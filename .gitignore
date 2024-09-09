@@ -1,0 +1,16 @@
+**/node_modules/
+
+# Expo app
+mobile-app/expo/
+mobile-app/dist/
+mobile-app/npm-debug.*
+mobile-app/*.jks
+mobile-app/*.p8
+mobile-app/*.p12
+mobile-app/*.key
+mobile-app/*.mobileprovision
+mobile-app/*.orig.*
+mobile-app/web-build/
+
+# Expo app macOS
+mobile-app/.DS_Store
