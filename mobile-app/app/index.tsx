@@ -3,7 +3,7 @@ import "react-native-url-polyfill/auto";
 import { Buffer } from "buffer";
 global.Buffer = global.Buffer || Buffer;
 import { StatusBar } from "expo-status-bar";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import {
   clusterApiUrl,
@@ -15,6 +15,14 @@ import Button from "../components/Button";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { COLORS } from "../constants";
 import * as Linking from "expo-linking";
+import bs58 from "bs58";
+import nacl from "tweetnacl";
+import { buildUrl } from "@/utils/buildUrl";
+import { decryptPayload } from "@/utils/decryptPayload";
+import { encryptPayload } from "@/utils/encryptPayload";
+
+const onConnectRedirectLink = Linking.createURL("onConnect");
+const onDisconnectRedirectLink = Linking.createURL("onDisconnect");
 
 const connection = new Connection(clusterApiUrl("devnet"));
 
@@ -24,15 +32,108 @@ export default function App() {
 
   const [submitting, setSubmitting] = useState(false);
 
+  const [dappKeyPair] = useState(nacl.box.keyPair());
+  const [sharedSecret, setSharedSecret] = useState<Uint8Array>();
+
+  const [session, setSession] = useState<string>();
+
+  const [deepLink, setDeepLink] = useState<string>("");
+
+  // On app start up, check if we were opened by an inbound deeplink. If so, track the intial URL. Then, listen for a "url" event
+  useEffect(() => {
+    const initializeDeeplinks = async () => {
+      const initialUrl = await Linking.getInitialURL();
+      if (initialUrl) {
+        setDeepLink(initialUrl);
+      }
+    };
+    initializeDeeplinks();
+    const listener = Linking.addEventListener("url", handleDeepLink);
+    return () => {
+      listener.remove();
+    };
+  }, []);
+
+  // When a "url" event occurs, track the url
+  const handleDeepLink = ({ url }: Linking.EventType) => {
+    setDeepLink(url);
+  };
+
+  // Handle in-bound links
+  useEffect(() => {
+    if (!deepLink) return;
+
+    const url = new URL(deepLink);
+    const params = url.searchParams;
+
+    // Handle an error response from Phantom
+    if (params.get("errorCode")) {
+      const error = Object.fromEntries([...params]);
+      const message =
+        error?.errorMessage ??
+        JSON.stringify(Object.fromEntries([...params]), null, 2);
+      console.log("error: ", message);
+      return;
+    }
+
+    // Handle a `connect` response from Phantom
+    if (/onConnect/.test(url.host)) {
+      const sharedSecretDapp = nacl.box.before(
+        bs58.decode(params.get("phantom_encryption_public_key")!),
+        dappKeyPair.secretKey
+      );
+      const connectData = decryptPayload(
+        params.get("data")!,
+        params.get("nonce")!,
+        sharedSecretDapp
+      );
+      setSharedSecret(sharedSecretDapp);
+      setSession(connectData.session);
+      setPhantomWalletPublicKey(new PublicKey(connectData.public_key));
+      console.log(`connected to ${connectData.public_key.toString()}`);
+    }
+
+    if (/onDisconnect/.test(url.host)) {
+      setPhantomWalletPublicKey(null);
+      console.log("disconnected");
+    }
+  }, [deepLink]);
+
   // Initiate a new connection to Phantom
-  const connect = async () => {};
+  const connect = async () => {
+    const params = new URLSearchParams({
+      dapp_encryption_public_key: bs58.encode(dappKeyPair.publicKey),
+      cluster: "devnet",
+      app_url: "https://quartzpay.io",
+      redirect_link: onConnectRedirectLink,
+    });
+
+    console.log("Pressed connect button!!");
+
+    const url = buildUrl("connect", params);
+    Linking.openURL(url);
+  };
 
   // Initiate a disconnect from Phantom
-  const disconnect = async () => {};
+  const disconnect = async () => {
+    const payload = {
+      session,
+    };
+    const [nonce, encryptedPayload] = encryptPayload(payload, sharedSecret);
+    const params = new URLSearchParams({
+      dapp_encryption_public_key: bs58.encode(dappKeyPair.publicKey),
+      nonce: bs58.encode(nonce),
+      redirect_link: onDisconnectRedirectLink,
+      payload: bs58.encode(encryptedPayload),
+    });
+    const url = buildUrl("disconnect", params);
+    Linking.openURL(url);
+  };
 
-  // Initiate a new transaction via Phantom. We call this in `components/AddReviewSheet.tsx` to send our movie review to the Solana network
-  const signAndSendTransaction = async (transaction: Transaction) => {};
-
+  // Initiate a new transaction via Phantom.
+  const signAndSendTransaction = async (transaction: Transaction) => {
+    console.log("signAndSendTransaction");
+  };
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.container}>
@@ -55,7 +156,7 @@ export default function App() {
             </>
           ) : (
             <View style={{ marginTop: 15 }}>
-              <Button title="Connect Phantom" onPress={connect} />
+              <Button title="Connect Phantom!!!" onPress={connect} />
             </View>
           )}
         </View>
