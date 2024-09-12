@@ -14,3 +14,6 @@ mobile-app/web-build/
 
 # Expo app macOS
 mobile-app/.DS_Store
+mobile-app/.expo/
+mobile-app/package-lock.json
+mobile-app/yarn.lock
