@@ -1,3 +1,40 @@
-// TODO: Implement secure wipe function
-// - Use SecureRandom (Android) or CommonCrypto (iOS) for secure memory operations
-// - Implement a secure wipe function to clear keys from memory after use
+/**
+ * Securely wipes a Uint8Array by overwriting it with random data multiple times.
+ * @param data The Uint8Array to be wiped.
+ * @throws {Error} If the input is not a Uint8Array or if crypto.getRandomValues is not available.
+ */
+export function secureWipe(data: Uint8Array): void {
+  if (!(data instanceof Uint8Array)) {
+    throw new Error('Input must be a Uint8Array');
+  }
+
+  if (typeof crypto === 'undefined' || !crypto.getRandomValues) {
+    throw new Error('crypto.getRandomValues is not available');
+  }
+
+  const length = data.length;
+  const iterations = 3;
+
+  try {
+    for (let i = 0; i < iterations; i++) {
+      crypto.getRandomValues(data);
+    }
+  } catch (error) {
+    console.error('Error during secure wipe:', error);
+    // Fallback to a less secure but still somewhat effective method
+    for (let i = 0; i < length; i++) {
+      data[i] = Math.floor(Math.random() * 256);
+    }
+  } finally {
+    // Final overwrite with zeros
+    data.fill(0);
+  }
+
+  // Attempt to prevent compiler/runtime optimizations
+  return void(0);
+}
+
+// Usage example:
+// const sensitiveData = new Uint8Array([1, 2, 3, 4, 5]);
+// secureWipe(sensitiveData);
+// console.log(sensitiveData); // Should output all zeros
