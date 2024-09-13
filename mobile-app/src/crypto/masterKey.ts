@@ -1,12 +1,12 @@
-import * as Random from 'expo-random';
 import * as Keychain from 'react-native-keychain';
 import { secureWipe } from './secureWipe';
+import * as crypto from 'expo-crypto';
 
 const MASTER_KEY_SIZE = 32; // 256 bits
 const MASTER_KEY_ALIAS = 'app_master_key';
 
 export const createMasterKey = async (): Promise<Uint8Array> => {
-  return Random.getRandomBytes(MASTER_KEY_SIZE);
+  return crypto.getRandomValues(new Uint8Array(MASTER_KEY_SIZE));
 };
 
 export const storeMasterKey = async (masterKey: Uint8Array): Promise<boolean> => {
