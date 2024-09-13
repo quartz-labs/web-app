@@ -1,8 +1,4 @@
-/**
- * Securely wipes a Uint8Array by overwriting it with random data multiple times.
- * @param data The Uint8Array to be wiped.
- * @throws {Error} If the input is not a Uint8Array or if crypto.getRandomValues is not available.
- */
+//Securely wipes a Uint8Array by overwriting it with random data multiple times.
 export function secureWipe(data: Uint8Array): void {
   if (!(data instanceof Uint8Array)) {
     throw new Error('Input must be a Uint8Array');
