@@ -1,4 +1,21 @@
-// TODO: Implement key access and usage
-// - Require biometric authentication to access the master key
-// - Use the master key to decrypt the Solana private key
-// - Implement secure memory operations for key handling
+import { getStoredKeypair } from '../crypto/solanaKeypair';
+import { Keypair } from '@solana/web3.js';
+
+export async function getSolanaKeypair(): Promise<Keypair | null> {
+    const keypair = await getStoredKeypair();
+    if (!keypair) {
+        console.error('Solana keypair not found');
+        return null;
+    }
+    return keypair;
+}
+
+
+// Usage example:
+// const keypair = await getSolanaKeypair();
+// if (keypair) {
+//   // Use the keypair
+//   // ...
+//   // Don't forget to wipe the secret key when done
+//   secureWipe(keypair.secretKey);
+// }
