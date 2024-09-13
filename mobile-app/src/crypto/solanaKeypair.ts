@@ -1,5 +1,5 @@
 import * as SecureStore from 'expo-secure-store';
-import { Keypair } from '@solana/web3.js';
+import { Keypair, PublicKey } from '@solana/web3.js';
 import * as crypto from 'expo-crypto';
 import Aes from 'react-native-aes-crypto';
 import { getOrCreateMasterKey, getMasterKey } from './masterKey';
@@ -38,15 +38,18 @@ const decryptPrivateKey = async (encryptedData: string, masterKey: Uint8Array): 
     return new Uint8Array(Buffer.from(decrypted, 'base64'));
 };
 
-export const createAndStoreKeypair = async (): Promise<void> => {
+export const createAndStoreKeypair = async (): Promise<PublicKey | null> => {
     try {
         const keypair = Keypair.generate();
         const masterKey = await getOrCreateMasterKey();
+
+        const publicKey = keypair.publicKey;
 
         const encryptedPrivateKey = await encryptPrivateKey(keypair.secretKey, masterKey);
 
         await SecureStore.setItemAsync('solana_private_key', encryptedPrivateKey);
 
+        return publicKey;
     } catch (error) {
         console.error('Failed to generate and store keypair:', error);
         throw new Error('Keypair generation failed');

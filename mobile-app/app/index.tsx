@@ -162,7 +162,7 @@ export default function App() {
           )}
         </View>
         <View style={{ marginTop: 15, alignItems: "center" }}>
-          <Link href="/create" asChild>
+          <Link href="/onConnect" asChild>
             <Text style={{ fontSize: 20, color: COLORS.WHITE }}>Create or Restore Keypair</Text>
           </Link>
         </View>

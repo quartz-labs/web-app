@@ -5,8 +5,9 @@ import { Keypair, Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PE
 import { createAndStoreKeypair, getStoredKeypair } from "../src/crypto/solanaKeypair";
 import { COLORS } from "../constants";
 
-export default function Create() {
+export default function OnConnect() {
   const [keypair, setKeypair] = useState<Keypair | null>(null);
+  const [publicKey, setPublicKey] = useState<PublicKey | null>(null);
   const [balance, setBalance] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -17,9 +18,9 @@ export default function Create() {
   const generateKeypair = async () => {
     setLoading(true);
     try {
-      await createAndStoreKeypair();
-      const storedKeypair = await getStoredKeypair();
-      setKeypair(storedKeypair);
+      const publicKey = await createAndStoreKeypair();
+      setPublicKey(publicKey);
+
       setError(null);
     } catch (err) {
       setError("Failed to generate keypair");
@@ -34,6 +35,9 @@ export default function Create() {
     try {
       const storedKeypair = await getStoredKeypair();
       setKeypair(storedKeypair);
+      if (storedKeypair) {
+        setPublicKey(storedKeypair.publicKey);
+      }
       setError(null);
     } catch (err) {
       setError("Failed to get keypair");
@@ -73,7 +77,13 @@ export default function Create() {
   };
 
   const sendTransaction = async () => {
-    if (!keypair) return;
+    if (!keypair) {
+      await getKeypair();
+      if (!keypair) {
+        setError("Failed to get keypair");
+        return;
+      }
+    }
     setLoading(true);
     try {
       const recipientPubkey = new PublicKey(recipientAddress);
@@ -96,10 +106,10 @@ export default function Create() {
   };
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      {keypair ? (
+    <View style={{ flex: 1, alignItems: 'center' }}>
+      {publicKey ? (
         <>
-          <Text>Public Key: {keypair.publicKey.toString()}</Text>
+          <Text>Public Key: {publicKey.toString()}</Text>
           <Text>Balance: {balance !== null ? `${balance} SOL` : 'Loading...'}</Text>
           <Button title="Request Airdrop" onPress={requestAirdrop} disabled={loading} />
           <TextInput
