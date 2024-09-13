@@ -4,7 +4,7 @@ import { Buffer } from "buffer";
 global.Buffer = global.Buffer || Buffer;
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, GestureResponderEvent, StyleSheet, Text, View } from "react-native";
 import {
   clusterApiUrl,
   Connection,
@@ -20,6 +20,7 @@ import nacl from "tweetnacl";
 import { buildUrl } from "@/utils/buildUrl";
 import { decryptPayload } from "@/utils/decryptPayload";
 import { encryptPayload } from "@/utils/encryptPayload";
+import { Link } from "expo-router";
 
 const onConnectRedirectLink = Linking.createURL("onConnect");
 const onDisconnectRedirectLink = Linking.createURL("onDisconnect");
@@ -159,6 +160,11 @@ export default function App() {
               <Button title="Connect Phantom!!!" onPress={connect} />
             </View>
           )}
+        </View>
+        <View style={{ marginTop: 15, alignItems: "center" }}>
+          <Link href="/create" asChild>
+            <Text style={{ fontSize: 20, color: COLORS.WHITE }}>Create or Restore Keypair</Text>
+          </Link>
         </View>
         {submitting && (
           <ActivityIndicator

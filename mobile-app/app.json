@@ -14,7 +14,11 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.quartz.app"
+      "bundleIdentifier": "com.quartz.app",
+      "config": {
+        "usesNonExemptEncryption": false
+      }
+
     },
     "android": {
       "adaptiveIcon": {
@@ -29,7 +33,14 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "expo-secure-store",
+        {
+          "faceIDPermission": "Allow Quartz to access your Face ID biometric data."
+        }
+      ]
+
     ],
     "experiments": {
       "typedRoutes": true
