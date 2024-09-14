@@ -1,12 +1,13 @@
 import "react-native-get-random-values";
 import React, { useState } from "react";
 import { View, Text, Button, ActivityIndicator, TextInput } from "react-native";
-import { Keypair, Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from "@solana/web3.js";
-import { createAndStoreKeypair, getStoredKeypair } from "../src/crypto/solanaKeypair";
+import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { getKeypairPublicKey } from "../src/crypto/solanaKeypair";
 import { COLORS } from "../constants";
+import { createSolanaKeypair, deleteSolanaKeypair } from "@/src/wallet/keyManagement";
+import { signTransaction } from "@/src/wallet/transactionSigning";
 
 export default function OnConnect() {
-  const [keypair, setKeypair] = useState<Keypair | null>(null);
   const [publicKey, setPublicKey] = useState<PublicKey | null>(null);
   const [balance, setBalance] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
@@ -18,7 +19,7 @@ export default function OnConnect() {
   const generateKeypair = async () => {
     setLoading(true);
     try {
-      const publicKey = await createAndStoreKeypair();
+      const publicKey = await createSolanaKeypair();
       setPublicKey(publicKey);
 
       setError(null);
@@ -30,17 +31,32 @@ export default function OnConnect() {
     }
   };
 
-  const getKeypair = async () => {
+  const getPublicKey = async () => {
     setLoading(true);
     try {
-      const storedKeypair = await getStoredKeypair();
-      setKeypair(storedKeypair);
-      if (storedKeypair) {
-        setPublicKey(storedKeypair.publicKey);
-      }
+      const storedPublickey = await getKeypairPublicKey();
+      setPublicKey(storedPublickey);
       setError(null);
     } catch (err) {
-      setError("Failed to get keypair");
+      setError("Failed to get public key");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteKeypair = async () => {
+    setLoading(true);
+    try {
+      const result = await deleteSolanaKeypair();
+      if (!result) {
+        setError("Failed to delete keypair");
+        return;
+      }
+      setPublicKey(null);
+      setBalance(null);
+    } catch (err) { 
+      setError("Failed to delete keypair");
       console.error(err);
     } finally {
       setLoading(false);
@@ -48,11 +64,11 @@ export default function OnConnect() {
   };
 
   const requestAirdrop = async () => {
-    if (!keypair) return;
+    if (!publicKey) return;
     setLoading(true);
     try {
       const airdropSignature = await connection.requestAirdrop(
-        keypair.publicKey,
+        publicKey,
         2 * LAMPORTS_PER_SOL
       );
       await connection.confirmTransaction(airdropSignature);
@@ -66,9 +82,9 @@ export default function OnConnect() {
   };
 
   const updateBalance = async () => {
-    if (!keypair) return;
+    if (!publicKey) return;
     try {
-      const balance = await connection.getBalance(keypair.publicKey);
+      const balance = await connection.getBalance(publicKey);
       setBalance(balance / LAMPORTS_PER_SOL);
     } catch (err) {
       setError("Failed to fetch balance");
@@ -77,24 +93,23 @@ export default function OnConnect() {
   };
 
   const sendTransaction = async () => {
-    if (!keypair) {
-      await getKeypair();
-      if (!keypair) {
-        setError("Failed to get keypair");
+    if (!publicKey) {
+        setError("Failed to get public key");
         return;
-      }
     }
     setLoading(true);
     try {
       const recipientPubkey = new PublicKey(recipientAddress);
       const transaction = new Transaction().add(
         SystemProgram.transfer({
-          fromPubkey: keypair.publicKey,
+          fromPubkey: publicKey,
           toPubkey: recipientPubkey,
           lamports: LAMPORTS_PER_SOL / 100,
         })
       );
-      const signature = await connection.sendTransaction(transaction, [keypair]);
+      const signedTransaction = await signTransaction(transaction);
+      //TODO: Update to use transactionSender logic in wallet/transactionSender.ts
+      const signature = await connection.sendRawTransaction(signedTransaction.serialize());
       await connection.confirmTransaction(signature);
       updateBalance();
     } catch (err) {
@@ -124,11 +139,15 @@ export default function OnConnect() {
         </>
       ) : (
         <>
+          <Button title="Delete" onPress={deleteKeypair} disabled={loading} />
+          {loading && <ActivityIndicator color={COLORS.WHITE} />}
+          {error && <Text style={{ color: 'red' }}>{error}</Text>}
+
           <Button title="Generate" onPress={generateKeypair} disabled={loading} />
           {loading && <ActivityIndicator color={COLORS.WHITE} />}
           {error && <Text style={{ color: 'red' }}>{error}</Text>}
 
-          <Button title="Get existing" onPress={getKeypair} disabled={loading} />
+          <Button title="Get existing" onPress={getPublicKey} disabled={loading} />
           {loading && <ActivityIndicator color={COLORS.WHITE} />}
           {error && <Text style={{ color: 'red' }}>{error}</Text>}
         </>
