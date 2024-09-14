@@ -47,7 +47,7 @@ export const createAndStoreKeypair = async (): Promise<PublicKey | null> => {
 
         const encryptedPrivateKey = await encryptPrivateKey(keypair.secretKey, masterKey);
 
-        await SecureStore.setItemAsync('solana_private_key', encryptedPrivateKey);
+        await SecureStore.setItemAsync('quartz_sol_private_key', encryptedPrivateKey);
 
         return publicKey;
     } catch (error) {
@@ -58,7 +58,7 @@ export const createAndStoreKeypair = async (): Promise<PublicKey | null> => {
 
 export const getStoredKeypair = async (): Promise<Keypair | null> => {
     try {
-        const encryptedPrivateKey = await SecureStore.getItemAsync('solana_private_key');
+        const encryptedPrivateKey = await SecureStore.getItemAsync('quartz_sol_private_key');
         if (!encryptedPrivateKey) return null;
 
         const masterKey = await getMasterKey();
@@ -79,7 +79,7 @@ export const getStoredKeypair = async (): Promise<Keypair | null> => {
 
 export const deleteStoredKeypair = async (): Promise<boolean> => {
     try {
-        await SecureStore.deleteItemAsync('solana_private_key');
+        await SecureStore.deleteItemAsync('quartz_sol_private_key');
         return true;
     } catch (error) {
         console.error('Failed to delete stored keypair:', error);
