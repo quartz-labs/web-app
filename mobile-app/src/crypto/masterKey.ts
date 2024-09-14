@@ -19,8 +19,6 @@ export const storeMasterKey = async (masterKey: Uint8Array): Promise<boolean> =>
         accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED,
       }
     );
-
-    secureWipe(masterKey);
     
     return !!result;
   } catch (error) {
