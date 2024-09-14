@@ -76,3 +76,28 @@ export const getStoredKeypair = async (): Promise<Keypair | null> => {
         return null;
     }
 };
+
+export const deleteStoredKeypair = async (): Promise<boolean> => {
+    try {
+        await SecureStore.deleteItemAsync('solana_private_key');
+        return true;
+    } catch (error) {
+        console.error('Failed to delete stored keypair:', error);
+        return false;
+    }
+};
+
+export const getKeypairPublicKey = async (): Promise<PublicKey | null> => {
+    try {
+        const keypair = await getStoredKeypair();
+        if (!keypair) return null;
+        const publicKey = keypair.publicKey;
+
+        secureWipe(keypair.secretKey);
+
+        return publicKey;
+    } catch (error) {
+        console.error('Failed to get public key:', error);
+        return null;
+    }
+};

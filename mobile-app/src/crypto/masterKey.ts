@@ -53,3 +53,15 @@ export const getOrCreateMasterKey = async (): Promise<Uint8Array> => {
   await storeMasterKey(newKey);
   return newKey;
 };
+
+export const deleteMasterKey = async (): Promise<boolean> => {
+    try {
+        await Keychain.resetGenericPassword({
+            accessControl: Keychain.ACCESS_CONTROL.BIOMETRY_ANY,
+        });
+        return true;
+    } catch (error) {
+        console.error('Failed to delete master key:', error);
+        return false;
+    }
+};
