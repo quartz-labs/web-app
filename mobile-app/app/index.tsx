@@ -21,6 +21,7 @@ import { buildUrl } from "@/utils/buildUrl";
 import { decryptPayload } from "@/utils/decryptPayload";
 import { encryptPayload } from "@/utils/encryptPayload";
 import { Link } from "expo-router";
+import { useRouter } from 'expo-router';
 
 const onConnectRedirectLink = Linking.createURL("onConnect");
 const onDisconnectRedirectLink = Linking.createURL("onDisconnect");
@@ -28,6 +29,8 @@ const onDisconnectRedirectLink = Linking.createURL("onDisconnect");
 const connection = new Connection(clusterApiUrl("devnet"));
 
 export default function App() {
+  const router = useRouter();
+
   const [phantomWalletPublicKey, setPhantomWalletPublicKey] =
     useState<PublicKey | null>(null);
 
@@ -90,8 +93,12 @@ export default function App() {
       );
       setSharedSecret(sharedSecretDapp);
       setSession(connectData.session);
-      setPhantomWalletPublicKey(new PublicKey(connectData.public_key));
-      console.log(`connected to ${connectData.public_key.toString()}`);
+      const newPublicKey = new PublicKey(connectData.public_key);
+      setPhantomWalletPublicKey(newPublicKey);
+      console.log(`connected to ${newPublicKey.toString()}`);
+      
+      // Instead of navigating, just update the URL with the public key
+      router.setParams({ phantomPublicKey: newPublicKey.toString() });
     }
 
     if (/onDisconnect/.test(url.host)) {

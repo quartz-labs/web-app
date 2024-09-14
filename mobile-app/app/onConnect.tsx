@@ -1,13 +1,16 @@
 import "react-native-get-random-values";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, Button, ActivityIndicator, TextInput } from "react-native";
 import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { getKeypairPublicKey } from "../src/crypto/solanaKeypair";
 import { COLORS } from "../constants";
 import { createSolanaKeypair, deleteSolanaKeypair } from "@/src/wallet/keyManagement";
 import { signTransaction } from "@/src/wallet/transactionSigning";
+import { useLocalSearchParams } from 'expo-router';
 
 export default function OnConnect() {
+  const { phantomPublicKey } = useLocalSearchParams();
+  const [phantomWalletPublicKey, setPhantomWalletPublicKey] = useState<PublicKey | null>(null);
   const [publicKey, setPublicKey] = useState<PublicKey | null>(null);
   const [balance, setBalance] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
@@ -120,8 +123,22 @@ export default function OnConnect() {
     }
   };
 
+  useEffect(() => {
+    if (phantomPublicKey) {
+      try {
+        const pubKey = new PublicKey(phantomPublicKey as string);
+        setPhantomWalletPublicKey(pubKey);
+      } catch (error) {
+        console.error("Invalid public key:", error);
+      }
+    }
+  }, [phantomPublicKey]);
+
   return (
     <View style={{ flex: 1, alignItems: 'center' }}>
+      {phantomWalletPublicKey && (
+        <Text>Phantom Wallet Public Key: {phantomWalletPublicKey.toString()}</Text>
+      )}
       {publicKey ? (
         <>
           <Text>Public Key: {publicKey.toString()}</Text>
@@ -143,7 +160,7 @@ export default function OnConnect() {
           {loading && <ActivityIndicator color={COLORS.WHITE} />}
           {error && <Text style={{ color: 'red' }}>{error}</Text>}
 
-          <Button title="Generate" onPress={generateKeypair} disabled={loading} />
+          <Button title="Create Account" onPress={generateKeypair} disabled={loading} />
           {loading && <ActivityIndicator color={COLORS.WHITE} />}
           {error && <Text style={{ color: 'red' }}>{error}</Text>}
 
