@@ -6,8 +6,9 @@ use crate::errors::ErrorCode;
 pub struct CloseUser<'info> {
     #[account(
         mut,
-        seeds = [b"vault", user.key().as_ref()],
+        seeds = [b"vault", backup.key().as_ref()],
         bump,
+        has_one = backup,
         has_one = user,
         close = init_payer,
     )]
@@ -20,10 +21,13 @@ pub struct CloseUser<'info> {
     )]
     pub init_payer: UncheckedAccount<'info>,
 
-    pub user: Signer<'info>
+    /// CHECK: The backup account is not read or written to, it only locates the PDA
+    pub backup: UncheckedAccount<'info>,
+
+    pub user: Signer<'info>,
 }
 
-pub fn close_user_handler(ctx: Context<CloseUser>) -> Result<()> {
-    msg!("Closing user account for {}", ctx.program_id);
+pub fn close_user_handler(_ctx: Context<CloseUser>) -> Result<()> {
+    msg!("Closing user account");
     Ok(())
 }

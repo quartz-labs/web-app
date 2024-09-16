@@ -21,28 +21,30 @@ describe("funds-program", () => {
   const quartzManagerKeypair = Keypair.fromSecretKey(Uint8Array.from(JSON.parse(process.env.QUARTZ_MANAGER_KEYPAIR)));
 
   // Generate random keypairs
+  const backupKeypair = Keypair.generate();
   const userKeypair = Keypair.generate();
-  const otherKeypair = Keypair.generate();
+  const otherBackupKeypair = Keypair.generate();
+  const otherUserKeypair = Keypair.generate();
 
   const [vaultPda] = anchor.web3.PublicKey.findProgramAddressSync(
-    [Buffer.from("vault"), userKeypair.publicKey.toBuffer()],
+    [Buffer.from("vault"), backupKeypair.publicKey.toBuffer()],
     program.programId
   );
 
   const [otherKeypairVaultPda] = anchor.web3.PublicKey.findProgramAddressSync(
-    [Buffer.from("vault"), otherKeypair.publicKey.toBuffer()],
+    [Buffer.from("vault"), otherBackupKeypair.publicKey.toBuffer()],
     program.programId
   );
 
   before(async () => {
     console.log("Generated user address: ", userKeypair.publicKey.toString());
-    console.log("Generated other address: ", otherKeypair.publicKey.toString());
+    console.log("Generated other address: ", otherUserKeypair.publicKey.toString());
 
     // Topup incorrect keypair account with SOL
     const tx = new Transaction().add(
       SystemProgram.transfer({
         fromPubkey: wallet.publicKey,
-        toPubkey: otherKeypair.publicKey,
+        toPubkey: otherBackupKeypair.publicKey,
         lamports: LAMPORTS_PER_SOL * 10,
       })
     );
@@ -61,10 +63,11 @@ describe("funds-program", () => {
           // @ts-ignore - Causing an issue in Curosr IDE
           vault: vaultPda,
           payer: quartzManagerKeypair.publicKey,
-          user: otherKeypair.publicKey,
+          backup: otherBackupKeypair.publicKey,
+          user: otherUserKeypair.publicKey,
           systemProgram: SystemProgram.programId,
         })  
-        .signers([otherKeypair])
+        .signers([otherBackupKeypair])
         .rpc();
 
       assert.fail(0, 1, "init_user instruction call should have failed");
@@ -81,16 +84,17 @@ describe("funds-program", () => {
       .accounts({
         // @ts-ignore - Causing an issue in Cursor IDE
         vault: otherKeypairVaultPda,
-        payer: otherKeypair.publicKey,
-        user: otherKeypair.publicKey,
+        payer: otherBackupKeypair.publicKey,
+        backup: otherBackupKeypair.publicKey,
+        user: otherUserKeypair.publicKey,
         systemProgram: SystemProgram.programId,
       })
-      .signers([otherKeypair])
+      .signers([otherBackupKeypair])
       .rpc();
     
     const account = await program.account.vault.fetch(otherKeypairVaultPda);
-    expect(account.user === otherKeypair.publicKey);
-    expect(account.initPayer === otherKeypair.publicKey);
+    expect(account.user === otherUserKeypair.publicKey);
+    expect(account.initPayer === otherUserKeypair.publicKey);
   });
 
 
@@ -100,10 +104,11 @@ describe("funds-program", () => {
       .accounts({
         // @ts-ignore - Causing an issue in Cursor IDE
         vault: otherKeypairVaultPda,
-        initPayer: otherKeypair.publicKey,
-        user: otherKeypair.publicKey
+        initPayer: otherBackupKeypair.publicKey,
+        backup: otherBackupKeypair.publicKey,
+        user: otherUserKeypair.publicKey
       })
-      .signers([otherKeypair])
+      .signers([otherUserKeypair])
       .rpc();
   });
 
@@ -115,6 +120,7 @@ describe("funds-program", () => {
         // @ts-ignore - Causing an issue in Cursor IDE
         vault: vaultPda,
         payer: quartzManagerKeypair.publicKey,
+        backup: backupKeypair.publicKey,
         user: userKeypair.publicKey,
         systemProgram: SystemProgram.programId,
       })
@@ -150,6 +156,7 @@ describe("funds-program", () => {
         // @ts-ignore - Causing an issue in Cursor IDE
         vault: vaultPda, 
         receiver: destinationAccount,
+        backup: backupKeypair.publicKey,
         user: userKeypair.publicKey,
         systemProgram: SystemProgram.programId
       })
@@ -174,6 +181,7 @@ describe("funds-program", () => {
           // @ts-ignore - Causing an issue in Cursor IDE
           vault: vaultPda, 
           receiver: destinationAccount,
+          backup: backupKeypair.publicKey,
           user: userKeypair.publicKey,
           systemProgram: SystemProgram.programId
         })
@@ -214,10 +222,52 @@ describe("funds-program", () => {
           // @ts-ignore - Causing an issue in Cursor IDE
           vault: vaultPda, 
           receiver: destinationAccount,
+          backup: backupKeypair.publicKey,
           user: userKeypair.publicKey,
           systemProgram: SystemProgram.programId
         })
         .signers([quartzManagerKeypair])
+        .rpc();
+
+      assert.fail(0, 1, "transferLamports instruction call should have failed")
+    } catch(err) {
+      expect(err).to.be.instanceOf(Error);
+      expect(err.message).to.include(desiredErrorMessage);
+    }
+  })
+
+
+  it("transfer_lamports backup signature", async () => {
+    const desiredErrorMessage = "unknown signer"
+    const destinationAccount = Keypair.generate().publicKey;
+
+    try {
+      expect(
+        await provider.connection.getBalance(destinationAccount)
+      ).to.equal(0);
+
+      // Send SOL to vaultPda
+      const transaction = new Transaction().add(
+        SystemProgram.transfer({
+          fromPubkey: provider.wallet.publicKey,
+          toPubkey: vaultPda,
+          lamports: LAMPORTS_PER_SOL * 2,
+        })
+      )
+      await provider.sendAndConfirm(transaction);
+
+      // Call PDA to transfer SOL
+      await program.methods
+        .transferLamports(new anchor.BN(LAMPORTS_PER_SOL))
+        .accounts({
+          // @ts-ignore - Causing an issue in Cursor IDE
+          vault: vaultPda, 
+          receiver: destinationAccount,
+          backup: backupKeypair.publicKey,
+          user: userKeypair.publicKey,
+          systemProgram: SystemProgram.programId
+        })
+        .signers([backupKeypair])
         .rpc();
 
       assert.fail(0, 1, "transferLamports instruction call should have failed")
@@ -248,6 +298,7 @@ describe("funds-program", () => {
         // @ts-ignore - Causing an issue in Cursor IDE
         vault: vaultPda, 
         quartzHolding: QUARTZ_HOLDING_ADDRESS,
+        backup: backupKeypair.publicKey,
         user: userKeypair.publicKey,
         systemProgram: SystemProgram.programId
       })
@@ -262,7 +313,6 @@ describe("funds-program", () => {
 
   it("spend_lamports insufficient funds", async () => {
     const desiredErrorCode = "InsufficientFunds"
-    const destinationAccount = Keypair.generate().publicKey;
 
     try {
       await program.methods
@@ -271,6 +321,7 @@ describe("funds-program", () => {
           // @ts-ignore - Causing an issue in Cursor IDE
           vault: vaultPda, 
           quartzHolding: QUARTZ_HOLDING_ADDRESS,
+          backup: backupKeypair.publicKey,
           user: userKeypair.publicKey,
           systemProgram: SystemProgram.programId
         })
@@ -311,10 +362,52 @@ describe("funds-program", () => {
           // @ts-ignore - Causing an issue in Cursor IDE
           vault: vaultPda, 
           quartzHolding: QUARTZ_HOLDING_ADDRESS,
+          backup: backupKeypair.publicKey,
           user: userKeypair.publicKey,
           systemProgram: SystemProgram.programId
         })
         .signers([quartzManagerKeypair])
+        .rpc();
+
+      assert.fail(0, 1, "spendLamports instruction call should have failed")
+    } catch(err) {
+      expect(err).to.be.instanceOf(Error);
+      expect(err.message).to.include(desiredErrorMessage);
+    }
+  })
+
+
+  it("spend_lamports backup signature", async () => {
+    const desiredErrorMessage = "unknown signer"
+    const destinationAccount = Keypair.generate().publicKey;
+
+    try {
+      expect(
+        await provider.connection.getBalance(destinationAccount)
+      ).to.equal(0);
+
+      // Send SOL to vaultPda
+      const transaction = new Transaction().add(
+        SystemProgram.transfer({
+          fromPubkey: provider.wallet.publicKey,
+          toPubkey: vaultPda,
+          lamports: LAMPORTS_PER_SOL * 2,
+        })
+      )
+      await provider.sendAndConfirm(transaction);
+
+      // Call PDA to transfer SOL
+      await program.methods
+        .spendLamports(new anchor.BN(LAMPORTS_PER_SOL))
+        .accounts({
+          // @ts-ignore - Causing an issue in Cursor IDE
+          vault: vaultPda, 
+          quartzHolding: QUARTZ_HOLDING_ADDRESS,
+          backup: backupKeypair.publicKey,
+          user: userKeypair.publicKey,
+          systemProgram: SystemProgram.programId
+        })
+        .signers([backupKeypair])
         .rpc();
 
       assert.fail(0, 1, "spendLamports instruction call should have failed")
@@ -350,7 +443,8 @@ describe("funds-program", () => {
         .accounts({
           // @ts-ignore - Causing an issue in Cursor IDE
           vault: vaultPda, 
-          quartzHolding: otherKeypair.publicKey,
+          quartzHolding: otherUserKeypair.publicKey,
+          backup: backupKeypair.publicKey,
           user: userKeypair.publicKey,
           systemProgram: SystemProgram.programId
         })
@@ -374,7 +468,8 @@ describe("funds-program", () => {
         .accounts({
           // @ts-ignore - Causing an issue in Curosr IDE
           vault: vaultPda,
-          initPayer: otherKeypair.publicKey,
+          initPayer: otherUserKeypair.publicKey,
+          backup: backupKeypair.publicKey,
           user: userKeypair.publicKey,
         })  
         .signers([userKeypair])
@@ -398,9 +493,34 @@ describe("funds-program", () => {
           // @ts-ignore - Causing an issue in Cursor IDE
           vault: vaultPda,
           initPayer: quartzManagerKeypair.publicKey,
+          backup: backupKeypair.publicKey,
           user: userKeypair.publicKey
         })
         .signers([quartzManagerKeypair])
+        .rpc();
+
+      assert.fail("close_user instruction should have failed");
+    } catch (err) {
+      expect(err).to.be.instanceOf(Error);
+      expect(err.message).to.include(desiredErrorMessage);
+    }
+  });
+
+
+  it("close_user backup signature", async () => {
+    const desiredErrorMessage = "unknown signer"
+
+    try {
+      await program.methods
+        .closeUser()
+        .accounts({
+          // @ts-ignore - Causing an issue in Cursor IDE
+          vault: vaultPda,
+          initPayer: quartzManagerKeypair.publicKey,
+          backup: backupKeypair.publicKey,
+          user: userKeypair.publicKey
+        })
+        .signers([backupKeypair])
         .rpc();
 
       assert.fail("close_user instruction should have failed");
@@ -418,6 +538,7 @@ describe("funds-program", () => {
         // @ts-ignore - Causing an issue in Cursor IDE
         vault: vaultPda,
         initPayer: quartzManagerKeypair.publicKey,
+        backup: backupKeypair.publicKey,
         user: userKeypair.publicKey
       })
       .signers([userKeypair])
