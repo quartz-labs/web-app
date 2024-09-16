@@ -4,4 +4,6 @@ use anchor_lang::prelude::*;
 pub enum ErrorCode {
     #[msg("Invalid Quartz account")]
     InvalidQuartzAccount,
+    #[msg("Insufficent funds for transaction")]
+    InsufficientFunds,
 }

@@ -27,8 +27,8 @@ pub struct InitializeUser<'info> {
 }
 
 pub fn init_user_handler(ctx: Context<InitializeUser>) -> Result<()> {
-    ctx.accounts.vault.user = ctx.accounts.user.key();
+    msg!("Initializing account for user {}", ctx.program_id);
 
-    msg!("Initialized account for user {}", ctx.program_id);
+    ctx.accounts.vault.user = ctx.accounts.user.key();
     Ok(())
 }
