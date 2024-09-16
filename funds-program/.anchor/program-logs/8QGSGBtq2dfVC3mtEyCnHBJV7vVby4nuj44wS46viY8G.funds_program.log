@@ -1,10 +1,12 @@
 Streaming transaction logs mentioning 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G. Confirmed commitment
 Transaction executed in slot 4:
-  Signature: 4hEGQE9c8GSaX4Let5aKwmtjNQhDbybYHQzWmtWfphu1G4trtZepYbgYDLnjmmoVhJMUkCid8ARRt1krAhGLPZ5Z
+  Signature: 4uHn7gwFkgNcqu6CdWRNrS7mAvU1PArhgrDvdqu84J2KxmdsPSdCt1sypvwwbuxwzxgTfJDR1jCdoUVJaBt7Sfj9
   Status: Ok
   Log Messages:
     Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G invoke [1]
-    Program log: Instruction: Initialize
-    Program log: Greetings from: 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G
-    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G consumed 11867 of 200000 compute units
+    Program log: Instruction: InitializeUser
+    Program 11111111111111111111111111111111 invoke [2]
+    Program 11111111111111111111111111111111 success
+    Program log: Initialized account for user 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G
+    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G consumed 19393 of 200000 compute units
     Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G success
