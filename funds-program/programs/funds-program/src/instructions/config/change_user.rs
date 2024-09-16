@@ -1,6 +1,5 @@
 use anchor_lang::prelude::*;
 use crate::state::Vault;
-use crate::errors::ErrorCode;
 
 #[derive(Accounts)]
 pub struct ChangeUser<'info> {
@@ -11,13 +10,6 @@ pub struct ChangeUser<'info> {
         has_one = backup,
     )]
     pub vault: Account<'info, Vault>,
-
-    /// CHECK: The init_payer account is not read or written to, it only recieves rent
-    #[account(
-        mut,
-        constraint = init_payer.key() == vault.init_payer.key() @ ErrorCode::InvalidQuartzAccount
-    )]
-    pub init_payer: UncheckedAccount<'info>,
 
     /// CHECK: The new_user account is not read or written to, it only locates the PDA
     pub new_user: UncheckedAccount<'info>,
