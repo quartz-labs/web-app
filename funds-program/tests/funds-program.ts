@@ -140,6 +140,29 @@ describe("funds-program", () => {
   });
 
 
+  it("close_user incorrect user", async () => {
+    const desiredErrorMessage = "unknown signer"
+
+    try {
+      await program.methods
+        .closeUser()
+        .accounts({
+          // @ts-ignore - Causing an issue in Cursor IDE
+          vault: vaultPda,
+          quartzManager: quartzManagerKeypair.publicKey,
+          user: userKeypair.publicKey
+        })
+        .signers([randomKeypair])
+        .rpc();
+
+      assert.fail("close_user instruction should have failed");
+    } catch (err) {
+      expect(err).to.be.instanceOf(Error);
+      expect(err.message).to.include(desiredErrorMessage);
+    }
+  });
+
+
   it("close_user", async () => {
     await program.methods
       .closeUser()
