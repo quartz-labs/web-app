@@ -19,9 +19,9 @@ pub struct SpendLamports<'info> {
     /// CHECK: Receiving account does not need to be checked, once the address is the correct one
     #[account(
         mut,
-        constraint = receiver.key() == QUARTZ_HOLDING_ADDRESS @ ErrorCode::InvalidQuartzAccount
+        constraint = quartz_holding.key() == QUARTZ_HOLDING_ADDRESS @ ErrorCode::InvalidQuartzAccount
     )]
-    pub receiver: UncheckedAccount<'info>,
+    pub quartz_holding: UncheckedAccount<'info>,
 
     #[account(mut)]
     pub user: Signer<'info>,
@@ -33,12 +33,12 @@ pub fn spend_lamports_handler(
     ctx: Context<SpendLamports>, 
     amount_lamports: u64
 ) -> Result<()> {
-    msg!("Sending {} lamports to {}", amount_lamports, ctx.accounts.receiver.key());
+    msg!("Sending {} lamports to Quartz", amount_lamports);
 
     transfer_lamports_from_vault(
         amount_lamports, 
         ctx.accounts.vault.to_account_info(), 
-        ctx.accounts.receiver.to_account_info()
+        ctx.accounts.quartz_holding.to_account_info()
     )?;
 
     msg!("Lamports sent");

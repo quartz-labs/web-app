@@ -1,7 +1,5 @@
 use anchor_lang::prelude::*;
 use crate::state::Vault;
-use crate::constants::QUARTZ_MANAGER_ADDRESS;
-use crate::errors::ErrorCode;
 
 #[derive(Accounts)]
 pub struct InitializeUser<'info> {
@@ -9,16 +7,13 @@ pub struct InitializeUser<'info> {
         init,
         seeds = [b"vault", user.key().as_ref()],
         bump,
-        payer = quartz_manager,
+        payer = payer,
         space = Vault::INIT_SPACE
     )]
     pub vault: Account<'info, Vault>,
 
-    #[account(
-        mut,
-        constraint = quartz_manager.key() == QUARTZ_MANAGER_ADDRESS @ ErrorCode::InvalidQuartzAccount
-    )]
-    pub quartz_manager: Signer<'info>,
+    #[account(mut)]
+    pub payer: Signer<'info>,
 
     /// CHECK: User account is not read or written to, it is only assigned as the owner and can be any account
     pub user: UncheckedAccount<'info>,
@@ -30,5 +25,7 @@ pub fn init_user_handler(ctx: Context<InitializeUser>) -> Result<()> {
     msg!("Initializing account for user {}", ctx.program_id);
 
     ctx.accounts.vault.user = ctx.accounts.user.key();
+    ctx.accounts.vault.init_payer = ctx.accounts.payer.key();
+
     Ok(())
 }
