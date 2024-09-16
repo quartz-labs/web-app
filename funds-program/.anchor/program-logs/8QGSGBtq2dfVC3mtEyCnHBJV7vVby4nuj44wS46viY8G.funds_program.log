@@ -1,6 +1,6 @@
 Streaming transaction logs mentioning 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G. Confirmed commitment
-Transaction executed in slot 5:
-  Signature: 2FMN2PSn56RpzF8PKt77WAmiZUpVp5KwBJ8759DgkkiofVcWqsk2m5QWKRXZrLo9B1H7Lg3yCHd8THwCsU2ZwPEh
+Transaction executed in slot 4:
+  Signature: 4uJyyk9zYcNNpU4iWGB2wofSAgFLCckbzc983BffTC98vtTnsRY9fDv4zeQdJA7bRivkqHgRJL2WA6oRZKbbuvjQ
   Status: Ok
   Log Messages:
     Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G invoke [1]
@@ -8,24 +8,24 @@ Transaction executed in slot 5:
     Program 11111111111111111111111111111111 invoke [2]
     Program 11111111111111111111111111111111 success
     Program log: Initializing account for user 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G
-    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G consumed 19440 of 200000 compute units
+    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G consumed 20940 of 200000 compute units
     Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G success
-Transaction executed in slot 7:
-  Signature: 5YqtZik1AMsJUvK2L9Ya9WyGGy8k81LEyMfGQPgs73yE16suxKDQwwesNMvuovHG2712xSUfbwbQPfdHUVL3qDFi
+Transaction executed in slot 6:
+  Signature: 4xUUaXb2P9yF4D1hCkNBx9KgVbwYB9PFfcjK2tffs46Kf1bBg5XuQjZGBWzaX7EHWcija3TqGBn1LEXJLGKopA5V
   Status: Ok
   Log Messages:
     Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G invoke [1]
     Program log: Instruction: TransferLamports
-    Program log: Sending 1000000000 lamports to BDiBgCaZrcKGQ9oFLbZENUqtPsLQsXzAwXUTVw7eVWVr
+    Program log: Sending 1000000000 lamports to 3jSDnYDX7Sub72S4aHdJBQE8eAQmSXpgqGujoJp765z3
     Program log: Lamports sent
-    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G consumed 16013 of 200000 compute units
+    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G consumed 17397 of 200000 compute units
     Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G success
-Transaction executed in slot 9:
-  Signature: 3DjfF6cDmAXp8aCsCMPPQGKtQgomrNuLveh3Q2nA3cb9gTMDyRLhyLzELkXxdGT7RHnsSwjb5wDPv9fiFJnTib4n
+Transaction executed in slot 8:
+  Signature: 4FJC4UnFobgu37o2W3iYRkLDj74CPVfMKjYS9gKMfo2DQqRQ7gVvoQezVwZVMcQgbSKteTwHZkCf2CZKL6Ywzpv6
   Status: Ok
   Log Messages:
     Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G invoke [1]
     Program log: Instruction: CloseUser
     Program log: Closing user account for 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G
-    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G consumed 15190 of 200000 compute units
+    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G consumed 16689 of 200000 compute units
     Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G success
