@@ -1,3 +1,6 @@
+use anchor_lang::prelude::*;
+use crate::constants::*;
+
 #[account]
 pub struct Vault {
     pub user: Pubkey

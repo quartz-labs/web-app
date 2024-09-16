@@ -3,6 +3,7 @@ import { Program } from "@coral-xyz/anchor";
 import { FundsProgram } from "../target/types/funds_program";
 import { Keypair } from "@solana/web3.js";
 import dotenv from 'dotenv';
+import { expect } from "chai";
 dotenv.config();
 
 describe("funds-program", () => {
@@ -19,16 +20,16 @@ describe("funds-program", () => {
     // Create a random public key for the user
     const userKeypair = Keypair.generate();
 
-    const [vault_pda] = anchor.web3.PublicKey.findProgramAddressSync(
+    const [vaultPda] = anchor.web3.PublicKey.findProgramAddressSync(
       [Buffer.from("vault"), userKeypair.publicKey.toBuffer()],
       program.programId
     );
 
     try {
-      const tx = await program.methods.initializeUser()
+      const tx = await program.methods.initUser()
         .accounts({
           // @ts-ignore - Causing an issue in Cursor IDE, but works fine when running
-          vault: vault_pda,
+          vault: vaultPda,
           quartz: quartzKeypair.publicKey,
           user: userKeypair.publicKey,
           systemProgram: anchor.web3.SystemProgram.programId,
@@ -36,6 +37,8 @@ describe("funds-program", () => {
         .signers([quartzKeypair])
         .rpc();
       
+      const account = await program.account.vault.fetch(vaultPda)
+      expect(account.user === userKeypair.publicKey)
       console.log("Transaction signature", tx);
     } catch (error) {
       console.error("Error initializing user account:", error);
