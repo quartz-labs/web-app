@@ -16,6 +16,10 @@ pub mod funds_program {
         init_user_handler(ctx)
     }
 
+    pub fn close_user(ctx: Context<CloseUser>) -> Result<()> {
+        close_user_handler(ctx)
+    }
+
     pub fn transfer_lamports(ctx: Context<TransferLamports>, amount: u64) -> Result<()> {
         transfer_lamports_handler(ctx, amount)
     }

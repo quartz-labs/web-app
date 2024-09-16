@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use crate::constants::*;
+use crate::constants::{ANCHOR_DISCRIMINATOR, PUBKEY_SIZE};
 
 #[account]
 pub struct Vault {
