@@ -4,7 +4,7 @@ import { Buffer } from "buffer";
 global.Buffer = global.Buffer || Buffer;
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, GestureResponderEvent, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import {
   clusterApiUrl,
   Connection,
