@@ -1,8 +1,11 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{associated_token::AssociatedToken, token::{
-    Mint, Token, TokenAccount
+    self, Mint, Token, TokenAccount
 }};
-use crate::state::Vault;
+use crate::{
+    state::Vault,
+    errors::ErrorCode
+};
 
 #[derive(Accounts)]
 pub struct TransferSPL<'info> {
@@ -58,6 +61,31 @@ pub fn transfer_spl_handler(
         "Sending {} tokens to {}, mint address: {}",
         amount, ctx.accounts.receiver_ata.key(), ctx.accounts.token_mint.key()
     );
+
+    if ctx.accounts.vault_spl.amount < amount {
+        return err!(ErrorCode::InsufficientFunds);
+    }
+
+    let backup = ctx.accounts.backup.key();
+    let seeds = &[
+        b"vault",
+        backup.as_ref(),
+        &[ctx.accounts.vault.bump]
+    ];
+    let signer_seeds = &[&seeds[..]];
+
+    token::transfer(
+        CpiContext::new_with_signer(
+            ctx.accounts.token_program.to_account_info(), 
+            token::Transfer { 
+                from: ctx.accounts.vault_spl.to_account_info(), 
+                to: ctx.accounts.receiver_ata.to_account_info(), 
+                authority: ctx.accounts.vault.to_account_info()
+            }, 
+            signer_seeds
+        ),
+        amount
+    )?;
 
     Ok(())
 }

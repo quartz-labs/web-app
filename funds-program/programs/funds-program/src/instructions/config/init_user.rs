@@ -56,6 +56,7 @@ pub fn init_user_handler(ctx: Context<InitializeUser>) -> Result<()> {
     ctx.accounts.vault.backup = ctx.accounts.backup.key();
     ctx.accounts.vault.user = ctx.accounts.user.key();
     ctx.accounts.vault.init_payer = ctx.accounts.payer.key();
+    ctx.accounts.vault.bump = ctx.bumps.vault;
 
     Ok(())
 }
