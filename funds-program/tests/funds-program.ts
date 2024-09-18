@@ -711,7 +711,7 @@ describe("funds-program", () => {
 
 
   it("close_user incorrect init_payer", async () => {
-    const desiredErrorCode = "InvalidQuartzAccount";
+    const desiredErrorCode = "InvalidInitPayer";
 
     try {
       await program.methods

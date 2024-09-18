@@ -17,7 +17,7 @@ pub struct CloseUser<'info> {
     /// CHECK: The init_payer account is not read or written to, it only recieves rent
     #[account(
         mut,
-        constraint = init_payer.key() == vault.init_payer.key() @ ErrorCode::InvalidQuartzAccount
+        constraint = init_payer.key() == vault.init_payer.key() @ ErrorCode::InvalidInitPayer
     )]
     pub init_payer: UncheckedAccount<'info>,
 

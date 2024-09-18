@@ -17,7 +17,7 @@ pub struct SpendLamports<'info> {
     )]
     pub vault: Account<'info, Vault>,
 
-    /// CHECK: Receiving account does not need to be checked, once the address is the correct one
+    /// CHECK: Quartz account is not read or written to, just needs to be the correct address
     #[account(
         mut,
         constraint = quartz_holding.key() == QUARTZ_HOLDING_ADDRESS @ ErrorCode::InvalidQuartzAccount

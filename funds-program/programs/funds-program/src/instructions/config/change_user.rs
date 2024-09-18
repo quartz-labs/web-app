@@ -11,7 +11,7 @@ pub struct ChangeUser<'info> {
     )]
     pub vault: Account<'info, Vault>,
 
-    /// CHECK: The new_user account is not read or written to, it only locates the PDA
+    /// CHECK: The new_user can be any account
     pub new_user: UncheckedAccount<'info>,
 
     pub backup: Signer<'info>,
