@@ -1,4 +1,5 @@
 **/node_modules/
+**/.env
 
 # Expo app
 mobile-app/expo/
@@ -17,3 +18,12 @@ mobile-app/.DS_Store
 mobile-app/.expo/
 mobile-app/package-lock.json
 mobile-app/yarn.lock
+
+# funds-program
+funds-program/dist/
+funds-program/target/
+funds-program/.idea/
+funds-program/.DS_Store
+funds-program/*.log
+funds-program/*.tsbuildinfo
+funds-program/anchor.lock
