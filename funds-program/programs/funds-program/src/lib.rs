@@ -28,8 +28,4 @@ pub mod funds_program {
     pub fn transfer_lamports(ctx: Context<TransferLamports>, amount: u64) -> Result<()> {
         transfer_lamports_handler(ctx, amount)
     }
-
-    pub fn spend_lamports(ctx: Context<SpendLamports>, amount: u64) -> Result<()> {
-        spend_lamports_handler(ctx, amount)
-    }
 }
