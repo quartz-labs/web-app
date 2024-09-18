@@ -117,7 +117,7 @@ describe("funds-program", () => {
         .accounts({
           // @ts-ignore - Causing an issue in Curosr IDE
           vault: vaultPda,
-          vaultAtaUsdc: vaultUsdcPda,
+          vaultUsdc: vaultUsdcPda,
           payer: quartzManagerKeypair.publicKey,
           backup: otherBackupKeypair.publicKey,
           user: otherUserKeypair.publicKey,
@@ -142,7 +142,7 @@ describe("funds-program", () => {
       .accounts({
         // @ts-ignore - Causing an issue in Cursor IDE
         vault: otherKeypairVaultPda,
-        vaultAtaUsdc: otherKeypairVaultUsdcPda,
+        vaultUsdc: otherKeypairVaultUsdcPda,
         payer: otherBackupKeypair.publicKey,
         backup: otherBackupKeypair.publicKey,
         user: otherUserKeypair.publicKey,
@@ -181,7 +181,7 @@ describe("funds-program", () => {
       .accounts({
         // @ts-ignore - Causing an issue in Cursor IDE
         vault: vaultPda,
-        vaultAtaUsdc: vaultUsdcPda,
+        vaultUsdc: vaultUsdcPda,
         payer: quartzManagerKeypair.publicKey,
         backup: backupKeypair.publicKey,
         user: userKeypair.publicKey,
@@ -862,7 +862,7 @@ describe("funds-program", () => {
       .accounts({
         // @ts-ignore - Causing an issue in Cursor IDE
         vault: testKeypairVaultPda,
-        vaultAtaUsdc: testKeypairVaultUsdcPda,
+        vaultUsdc: testKeypairVaultUsdcPda,
         payer: quartzManagerKeypair.publicKey,
         backup: testBackupKeypair.publicKey,
         user: testUserKeypair.publicKey,

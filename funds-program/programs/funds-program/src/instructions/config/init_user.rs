@@ -29,7 +29,7 @@ pub struct InitializeUser<'info> {
         token::mint = usdc_mint,
         token::authority = vault
     )]
-    pub vault_ata_usdc: Account<'info, TokenAccount>,
+    pub vault_usdc: Account<'info, TokenAccount>,
 
     #[account(mut)]
     pub payer: Signer<'info>,

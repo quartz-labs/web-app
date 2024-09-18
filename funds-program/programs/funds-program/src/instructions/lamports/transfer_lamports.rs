@@ -30,16 +30,16 @@ pub struct TransferLamports<'info> {
 
 pub fn transfer_lamports_handler(
     ctx: Context<TransferLamports>, 
-    amount_lamports: u64
+    amount: u64
 ) -> Result<()> {
-    msg!("Sending {} lamports to {}", amount_lamports, ctx.accounts.receiver.key());
+    msg!("Sending {} lamports to {}", amount, ctx.accounts.receiver.key());
 
-    if **ctx.accounts.vault.to_account_info().try_borrow_lamports()? < amount_lamports {
+    if **ctx.accounts.vault.to_account_info().try_borrow_lamports()? < amount {
         return err!(ErrorCode::InsufficientFunds);
     }
 
-    **ctx.accounts.vault.to_account_info().try_borrow_mut_lamports()? -= amount_lamports;
-    **ctx.accounts.receiver.to_account_info().try_borrow_mut_lamports()? += amount_lamports;
+    **ctx.accounts.vault.to_account_info().try_borrow_mut_lamports()? -= amount;
+    **ctx.accounts.receiver.to_account_info().try_borrow_mut_lamports()? += amount;
 
     msg!("Lamports sent");
 
