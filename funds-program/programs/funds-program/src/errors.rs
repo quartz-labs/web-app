@@ -8,4 +8,6 @@ pub enum ErrorCode {
     InvalidInitPayer,
     #[msg("Insufficent funds for transaction")]
     InsufficientFunds,
+    #[msg("Invalid SPL token mint address")]
+    InvalidMintAddress,
 }

@@ -1,7 +1,7 @@
 [package]
 name = "funds-program"
-version = "0.1.0"
-description = "Created with Anchor"
+version = "0.0.1"
+description = "Quartz funds program"
 edition = "2021"
 
 [lib]
@@ -14,7 +14,11 @@ cpi = ["no-entrypoint"]
 no-entrypoint = []
 no-idl = []
 no-log-ix-name = []
-idl-build = ["anchor-lang/idl-build"]
+
+idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
+local = []
+devnet = []
 
 [dependencies]
 anchor-lang = "0.30.1"
+anchor-spl = "0.30.1"

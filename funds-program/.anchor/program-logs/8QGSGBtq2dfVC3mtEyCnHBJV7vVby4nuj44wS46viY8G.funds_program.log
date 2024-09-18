@@ -1,17 +1,23 @@
 Streaming transaction logs mentioning 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G. Confirmed commitment
-Transaction executed in slot 5:
-  Signature: 2gyn2Gy7HUJ5JwmKp4ggnVWxvswfxaskZF3sLCeQXvJoGAdpTh9FrfA1YVedwtmBRUu64QTietSaQDTGsnxTQaxL
+Transaction executed in slot 7:
+  Signature: 3shGJtbmfmiQvJPyBztknkAuwhjiXSFpGSSwVywBFBWPdtit2DsWgvaZLWpw18HVESQBj6epodxUJaT23ALfdpZD
   Status: Ok
   Log Messages:
     Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G invoke [1]
     Program log: Instruction: InitUser
     Program 11111111111111111111111111111111 invoke [2]
     Program 11111111111111111111111111111111 success
+    Program 11111111111111111111111111111111 invoke [2]
+    Program 11111111111111111111111111111111 success
+    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]
+    Program log: Instruction: InitializeAccount3
+    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 4241 of 180080 compute units
+    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success
     Program log: Initializing account
-    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G consumed 8882 of 200000 compute units
+    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G consumed 27177 of 200000 compute units
     Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G success
-Transaction executed in slot 6:
-  Signature: 4RXv7ggaWz2q574JdFgtWv9Z18Kv5p54cc5SX6wyMP7g1oNQ6iUvptq79Gth6PEUdUXP2fVhQekPNaLV6zNcJf5B
+Transaction executed in slot 8:
+  Signature: 2QBD4uYY8q5QVukRQvQPcqYMsviZugnx26puj1wGn6SCmtsb1fzMbhD3ayegcyz8KR9XSp95uQoaJ88h6HuWPusX
   Status: Ok
   Log Messages:
     Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G invoke [1]
@@ -19,39 +25,80 @@ Transaction executed in slot 6:
     Program log: Closing user account
     Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G consumed 4853 of 200000 compute units
     Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G success
-Transaction executed in slot 7:
-  Signature: T6Jje25EqBV31FJwdeCsAhKn5H8JzdiVS4dqYd4oGpSfL5uoSfAGRVVC3SNCneuu42xWiYqvXRxXXpeJWjvNM3q
+Transaction executed in slot 9:
+  Signature: 2bjG8xdHduojLsKq7hgMmLgnx1DE3B7vAhSQBX7udesc46sgdtLwdeZnCy6XMH4k8bGy5riuoqKVz7i4ZmrrtNQz
   Status: Ok
   Log Messages:
     Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G invoke [1]
     Program log: Instruction: InitUser
     Program 11111111111111111111111111111111 invoke [2]
     Program 11111111111111111111111111111111 success
+    Program 11111111111111111111111111111111 invoke [2]
+    Program 11111111111111111111111111111111 success
+    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]
+    Program log: Instruction: InitializeAccount3
+    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 4241 of 179921 compute units
+    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success
     Program log: Initializing account
-    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G consumed 9048 of 200000 compute units
+    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G consumed 27343 of 200000 compute units
     Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G success
-Transaction executed in slot 11:
-  Signature: 5cvZEFm6EJFSShQwD2oAo73BENpsagymBxAf223RZUfDgaub9gGfRzYnEFKAeU8QknzyYdjF9MaLpB2HAnayp9HF
+Transaction executed in slot 13:
+  Signature: 49G4vc9eGkktiji5Tn8bJ9ZNiBymTeMxp5rE7Mi6eJzXrsRwKaATnvHcNc4DipWXF5uB3nUkYcHX1Q4h4NTyXosC
   Status: Ok
   Log Messages:
     Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G invoke [1]
     Program log: Instruction: TransferLamports
-    Program log: Sending 1000000000 lamports to JCEC61WHs2he9v4XCcFnBchmE9XjZSAfxwBKfj3UZHRX
+    Program log: Sending 1000000000 lamports to 8jGXrFE6k3DU2bRooaihn5pMkw2ptohnrJAxRs6qhj3i
     Program log: Lamports sent
-    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G consumed 17555 of 200000 compute units
+    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G consumed 19007 of 200000 compute units
     Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G success
-Transaction executed in slot 16:
-  Signature: 5tjgHapyvGdddGvx3eFLnnvgV2PTdTDr99nYaat3dbpc9yVNXyQPuWMbk2ZE2woCW4Pk5P42yieoh63rfkesHa9J
+Transaction executed in slot 14:
+  Signature: 4uHcZo8dewv4efA55H653BqwfNGFzMbbsL8kprubgfm8vKNZvEbfsqjPf925c8bEHUQaZwHw9v1JK6v6QrTG568v
   Status: Ok
   Log Messages:
     Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G invoke [1]
-    Program log: Instruction: SpendLamports
-    Program log: Sending 1000000000 lamports to Quartz
-    Program log: Lamports sent
-    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G consumed 6098 of 200000 compute units
+    Program log: Instruction: ChangeUser
+    Program log: Changing local user keypair
+    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G consumed 6306 of 200000 compute units
     Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G success
 Transaction executed in slot 17:
-  Signature: 7tzXCLcd4UV9pqsJpqSUGnSWwy3Gee33nVJHmKjawoeMjBwBtwnG4muZhxKjDNGSgUrf9c8GgJMLun7TYNTNHE7
+  Signature: 3f9sLrm26ejrjUNrw5yjYAQs1aodQaiJYqKPoxo8JMGW5TB8n2zGRJQzMHEroLMW1NFV4TMtxDAMsq969UBLRzcm
+  Status: Ok
+  Log Messages:
+    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G invoke [1]
+    Program log: Instruction: TransferLamports
+    Program log: Sending 1000000000 lamports to BB4scrQvxgU8azBU3pe5YEDqLHR7cUc5x3uYgHpp9FBU
+    Program log: Lamports sent
+    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G consumed 19033 of 200000 compute units
+    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G success
+Transaction executed in slot 18:
+  Signature: 3Res2LMGGj1BYpdNU5nc4Eto8knbdnZKpRLftnGww5SMLzsRLrX6qydToPUAG4Lp241ZvyoBrfg5ZQt8ZxUxmHkX
+  Status: Ok
+  Log Messages:
+    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G invoke [1]
+    Program log: Instruction: ChangeUser
+    Program log: Changing local user keypair
+    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G consumed 6306 of 200000 compute units
+    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G success
+Transaction executed in slot 19:
+  Signature: TDHA4EZsb7hXz9qPiofvjbZjAs7KssYvz5XH251zBD89J16MYwN7Ntq2uYJx3WaFMnJWy8qEdNPsTEuj4Gi45Ku
+  Status: Ok
+  Log Messages:
+    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G invoke [1]
+    Program log: Instruction: InitUser
+    Program 11111111111111111111111111111111 invoke [2]
+    Program 11111111111111111111111111111111 success
+    Program 11111111111111111111111111111111 invoke [2]
+    Program 11111111111111111111111111111111 success
+    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]
+    Program log: Instruction: InitializeAccount3
+    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 4241 of 178421 compute units
+    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success
+    Program log: Initializing account
+    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G consumed 28843 of 200000 compute units
+    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G success
+Transaction executed in slot 20:
+  Signature: 9ah4SUAbVEzkK4WknpcvgLSrK5cPzaBJVXaBenx3E7kevegpcTqVPoE7oHCsGJvrUXRaQbwJJTxPFyoGGmDZakm
   Status: Ok
   Log Messages:
     Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G invoke [1]
@@ -60,69 +107,20 @@ Transaction executed in slot 17:
     Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G consumed 4806 of 200000 compute units
     Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G success
 Transaction executed in slot 21:
-  Signature: 2o6tTSs2EMQePvVRzDUxsRkpwTjDooSn6rh46CqiGhfgZmbuM5ayZLfRPSkRKTtvSNdnQ4whjhht5tEpHUBGYCtk
-  Status: Ok
-  Log Messages:
-    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G invoke [1]
-    Program log: Instruction: TransferLamports
-    Program log: Sending 1000000000 lamports to Bc1PYEUqg2WSdazGNCRHg8UupnmXEEodw5q4QZrJo26T
-    Program log: Lamports sent
-    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G consumed 17503 of 200000 compute units
-    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G success
-Transaction executed in slot 23:
-  Signature: 4Jzhfn88xoTmW9gXpkmXQNsveL6cwXiGymUGNP2ohj4wc6f3YpQ7hkf9GSmUW89aRaJXiW1MLURTxeazyqMWpN2t
-  Status: Ok
-  Log Messages:
-    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G invoke [1]
-    Program log: Instruction: SpendLamports
-    Program log: Sending 1000000000 lamports to Quartz
-    Program log: Lamports sent
-    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G consumed 6098 of 200000 compute units
-    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G success
-Transaction executed in slot 24:
-  Signature: 2BZHoDXYQ9JCite8r6fJA2pWTicGpxqkngWNAz5FWg5UksFQqw7ZiLMcJz2RCpdVNDJHFEuVxZpLbUip4qJTTLt5
-  Status: Ok
-  Log Messages:
-    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G invoke [1]
-    Program log: Instruction: ChangeUser
-    Program log: Changing local user keypair
-    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G consumed 4806 of 200000 compute units
-    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G success
-Transaction executed in slot 25:
-  Signature: 5kUNWhDnSexrCApT5ApqyzLzWGT3G5WkCw62sF9xvd1LwsWC8Xd7QuYZyz8ice7L9JikuScJTesEwgcoQfAoDWjG
-  Status: Ok
-  Log Messages:
-    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G invoke [1]
-    Program log: Instruction: InitUser
-    Program 11111111111111111111111111111111 invoke [2]
-    Program 11111111111111111111111111111111 success
-    Program log: Initializing account
-    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G consumed 10548 of 200000 compute units
-    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G success
-Transaction executed in slot 26:
-  Signature: 5wnCC7V58W67Pp7QvuNcUjzwpbpyYQv32aF569B1TLrhgwPaiLX3MEFLVeWiWbDSNzpCeqEY5WGJ3G6H4cnKABy6
-  Status: Ok
-  Log Messages:
-    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G invoke [1]
-    Program log: Instruction: ChangeUser
-    Program log: Changing local user keypair
-    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G consumed 6306 of 200000 compute units
-    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G success
-Transaction executed in slot 27:
-  Signature: 3i8Vxfm4bY5QxbSUqYfsDpCB6h2rUU1oJYtF6cCtcPb1t25gga35xbex4sGXcDUuTEimDNgHpGVBcKg8L8NmhpA6
-  Status: Ok
-  Log Messages:
-    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G invoke [1]
-    Program log: Instruction: CloseUser
-    Program log: Closing user account
-    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G consumed 6518 of 200000 compute units
-    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G success
-Transaction executed in slot 28:
-  Signature: C18tWCvR3p7dTfqTjikdZ7aKNNycxgddBjYKEucbs7pehPBXyZ6NRPpbzjFiHz2DrmxVZgAYv319zPs3CUrGLV4
+  Signature: 3DmnUEVmDBw1RYRL6Sg5aKRAWHSnLtsY3TfTAddg436T6L1gpL4x1haEc897oNedhBWD7ZjPgbq6aYb44rgw7VMU
   Status: Ok
   Log Messages:
     Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G invoke [1]
     Program log: Instruction: CloseUser
     Program log: Closing user account
     Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G consumed 5018 of 200000 compute units
+    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G success
+Transaction executed in slot 22:
+  Signature: hjNE456rwXBCe6RPgfw2X9zAuucRSbLsEpChs9GxtcZE2ZQyZK9jMXHjaj4PHoduZFbxtM9Pq2ErFytcP1zXEcC
+  Status: Ok
+  Log Messages:
+    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G invoke [1]
+    Program log: Instruction: CloseUser
+    Program log: Closing user account
+    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G consumed 6518 of 200000 compute units
     Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G success

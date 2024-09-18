@@ -2,7 +2,10 @@ import * as anchor from "@coral-xyz/anchor";
 import { Program, AnchorError } from "@coral-xyz/anchor";
 import { FundsProgram } from "../target/types/funds_program";
 import { Keypair, SystemProgram, LAMPORTS_PER_SOL, Transaction, PublicKey } from "@solana/web3.js";
+import { createMint, getOrCreateAssociatedTokenAccount, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import dotenv from 'dotenv';
+const fs = require("fs");
+import path from "path";
 import { assert, expect } from "chai";
 dotenv.config();
 
@@ -10,6 +13,7 @@ dotenv.config();
 describe("funds-program", () => {
   // Configure the client to use the local cluster.
   const provider = anchor.AnchorProvider.env();
+  const connection = provider.connection;
   const wallet = anchor.workspace.FundsProgram.provider.wallet;
   anchor.setProvider(provider);
 
@@ -20,38 +24,86 @@ describe("funds-program", () => {
   if (!process.env.QUARTZ_MANAGER_KEYPAIR) throw new Error("QUARTZ_MANAGER_KEYPAIR environment variable is not set");
   const quartzManagerKeypair = Keypair.fromSecretKey(Uint8Array.from(JSON.parse(process.env.QUARTZ_MANAGER_KEYPAIR)));
 
+  // Test USDC mint
+  const testUsdcKeypair = Keypair.fromSecretKey(new Uint8Array(JSON.parse(
+    fs.readFileSync(path.resolve(__dirname, "./test-keys/envrJbV6GbhBTi8Pu6h9MwNViLuAmu3mFFRq7gE9Cp3.json"))
+  )));
+  let testUsdcMint;
+  let quartzHoldingUsdc;
+
+
   // Generate random keypairs
   const backupKeypair = Keypair.generate();
   const userKeypair = Keypair.generate();
   const newUserKeypair = Keypair.generate();
   const otherBackupKeypair = Keypair.generate();
   const otherUserKeypair = Keypair.generate();
+  const usdcAuth = Keypair.generate();
 
+  // PDAs
   const [vaultPda] = anchor.web3.PublicKey.findProgramAddressSync(
     [Buffer.from("vault"), backupKeypair.publicKey.toBuffer()],
     program.programId
   );
-
+  const [vaultUsdcPda] = anchor.web3.PublicKey.findProgramAddressSync(
+    [Buffer.from("vault"), backupKeypair.publicKey.toBuffer(), testUsdcKeypair.publicKey.toBuffer()],
+    program.programId
+  );
   const [otherKeypairVaultPda] = anchor.web3.PublicKey.findProgramAddressSync(
     [Buffer.from("vault"), otherBackupKeypair.publicKey.toBuffer()],
     program.programId
   );
+  const [otherKeypairVaultUsdcPda] = anchor.web3.PublicKey.findProgramAddressSync(
+    [Buffer.from("vault"), otherBackupKeypair.publicKey.toBuffer(), testUsdcKeypair.publicKey.toBuffer()],
+    program.programId
+  );
+
+  // Other variables
+  const CENT_PER_USDC = 2;
 
   before(async () => {
+    // Top-up SOL for USDC mint authority
+    const tx_UsdcMintTopup = new Transaction().add(
+      SystemProgram.transfer({
+        fromPubkey: wallet.publicKey,
+        toPubkey: usdcAuth.publicKey,
+        lamports: LAMPORTS_PER_SOL * 1000,
+      })
+    );
+    await provider.sendAndConfirm(tx_UsdcMintTopup);
+
+    // Create USDC mint
+    testUsdcMint = await createMint(
+      connection,
+      wallet.payer,
+      usdcAuth.publicKey,
+      usdcAuth.publicKey,
+      2,
+      testUsdcKeypair
+    );
+  
+    // Initialise USDC ATA for QUARTZ_HOLDING_ADDRESS
+    quartzHoldingUsdc = (await getOrCreateAssociatedTokenAccount(
+        connection,
+        wallet.payer,
+        testUsdcMint,
+        QUARTZ_HOLDING_ADDRESS
+    )).address;
+
     console.log("Quartz manager address: ", quartzManagerKeypair.publicKey.toString());
-    console.log("Quartz holding address: ", QUARTZ_HOLDING_ADDRESS.toString());
+    console.log("Quartz USDC holding address: ", quartzHoldingUsdc.toString());
     console.log("Generated user address: ", userKeypair.publicKey.toString());
     console.log("Generated other address: ", otherUserKeypair.publicKey.toString());
 
-    // Topup incorrect keypair account with SOL
-    const tx = new Transaction().add(
+    // Topup other keypair account with SOL
+    const tx_otherKeypairTopup = new Transaction().add(
       SystemProgram.transfer({
         fromPubkey: wallet.publicKey,
         toPubkey: otherBackupKeypair.publicKey,
         lamports: LAMPORTS_PER_SOL * 10,
       })
     );
-    await provider.sendAndConfirm(tx);
+    await provider.sendAndConfirm(tx_otherKeypairTopup);
   })
 
 
@@ -65,9 +117,12 @@ describe("funds-program", () => {
         .accounts({
           // @ts-ignore - Causing an issue in Curosr IDE
           vault: vaultPda,
+          vaultAtaUsdc: vaultUsdcPda,
           payer: quartzManagerKeypair.publicKey,
           backup: otherBackupKeypair.publicKey,
           user: otherUserKeypair.publicKey,
+          usdcMint: testUsdcMint,
+          tokenProgram: TOKEN_PROGRAM_ID,
           systemProgram: SystemProgram.programId,
         })  
         .signers([otherBackupKeypair])
@@ -87,9 +142,12 @@ describe("funds-program", () => {
       .accounts({
         // @ts-ignore - Causing an issue in Cursor IDE
         vault: otherKeypairVaultPda,
+        vaultAtaUsdc: otherKeypairVaultUsdcPda,
         payer: otherBackupKeypair.publicKey,
         backup: otherBackupKeypair.publicKey,
         user: otherUserKeypair.publicKey,
+        usdcMint: testUsdcMint,
+        tokenProgram: TOKEN_PROGRAM_ID,
         systemProgram: SystemProgram.programId,
       })
       .signers([otherBackupKeypair])
@@ -123,9 +181,12 @@ describe("funds-program", () => {
       .accounts({
         // @ts-ignore - Causing an issue in Cursor IDE
         vault: vaultPda,
+        vaultAtaUsdc: vaultUsdcPda,
         payer: quartzManagerKeypair.publicKey,
         backup: backupKeypair.publicKey,
         user: userKeypair.publicKey,
+        usdcMint: testUsdcMint,
+        tokenProgram: TOKEN_PROGRAM_ID,
         systemProgram: SystemProgram.programId,
       })
       .signers([quartzManagerKeypair])
@@ -283,185 +344,185 @@ describe("funds-program", () => {
   })
 
 
-  it("spend_lamports insufficient funds", async () => {
-    const desiredErrorCode = "InsufficientFunds"
+  // it("spend_lamports insufficient funds", async () => {
+  //   const desiredErrorCode = "InsufficientFunds"
 
-    try {
-      await program.methods
-      .spendLamports(new anchor.BN(LAMPORTS_PER_SOL * 1000))
-        .accounts({
-          // @ts-ignore - Causing an issue in Cursor IDE
-          vault: vaultPda, 
-          quartzHolding: QUARTZ_HOLDING_ADDRESS,
-          backup: backupKeypair.publicKey,
-          user: userKeypair.publicKey,
-          systemProgram: SystemProgram.programId
-        })
-        .signers([userKeypair])
-        .rpc();
+  //   try {
+  //     await program.methods
+  //     .spendLamports(new anchor.BN(LAMPORTS_PER_SOL * 1000))
+  //       .accounts({
+  //         // @ts-ignore - Causing an issue in Cursor IDE
+  //         vault: vaultPda, 
+  //         quartzHolding: QUARTZ_HOLDING_ADDRESS,
+  //         backup: backupKeypair.publicKey,
+  //         user: userKeypair.publicKey,
+  //         systemProgram: SystemProgram.programId
+  //       })
+  //       .signers([userKeypair])
+  //       .rpc();
 
-      assert.fail(0, 1, "spendLamports instruction call should have failed")
-    } catch(err) {
-      expect(err).to.be.instanceOf(AnchorError)
-      expect((err as AnchorError).error.errorCode.code).to.equal(desiredErrorCode)
-    }
-  })
-
-
-  it("spend_lamports incorrect signature", async () => {
-    const desiredErrorMessage = "Missing signature"
-    const destinationAccount = Keypair.generate().publicKey;
-
-    try {
-      expect(
-        await provider.connection.getBalance(destinationAccount)
-      ).to.equal(0);
-
-      // Send SOL to vaultPda
-      const transaction = new Transaction().add(
-        SystemProgram.transfer({
-          fromPubkey: provider.wallet.publicKey,
-          toPubkey: vaultPda,
-          lamports: LAMPORTS_PER_SOL * 2,
-        })
-      )
-      await provider.sendAndConfirm(transaction);
-
-      // Call PDA to transfer SOL
-      await program.methods
-        .spendLamports(new anchor.BN(LAMPORTS_PER_SOL))
-        .accounts({
-          // @ts-ignore - Causing an issue in Cursor IDE
-          vault: vaultPda, 
-          quartzHolding: QUARTZ_HOLDING_ADDRESS,
-          backup: backupKeypair.publicKey,
-          user: userKeypair.publicKey,
-          systemProgram: SystemProgram.programId
-        })
-        .signers([quartzManagerKeypair])
-        .rpc();
-
-      assert.fail(0, 1, "spendLamports instruction call should have failed")
-    } catch(err) {
-      expect(err).to.be.instanceOf(Error);
-      expect(err.message).to.include(desiredErrorMessage);
-    }
-  })
+  //     assert.fail(0, 1, "spendLamports instruction call should have failed")
+  //   } catch(err) {
+  //     expect(err).to.be.instanceOf(AnchorError)
+  //     expect((err as AnchorError).error.errorCode.code).to.equal(desiredErrorCode)
+  //   }
+  // })
 
 
-  it("spend_lamports backup signature", async () => {
-    const desiredErrorMessage = "unknown signer"
-    const destinationAccount = Keypair.generate().publicKey;
+  // it("spend_lamports incorrect signature", async () => {
+  //   const desiredErrorMessage = "Missing signature"
+  //   const destinationAccount = Keypair.generate().publicKey;
 
-    try {
-      expect(
-        await provider.connection.getBalance(destinationAccount)
-      ).to.equal(0);
+  //   try {
+  //     expect(
+  //       await provider.connection.getBalance(destinationAccount)
+  //     ).to.equal(0);
 
-      // Send SOL to vaultPda
-      const transaction = new Transaction().add(
-        SystemProgram.transfer({
-          fromPubkey: provider.wallet.publicKey,
-          toPubkey: vaultPda,
-          lamports: LAMPORTS_PER_SOL * 2,
-        })
-      )
-      await provider.sendAndConfirm(transaction);
+  //     // Send SOL to vaultPda
+  //     const transaction = new Transaction().add(
+  //       SystemProgram.transfer({
+  //         fromPubkey: provider.wallet.publicKey,
+  //         toPubkey: vaultPda,
+  //         lamports: LAMPORTS_PER_SOL * 2,
+  //       })
+  //     )
+  //     await provider.sendAndConfirm(transaction);
 
-      // Call PDA to transfer SOL
-      await program.methods
-        .spendLamports(new anchor.BN(LAMPORTS_PER_SOL))
-        .accounts({
-          // @ts-ignore - Causing an issue in Cursor IDE
-          vault: vaultPda, 
-          quartzHolding: QUARTZ_HOLDING_ADDRESS,
-          backup: backupKeypair.publicKey,
-          user: userKeypair.publicKey,
-          systemProgram: SystemProgram.programId
-        })
-        .signers([backupKeypair])
-        .rpc();
+  //     // Call PDA to transfer SOL
+  //     await program.methods
+  //       .spendLamports(new anchor.BN(LAMPORTS_PER_SOL))
+  //       .accounts({
+  //         // @ts-ignore - Causing an issue in Cursor IDE
+  //         vault: vaultPda, 
+  //         quartzHolding: QUARTZ_HOLDING_ADDRESS,
+  //         backup: backupKeypair.publicKey,
+  //         user: userKeypair.publicKey,
+  //         systemProgram: SystemProgram.programId
+  //       })
+  //       .signers([quartzManagerKeypair])
+  //       .rpc();
 
-      assert.fail(0, 1, "spendLamports instruction call should have failed")
-    } catch(err) {
-      expect(err).to.be.instanceOf(Error);
-      expect(err.message).to.include(desiredErrorMessage);
-    }
-  })
-
-
-  it("spend_lamports incorrect quartz holding account", async () => {
-    const desiredErrorCode = "InvalidQuartzAccount"
-    const destinationAccount = Keypair.generate().publicKey;
-
-    try {
-      expect(
-        await provider.connection.getBalance(destinationAccount)
-      ).to.equal(0);
-
-      // Send SOL to vaultPda
-      const transaction = new Transaction().add(
-        SystemProgram.transfer({
-          fromPubkey: provider.wallet.publicKey,
-          toPubkey: vaultPda,
-          lamports: LAMPORTS_PER_SOL * 2,
-        })
-      )
-      await provider.sendAndConfirm(transaction);
-
-      // Call PDA to transfer SOL
-      await program.methods
-        .spendLamports(new anchor.BN(LAMPORTS_PER_SOL))
-        .accounts({
-          // @ts-ignore - Causing an issue in Cursor IDE
-          vault: vaultPda, 
-          quartzHolding: otherUserKeypair.publicKey,
-          backup: backupKeypair.publicKey,
-          user: userKeypair.publicKey,
-          systemProgram: SystemProgram.programId
-        })
-        .signers([userKeypair])
-        .rpc();
-
-      assert.fail(0, 1, "spendLamports instruction call should have failed")
-    } catch(err) {
-      expect(err).to.be.instanceOf(AnchorError)
-      expect((err as AnchorError).error.errorCode.code).to.equal(desiredErrorCode)
-    }
-  })
+  //     assert.fail(0, 1, "spendLamports instruction call should have failed")
+  //   } catch(err) {
+  //     expect(err).to.be.instanceOf(Error);
+  //     expect(err.message).to.include(desiredErrorMessage);
+  //   }
+  // })
 
 
-  it("spend_lamports", async () => {
-    const initialBalance = await provider.connection.getBalance(QUARTZ_HOLDING_ADDRESS);
+  // it("spend_lamports backup signature", async () => {
+  //   const desiredErrorMessage = "unknown signer"
+  //   const destinationAccount = Keypair.generate().publicKey;
 
-    // Send SOL to vaultPda
-    const transaction = new Transaction().add(
-      SystemProgram.transfer({
-        fromPubkey: provider.wallet.publicKey,
-        toPubkey: vaultPda,
-        lamports: LAMPORTS_PER_SOL * 2,
-      })
-    )
-    await provider.sendAndConfirm(transaction);
+  //   try {
+  //     expect(
+  //       await provider.connection.getBalance(destinationAccount)
+  //     ).to.equal(0);
 
-    // Call PDA to transfer SOL
-    await program.methods
-      .spendLamports(new anchor.BN(LAMPORTS_PER_SOL))
-      .accounts({
-        // @ts-ignore - Causing an issue in Cursor IDE
-        vault: vaultPda, 
-        quartzHolding: QUARTZ_HOLDING_ADDRESS,
-        backup: backupKeypair.publicKey,
-        user: userKeypair.publicKey,
-        systemProgram: SystemProgram.programId
-      })
-      .signers([userKeypair])
-      .rpc();
+  //     // Send SOL to vaultPda
+  //     const transaction = new Transaction().add(
+  //       SystemProgram.transfer({
+  //         fromPubkey: provider.wallet.publicKey,
+  //         toPubkey: vaultPda,
+  //         lamports: LAMPORTS_PER_SOL * 2,
+  //       })
+  //     )
+  //     await provider.sendAndConfirm(transaction);
 
-    // Check SOL is received
-    const newBalance = await provider.connection.getBalance(QUARTZ_HOLDING_ADDRESS);
-    expect(newBalance - initialBalance).to.equal(LAMPORTS_PER_SOL)
-  })
+  //     // Call PDA to transfer SOL
+  //     await program.methods
+  //       .spendLamports(new anchor.BN(LAMPORTS_PER_SOL))
+  //       .accounts({
+  //         // @ts-ignore - Causing an issue in Cursor IDE
+  //         vault: vaultPda, 
+  //         quartzHolding: QUARTZ_HOLDING_ADDRESS,
+  //         backup: backupKeypair.publicKey,
+  //         user: userKeypair.publicKey,
+  //         systemProgram: SystemProgram.programId
+  //       })
+  //       .signers([backupKeypair])
+  //       .rpc();
+
+  //     assert.fail(0, 1, "spendLamports instruction call should have failed")
+  //   } catch(err) {
+  //     expect(err).to.be.instanceOf(Error);
+  //     expect(err.message).to.include(desiredErrorMessage);
+  //   }
+  // })
+
+
+  // it("spend_lamports incorrect quartz holding account", async () => {
+  //   const desiredErrorCode = "InvalidQuartzAccount"
+  //   const destinationAccount = Keypair.generate().publicKey;
+
+  //   try {
+  //     expect(
+  //       await provider.connection.getBalance(destinationAccount)
+  //     ).to.equal(0);
+
+  //     // Send SOL to vaultPda
+  //     const transaction = new Transaction().add(
+  //       SystemProgram.transfer({
+  //         fromPubkey: provider.wallet.publicKey,
+  //         toPubkey: vaultPda,
+  //         lamports: LAMPORTS_PER_SOL * 2,
+  //       })
+  //     )
+  //     await provider.sendAndConfirm(transaction);
+
+  //     // Call PDA to transfer SOL
+  //     await program.methods
+  //       .spendLamports(new anchor.BN(LAMPORTS_PER_SOL))
+  //       .accounts({
+  //         // @ts-ignore - Causing an issue in Cursor IDE
+  //         vault: vaultPda, 
+  //         quartzHolding: otherUserKeypair.publicKey,
+  //         backup: backupKeypair.publicKey,
+  //         user: userKeypair.publicKey,
+  //         systemProgram: SystemProgram.programId
+  //       })
+  //       .signers([userKeypair])
+  //       .rpc();
+
+  //     assert.fail(0, 1, "spendLamports instruction call should have failed")
+  //   } catch(err) {
+  //     expect(err).to.be.instanceOf(AnchorError)
+  //     expect((err as AnchorError).error.errorCode.code).to.equal(desiredErrorCode)
+  //   }
+  // })
+
+
+  // it("spend_lamports", async () => {
+  //   const initialBalance = await provider.connection.getBalance(QUARTZ_HOLDING_ADDRESS);
+
+  //   // Send SOL to vaultPda
+  //   const transaction = new Transaction().add(
+  //     SystemProgram.transfer({
+  //       fromPubkey: provider.wallet.publicKey,
+  //       toPubkey: vaultPda,
+  //       lamports: LAMPORTS_PER_SOL * 2,
+  //     })
+  //   )
+  //   await provider.sendAndConfirm(transaction);
+
+  //   // Call PDA to transfer SOL
+  //   await program.methods
+  //     .spendLamports(new anchor.BN(LAMPORTS_PER_SOL))
+  //     .accounts({
+  //       // @ts-ignore - Causing an issue in Cursor IDE
+  //       vault: vaultPda, 
+  //       quartzHolding: QUARTZ_HOLDING_ADDRESS,
+  //       backup: backupKeypair.publicKey,
+  //       user: userKeypair.publicKey,
+  //       systemProgram: SystemProgram.programId
+  //     })
+  //     .signers([userKeypair])
+  //     .rpc();
+
+  //   // Check SOL is received
+  //   const newBalance = await provider.connection.getBalance(QUARTZ_HOLDING_ADDRESS);
+  //   expect(newBalance - initialBalance).to.equal(LAMPORTS_PER_SOL)
+  // })
 
 
   it("change_user incorrect signature", async () => {
@@ -565,38 +626,38 @@ describe("funds-program", () => {
   })
 
 
-  it("spend_lamports old user", async () => {
-    const desiredErrorCode = "ConstraintHasOne";
+  // it("spend_lamports old user", async () => {
+  //   const desiredErrorCode = "ConstraintHasOne";
 
-    try {
-      // Send SOL to vaultPda
-      const transaction = new Transaction().add(
-        SystemProgram.transfer({
-          fromPubkey: provider.wallet.publicKey,
-          toPubkey: vaultPda,
-          lamports: LAMPORTS_PER_SOL * 2,
-        })
-      )
-      await provider.sendAndConfirm(transaction);
+  //   try {
+  //     // Send SOL to vaultPda
+  //     const transaction = new Transaction().add(
+  //       SystemProgram.transfer({
+  //         fromPubkey: provider.wallet.publicKey,
+  //         toPubkey: vaultPda,
+  //         lamports: LAMPORTS_PER_SOL * 2,
+  //       })
+  //     )
+  //     await provider.sendAndConfirm(transaction);
 
-      // Call PDA to transfer SOL
-      await program.methods
-        .spendLamports(new anchor.BN(LAMPORTS_PER_SOL))
-        .accounts({
-          // @ts-ignore - Causing an issue in Cursor IDE
-          vault: vaultPda, 
-          quartzHolding: QUARTZ_HOLDING_ADDRESS,
-          backup: backupKeypair.publicKey,
-          user: userKeypair.publicKey,
-          systemProgram: SystemProgram.programId
-        })
-        .signers([userKeypair])
-        .rpc();
-    } catch(err) {
-      expect(err).to.be.instanceOf(AnchorError)
-      expect((err as AnchorError).error.errorCode.code).to.equal(desiredErrorCode)
-    }
-  });
+  //     // Call PDA to transfer SOL
+  //     await program.methods
+  //       .spendLamports(new anchor.BN(LAMPORTS_PER_SOL))
+  //       .accounts({
+  //         // @ts-ignore - Causing an issue in Cursor IDE
+  //         vault: vaultPda, 
+  //         quartzHolding: QUARTZ_HOLDING_ADDRESS,
+  //         backup: backupKeypair.publicKey,
+  //         user: userKeypair.publicKey,
+  //         systemProgram: SystemProgram.programId
+  //       })
+  //       .signers([userKeypair])
+  //       .rpc();
+  //   } catch(err) {
+  //     expect(err).to.be.instanceOf(AnchorError)
+  //     expect((err as AnchorError).error.errorCode.code).to.equal(desiredErrorCode)
+  //   }
+  // });
 
 
   it("close_user old user", async () => {
@@ -658,37 +719,37 @@ describe("funds-program", () => {
   })
 
 
-  it("spend_lamports new user", async () => {
-    const initialBalance = await provider.connection.getBalance(QUARTZ_HOLDING_ADDRESS);
+  // it("spend_lamports new user", async () => {
+  //   const initialBalance = await provider.connection.getBalance(QUARTZ_HOLDING_ADDRESS);
 
-    // Send SOL to vaultPda
-    const transaction = new Transaction().add(
-      SystemProgram.transfer({
-        fromPubkey: provider.wallet.publicKey,
-        toPubkey: vaultPda,
-        lamports: LAMPORTS_PER_SOL * 2,
-      })
-    )
-    await provider.sendAndConfirm(transaction);
+  //   // Send SOL to vaultPda
+  //   const transaction = new Transaction().add(
+  //     SystemProgram.transfer({
+  //       fromPubkey: provider.wallet.publicKey,
+  //       toPubkey: vaultPda,
+  //       lamports: LAMPORTS_PER_SOL * 2,
+  //     })
+  //   )
+  //   await provider.sendAndConfirm(transaction);
 
-    // Call PDA to transfer SOL
-    await program.methods
-      .spendLamports(new anchor.BN(LAMPORTS_PER_SOL))
-      .accounts({
-        // @ts-ignore - Causing an issue in Cursor IDE
-        vault: vaultPda, 
-        quartzHolding: QUARTZ_HOLDING_ADDRESS,
-        backup: backupKeypair.publicKey,
-        user: newUserKeypair.publicKey,
-        systemProgram: SystemProgram.programId
-      })
-      .signers([newUserKeypair])
-      .rpc();
+  //   // Call PDA to transfer SOL
+  //   await program.methods
+  //     .spendLamports(new anchor.BN(LAMPORTS_PER_SOL))
+  //     .accounts({
+  //       // @ts-ignore - Causing an issue in Cursor IDE
+  //       vault: vaultPda, 
+  //       quartzHolding: QUARTZ_HOLDING_ADDRESS,
+  //       backup: backupKeypair.publicKey,
+  //       user: newUserKeypair.publicKey,
+  //       systemProgram: SystemProgram.programId
+  //     })
+  //     .signers([newUserKeypair])
+  //     .rpc();
 
-    // Check SOL is received
-    const newBalance = await provider.connection.getBalance(QUARTZ_HOLDING_ADDRESS);
-    expect(newBalance - initialBalance).to.equal(LAMPORTS_PER_SOL)
-  })
+  //   // Check SOL is received
+  //   const newBalance = await provider.connection.getBalance(QUARTZ_HOLDING_ADDRESS);
+  //   expect(newBalance - initialBalance).to.equal(LAMPORTS_PER_SOL)
+  // })
 
 
   it("change_user back to original", async () => {
@@ -790,15 +851,23 @@ describe("funds-program", () => {
       [Buffer.from("vault"), testBackupKeypair.publicKey.toBuffer()],
       program.programId
     );
+    const [testKeypairVaultUsdcPda] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("vault"), testBackupKeypair.publicKey.toBuffer(), testUsdcKeypair.publicKey.toBuffer()],
+      program.programId
+    );
 
+    // Init account
     await program.methods
       .initUser()
       .accounts({
         // @ts-ignore - Causing an issue in Cursor IDE
         vault: testKeypairVaultPda,
+        vaultAtaUsdc: testKeypairVaultUsdcPda,
         payer: quartzManagerKeypair.publicKey,
         backup: testBackupKeypair.publicKey,
         user: testUserKeypair.publicKey,
+        usdcMint: testUsdcMint,
+        tokenProgram: TOKEN_PROGRAM_ID,
         systemProgram: SystemProgram.programId,
       })
       .signers([quartzManagerKeypair])
@@ -808,6 +877,7 @@ describe("funds-program", () => {
     expect(account.user.equals(testUserKeypair.publicKey)).to.be.true;
     expect(account.initPayer.equals(quartzManagerKeypair.publicKey)).to.be.true;
 
+    // Change user
     await program.methods
       .changeUser()
       .accounts({
@@ -823,6 +893,7 @@ describe("funds-program", () => {
     expect(account.user.equals(testNewUserKeypair.publicKey)).to.be.true;
     expect(account.initPayer.equals(quartzManagerKeypair.publicKey)).to.be.true;
 
+    // Close account with new user
     await program.methods
       .closeUser()
       .accounts({

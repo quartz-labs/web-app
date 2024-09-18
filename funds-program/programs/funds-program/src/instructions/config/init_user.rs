@@ -1,5 +1,14 @@
 use anchor_lang::prelude::*;
-use crate::state::Vault;
+use anchor_spl::token::{
+    Token,
+    TokenAccount,
+    Mint
+};
+use crate::{
+    state::Vault,
+    constants::USDC_MINT_ADDRESS,
+    errors::ErrorCode
+};
 
 #[derive(Accounts)]
 pub struct InitializeUser<'info> {
@@ -12,6 +21,16 @@ pub struct InitializeUser<'info> {
     )]
     pub vault: Account<'info, Vault>,
 
+    #[account(
+        init,
+        seeds = [b"vault", backup.key().as_ref(), usdc_mint.key().as_ref()],
+        bump,
+        payer = payer,
+        token::mint = usdc_mint,
+        token::authority = vault
+    )]
+    pub vault_ata_usdc: Account<'info, TokenAccount>,
+
     #[account(mut)]
     pub payer: Signer<'info>,
 
@@ -20,6 +39,13 @@ pub struct InitializeUser<'info> {
 
     /// CHECK: User account is not read or written to, is only assigned as owner and can be any account
     pub user: UncheckedAccount<'info>,
+
+    #[account(
+        constraint = usdc_mint.key() == USDC_MINT_ADDRESS @ ErrorCode::InvalidMintAddress
+    )]
+    pub usdc_mint: Account<'info, Mint>,
+
+    pub token_program: Program<'info, Token>,
 
     pub system_program: Program<'info, System>
 }

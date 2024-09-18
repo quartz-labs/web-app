@@ -1,7 +1,6 @@
 use anchor_lang::prelude::*;
 use crate::{
     state::Vault,
-    utils::transfer_lamports_from_vault,
     errors::ErrorCode,
     constants::QUARTZ_HOLDING_ADDRESS
 };
@@ -34,18 +33,17 @@ pub struct SpendLamports<'info> {
 }
 
 pub fn spend_lamports_handler(
-    ctx: Context<SpendLamports>, 
+    _ctx: Context<SpendLamports>, 
     amount_lamports: u64
 ) -> Result<()> {
-    msg!("Sending {} lamports to Quartz", amount_lamports);
+    msg!("Swapping {} lamports for card spend", amount_lamports);
 
-    transfer_lamports_from_vault(
-        amount_lamports, 
-        ctx.accounts.vault.to_account_info(), 
-        ctx.accounts.quartz_holding.to_account_info()
-    )?;
+    // TODO - Implement
+    // 1. Swap lamports to USDC
+    // 2. Send USDC to Quartz
 
-    msg!("Lamports sent");
+    let usdc_amount = 0;
+    msg!("Sent {} USDC to Quartz", usdc_amount);
 
     Ok(())
 }

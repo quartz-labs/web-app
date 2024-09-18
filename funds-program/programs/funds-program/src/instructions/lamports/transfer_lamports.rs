@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use crate::{
     state::Vault,
-    utils::transfer_lamports_from_vault
+    errors::ErrorCode
 };
 
 #[derive(Accounts)]
@@ -34,11 +34,12 @@ pub fn transfer_lamports_handler(
 ) -> Result<()> {
     msg!("Sending {} lamports to {}", amount_lamports, ctx.accounts.receiver.key());
 
-    transfer_lamports_from_vault(
-        amount_lamports, 
-        ctx.accounts.vault.to_account_info(), 
-        ctx.accounts.receiver.to_account_info()
-    )?;
+    if **ctx.accounts.vault.to_account_info().try_borrow_lamports()? < amount_lamports {
+        return err!(ErrorCode::InsufficientFunds);
+    }
+
+    **ctx.accounts.vault.to_account_info().try_borrow_mut_lamports()? -= amount_lamports;
+    **ctx.accounts.receiver.to_account_info().try_borrow_mut_lamports()? += amount_lamports;
 
     msg!("Lamports sent");
 
