@@ -6,7 +6,7 @@ pub struct ChangeUser<'info> {
     #[account(
         mut,
         seeds = [b"vault", backup.key().as_ref()],
-        bump,
+        bump = vault.bump,
         has_one = backup,
     )]
     pub vault: Account<'info, Vault>,
