@@ -8,7 +8,8 @@
     "test:change_user": "TEST_FILE='change_user_tests.ts' anchor test -- --features 'local'",
     "test:close_user": "TEST_FILE='close_user_tests.ts' anchor test -- --features 'local'",
     "test:transfer_lamports": "TEST_FILE='transfer_lamports_tests.ts' anchor test -- --features 'local'",
-    "test:transfer_spl": "TEST_FILE='transfer_spl_tests.ts' anchor test -- --features 'local'"
+    "test:transfer_spl": "TEST_FILE='transfer_spl_tests.ts' anchor test -- --features 'local'",
+    "test:spend_usdc": "TEST_FILE='spend_usdc_tests.ts' anchor test -- --features 'local'"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.30.1",
