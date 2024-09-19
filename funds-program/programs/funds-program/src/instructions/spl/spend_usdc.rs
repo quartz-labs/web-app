@@ -1,8 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{
-    Token,
-    TokenAccount,
-    Mint
+    self, Mint, Token, TokenAccount
 };
 use crate::{
     errors::ErrorCode,
@@ -42,7 +40,7 @@ pub struct SpendUSDC<'info> {
         associated_token::mint = usdc_mint,
         associated_token::authority = quartz_holding
     )]
-    pub quartz_holding_ata: Account<'info, TokenAccount>,
+    pub quartz_holding_usdc: Account<'info, TokenAccount>,
 
     /// CHECK: The backup account is not read or written to, it only locates the PDA
     pub backup: UncheckedAccount<'info>,
@@ -59,10 +57,36 @@ pub struct SpendUSDC<'info> {
 }
 
 pub fn spend_usdc_handler(
-    _ctx: Context<SpendUSDC>, 
+    ctx: Context<SpendUSDC>, 
     amount_cents: u64
 ) -> Result<()> {
-    msg!("Sending {} USDC cents to Quartz", amount_cents);
+    msg!("Spending {} USDC with card", amount_cents * 100);
+
+    if ctx.accounts.vault_usdc.amount < amount_cents {
+        return err!(ErrorCode::InsufficientFunds);
+    }
+
+    let vault_bump = ctx.accounts.vault.bump;
+    let backup = ctx.accounts.backup.key();
+    let signer_seeds = &[
+        b"vault",
+        backup.as_ref(),
+        &[vault_bump]
+    ];
+
+    // Transfer USDC
+    token::transfer(
+        CpiContext::new_with_signer(
+            ctx.accounts.token_program.to_account_info(), 
+            token::Transfer { 
+                from: ctx.accounts.vault_usdc.to_account_info(), 
+                to: ctx.accounts.quartz_holding_usdc.to_account_info(), 
+                authority: ctx.accounts.vault.to_account_info()
+            }, 
+            &[&signer_seeds[..]]
+        ),
+        amount_cents
+    )?;
 
     Ok(())
 }
