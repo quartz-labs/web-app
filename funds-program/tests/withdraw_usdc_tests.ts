@@ -100,7 +100,7 @@ describe("withdraw_usdc tests", () => {
 
   it("withdraw_usdc mismatched mint receiver", async () => {
     const { program, vaultPda, vaultUsdcPda, ownerKeypair, testUsdcMint, connection, wallet, CENT_PER_USDC, mintUsdcToVault } = testSetup;
-    const desiredErrorCode = "ConstraintAssociated";
+    const desiredErrorCode = "ConstraintTokenMint";
     await mintUsdcToVault(10);
 
     const mintAuth = Keypair.generate();
@@ -150,7 +150,7 @@ describe("withdraw_usdc tests", () => {
 
   it("withdraw_usdc mismatched mint vault", async () => {
     const { program, vaultPda, vaultUsdcPda, ownerKeypair, testUsdcMint, connection, wallet, CENT_PER_USDC, mintUsdcToVault } = testSetup;
-    const desiredErrorCode = "ConstraintSeeds";
+    const desiredErrorCode = "ConstraintTokenMint";
     await mintUsdcToVault(10);
 
     const mintAuth = Keypair.generate();

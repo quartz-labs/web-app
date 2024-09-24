@@ -91,3 +91,5 @@ pub fn spend_usdc_handler(
 
     Ok(())
 }
+
+// TODO - Note this instruction is unused until mobile app implemented

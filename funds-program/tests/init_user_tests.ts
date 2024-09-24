@@ -29,7 +29,7 @@ describe("init_user tests", () => {
           // @ts-ignore - Causing an issue in Curosr IDE
           vault: vaultPda,
           vaultUsdc: vaultUsdcPda,
-          owner: otherOwnerKeypair,
+          owner: otherOwnerKeypair.publicKey,
           usdcMint: testUsdcMint,
           tokenProgram: TOKEN_PROGRAM_ID,
           systemProgram: SystemProgram.programId,
