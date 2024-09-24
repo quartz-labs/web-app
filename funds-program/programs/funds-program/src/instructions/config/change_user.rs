@@ -17,6 +17,8 @@ pub struct ChangeUser<'info> {
     pub backup: Signer<'info>,
 }
 
+
+// TODO - This is not functional, needs looking at again once using mobile app
 pub fn change_user_handler(ctx: Context<ChangeUser>) -> Result<()> {
     msg!("Changing local user keypair");
 

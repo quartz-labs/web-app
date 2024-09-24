@@ -4,5 +4,5 @@ pub use config::*;
 mod lamports;
 pub use lamports::*;
 
-mod spl;
-pub use spl::*;
+mod usdc;
+pub use usdc::*;

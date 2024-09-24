@@ -31,11 +31,9 @@ export const setupTests = async () => {
   )));
   
   // Generate random keypairs
-  const backupKeypair = Keypair.generate();
-  const userKeypair = Keypair.generate();
+  const ownerKeypair = Keypair.generate();
   const newUserKeypair = Keypair.generate();
-  const otherBackupKeypair = Keypair.generate();
-  const otherUserKeypair = Keypair.generate();
+  const otherOwnerKeypair = Keypair.generate();
 
   // Other variables
   const CENT_PER_USDC = 2;
@@ -54,19 +52,19 @@ export const setupTests = async () => {
 
   // PDAs
   const [vaultPda] = anchor.web3.PublicKey.findProgramAddressSync(
-    [Buffer.from("vault"), backupKeypair.publicKey.toBuffer()],
+    [Buffer.from("vault"), ownerKeypair.publicKey.toBuffer()],
     program.programId
   );
   const [vaultUsdcPda] = anchor.web3.PublicKey.findProgramAddressSync(
-    [Buffer.from("vault"), backupKeypair.publicKey.toBuffer(), testUsdcKeypair.publicKey.toBuffer()],
+    [Buffer.from("vault"), ownerKeypair.publicKey.toBuffer(), testUsdcKeypair.publicKey.toBuffer()],
     program.programId
   );
   const [otherKeypairVaultPda] = anchor.web3.PublicKey.findProgramAddressSync(
-    [Buffer.from("vault"), otherBackupKeypair.publicKey.toBuffer()],
+    [Buffer.from("vault"), otherOwnerKeypair.publicKey.toBuffer()],
     program.programId
   );
   const [otherKeypairVaultUsdcPda] = anchor.web3.PublicKey.findProgramAddressSync(
-    [Buffer.from("vault"), otherBackupKeypair.publicKey.toBuffer(), testUsdcKeypair.publicKey.toBuffer()],
+    [Buffer.from("vault"), otherOwnerKeypair.publicKey.toBuffer(), testUsdcKeypair.publicKey.toBuffer()],
     program.programId
   );
 
@@ -104,11 +102,21 @@ export const setupTests = async () => {
     );
     await provider.sendAndConfirm(tx_UsdcMintTopup);
 
+    // Topup owner keypair account with SOL
+    const tx_ownerKeypairTopup = new Transaction().add(
+      SystemProgram.transfer({
+        fromPubkey: wallet.publicKey,
+        toPubkey: otherOwnerKeypair.publicKey,
+        lamports: LAMPORTS_PER_SOL * 10,
+      })
+    );
+    await provider.sendAndConfirm(tx_ownerKeypairTopup);
+
     // Topup other keypair account with SOL
     const tx_otherKeypairTopup = new Transaction().add(
       SystemProgram.transfer({
         fromPubkey: wallet.publicKey,
-        toPubkey: otherBackupKeypair.publicKey,
+        toPubkey: ownerKeypair.publicKey,
         lamports: LAMPORTS_PER_SOL * 10,
       })
     );
@@ -121,14 +129,12 @@ export const setupTests = async () => {
         // @ts-ignore - Causing an issue in Cursor IDE
         vault: vaultPda,
         vaultUsdc: vaultUsdcPda,
-        payer: quartzManagerKeypair.publicKey,
-        backup: backupKeypair.publicKey,
-        user: userKeypair.publicKey,
+        owner: ownerKeypair.publicKey,
         usdcMint: testUsdcMint,
         tokenProgram: TOKEN_PROGRAM_ID,
         systemProgram: SystemProgram.programId,
       })
-      .signers([quartzManagerKeypair])
+      .signers([ownerKeypair])
       .rpc();
   }
 
@@ -142,11 +148,9 @@ export const setupTests = async () => {
     testUsdcKeypair,
     testUsdcMint,
     quartzHoldingUsdc,
-    backupKeypair,
-    userKeypair,
+    ownerKeypair,
     newUserKeypair,
-    otherBackupKeypair,
-    otherUserKeypair,
+    otherOwnerKeypair,
     vaultPda,
     vaultUsdcPda,
     otherKeypairVaultPda,

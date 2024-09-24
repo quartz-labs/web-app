@@ -20,19 +20,21 @@ pub mod funds_program {
         close_user_handler(ctx)
     }
 
-    pub fn change_user(ctx: Context<ChangeUser>) -> Result<()> {
-        change_user_handler(ctx)
+    // Not required until mobile app
+    // pub fn change_user(ctx: Context<ChangeUser>) -> Result<()> {
+    //     change_user_handler(ctx)
+    // }
+
+    pub fn withdraw_lamports(ctx: Context<WithdrawLamports>, amount: u64) -> Result<()> {
+        withdraw_lamports_handler(ctx, amount)
     }
 
-    pub fn transfer_lamports(ctx: Context<TransferLamports>, amount: u64) -> Result<()> {
-        transfer_lamports_handler(ctx, amount)
-    }
+    // Not required until mobile app
+    // pub fn spend_usdc(ctx: Context<SpendUSDC>, amount_cents: u64) -> Result<()> {
+    //     spend_usdc_handler(ctx, amount_cents)
+    // }
 
-    pub fn spend_usdc(ctx: Context<SpendUSDC>, amount_cents: u64) -> Result<()> {
-        spend_usdc_handler(ctx, amount_cents)
-    }
-
-    pub fn transfer_spl(ctx: Context<TransferSPL>, amount: u64) -> Result<()> {
-        transfer_spl_handler(ctx, amount)
+    pub fn withdraw_usdc(ctx: Context<WithdrawUSDC>, amount: u64) -> Result<()> {
+        withdraw_usdc_handler(ctx, amount)
     }
 }

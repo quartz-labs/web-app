@@ -5,7 +5,7 @@ pub const PUBKEY_SIZE: usize = 32;
 pub const U8_SIZE: usize = 1;
 
 
-pub const QUARTZ_HOLDING_ADDRESS: Pubkey = pubkey!("5XY5pQbBjwv8ByBxKPNE7Xyb9dVcdFgd51xcxKDJjGWE");
+// pub const QUARTZ_HOLDING_ADDRESS: Pubkey = pubkey!("5XY5pQbBjwv8ByBxKPNE7Xyb9dVcdFgd51xcxKDJjGWE");
 
 #[cfg(feature = "local")]
 #[constant]

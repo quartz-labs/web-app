@@ -14,31 +14,25 @@ use crate::{
 pub struct InitializeUser<'info> {
     #[account(
         init,
-        seeds = [b"vault", backup.key().as_ref()],
+        seeds = [b"vault", owner.key().as_ref()],
         bump,
-        payer = payer,
+        payer = owner,
         space = Vault::INIT_SPACE
     )]
     pub vault: Account<'info, Vault>,
 
     #[account(
         init,
-        seeds = [b"vault", backup.key().as_ref(), usdc_mint.key().as_ref()],
+        seeds = [b"vault", owner.key().as_ref(), usdc_mint.key().as_ref()],
         bump,
-        payer = payer,
+        payer = owner,
         token::mint = usdc_mint,
         token::authority = vault
     )]
     pub vault_usdc: Account<'info, TokenAccount>,
 
     #[account(mut)]
-    pub payer: Signer<'info>,
-
-    /// CHECK: Backup account is not read or written to, is only assigned as owner and can be any accountx
-    pub backup: UncheckedAccount<'info>,
-
-    /// CHECK: User account is not read or written to, is only assigned as owner and can be any account
-    pub user: UncheckedAccount<'info>,
+    pub owner: Signer<'info>,
 
     #[account(
         constraint = usdc_mint.key() == USDC_MINT_ADDRESS @ ErrorCode::InvalidMintAddress
@@ -53,9 +47,7 @@ pub struct InitializeUser<'info> {
 pub fn init_user_handler(ctx: Context<InitializeUser>) -> Result<()> {
     msg!("Initializing account");
 
-    ctx.accounts.vault.backup = ctx.accounts.backup.key();
-    ctx.accounts.vault.user = ctx.accounts.user.key();
-    ctx.accounts.vault.init_payer = ctx.accounts.payer.key();
+    ctx.accounts.vault.owner = ctx.accounts.owner.key();
     ctx.accounts.vault.bump = ctx.bumps.vault;
 
     Ok(())

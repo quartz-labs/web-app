@@ -19,7 +19,7 @@ describe("init_user tests", () => {
   });
 
   it("init_user incorrect signer", async () => {
-    const {program, vaultUsdcPda, quartzManagerKeypair, otherBackupKeypair, vaultPda, otherUserKeypair, testUsdcMint} = testSetup;
+    const {program, vaultUsdcPda, otherOwnerKeypair, vaultPda, testUsdcMint} = testSetup;
     const desiredErrorMessage = "unknown signer";
 
     try {
@@ -29,14 +29,12 @@ describe("init_user tests", () => {
           // @ts-ignore - Causing an issue in Curosr IDE
           vault: vaultPda,
           vaultUsdc: vaultUsdcPda,
-          payer: quartzManagerKeypair.publicKey,
-          backup: otherBackupKeypair.publicKey,
-          user: otherUserKeypair.publicKey,
+          owner: otherOwnerKeypair,
           usdcMint: testUsdcMint,
           tokenProgram: TOKEN_PROGRAM_ID,
           systemProgram: SystemProgram.programId,
         })  
-        .signers([otherBackupKeypair])
+        .signers([otherOwnerKeypair])
         .rpc();
 
       assert.fail(0, 1, "init_user instruction call should have failed");
@@ -48,7 +46,7 @@ describe("init_user tests", () => {
 
   
   it("init_user by user", async () => {
-    const {program, otherKeypairVaultUsdcPda, otherKeypairVaultPda, otherBackupKeypair, otherUserKeypair, testUsdcMint} = testSetup;
+    const {program, otherKeypairVaultUsdcPda, otherKeypairVaultPda, otherOwnerKeypair, testUsdcMint} = testSetup;
 
     await program.methods
       .initUser()
@@ -56,56 +54,53 @@ describe("init_user tests", () => {
         // @ts-ignore - Causing an issue in Cursor IDE
         vault: otherKeypairVaultPda,
         vaultUsdc: otherKeypairVaultUsdcPda,
-        payer: otherBackupKeypair.publicKey,
-        backup: otherBackupKeypair.publicKey,
-        user: otherUserKeypair.publicKey,
+        owner: otherOwnerKeypair.publicKey,
         usdcMint: testUsdcMint,
         tokenProgram: TOKEN_PROGRAM_ID,
         systemProgram: SystemProgram.programId,
       })
-      .signers([otherBackupKeypair])
+      .signers([otherOwnerKeypair])
       .rpc();
     
     const account = await program.account.vault.fetch(otherKeypairVaultPda);
-    expect(account.backup.equals(otherBackupKeypair.publicKey)).to.be.true;
-    expect(account.user.equals(otherUserKeypair.publicKey)).to.be.true;
-    expect(account.initPayer.equals(otherBackupKeypair.publicKey)).to.be.true;
+    expect(account.owner.equals(otherOwnerKeypair.publicKey)).to.be.true;
   });
 
 
-  it("init_user by quartz", async () => {
-    const {program, testUsdcKeypair, testUsdcMint, quartzManagerKeypair} = testSetup;
+  // TODO - Add in when doing mobile app
+  // it("init_user by quartz", async () => {
+  //   const {program, testUsdcKeypair, testUsdcMint, quartzManagerKeypair} = testSetup;
 
-    const testBackupKeypair = Keypair.generate();
-    const testUserKeypair = Keypair.generate();
-    const [testPDa] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("vault"), testBackupKeypair.publicKey.toBuffer()],
-      program.programId
-    );
-    const [testUsdcPda] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("vault"), testBackupKeypair.publicKey.toBuffer(), testUsdcKeypair.publicKey.toBuffer()],
-      program.programId
-    );
+  //   const testBackupKeypair = Keypair.generate();
+  //   const testUserKeypair = Keypair.generate();
+  //   const [testPDa] = anchor.web3.PublicKey.findProgramAddressSync(
+  //     [Buffer.from("vault"), testBackupKeypair.publicKey.toBuffer()],
+  //     program.programId
+  //   );
+  //   const [testUsdcPda] = anchor.web3.PublicKey.findProgramAddressSync(
+  //     [Buffer.from("vault"), testBackupKeypair.publicKey.toBuffer(), testUsdcKeypair.publicKey.toBuffer()],
+  //     program.programId
+  //   );
 
-    await program.methods
-      .initUser()
-      .accounts({
-        // @ts-ignore - Causing an issue in Cursor IDE
-        vault: testPDa,
-        vaultUsdc: testUsdcPda,
-        payer: quartzManagerKeypair.publicKey,
-        backup: testBackupKeypair.publicKey,
-        user: testUserKeypair.publicKey,
-        usdcMint: testUsdcMint,
-        tokenProgram: TOKEN_PROGRAM_ID,
-        systemProgram: SystemProgram.programId,
-      })
-      .signers([quartzManagerKeypair])
-      .rpc();
+  //   await program.methods
+  //     .initUser()
+  //     .accounts({
+  //       // @ts-ignore - Causing an issue in Cursor IDE
+  //       vault: testPDa,
+  //       vaultUsdc: testUsdcPda,
+  //       payer: quartzManagerKeypair.publicKey,
+  //       backup: testBackupKeypair.publicKey,
+  //       user: testUserKeypair.publicKey,
+  //       usdcMint: testUsdcMint,
+  //       tokenProgram: TOKEN_PROGRAM_ID,
+  //       systemProgram: SystemProgram.programId,
+  //     })
+  //     .signers([quartzManagerKeypair])
+  //     .rpc();
     
-    const account = await program.account.vault.fetch(testPDa);
-    expect(account.backup.equals(testBackupKeypair.publicKey)).to.be.true;
-    expect(account.user.equals(testUserKeypair.publicKey)).to.be.true;
-    expect(account.initPayer.equals(quartzManagerKeypair.publicKey)).to.be.true;
-  });
+  //   const account = await program.account.vault.fetch(testPDa);
+  //   expect(account.backup.equals(testBackupKeypair.publicKey)).to.be.true;
+  //   expect(account.user.equals(testUserKeypair.publicKey)).to.be.true;
+  //   expect(account.initPayer.equals(quartzManagerKeypair.publicKey)).to.be.true;
+  // });
 });
