@@ -5,6 +5,8 @@
 html,
 body {
   height: 100%;
+  background: #0B111D;
+  color: white;
 }
 
 .wallet-adapter-button-trigger {

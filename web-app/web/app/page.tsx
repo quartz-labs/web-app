@@ -1,8 +1,6 @@
-import DashboardFeature from '@/components/dashboard/dashboard-feature';
-
 export default function Page() {
   return (
-    <main>
+    <main style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: "100%" }}>
       <p>gm</p>
     </main>
   );

@@ -29,12 +29,7 @@ export const defaultClusters: Cluster[] = [
     endpoint: clusterApiUrl('devnet'),
     network: ClusterNetwork.Devnet,
   },
-  { name: 'local', endpoint: 'http://localhost:8899' },
-  {
-    name: 'testnet',
-    endpoint: clusterApiUrl('testnet'),
-    network: ClusterNetwork.Testnet,
-  },
+//   { name: 'local', endpoint: 'http://localhost:8899' },
 ];
 
 const clusterAtom = atomWithStorage<Cluster>(
