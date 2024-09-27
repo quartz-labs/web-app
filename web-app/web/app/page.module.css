@@ -1,2 +1,17 @@
-.page {
+.landingWrapper {
+    height: 100VH;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.mainLogo {
+    margin-bottom: 40px;
+}
+
+.subheading {
+    margin-bottom: 100px;
+    font-size: 28px;
+    font-weight: 100;
 }

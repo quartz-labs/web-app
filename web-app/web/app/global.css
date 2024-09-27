@@ -2,11 +2,97 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --overlay-color: rgba(255, 255, 255, 0.03);
+  --overlay: linear-gradient(var(--overlay-color), var(--overlay-color));
+
+  --gradient-glass-stroke:
+    linear-gradient(65deg, rgba(41,135,200,0.02) 0%, rgba(41,135,200,0.22) 100%),
+    linear-gradient(65deg, rgba(188,188,188,0.12) 0%, rgba(235,235,235,0.25) 100%);
+  
+  --placeholder-glass-stroke: #4E677D;
+  --placeholder-glass-stroke-accent: #5A355A;
+  --glass-border: 1.5px solid var(--placeholder-glass-stroke); /* TODO: Make gradient */
+
+  --background-linear-gradient: linear-gradient(var(--color-background), var(--color-background));
+}
+
 html,
 body {
   height: 100%;
   background: #0B111D;
   color: white;
+  font-weight: 200;
+}
+
+.glassButton {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
+  gap: 10px;
+  padding: 20px 30px;
+  background: var(--gradient-glass-stroke);
+
+  border: double 1px var(--placeholder-glass-stroke);
+  border-radius: 14px;
+  background-image: var(--gradient-glass-stroke);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+
+.glassButton:hover {
+  background-image: 
+    var(--overlay), 
+    var(--gradient-glass-stroke);
+}
+
+.glassButton:active {
+  background-image: 
+    var(--overlay), 
+    var(--overlay), 
+    var(--gradient-glass-stroke);
+}
+
+.glass {
+  position: relative;
+
+  /* Black Shadow */
+  -webkit-box-shadow: -10px 10px 24px 0px rgba(0,0,0,0.3);
+  -moz-box-shadow: -10px 10px 24px 0px rgba(0,0,0,0.3);
+  box-shadow: -10px 10px 24px 0px rgba(0,0,0,0.3);
+
+  /* Primary Shadow */
+  -webkit-box-shadow: -10px 10px 24px 0px rgba(41,135,200,0.12);
+  -moz-box-shadow: -10px 10px 24px 0px rgba(41,135,200,0.12);
+  box-shadow: -10px 10px 24px 0px rgba(41,135,200,0.12);
+
+  /* Background */
+  background-image: 
+    url("/noise.png"),
+    radial-gradient(circle at 80% 20%, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%),
+    linear-gradient(#ffffff03, #ffffff03),
+    linear-gradient(#0B111D66, #0B111D66);
+  background-size: 17% auto, auto, auto, auto;
+
+  /* Border */
+  border: var(--glass-border);
+}
+
+.glass::before {
+  /* Background blur - in seperate class to allow stacking */
+  backdrop-filter: blur(18px);
+
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  
+  border-radius: inherit;
 }
 
 .wallet-adapter-button-trigger {
@@ -18,4 +104,12 @@ body {
 .wallet-adapter-dropdown-list,
 .wallet-adapter-button {
   font-family: inherit !important;
+}
+
+.container {
+  margin: 0px auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }

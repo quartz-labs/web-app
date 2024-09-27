@@ -20,20 +20,7 @@ export default function RootLayout({
         <ReactQueryProvider>
           <ClusterProvider>
             <SolanaProvider>
-              <div style={{ flex: '0 0 auto' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 30 }}>
-                  <Image 
-                    src="/logo.svg" 
-                    alt="Quartz" 
-                    width={150} 
-                    height={52}
-                  />
-                  <WalletButton />
-                </div>
-              </div>
-              <main style={{ flex: '1 0 auto', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                {children}
-              </main>
+              {children}
             </SolanaProvider>
           </ClusterProvider>
         </ReactQueryProvider>
