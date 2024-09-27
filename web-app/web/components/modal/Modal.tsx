@@ -12,7 +12,7 @@ export interface ModalProps {
 export default function Modal(
     { title, denomination, buttonText, onConfirm, onCancel }: ModalProps
 ) {
-    const [amount, setAmount] = useState<number | string>(''); // State variable for amount
+    const [amount, setAmount] = useState<number | string>(''); 
 
     return (
         <div className={styles.modalWrapper}>
@@ -25,9 +25,12 @@ export default function Modal(
                         type="text" 
                         placeholder={"0.0"} 
                         value={amount} 
-                        onChange={(e) => setAmount(e.target.value)}
+                        onChange={(e) => 
+                            setAmount(e.target.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1'))
+                        }
                     />
                 </div>
+                
                 <div className={styles.buttons}>
                     <button 
                         className={`glassButton ${styles.modalButton}`}

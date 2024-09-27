@@ -32,7 +32,14 @@
 }
 
 .inputField {
+    margin-top: 8px;
     width: 100%;
+    min-height: 80px;
+    background: var(--color-background);
+    padding: 12px;
+    border-radius: 14px;
+    border: 1px solid var(--placeholder-glass-stroke);
+    font-size: 22px;
 }
 
 .buttons {
