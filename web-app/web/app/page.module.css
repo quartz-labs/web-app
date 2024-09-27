@@ -1,5 +1,5 @@
 .landingWrapper {
-    height: 100VH;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -25,6 +25,4 @@
     background: rgb(100, 26, 230);
     font-weight: 500;
     font-size: 16px;
-
-    display: 
 }

@@ -1,0 +1,48 @@
+.modalWrapper {
+    position: absolute;
+    z-index: 9999;
+    top: 0px;
+    left: 0px;
+    height: 100VH;
+    width: 100VW;
+    background: rgb(0, 0, 0, 0.35);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal {
+    width: 50%;
+    padding: 80px 0px;
+    border-radius: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.heading {
+    font-size: 38px;
+    margin-bottom: 55px;
+}
+
+.inputFieldWrapper {
+    width: 60%;
+    margin-bottom: 55px;
+}
+
+.inputField {
+    width: 100%;
+}
+
+.buttons {
+    display: flex;
+    width: 60%;
+    gap: 25px;
+}
+
+.modalButton {
+    flex-grow: 1;
+    padding: 15px 30px;
+    border-radius: 15px;
+}

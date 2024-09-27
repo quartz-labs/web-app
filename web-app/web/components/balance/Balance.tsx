@@ -6,14 +6,11 @@ import { getVault, isVaultInitialized } from "@/utils/utils";
 import { useEffect, useState } from "react";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 
-interface BalanceProps {
-    breakdownView: Boolean;
-}
-
-export default function Balance({breakdownView}: BalanceProps) {
+export default function Balance() {
     const { connection } = useConnection();
     const wallet = useAnchorWallet();
 
+    const [detailedView, setDetailedView] = useState(false);
     const [solBalance, setSolBalance] = useState(0);
     
     useEffect(() => {
@@ -45,7 +42,7 @@ export default function Balance({breakdownView}: BalanceProps) {
         }
     }, [wallet]);
 
-    if (breakdownView) {
+    if (detailedView) {
         return (
             <div className={styles.balanceWrapper}>
                 
