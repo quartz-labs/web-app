@@ -1,4 +1,26 @@
 .balanceWrapper {
     height: 280px;
     margin-bottom: 115px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.heading {
+    font-size: 22px;
+}
+
+.balanceCell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.mainBalance {
+    font-size: 60px;
+}
+
+.subBalance {
+    color: var(--color-text-light);
+    font-size: 22px;
 }

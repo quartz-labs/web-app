@@ -17,6 +17,8 @@
   --background-linear-gradient: linear-gradient(var(--color-background), var(--color-background));
 
   --color-background: #0B111D;
+  --color-text: #ffffff;
+  --color-text-light: #ffffff55;
 }
 
 html,
