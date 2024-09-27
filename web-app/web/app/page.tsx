@@ -3,17 +3,31 @@
 import Image from "next/image";
 import styles from './page.module.css';
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { isPdaInitialized } from "@/utils/utils";
+import { web3 } from "@coral-xyz/anchor";
+import { FUNDS_PROGRAM_ID, USDC_MINT } from "@/utils/constants";
+import { initAccount } from "@/utils/instructions";
 
 export default function Page() {
-  const { publicKey } = useWallet();
+  const { connection } = useConnection();
+  const wallet = useAnchorWallet();
   const router = useRouter();
 
   useEffect(() => {
-    if (publicKey) router.push("/dashboard");
-  }, [publicKey]);
+    const isLoggedIn = async () => {
+      if (wallet) {
+        if (await isPdaInitialized(wallet, connection)) {
+          router.push("/dashboard");
+        } else {
+          initAccount(wallet, connection);
+        }
+      }
+    }
+    isLoggedIn();
+  }, [wallet]);
 
   return (
     <main className={"container"}>

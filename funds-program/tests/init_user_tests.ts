@@ -19,22 +19,22 @@ describe("init_user tests", () => {
   });
 
   it("init_user incorrect signer", async () => {
-    const {program, vaultUsdcPda, otherOwnerKeypair, vaultPda, testUsdcMint} = testSetup;
-    const desiredErrorMessage = "unknown signer";
+    const {program, otherKeypairVaultUsdcPda, otherOwnerKeypair, otherKeypairVaultPda, testUsdcMint, quartzManagerKeypair} = testSetup;
+    const desiredErrorMessage = "Missing signature";
 
     try {
       const tx = await program.methods
         .initUser()
         .accounts({
           // @ts-ignore - Causing an issue in Curosr IDE
-          vault: vaultPda,
-          vaultUsdc: vaultUsdcPda,
+          vault: otherKeypairVaultPda,
+          vaultUsdc: otherKeypairVaultUsdcPda,
           owner: otherOwnerKeypair.publicKey,
           usdcMint: testUsdcMint,
           tokenProgram: TOKEN_PROGRAM_ID,
           systemProgram: SystemProgram.programId,
         })  
-        .signers([otherOwnerKeypair])
+        .signers([quartzManagerKeypair])
         .rpc();
 
       assert.fail(0, 1, "init_user instruction call should have failed");

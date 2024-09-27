@@ -4,17 +4,25 @@ import Image from 'next/image';
 import styles from './page.module.css';
 import Balance from "@/components/balance/Balance";
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useAnchorWallet, useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { web3 } from '@coral-xyz/anchor';
+import { isPdaInitialized } from '@/utils/utils';
 
 export default function Dashboard() {
-    const { publicKey } = useWallet();
+    const { connection } = useConnection();
+    const wallet = useAnchorWallet();
     const router = useRouter();
 
     useEffect(() => {
-        if (!publicKey) router.push("/");
-    }, [publicKey]);
+        const isLoggedIn = async () => {
+            if (!wallet || !await isPdaInitialized(wallet, connection)) {
+                router.push("/");
+            }
+        }
+        isLoggedIn();
+    }, [wallet]);
     
     return (
         <main className="container">

@@ -6,7 +6,7 @@ mod constants;
 mod instructions;
 use instructions::*;
 
-declare_id!("8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G");
+declare_id!("B91b1VtvTSzcwJ5JDgbtJYf8syfE1HSsfW3C8iFgwcYN");
 
 #[program]
 pub mod funds_program {
