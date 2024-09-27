@@ -3,11 +3,11 @@
 import Image from "next/image";
 import styles from './page.module.css';
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { AnchorWallet, useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { isPdaInitialized } from "@/utils/utils";
-import { web3 } from "@coral-xyz/anchor";
+import { AnchorError, web3 } from "@coral-xyz/anchor";
 import { FUNDS_PROGRAM_ID, USDC_MINT } from "@/utils/constants";
 import { initAccount } from "@/utils/instructions";
 
@@ -16,15 +16,22 @@ export default function Page() {
   const wallet = useAnchorWallet();
   const router = useRouter();
 
+  const [uninitialized, setUninitialized] = useState(false);
+
+  const login = async () => {
+    if (!wallet) return;
+
+    const signature = await initAccount(wallet, connection);
+    if (signature) router.push("/dashboard");
+    else setUninitialized(true);
+  }
+
   useEffect(() => {
     const isLoggedIn = async () => {
       if (wallet) {
-        if (await isPdaInitialized(wallet, connection)) {
-          router.push("/dashboard");
-        } else {
-          initAccount(wallet, connection);
-        }
-      }
+        if (await isPdaInitialized(wallet, connection)) router.push("/dashboard");
+        else setUninitialized(true);
+      } else setUninitialized(false);
     }
     isLoggedIn();
   }, [wallet]);
@@ -43,6 +50,10 @@ export default function Page() {
         <h1 className={styles.subheading}>Off-ramp without selling your assets</h1>
 
         <WalletMultiButton />
+
+        {uninitialized && (
+          <button className={styles.initButton} onClick={() => login()}>Initialize Account</button>
+        )}
       </div>
     </main>
   );
