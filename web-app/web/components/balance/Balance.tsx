@@ -40,6 +40,7 @@ export default function Balance() {
                 console.error("Failed to retreive account info: ", error);
             }
         }
+        updateBalance();
     }, [wallet]);
 
     if (detailedView) {
