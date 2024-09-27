@@ -8,20 +8,23 @@ import { useAnchorWallet, useConnection, useWallet } from '@solana/wallet-adapte
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { web3 } from '@coral-xyz/anchor';
-import { isVaultInitialized } from '@/utils/utils';
+import { getVault, isVaultInitialized } from '@/utils/utils';
 import Modal, { ModalProps } from '@/components/modal/Modal';
+import { withdrawSol } from '@/utils/instructions';
+import { LAMPORTS_PER_SOL, SystemProgram, Transaction } from '@solana/web3.js';
 
 export default function Dashboard() {
     const { connection } = useConnection();
     const wallet = useAnchorWallet();
     const router = useRouter();
+    const {publicKey, sendTransaction} = useWallet();
 
     const [modalEnabled, setModalEnabled] = useState(false);
     const [modalData, setModalData] = useState<ModalProps>({
         title: "",
         denomination: "",
         buttonText: "",
-        onConfirm: () => {},
+        onConfirm: (amount: number) => {},
         onCancel: () => {}
     });
 
@@ -40,9 +43,24 @@ export default function Dashboard() {
             title: "Deposit SOL",
             denomination: "SOL",
             buttonText: "Deposit",
-            onConfirm: (amount: Number) => {
+            onConfirm: async (amount: number) => {
+                if (!publicKey) {
+                    console.error("Error: Wallet not connected");
+                    return;
+                }
 
-                setModalEnabled(false);
+                const [vault, _] = getVault(publicKey);
+                const tx = new Transaction().add(
+                    SystemProgram.transfer({
+                        fromPubkey: publicKey,
+                        toPubkey: vault,
+                        lamports: amount * LAMPORTS_PER_SOL
+                    })
+                );
+
+                const signature = await sendTransaction(tx, connection);
+                console.log(signature);
+                if (signature) setModalEnabled(false);
             },
             onCancel: () => { setModalEnabled(false); }
         })
@@ -54,9 +72,14 @@ export default function Dashboard() {
             title: "Withdraw SOL",
             denomination: "SOL",
             buttonText: "Withdraw",
-            onConfirm: (amount: Number) => {
-                
-                setModalEnabled(false);
+            onConfirm: async (amount: number) => {
+                if (!wallet) {
+                    console.error("Error: Wallet not connected");
+                    return;
+                }
+                const signature = await withdrawSol(wallet, connection, amount * LAMPORTS_PER_SOL);
+                console.log(signature);
+                if (signature) setModalEnabled(false);
             },
             onCancel: () => { setModalEnabled(false); }
         })
@@ -68,7 +91,7 @@ export default function Dashboard() {
             title: "Liquidate SOL",
             denomination: "SOL",
             buttonText: "Liquidate",
-            onConfirm: (amount: Number) => {
+            onConfirm: async (amount: number) => {
                 console.log("Liquidate " + amount);
                 setModalEnabled(false);
             },
@@ -82,7 +105,7 @@ export default function Dashboard() {
             title: "Offramp USDC",
             denomination: "USDC",
             buttonText: "Offramp",
-            onConfirm: (amount: Number) => {
+            onConfirm: async (amount: number) => {
                 console.log("Offramp " + amount);
                 setModalEnabled(false);
             },

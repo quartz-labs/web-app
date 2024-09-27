@@ -1,6 +1,6 @@
 import { AnchorProvider, Idl, Program, setProvider, web3 } from "@coral-xyz/anchor";
 import { AnchorWallet } from "@solana/wallet-adapter-react";
-import { FUNDS_PROGRAM_ID, USDC_MINT } from "./constants";
+import { USDC_MINT } from "./constants";
 import idl from "../idl/funds-program.json";
 import { FundsProgram } from "@/app/types/funds_program";
 import { TOKEN_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/utils/token";
@@ -33,4 +33,8 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
             return null;
         } else throw err;
     }
+}
+
+export const withdrawSol = async(wallet: AnchorWallet, connection: web3.Connection, amountLamports: number) => {
+    return null;
 }
