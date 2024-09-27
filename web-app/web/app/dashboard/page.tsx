@@ -8,7 +8,7 @@ import { useAnchorWallet, useConnection, useWallet } from '@solana/wallet-adapte
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { web3 } from '@coral-xyz/anchor';
-import { isPdaInitialized } from '@/utils/utils';
+import { isVaultInitialized } from '@/utils/utils';
 
 export default function Dashboard() {
     const { connection } = useConnection();
@@ -17,7 +17,7 @@ export default function Dashboard() {
 
     useEffect(() => {
         const isLoggedIn = async () => {
-            if (!wallet || !await isPdaInitialized(wallet, connection)) {
+            if (!wallet || !await isVaultInitialized(wallet, connection)) {
                 router.push("/");
             }
         }

@@ -6,7 +6,7 @@ import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { AnchorWallet, useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { isPdaInitialized } from "@/utils/utils";
+import { isVaultInitialized } from "@/utils/utils";
 import { AnchorError, web3 } from "@coral-xyz/anchor";
 import { FUNDS_PROGRAM_ID, USDC_MINT } from "@/utils/constants";
 import { initAccount } from "@/utils/instructions";
@@ -29,7 +29,7 @@ export default function Page() {
   useEffect(() => {
     const isLoggedIn = async () => {
       if (wallet) {
-        if (await isPdaInitialized(wallet, connection)) router.push("/dashboard");
+        if (await isVaultInitialized(wallet, connection)) router.push("/dashboard");
         else setUninitialized(true);
       } else setUninitialized(false);
     }
