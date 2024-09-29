@@ -2,7 +2,7 @@ import { AnchorProvider, BN, Idl, Program, setProvider, web3 } from "@coral-xyz/
 import { AnchorWallet } from "@solana/wallet-adapter-react";
 import { USDC_MINT } from "./constants";
 import idl from "../idl/funds-program.json";
-import { FundsProgram } from "@/app/types/funds_program";
+import { FundsProgram } from "@/types/funds_program";
 import { TOKEN_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/utils/token";
 import { SystemProgram } from "@solana/web3.js";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";

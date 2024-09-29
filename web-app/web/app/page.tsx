@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import styles from './page.module.css';
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
@@ -10,6 +11,11 @@ import { isVaultInitialized } from "@/utils/utils";
 import { AnchorError, web3 } from "@coral-xyz/anchor";
 import { FUNDS_PROGRAM_ID, USDC_MINT } from "@/utils/constants";
 import { initAccount } from "@/utils/instructions";
+
+const WalletMultiButtonDynamic = dynamic(
+  () => import("@solana/wallet-adapter-react-ui").then((mod) => mod.WalletMultiButton),
+  { ssr: false }
+);
 
 export default function Page() {
   const { connection } = useConnection();
@@ -49,7 +55,7 @@ export default function Page() {
 
         <h1 className={styles.subheading}>Off-ramp without selling your assets</h1>
 
-        <WalletMultiButton />
+        <WalletMultiButtonDynamic />
 
         {uninitialized && (
           <button className={styles.initButton} onClick={() => login()}>Initialize Account</button>

@@ -10,6 +10,18 @@
     font-size: 22px;
 }
 
+.subheading {
+    font-size: 22px;
+    margin-top: 10px;
+    margin-bottom: -10px;
+}
+
+.balancesRow {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    column-gap: 140px;
+}
+
 .balanceCell {
     display: flex;
     flex-direction: column;
@@ -18,9 +30,22 @@
 
 .mainBalance {
     font-size: 60px;
+    margin-bottom: -5px;
 }
 
 .subBalance {
     color: var(--color-text-light);
     font-size: 22px;
+}
+
+.viewButton {
+    padding: 12px 22px;
+    font-size: 14px;
+    margin-top: auto; 
+    min-width: 150px;
+}
+
+.dailyChange {
+    color: var(--color-text-light);
+    font-size: 16px;
 }

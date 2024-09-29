@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import styles from './page.module.css';
 import Balance from "@/components/balance/Balance";
@@ -12,6 +13,11 @@ import { getVault, isVaultInitialized } from '@/utils/utils';
 import Modal, { ModalProps } from '@/components/modal/Modal';
 import { withdrawSol } from '@/utils/instructions';
 import { LAMPORTS_PER_SOL, SystemProgram, Transaction } from '@solana/web3.js';
+
+const WalletMultiButtonDynamic = dynamic(
+    () => import("@solana/wallet-adapter-react-ui").then((mod) => mod.WalletMultiButton),
+    { ssr: false }
+);
 
 export default function Dashboard() {
     const { connection } = useConnection();
@@ -127,7 +133,7 @@ export default function Dashboard() {
                     height={69}
                 />
 
-                <WalletMultiButton />
+                <WalletMultiButtonDynamic />
             </div>
             
             <Balance/>
