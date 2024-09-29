@@ -53,6 +53,7 @@ pub fn drift_withdraw_borrow_handler(ctx: Context<DriftWithdrawBorrow>, amount: 
             user: ctx.accounts.user.to_account_info(),
             user_stats: ctx.accounts.user_stats.to_account_info(),
             authority: ctx.accounts.authority.to_account_info(),
+            drift_signer: ctx.accounts.drift_signer.to_account_info(),
             spot_market_vault: ctx.accounts.spot_market_vault.to_account_info(),
             user_token_account: ctx.accounts.user_token_account.to_account_info(),
             token_program: ctx.accounts.token_program.to_account_info(),

@@ -45,7 +45,7 @@ pub fn drift_deposit_handler(
     let program_id = ctx.accounts.system_program.to_account_info();
     
     let seed = ctx.accounts.owner.key();
-    let bump_seed = *ctx.bumps.get("pda_account").unwrap();
+    let bump_seed = *ctx.bumps.pda_account.unwrap();
     let signer_seeds: &[&[&[u8]]] = &[&[b"vault", seed.as_ref(), &[bump_seed]]];
  
     let cpi_context = CpiContext::new(
