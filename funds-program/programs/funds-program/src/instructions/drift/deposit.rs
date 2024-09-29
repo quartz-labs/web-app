@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
-//import the cpi drift deposit
-use drift_sdk::cpi::{Deposit, deposit};
+use drift_sdk::cpi::deposit;
+use drift_sdk::Deposit;
 
 #[derive(Accounts)]
 pub struct DriftDeposit<'info> {
@@ -9,7 +9,7 @@ pub struct DriftDeposit<'info> {
         seeds = [b"vault", owner.key().as_ref()],
         bump,
     )]
-    pda_account: SystemAccount<'info>,
+    pub pda_account: SystemAccount<'info>,
     /// CHECK: Skip check
     pub state: AccountInfo<'info>,
     #[account(mut)]
@@ -29,25 +29,24 @@ pub struct DriftDeposit<'info> {
     pub user_token_account: AccountInfo<'info>,
     /// CHECK: Skip check
     pub token_program: AccountInfo<'info>,
-
-    pub market_index: u16,
-
-    pub reduce_only: bool,
     
     #[account(mut)]
-    owner: SystemAccount<'info>,
+    pub owner: SystemAccount<'info>,
     
-    system_program: Program<'info, System>,
+    pub system_program: Program<'info, System>,
 }
 
-pub fn drift_deposit_handler(ctx: Context<DriftDeposit>, amount: u64) -> Result<()> {
-    let program_id = ctx.accounts.system_program.to_account_info();
-    let market_index = ctx.accounts.market_index;
-    let reduce_only = ctx.accounts.reduce_only;
+pub fn drift_deposit_handler(
+    ctx: Context<DriftDeposit>, 
+    amount: u64, 
+    market_index: u16, 
+    reduce_only: bool
+) -> Result<()> {
+    let program_id = ctx.accounts.system_program.to_account_info().key();
     
     let seed = ctx.accounts.owner.key();
-    let bump_seed = ctx.bumps.pda_account;
-    let signer_seeds: &[&[&[u8]]] = &[&[b"pda", seed.as_ref(), &[bump_seed]]];
+    let bump_seed = *ctx.bumps.get("pda_account").unwrap();
+    let signer_seeds: &[&[&[u8]]] = &[&[b"vault", seed.as_ref(), &[bump_seed]]];
  
     let cpi_context = CpiContext::new(
         program_id,

@@ -1,6 +1,7 @@
 use anchor_lang::prelude::*;
 //import the cpi drift deposit
-use drift_sdk::cpi::{Withdraw, withdraw};
+use drift_sdk::cpi::withdraw;
+use drift_sdk::Withdraw;
 
 #[derive(Accounts)]
 pub struct DriftWithdrawBorrow<'info> {
@@ -49,7 +50,7 @@ pub fn drift_withdraw_borrow_handler(ctx: Context<DriftWithdrawBorrow>, amount: 
  
     let cpi_context = CpiContext::new(
         program_id,
-        Withdraw {7
+        Withdraw {
             state: ctx.accounts.state.to_account_info(),
             user: ctx.accounts.user.to_account_info(),
             user_stats: ctx.accounts.user_stats.to_account_info(),

@@ -1,5 +1,6 @@
 use anchor_lang::prelude::*;
-use drift_sdk::cpi::{InitializeUser, initialize_user, InitializeUserStats, initialize_user_stats};
+use drift_sdk::cpi::{initialize_user, initialize_user_stats};
+use drift_sdk::{InitializeUser, InitializeUserStats};
 
 #[derive(Accounts)]
 pub struct DriftUserInit<'info> {
@@ -30,15 +31,13 @@ pub struct DriftUserInit<'info> {
     pub drift_program: AccountInfo<'info>,
 }
 
-pub fn initialize_drift_user_handler(ctx: Context<DriftUserInit>) -> Result<()> {
-    let drift_program_id = ctx.accounts.drift_program.key();
-    
+pub fn drift_init_user_handler(ctx: Context<DriftUserInit>) -> Result<()> {    
     let seed = ctx.accounts.owner.key();
     let bump_seed = ctx.bumps.pda_account;
     let signer_seeds: &[&[&[u8]]] = &[&[b"vault", seed.as_ref(), &[bump_seed]]];
 
     let create_user_stats_cpi_context = CpiContext::new_with_signer(
-        drift_program_id,
+        ctx.accounts.drift_program.to_account_info(),
         InitializeUserStats {
             user_stats: ctx.accounts.user_stats.to_account_info(),
             state: ctx.accounts.state.to_account_info(),
@@ -53,7 +52,7 @@ pub fn initialize_drift_user_handler(ctx: Context<DriftUserInit>) -> Result<()> 
     initialize_user_stats(create_user_stats_cpi_context)?;
 
     let create_user_cpi_context = CpiContext::new_with_signer(
-        drift_program_id,
+        ctx.accounts.drift_program.to_account_info(),
         InitializeUser {
             user: ctx.accounts.user.to_account_info(),
             user_stats: ctx.accounts.user_stats.to_account_info(),
@@ -66,6 +65,6 @@ pub fn initialize_drift_user_handler(ctx: Context<DriftUserInit>) -> Result<()> 
         signer_seeds,
     );
  
-    initialize_user(create_user_cpi_context)?;
+    initialize_user(create_user_cpi_context, 0, [0; 32])?;
     Ok(())
 }
