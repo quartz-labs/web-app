@@ -42,7 +42,7 @@ pub fn drift_deposit_handler(
     market_index: u16, 
     reduce_only: bool
 ) -> Result<()> {
-    let program_id = ctx.accounts.system_program.to_account_info().key();
+    let program_id = ctx.accounts.system_program.to_account_info();
     
     let seed = ctx.accounts.owner.key();
     let bump_seed = *ctx.bumps.get("pda_account").unwrap();

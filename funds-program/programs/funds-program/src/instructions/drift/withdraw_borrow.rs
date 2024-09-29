@@ -39,10 +39,8 @@ pub struct DriftWithdrawBorrow<'info> {
     system_program: Program<'info, System>,
 }
 
-pub fn drift_withdraw_borrow_handler(ctx: Context<DriftWithdrawBorrow>, amount: u64) -> Result<()> {
+pub fn drift_withdraw_borrow_handler(ctx: Context<DriftWithdrawBorrow>, amount: u64, market_index: u16, reduce_only: bool) -> Result<()> {
     let program_id = ctx.accounts.system_program.to_account_info();
-    let market_index = ctx.accounts.market_index;
-    let reduce_only = ctx.accounts.reduce_only;
     
     let seed = ctx.accounts.owner.key();
     let bump_seed = ctx.bumps.pda_account;

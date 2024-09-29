@@ -42,11 +42,11 @@ pub mod funds_program {
         drift_init_user_handler(ctx)
     }
 
-    pub fn drift_deposit(ctx: Context<DriftDeposit>, amount: u64) -> Result<()> {
-        drift_deposit_handler(ctx, amount)
+    pub fn drift_deposit(ctx: Context<DriftDeposit>, amount: u64, market_index: u16, reduce_only: bool) -> Result<()> {
+        drift_deposit_handler(ctx, amount, market_index, reduce_only)
     }
 
-    pub fn drift_withdraw_borrow(ctx: Context<DriftWithdrawBorrow>, amount: u64) -> Result<()> {
-        drift_withdraw_borrow_handler(ctx, amount)
+    pub fn drift_withdraw_borrow(ctx: Context<DriftWithdrawBorrow>, amount: u64, market_index: u16, reduce_only: bool) -> Result<()> {
+        drift_withdraw_borrow_handler(ctx, amount, market_index, reduce_only)
     }
 }
