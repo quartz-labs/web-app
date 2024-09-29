@@ -30,7 +30,7 @@ pub struct DriftUserInit<'info> {
     pub drift_program: AccountInfo<'info>,
 }
 
-pub fn initialize_drift_user(ctx: Context<DriftUserInit>) -> Result<()> {
+pub fn initialize_drift_user_handler(ctx: Context<DriftUserInit>) -> Result<()> {
     let drift_program_id = ctx.accounts.drift_program.key();
     
     let seed = ctx.accounts.owner.key();

@@ -37,4 +37,16 @@ pub mod funds_program {
     pub fn withdraw_usdc(ctx: Context<WithdrawUSDC>, amount: u64) -> Result<()> {
         withdraw_usdc_handler(ctx, amount)
     }
+
+    pub fn drift_init_account(ctx: Context<DriftInitAccount>) -> Result<()> {
+        initialize_drift_user_handler(ctx)
+    }
+
+    pub fn drift_deposit(ctx: Context<DriftDeposit>, amount: u64) -> Result<()> {
+        drift_deposit_handler(ctx, amount)
+    }
+
+    pub fn drift_withdraw_borrow(ctx: Context<DriftWithdrawBorrow>, amount: u64) -> Result<()> {
+        drift_withdraw_borrow_handler(ctx, amount)
+    }
 }
