@@ -22,4 +22,4 @@ devnet = []
 [dependencies]
 anchor-lang = { version = "0.30.1", features = ["init-if-needed"] }
 anchor-spl = "0.30.1"
-drift-sdk = { path = "../../drift" }
+drift-sdk = { path = "../../drift", features = ["cpi"] }

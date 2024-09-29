@@ -11,8 +11,10 @@ name = "drift_sdk"
 [features]
 rpc = []
 i11n = ["anchor-i11n"]
-cpi = []
+no-entrypoint=[]
+cpi = ["no-entrypoint"]
 events = []
+solana = []
 default = ["rpc", "i11n", "cpi", "events"]
 
 [dependencies]

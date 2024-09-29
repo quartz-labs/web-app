@@ -11,17 +11,26 @@ pub struct DriftUserInit<'info> {
     )]
     pda_account: SystemAccount<'info>,
 
+    /// CHECK: TODO - this is actually unsafe, just temporary
     #[account(mut)]
     pub user: AccountInfo<'info>,
+
+    /// CHECK: TODO - this is actually unsafe, just temporary
     #[account(mut)]
     pub user_stats: AccountInfo<'info>,
+
+    /// CHECK: TODO - this is actually unsafe, just temporary
     #[account(mut)]
     pub state: AccountInfo<'info>,
-    #[account(mut, signer)]
-    pub authority: AccountInfo<'info>,
-    #[account(mut, signer)]
-    pub payer: AccountInfo<'info>,
+
+    #[account(mut)]
+    pub authority: Signer<'info>,
+
+    #[account(mut)]
+    pub payer: Signer<'info>,
+
     pub rent: Sysvar<'info, Rent>,
+    
     pub system_program: Program<'info, System>,
 
     #[account(mut)]

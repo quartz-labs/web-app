@@ -2479,7 +2479,7 @@ pub struct InitializePythPullOracle<'info> {
 }
 
 // CPI
-#[cfg(all(target_os = "solana", feature="cpi"))]
+#[cfg(feature="cpi")]
 pub mod cpi {
     #![allow(unused)]
     use anchor_lang::Discriminator;
@@ -6269,11 +6269,11 @@ pub mod cpi {
 }
 
 // RPC
-#[cfg(all(not(target_os = "solana"), feature="cpi"))]
+#[cfg(all(not(feature = "solana"), feature="cpi"))]
 pub mod rpc {
     #![allow(unused)]
     use anchor_lang::prelude::*;
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct InitializeUser {
             pub user: Pubkey,
@@ -6323,7 +6323,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct InitializeUserStats {
             pub user_stats: Pubkey,
@@ -6368,7 +6368,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct InitializeReferrerName {
             pub referrer_name: Pubkey,
@@ -6418,7 +6418,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct Deposit {
             pub state: Pubkey,
@@ -6468,7 +6468,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct Withdraw {
             pub state: Pubkey,
@@ -6523,7 +6523,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct TransferDeposit {
             pub from_user: Pubkey,
@@ -6568,7 +6568,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct PlacePerpOrder {
             pub state: Pubkey,
@@ -6598,7 +6598,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct CancelOrder {
             pub state: Pubkey,
@@ -6628,7 +6628,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct CancelOrderByUserId {
             pub state: Pubkey,
@@ -6658,7 +6658,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct CancelOrders {
             pub state: Pubkey,
@@ -6688,7 +6688,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct CancelOrdersByIds {
             pub state: Pubkey,
@@ -6718,7 +6718,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct ModifyOrder {
             pub state: Pubkey,
@@ -6748,7 +6748,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct ModifyOrderByUserId {
             pub state: Pubkey,
@@ -6778,7 +6778,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct PlaceAndTakePerpOrder {
             pub state: Pubkey,
@@ -6813,7 +6813,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct PlaceAndMakePerpOrder {
             pub state: Pubkey,
@@ -6858,7 +6858,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct PlaceSpotOrder {
             pub state: Pubkey,
@@ -6888,7 +6888,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct PlaceAndTakeSpotOrder {
             pub state: Pubkey,
@@ -6923,7 +6923,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct PlaceAndMakeSpotOrder {
             pub state: Pubkey,
@@ -6968,7 +6968,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct PlaceOrders {
             pub state: Pubkey,
@@ -6998,7 +6998,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct BeginSwap {
             pub state: Pubkey,
@@ -7068,7 +7068,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct EndSwap {
             pub state: Pubkey,
@@ -7138,7 +7138,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct AddPerpLpShares {
             pub state: Pubkey,
@@ -7168,7 +7168,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct RemovePerpLpShares {
             pub state: Pubkey,
@@ -7198,7 +7198,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct RemovePerpLpSharesInExpiringMarket {
             pub state: Pubkey,
@@ -7223,7 +7223,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateUserName {
             pub user: Pubkey,
@@ -7248,7 +7248,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateUserCustomMarginRatio {
             pub user: Pubkey,
@@ -7273,7 +7273,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateUserMarginTradingEnabled {
             pub user: Pubkey,
@@ -7298,7 +7298,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateUserDelegate {
             pub user: Pubkey,
@@ -7323,7 +7323,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateUserReduceOnly {
             pub user: Pubkey,
@@ -7348,7 +7348,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateUserAdvancedLp {
             pub user: Pubkey,
@@ -7373,7 +7373,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct DeleteUser {
             pub user: Pubkey,
@@ -7408,7 +7408,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct ReclaimRent {
             pub user: Pubkey,
@@ -7448,7 +7448,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct FillPerpOrder {
             pub state: Pubkey,
@@ -7493,7 +7493,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct RevertFill {
             pub state: Pubkey,
@@ -7528,7 +7528,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct FillSpotOrder {
             pub state: Pubkey,
@@ -7573,7 +7573,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct TriggerOrder {
             pub state: Pubkey,
@@ -7608,7 +7608,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct ForceCancelOrders {
             pub state: Pubkey,
@@ -7643,7 +7643,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateUserIdle {
             pub state: Pubkey,
@@ -7678,7 +7678,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateUserOpenOrdersCount {
             pub state: Pubkey,
@@ -7713,7 +7713,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct AdminDisableUpdatePerpBidAskTwap {
             pub admin: Pubkey,
@@ -7743,7 +7743,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct SettlePnl {
             pub state: Pubkey,
@@ -7778,7 +7778,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct SettleMultiplePnls {
             pub state: Pubkey,
@@ -7813,7 +7813,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct SettleFundingPayment {
             pub state: Pubkey,
@@ -7838,7 +7838,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct SettleLp {
             pub state: Pubkey,
@@ -7863,7 +7863,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct SettleExpiredMarket {
             pub state: Pubkey,
@@ -7888,7 +7888,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct LiquidatePerp {
             pub state: Pubkey,
@@ -7933,7 +7933,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct LiquidatePerpWithFill {
             pub state: Pubkey,
@@ -7978,7 +7978,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct LiquidateSpot {
             pub state: Pubkey,
@@ -8023,7 +8023,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct LiquidateBorrowForPerpPnl {
             pub state: Pubkey,
@@ -8068,7 +8068,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct LiquidatePerpPnlForDeposit {
             pub state: Pubkey,
@@ -8113,7 +8113,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct SetUserStatusToBeingLiquidated {
             pub state: Pubkey,
@@ -8138,7 +8138,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct ResolvePerpPnlDeficit {
             pub state: Pubkey,
@@ -8183,7 +8183,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct ResolvePerpBankruptcy {
             pub state: Pubkey,
@@ -8248,7 +8248,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct ResolveSpotBankruptcy {
             pub state: Pubkey,
@@ -8313,7 +8313,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct SettleRevenueToInsuranceFund {
             pub state: Pubkey,
@@ -8358,7 +8358,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateFundingRate {
             pub state: Pubkey,
@@ -8388,7 +8388,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdatePrelaunchOracle {
             pub state: Pubkey,
@@ -8418,7 +8418,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdatePerpBidAskTwap {
             pub state: Pubkey,
@@ -8458,7 +8458,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateSpotMarketCumulativeInterest {
             pub state: Pubkey,
@@ -8493,7 +8493,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateAmms {
             pub state: Pubkey,
@@ -8518,7 +8518,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateSpotMarketExpiry {
             pub admin: Pubkey,
@@ -8548,7 +8548,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateUserQuoteAssetInsuranceStake {
             pub state: Pubkey,
@@ -8593,7 +8593,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateUserGovTokenInsuranceStake {
             pub state: Pubkey,
@@ -8638,7 +8638,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct InitializeInsuranceFundStake {
             pub spot_market: Pubkey,
@@ -8693,7 +8693,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct AddInsuranceFundStake {
             pub state: Pubkey,
@@ -8758,7 +8758,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct RequestRemoveInsuranceFundStake {
             pub spot_market: Pubkey,
@@ -8798,7 +8798,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct CancelRequestRemoveInsuranceFundStake {
             pub spot_market: Pubkey,
@@ -8838,7 +8838,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct RemoveInsuranceFundStake {
             pub state: Pubkey,
@@ -8898,7 +8898,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct TransferProtocolIfShares {
             pub signer: Pubkey,
@@ -8953,7 +8953,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdatePythPullOracle {
             pub keeper: Pubkey,
@@ -8988,7 +8988,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct PostPythPullOracleUpdateAtomic {
             pub keeper: Pubkey,
@@ -9023,7 +9023,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct PostMultiPythPullOracleUpdatesAtomic {
             pub keeper: Pubkey,
@@ -9053,7 +9053,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct Initialize {
             pub admin: Pubkey,
@@ -9103,7 +9103,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct InitializeSpotMarket {
             pub spot_market: Pubkey,
@@ -9173,7 +9173,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct DeleteInitializedSpotMarket {
             pub admin: Pubkey,
@@ -9223,7 +9223,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct InitializeSerumFulfillmentConfig {
             pub base_spot_market: Pubkey,
@@ -9293,7 +9293,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateSerumFulfillmentConfigStatus {
             pub state: Pubkey,
@@ -9323,7 +9323,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct InitializeOpenbookV2FulfillmentConfig {
             pub base_spot_market: Pubkey,
@@ -9388,7 +9388,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct OpenbookV2FulfillmentConfigStatus {
             pub state: Pubkey,
@@ -9418,7 +9418,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct InitializePhoenixFulfillmentConfig {
             pub base_spot_market: Pubkey,
@@ -9483,7 +9483,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct PhoenixFulfillmentConfigStatus {
             pub state: Pubkey,
@@ -9513,7 +9513,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateSerumVault {
             pub state: Pubkey,
@@ -9543,7 +9543,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct InitializePerpMarket {
             pub admin: Pubkey,
@@ -9588,7 +9588,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct InitializePredictionMarket {
             pub admin: Pubkey,
@@ -9618,7 +9618,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct DeleteInitializedPerpMarket {
             pub admin: Pubkey,
@@ -9648,7 +9648,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct MoveAmmPrice {
             pub admin: Pubkey,
@@ -9678,7 +9678,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct RecenterPerpMarketAmm {
             pub admin: Pubkey,
@@ -9708,7 +9708,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdatePerpMarketAmmSummaryStats {
             pub admin: Pubkey,
@@ -9748,7 +9748,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdatePerpMarketExpiry {
             pub admin: Pubkey,
@@ -9778,7 +9778,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct SettleExpiredMarketPoolsToRevenuePool {
             pub state: Pubkey,
@@ -9813,7 +9813,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct DepositIntoPerpMarketFeePool {
             pub state: Pubkey,
@@ -9868,7 +9868,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct DepositIntoSpotMarketVault {
             pub state: Pubkey,
@@ -9913,7 +9913,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct DepositIntoSpotMarketRevenuePool {
             pub state: Pubkey,
@@ -9958,7 +9958,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct RepegAmmCurve {
             pub state: Pubkey,
@@ -9993,7 +9993,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdatePerpMarketAmmOracleTwap {
             pub state: Pubkey,
@@ -10028,7 +10028,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct ResetPerpMarketAmmOracleTwap {
             pub state: Pubkey,
@@ -10063,7 +10063,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateK {
             pub admin: Pubkey,
@@ -10098,7 +10098,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdatePerpMarketMarginRatio {
             pub admin: Pubkey,
@@ -10128,7 +10128,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdatePerpMarketFundingPeriod {
             pub admin: Pubkey,
@@ -10158,7 +10158,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdatePerpMarketMaxImbalances {
             pub admin: Pubkey,
@@ -10188,7 +10188,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdatePerpMarketLiquidationFee {
             pub admin: Pubkey,
@@ -10218,7 +10218,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateInsuranceFundUnstakingPeriod {
             pub admin: Pubkey,
@@ -10248,7 +10248,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateSpotMarketLiquidationFee {
             pub admin: Pubkey,
@@ -10278,7 +10278,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateWithdrawGuardThreshold {
             pub admin: Pubkey,
@@ -10308,7 +10308,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateSpotMarketIfFactor {
             pub admin: Pubkey,
@@ -10338,7 +10338,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateSpotMarketRevenueSettlePeriod {
             pub admin: Pubkey,
@@ -10368,7 +10368,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateSpotMarketStatus {
             pub admin: Pubkey,
@@ -10398,7 +10398,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateSpotMarketPausedOperations {
             pub admin: Pubkey,
@@ -10428,7 +10428,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateSpotMarketAssetTier {
             pub admin: Pubkey,
@@ -10458,7 +10458,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateSpotMarketMarginWeights {
             pub admin: Pubkey,
@@ -10488,7 +10488,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateSpotMarketBorrowRate {
             pub admin: Pubkey,
@@ -10518,7 +10518,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateSpotMarketMaxTokenDeposits {
             pub admin: Pubkey,
@@ -10548,7 +10548,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateSpotMarketMaxTokenBorrows {
             pub admin: Pubkey,
@@ -10578,7 +10578,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateSpotMarketScaleInitialAssetWeightStart {
             pub admin: Pubkey,
@@ -10608,7 +10608,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateSpotMarketOracle {
             pub admin: Pubkey,
@@ -10643,7 +10643,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateSpotMarketStepSizeAndTickSize {
             pub admin: Pubkey,
@@ -10673,7 +10673,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateSpotMarketMinOrderSize {
             pub admin: Pubkey,
@@ -10703,7 +10703,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateSpotMarketOrdersEnabled {
             pub admin: Pubkey,
@@ -10733,7 +10733,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateSpotMarketIfPausedOperations {
             pub admin: Pubkey,
@@ -10763,7 +10763,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateSpotMarketName {
             pub admin: Pubkey,
@@ -10793,7 +10793,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdatePerpMarketStatus {
             pub admin: Pubkey,
@@ -10823,7 +10823,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdatePerpMarketPausedOperations {
             pub admin: Pubkey,
@@ -10853,7 +10853,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdatePerpMarketContractTier {
             pub admin: Pubkey,
@@ -10883,7 +10883,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdatePerpMarketImfFactor {
             pub admin: Pubkey,
@@ -10913,7 +10913,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdatePerpMarketUnrealizedAssetWeight {
             pub admin: Pubkey,
@@ -10943,7 +10943,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdatePerpMarketConcentrationCoef {
             pub admin: Pubkey,
@@ -10973,7 +10973,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdatePerpMarketCurveUpdateIntensity {
             pub admin: Pubkey,
@@ -11003,7 +11003,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdatePerpMarketTargetBaseAssetAmountPerLp {
             pub admin: Pubkey,
@@ -11033,7 +11033,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdatePerpMarketPerLpBase {
             pub admin: Pubkey,
@@ -11063,7 +11063,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateLpCooldownTime {
             pub admin: Pubkey,
@@ -11088,7 +11088,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdatePerpFeeStructure {
             pub admin: Pubkey,
@@ -11113,7 +11113,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateSpotFeeStructure {
             pub admin: Pubkey,
@@ -11138,7 +11138,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateInitialPctToLiquidate {
             pub admin: Pubkey,
@@ -11163,7 +11163,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateLiquidationDuration {
             pub admin: Pubkey,
@@ -11188,7 +11188,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateLiquidationMarginBufferRatio {
             pub admin: Pubkey,
@@ -11213,7 +11213,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateOracleGuardRails {
             pub admin: Pubkey,
@@ -11238,7 +11238,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateStateSettlementDuration {
             pub admin: Pubkey,
@@ -11263,7 +11263,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateStateMaxNumberOfSubAccounts {
             pub admin: Pubkey,
@@ -11288,7 +11288,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateStateMaxInitializeUserFee {
             pub admin: Pubkey,
@@ -11313,7 +11313,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdatePerpMarketOracle {
             pub state: Pubkey,
@@ -11348,7 +11348,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdatePerpMarketBaseSpread {
             pub admin: Pubkey,
@@ -11378,7 +11378,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateAmmJitIntensity {
             pub admin: Pubkey,
@@ -11408,7 +11408,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdatePerpMarketMaxSpread {
             pub admin: Pubkey,
@@ -11438,7 +11438,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdatePerpMarketStepSizeAndTickSize {
             pub admin: Pubkey,
@@ -11468,7 +11468,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdatePerpMarketName {
             pub admin: Pubkey,
@@ -11498,7 +11498,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdatePerpMarketMinOrderSize {
             pub admin: Pubkey,
@@ -11528,7 +11528,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdatePerpMarketMaxSlippageRatio {
             pub admin: Pubkey,
@@ -11558,7 +11558,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdatePerpMarketMaxFillReserveFraction {
             pub admin: Pubkey,
@@ -11588,7 +11588,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdatePerpMarketMaxOpenInterest {
             pub admin: Pubkey,
@@ -11618,7 +11618,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdatePerpMarketNumberOfUsers {
             pub admin: Pubkey,
@@ -11648,7 +11648,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdatePerpMarketFeeAdjustment {
             pub admin: Pubkey,
@@ -11678,7 +11678,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateSpotMarketFeeAdjustment {
             pub admin: Pubkey,
@@ -11708,7 +11708,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdatePerpMarketFuel {
             pub admin: Pubkey,
@@ -11738,7 +11738,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateSpotMarketFuel {
             pub admin: Pubkey,
@@ -11768,7 +11768,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct InitUserFuel {
             pub admin: Pubkey,
@@ -11803,7 +11803,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateAdmin {
             pub admin: Pubkey,
@@ -11828,7 +11828,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateWhitelistMint {
             pub admin: Pubkey,
@@ -11853,7 +11853,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateDiscountMint {
             pub admin: Pubkey,
@@ -11878,7 +11878,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateExchangeStatus {
             pub admin: Pubkey,
@@ -11903,7 +11903,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdatePerpAuctionDuration {
             pub admin: Pubkey,
@@ -11928,7 +11928,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateSpotAuctionDuration {
             pub admin: Pubkey,
@@ -11953,7 +11953,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct InitializeProtocolIfSharesTransferConfig {
             pub admin: Pubkey,
@@ -11993,7 +11993,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdateProtocolIfSharesTransferConfig {
             pub admin: Pubkey,
@@ -12023,7 +12023,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct InitializePrelaunchOracle {
             pub admin: Pubkey,
@@ -12063,7 +12063,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct UpdatePrelaunchOracleParams {
             pub admin: Pubkey,
@@ -12098,7 +12098,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct DeletePrelaunchOracle {
             pub admin: Pubkey,
@@ -12133,7 +12133,7 @@ pub mod rpc {
             }
         }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorSerialize)]
     pub struct InitializePythPullOracle {
             pub admin: Pubkey,
@@ -12175,7 +12175,7 @@ pub mod rpc {
 }
 
 // I11n
-#[cfg(all(target_os = "solana", feature="i11n"))]
+#[cfg(all(feature = "solana", feature="i11n"))]
 pub mod i11n {
     use anchor_lang::prelude::*;
     use anchor_i11n::prelude::*;
@@ -18518,7 +18518,7 @@ pub mod events {
     use anchor_i11n::AnchorDiscriminator;
     use anchor_lang::Discriminator;
 
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorDiscriminator, AnchorSerialize, AnchorDeserialize)]
     pub struct NewUserRecord {
                 pub ts: i64,
@@ -18537,7 +18537,7 @@ pub mod events {
         }
     }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorDiscriminator, AnchorSerialize, AnchorDeserialize)]
     pub struct DepositRecord {
                 pub ts: i64,
@@ -18566,7 +18566,7 @@ pub mod events {
         }
     }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorDiscriminator, AnchorSerialize, AnchorDeserialize)]
     pub struct SpotInterestRecord {
                 pub ts: i64,
@@ -18588,7 +18588,7 @@ pub mod events {
         }
     }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorDiscriminator, AnchorSerialize, AnchorDeserialize)]
     pub struct FundingPaymentRecord {
                 pub ts: i64,
@@ -18610,7 +18610,7 @@ pub mod events {
         }
     }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorDiscriminator, AnchorSerialize, AnchorDeserialize)]
     pub struct FundingRateRecord {
                 pub ts: i64,
@@ -18636,7 +18636,7 @@ pub mod events {
         }
     }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorDiscriminator, AnchorSerialize, AnchorDeserialize)]
     pub struct CurveRecord {
                 pub ts: i64,
@@ -18669,7 +18669,7 @@ pub mod events {
         }
     }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorDiscriminator, AnchorSerialize, AnchorDeserialize)]
     pub struct OrderRecord {
                 pub ts: i64,
@@ -18685,7 +18685,7 @@ pub mod events {
         }
     }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorDiscriminator, AnchorSerialize, AnchorDeserialize)]
     pub struct OrderActionRecord {
                 pub ts: i64,
@@ -18726,7 +18726,7 @@ pub mod events {
         }
     }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorDiscriminator, AnchorSerialize, AnchorDeserialize)]
     pub struct LpRecord {
                 pub ts: i64,
@@ -18747,7 +18747,7 @@ pub mod events {
         }
     }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorDiscriminator, AnchorSerialize, AnchorDeserialize)]
     pub struct LiquidationRecord {
                 pub ts: i64,
@@ -18776,7 +18776,7 @@ pub mod events {
         }
     }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorDiscriminator, AnchorSerialize, AnchorDeserialize)]
     pub struct SettlePnlRecord {
                 pub ts: i64,
@@ -18798,7 +18798,7 @@ pub mod events {
         }
     }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorDiscriminator, AnchorSerialize, AnchorDeserialize)]
     pub struct InsuranceFundRecord {
                 pub ts: i64,
@@ -18821,7 +18821,7 @@ pub mod events {
         }
     }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorDiscriminator, AnchorSerialize, AnchorDeserialize)]
     pub struct InsuranceFundStakeRecord {
                 pub ts: i64,
@@ -18846,7 +18846,7 @@ pub mod events {
         }
     }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorDiscriminator, AnchorSerialize, AnchorDeserialize)]
     pub struct SwapRecord {
                 pub ts: i64,
@@ -18868,7 +18868,7 @@ pub mod events {
         }
     }
     
-    #[cfg_attr(not(target_os="solana"), derive(Debug))]
+    #[cfg_attr(not(feature="solana"), derive(Debug))]
     #[derive(AnchorDiscriminator, AnchorSerialize, AnchorDeserialize)]
     pub struct SpotMarketVaultDepositRecord {
                 pub ts: i64,
@@ -19182,7 +19182,7 @@ pub mod accounts {
 }
         
 // Defined types
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct UpdatePerpMarketSummaryStatsParams {
     pub quote_asset_amount_with_unsettled_lp: Option<i64>,
@@ -19190,7 +19190,7 @@ pub struct UpdatePerpMarketSummaryStatsParams {
     pub update_amm_summary_stats: Option<bool>,
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct LiquidatePerpRecord {
     pub market_index: u16,
@@ -19205,7 +19205,7 @@ pub struct LiquidatePerpRecord {
     pub if_fee: u64,
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct LiquidateSpotRecord {
     pub asset_market_index: u16,
@@ -19217,7 +19217,7 @@ pub struct LiquidateSpotRecord {
     pub if_fee: u64,
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct LiquidateBorrowForPerpPnlRecord {
     pub perp_market_index: u16,
@@ -19228,7 +19228,7 @@ pub struct LiquidateBorrowForPerpPnlRecord {
     pub liability_transfer: u128,
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct LiquidatePerpPnlForDepositRecord {
     pub perp_market_index: u16,
@@ -19239,7 +19239,7 @@ pub struct LiquidatePerpPnlForDepositRecord {
     pub asset_transfer: u128,
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct PerpBankruptcyRecord {
     pub market_index: u16,
@@ -19250,7 +19250,7 @@ pub struct PerpBankruptcyRecord {
     pub cumulative_funding_rate_delta: i128,
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct SpotBankruptcyRecord {
     pub market_index: u16,
@@ -19259,14 +19259,14 @@ pub struct SpotBankruptcyRecord {
     pub cumulative_deposit_interest_delta: u128,
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct MarketIdentifier {
     pub market_type: MarketType,
     pub market_index: u16,
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct HistoricalOracleData {
     pub last_oracle_price: i64,
@@ -19277,7 +19277,7 @@ pub struct HistoricalOracleData {
     pub last_oracle_price_twap_ts: i64,
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct HistoricalIndexData {
     pub last_index_bid_price: u64,
@@ -19287,7 +19287,7 @@ pub struct HistoricalIndexData {
     pub last_index_price_twap_ts: i64,
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct PrelaunchOracleParams {
     pub perp_market_index: u16,
@@ -19295,7 +19295,7 @@ pub struct PrelaunchOracleParams {
     pub max_price: Option<i64>,
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct OrderParams {
     pub order_type: OrderType,
@@ -19317,7 +19317,7 @@ pub struct OrderParams {
     pub auction_end_price: Option<i64>,
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct ModifyOrderParams {
     pub direction: Option<PositionDirection>,
@@ -19336,7 +19336,7 @@ pub struct ModifyOrderParams {
     pub policy: Option<ModifyOrderPolicy>,
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct InsuranceClaim {
     pub revenue_withdraw_since_last_settle: i64,
@@ -19346,7 +19346,7 @@ pub struct InsuranceClaim {
     pub last_revenue_withdraw_ts: i64,
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct PoolBalance {
     pub scaled_balance: u128,
@@ -19354,7 +19354,7 @@ pub struct PoolBalance {
     pub padding: [u8;6],
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct AMM {
     pub oracle: Pubkey,
@@ -19443,7 +19443,7 @@ pub struct AMM {
     pub padding: [u8;12],
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct InsuranceFund {
     pub vault: Pubkey,
@@ -19457,21 +19457,21 @@ pub struct InsuranceFund {
     pub user_factor: u32,
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct OracleGuardRails {
     pub price_divergence: PriceDivergenceGuardRails,
     pub validity: ValidityGuardRails,
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct PriceDivergenceGuardRails {
     pub mark_oracle_percent_divergence: u64,
     pub oracle_twap_5_min_percent_divergence: u64,
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct ValidityGuardRails {
     pub slots_before_stale_for_amm: i64,
@@ -19480,7 +19480,7 @@ pub struct ValidityGuardRails {
     pub too_volatile_ratio: i64,
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct FeeStructure {
     pub fee_tiers: [FeeTier;10],
@@ -19489,7 +19489,7 @@ pub struct FeeStructure {
     pub flat_filler_fee: u64,
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct FeeTier {
     pub fee_numerator: u32,
@@ -19502,7 +19502,7 @@ pub struct FeeTier {
     pub referee_fee_denominator: u32,
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct OrderFillerRewardStructure {
     pub reward_numerator: u32,
@@ -19510,7 +19510,7 @@ pub struct OrderFillerRewardStructure {
     pub time_based_reward_lower_bound: u128,
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct UserFees {
     pub total_fee_paid: u64,
@@ -19521,7 +19521,7 @@ pub struct UserFees {
     pub current_epoch_referrer_reward: u64,
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct SpotPosition {
     pub scaled_balance: u64,
@@ -19534,7 +19534,7 @@ pub struct SpotPosition {
     pub padding: [u8;4],
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct PerpPosition {
     pub last_cumulative_funding_rate: i64,
@@ -19554,7 +19554,7 @@ pub struct PerpPosition {
     pub per_lp_base: i8,
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct Order {
     pub slot: u64,
@@ -19583,28 +19583,28 @@ pub struct Order {
     pub padding: [u8;3],
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum SwapDirection {
     Add,
     Remove
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum ModifyOrderId {
     UserOrderId,
     OrderId
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum PositionDirection {
     Long,
     Short
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum SpotFulfillmentType {
     SerumV3,
@@ -19613,28 +19613,28 @@ pub enum SpotFulfillmentType {
     OpenbookV2
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum SwapReduceOnly {
     In,
     Out
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum TwapPeriod {
     FundingPeriod,
     FiveMin
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum LiquidationMultiplierType {
     Discount,
     Premium
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum MarginRequirementType {
     Initial,
@@ -19642,7 +19642,7 @@ pub enum MarginRequirementType {
     Maintenance
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum OracleValidity {
     NonPositive,
@@ -19654,7 +19654,7 @@ pub enum OracleValidity {
     Valid
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum DriftAction {
     UpdateFunding,
@@ -19669,7 +19669,7 @@ pub enum DriftAction {
     OracleOrderPrice
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum PositionUpdateType {
     Open,
@@ -19679,7 +19679,7 @@ pub enum PositionUpdateType {
     Flip
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum DepositExplanation {
     None,
@@ -19688,14 +19688,14 @@ pub enum DepositExplanation {
     RepayBorrow
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum DepositDirection {
     Deposit,
     Withdraw
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum OrderAction {
     Place,
@@ -19705,7 +19705,7 @@ pub enum OrderAction {
     Expire
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum OrderActionExplanation {
     None,
@@ -19730,7 +19730,7 @@ pub enum OrderActionExplanation {
     OrderFilledWithOpenbookV2
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum LPAction {
     AddLiquidity,
@@ -19739,7 +19739,7 @@ pub enum LPAction {
     RemoveLiquidityDerisk
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum LiquidationType {
     LiquidatePerp,
@@ -19750,14 +19750,14 @@ pub enum LiquidationType {
     SpotBankruptcy
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum SettlePnlExplanation {
     None,
     ExpiredPosition
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum StakeAction {
     Stake,
@@ -19768,7 +19768,7 @@ pub enum StakeAction {
     StakeTransfer
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum FillMode {
     Fill,
@@ -19777,28 +19777,28 @@ pub enum FillMode {
     Liquidation
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum PerpFulfillmentMethod {
     Amm,
     Match
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum SpotFulfillmentMethod {
     ExternalMarket,
     Match
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum MarginCalculationMode {
     Standard,
     Liquidation
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum OracleSource {
     Pyth,
@@ -19815,7 +19815,7 @@ pub enum OracleSource {
     SwitchboardOnDemand
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum PostOnlyParam {
     None,
@@ -19824,14 +19824,14 @@ pub enum PostOnlyParam {
     Slide
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum ModifyOrderPolicy {
     TryModify,
     MustModify
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum PerpOperation {
     UpdateFunding,
@@ -19842,7 +19842,7 @@ pub enum PerpOperation {
     Liquidation
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum SpotOperation {
     UpdateCumulativeInterest,
@@ -19852,7 +19852,7 @@ pub enum SpotOperation {
     Liquidation
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum InsuranceFundOperation {
     Init,
@@ -19861,7 +19861,7 @@ pub enum InsuranceFundOperation {
     Remove
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum MarketStatus {
     Initialized,
@@ -19875,7 +19875,7 @@ pub enum MarketStatus {
     Delisted
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum ContractType {
     Perpetual,
@@ -19883,7 +19883,7 @@ pub enum ContractType {
     Prediction
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum ContractTier {
     A,
@@ -19894,7 +19894,7 @@ pub enum ContractTier {
     Isolated
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum AMMLiquiditySplit {
     ProtocolOwned,
@@ -19902,28 +19902,28 @@ pub enum AMMLiquiditySplit {
     Shared
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum SettlePnlMode {
     MustSettle,
     TrySettle
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum SpotBalanceType {
     Deposit,
     Borrow
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum SpotFulfillmentConfigStatus {
     Enabled,
     Disabled
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum AssetTier {
     Collateral,
@@ -19933,7 +19933,7 @@ pub enum AssetTier {
     Unlisted
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum ExchangeStatus {
     DepositPaused,
@@ -19945,7 +19945,7 @@ pub enum ExchangeStatus {
     SettlePnlPaused
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum UserStatus {
     BeingLiquidated,
@@ -19954,14 +19954,14 @@ pub enum UserStatus {
     AdvancedLp
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum AssetType {
     Base,
     Quote
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum OrderStatus {
     Init,
@@ -19970,7 +19970,7 @@ pub enum OrderStatus {
     Canceled
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum OrderType {
     Market,
@@ -19980,7 +19980,7 @@ pub enum OrderType {
     Oracle
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum OrderTriggerCondition {
     Above,
@@ -19989,7 +19989,7 @@ pub enum OrderTriggerCondition {
     TriggeredBelow
 }
 
-#[cfg_attr(not(target_os="solana"), derive(Debug))]
+#[cfg_attr(not(feature="solana"), derive(Debug))]
 #[derive(Clone, AnchorSerialize, AnchorDeserialize, Copy, PartialEq, Eq)]
 pub enum MarketType {
     Spot,
