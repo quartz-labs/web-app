@@ -2,7 +2,7 @@
 
 import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import styles from "./Balance.module.css";
-import { getVault, isVaultInitialized } from "@/utils/utils";
+import { getSolDailyEarnRate, getUsdcDailyBorrowRate, getVault, isVaultInitialized, roundToDecimalPlaces } from "@/utils/utils";
 import { useEffect, useState } from "react";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 
@@ -18,23 +18,26 @@ export default function Balance() {
     // TODO - Get USDC loan balance
     const [usdcLoanBalance, setUsdcLoanBalance] = useState(0);
 
-    // TODO - Calculate daily change on balances
-    const [solDailyChange, setSolDailyChange] = useState(0);
-    const [usdcLoanDailyChange, setUsdcLoanDailyChange] = useState(0);
+    const [solDailyEarnRate, setSolDailyEarnRate] = useState(0.07);
+    const [usdcDailyBorrowRate, setUsdcDailyBorrowRate] = useState(0);
 
-    const updateSolPrice = async () => {
+
+    const updateFinancialData = async () => {
         try {
             const response = await fetch('/api/solana-price');
             const data = await response.json();
             setSolPrice(data.solana.usd);
+
+            setSolDailyEarnRate(await getSolDailyEarnRate());
+            setUsdcDailyBorrowRate(await getUsdcDailyBorrowRate());
         } catch {
             console.error("Error: Unable to reach CoinGecko for price data");
         }
     }
 
     useEffect(() => {
-        updateSolPrice();
-        const interval = setInterval(updateSolPrice, 10000);
+        updateFinancialData();
+        const interval = setInterval(updateFinancialData, 10000);
 
         return () => clearInterval(interval);
     }, []);
@@ -56,7 +59,7 @@ export default function Balance() {
 
                     const vaultBalance = vaultAccount.lamports - requiredRent;
                     setSolBalance(vaultBalance / LAMPORTS_PER_SOL);
-                    updateSolPrice();
+                    updateFinancialData();
                 }
 
                 connection.onAccountChange(
@@ -77,6 +80,11 @@ export default function Balance() {
         updateBalance();
     }, [wallet, rentExemptionThreshold]);
 
+    // TODO - If collateralized SOL is not earning, this calculation must be adjusted as it assumes all SOL is earning yield
+    const dailySolChange = solDailyEarnRate * solBalance * solPrice;
+    const dailyUsdcChange = usdcDailyBorrowRate * usdcLoanBalance;
+    const dailyNetChange = dailySolChange - dailyUsdcChange;
+
     if (detailedView) {
         return (
             <div className={styles.balanceWrapper}>
@@ -89,7 +97,9 @@ export default function Balance() {
                             ${(solBalance * solPrice).toLocaleString('en-IE', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                         </p>
                         <p className={styles.subBalance}>{solBalance} SOL</p>
-                        <p className={styles.dailyChange}>+${solDailyChange} /day</p>
+                        <p className={styles.dailyChange}>
+                            +${roundToDecimalPlaces(dailySolChange, 4)} /day
+                        </p>
                     </div>
 
                     <div className={styles.balanceCell}>
@@ -98,7 +108,9 @@ export default function Balance() {
                             ${(usdcLoanBalance).toLocaleString('en-IE', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                         </p>
                         <p className={styles.subBalance}>USDC</p>
-                        <p className={styles.dailyChange}>+${usdcLoanDailyChange} /day</p>
+                        <p className={styles.dailyChange}>
+                            +${roundToDecimalPlaces(dailyUsdcChange, 4)} /day
+                        </p>
                     </div>
 
                     <div className={styles.balanceCell}>
@@ -109,7 +121,9 @@ export default function Balance() {
                             )}
                         </p>
                         <p className={styles.subBalance}>After outstanding loans</p>
-                        <p className={styles.dailyChange}>+${solDailyChange - usdcLoanDailyChange} /day</p>
+                        <p className={styles.dailyChange}>
+                            +${roundToDecimalPlaces(dailyNetChange,4)} /day
+                        </p>
                     </div>
                 </div>
                 
