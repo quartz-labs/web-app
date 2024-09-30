@@ -5,16 +5,16 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-funds_program = "8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G"
+funds_program = "MhXyor8RjLi41ABFB9fKT4VQ6s3oxKsZvpfYm3nfdQc"
 
 [programs.devnet]
-funds_program = "8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G"
+funds_program = "MhXyor8RjLi41ABFB9fKT4VQ6s3oxKsZvpfYm3nfdQc"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "localnet"
+cluster = "devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
