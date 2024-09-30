@@ -1,0 +1,19 @@
+.mainButton {
+    width: 160px;
+    height: 65px;
+    font-size: 24px;
+}
+
+.buttons {
+    display: flex;
+    gap: 50px;
+}
+
+.navBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 40px;
+    margin-bottom: 100px;
+}

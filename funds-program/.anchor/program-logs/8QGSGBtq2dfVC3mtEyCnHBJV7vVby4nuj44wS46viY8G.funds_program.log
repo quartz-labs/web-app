@@ -1,6 +1,6 @@
 Streaming transaction logs mentioning 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G. Confirmed commitment
 Transaction executed in slot 9:
-  Signature: 5NDHfNuJ3xMVZ6mAwLfbSDq1cfqyw7xqGvNCUNFAFpbQ4mzKpbMk9PsgYv8kXGCDhVGGb1pgakZYeefCKj2hYZcf
+  Signature: xyYNgm8mNjEtBeQkYprTA2rz8ssbF6zqWvujkGkS8zTo4AkxM5o2w9JQqB3kgQo2oZBGbYdNrTEkQJprP3oqz2e
   Status: Ok
   Log Messages:
     Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G invoke [1]
@@ -11,21 +11,25 @@ Transaction executed in slot 9:
     Program 11111111111111111111111111111111 success
     Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]
     Program log: Instruction: InitializeAccount3
-    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 4241 of 181001 compute units
+    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 4241 of 182501 compute units
     Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success
     Program log: Initializing account
-    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G consumed 26089 of 200000 compute units
+    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G consumed 24589 of 200000 compute units
     Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G success
-Transaction executed in slot 50:
-  Signature: 5VDiHQYY1SmNgJnNSMKBDhMMeTNAoXY9Dy4nMvTysRH8BKr4Y9yrmQ5tnnRwcTKnYyp1tAbH5KymxvxE9kDn2pK
+Transaction executed in slot 10:
+  Signature: 4nrGDGytiKsJ2LsRvxNwb8MpkNF7zcMC72xgZFeLQ72YwK6RCRNabGKthxmp1TXJ8Wye1o29VKPvYMU3KnofA2r8
   Status: Ok
   Log Messages:
     Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G invoke [1]
-    Program log: Instruction: WithdrawUsdc
-    Program log: Sending 200 USDC to G4mZSj6zfkz32eKQPCi6GGh6xq1jwxKPX9v3ccEwSAdC
+    Program log: Instruction: InitUser
+    Program 11111111111111111111111111111111 invoke [2]
+    Program 11111111111111111111111111111111 success
+    Program 11111111111111111111111111111111 invoke [2]
+    Program 11111111111111111111111111111111 success
     Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]
-    Program log: Instruction: Transfer
-    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 4645 of 172779 compute units
+    Program log: Instruction: InitializeAccount3
+    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 4241 of 184001 compute units
     Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success
-    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G consumed 32487 of 200000 compute units
+    Program log: Initializing account
+    Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G consumed 23089 of 200000 compute units
     Program 8QGSGBtq2dfVC3mtEyCnHBJV7vVby4nuj44wS46viY8G success
