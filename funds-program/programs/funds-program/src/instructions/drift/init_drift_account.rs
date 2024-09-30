@@ -24,13 +24,15 @@ pub struct InitDriftAccount<'info> {
     #[account(
         mut,
         seeds = [b"user_stats", owner.key().as_ref()],
+        seeds::program = drift_program.key(),
         bump
     )]
     pub user_stats: Account<'info, UserStats>,
 
     #[account(
         mut,
-        seeds = [b"drift_state", drift_program.key().as_ref()],
+        seeds = [b"drift_state"],
+        seeds::program = drift_program.key(),
         bump
     )]
     pub state: Box<Account<'info, State>>,
