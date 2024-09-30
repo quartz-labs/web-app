@@ -3,7 +3,6 @@ import { AnchorWallet, useAnchorWallet, useConnection } from "@solana/wallet-ada
 import { FUNDS_PROGRAM_ID, USDC_MINT } from "./constants";
 import { PublicKey } from "@solana/web3.js";
 import axios from 'axios';
-import { DriftClient, DriftEnv, initialize, PERCENTAGE_PRECISION, PerpMarketConfig } from "@drift-labs/sdk";
 
 export const isVaultInitialized = async (wallet: AnchorWallet, connection: web3.Connection) => {
     const [vaultPda, _] = getVault(wallet.publicKey);

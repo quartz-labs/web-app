@@ -1,20 +1,14 @@
-/**
- * Program IDL in camelCase format in order to be used in JS/TS.
- *
- * Note that this is only a type helper and is not the actual IDL. The original
- * IDL can be found at `target/idl/funds_program.json`.
- */
-export type FundsProgram = {
+{
   "address": "B6gXhjcwsD8uFsaaPNFxeswxSNM79iP5mPgBnmxQJjn2",
   "metadata": {
-    "name": "fundsProgram",
+    "name": "funds_program",
     "version": "0.0.1",
     "spec": "0.1.0",
     "description": "Quartz funds program"
   },
   "instructions": [
     {
-      "name": "closeUser",
+      "name": "close_user",
       "discriminator": [
         86,
         219,
@@ -60,7 +54,7 @@ export type FundsProgram = {
       "args": []
     },
     {
-      "name": "driftDeposit",
+      "name": "drift_deposit",
       "discriminator": [
         252,
         63,
@@ -73,7 +67,7 @@ export type FundsProgram = {
       ],
       "accounts": [
         {
-          "name": "pdaAccount",
+          "name": "pda_account",
           "writable": true,
           "pda": {
             "seeds": [
@@ -102,7 +96,7 @@ export type FundsProgram = {
           "writable": true
         },
         {
-          "name": "userStats",
+          "name": "user_stats",
           "writable": true
         },
         {
@@ -111,22 +105,22 @@ export type FundsProgram = {
           "signer": true
         },
         {
-          "name": "spotMarketVault",
+          "name": "spot_market_vault",
           "writable": true
         },
         {
-          "name": "userTokenAccount",
+          "name": "user_token_account",
           "writable": true
         },
         {
-          "name": "tokenProgram"
+          "name": "token_program"
         },
         {
           "name": "owner",
           "writable": true
         },
         {
-          "name": "systemProgram",
+          "name": "system_program",
           "address": "11111111111111111111111111111111"
         }
       ],
@@ -136,17 +130,17 @@ export type FundsProgram = {
           "type": "u64"
         },
         {
-          "name": "marketIndex",
+          "name": "market_index",
           "type": "u16"
         },
         {
-          "name": "reduceOnly",
+          "name": "reduce_only",
           "type": "bool"
         }
       ]
     },
     {
-      "name": "driftWithdrawBorrow",
+      "name": "drift_withdraw_borrow",
       "discriminator": [
         175,
         130,
@@ -159,7 +153,7 @@ export type FundsProgram = {
       ],
       "accounts": [
         {
-          "name": "pdaAccount",
+          "name": "pda_account",
           "writable": true,
           "pda": {
             "seeds": [
@@ -188,7 +182,7 @@ export type FundsProgram = {
           "writable": true
         },
         {
-          "name": "userStats",
+          "name": "user_stats",
           "writable": true
         },
         {
@@ -197,25 +191,25 @@ export type FundsProgram = {
           "signer": true
         },
         {
-          "name": "spotMarketVault",
+          "name": "spot_market_vault",
           "writable": true
         },
         {
-          "name": "driftSigner"
+          "name": "drift_signer"
         },
         {
-          "name": "userTokenAccount",
+          "name": "user_token_account",
           "writable": true
         },
         {
-          "name": "tokenProgram"
+          "name": "token_program"
         },
         {
           "name": "owner",
           "writable": true
         },
         {
-          "name": "systemProgram",
+          "name": "system_program",
           "address": "11111111111111111111111111111111"
         }
       ],
@@ -225,17 +219,17 @@ export type FundsProgram = {
           "type": "u64"
         },
         {
-          "name": "marketIndex",
+          "name": "market_index",
           "type": "u16"
         },
         {
-          "name": "reduceOnly",
+          "name": "reduce_only",
           "type": "bool"
         }
       ]
     },
     {
-      "name": "initDriftAccount",
+      "name": "init_drift_account",
       "discriminator": [
         148,
         140,
@@ -278,7 +272,7 @@ export type FundsProgram = {
           ]
         },
         {
-          "name": "userStats",
+          "name": "user_stats",
           "writable": true,
           "pda": {
             "seeds": [
@@ -304,7 +298,7 @@ export type FundsProgram = {
             ],
             "program": {
               "kind": "account",
-              "path": "driftProgram"
+              "path": "drift_program"
             }
           }
         },
@@ -332,7 +326,7 @@ export type FundsProgram = {
             ],
             "program": {
               "kind": "account",
-              "path": "driftProgram"
+              "path": "drift_program"
             }
           }
         },
@@ -341,17 +335,17 @@ export type FundsProgram = {
           "address": "SysvarRent111111111111111111111111111111111"
         },
         {
-          "name": "systemProgram",
+          "name": "system_program",
           "address": "11111111111111111111111111111111"
         },
         {
-          "name": "driftProgram"
+          "name": "drift_program"
         }
       ],
       "args": []
     },
     {
-      "name": "initUser",
+      "name": "init_user",
       "discriminator": [
         14,
         51,
@@ -386,7 +380,7 @@ export type FundsProgram = {
           }
         },
         {
-          "name": "vaultUsdc",
+          "name": "vault_usdc",
           "writable": true,
           "pda": {
             "seeds": [
@@ -406,7 +400,7 @@ export type FundsProgram = {
               },
               {
                 "kind": "account",
-                "path": "usdcMint"
+                "path": "usdc_mint"
               }
             ]
           }
@@ -417,21 +411,21 @@ export type FundsProgram = {
           "signer": true
         },
         {
-          "name": "usdcMint"
+          "name": "usdc_mint"
         },
         {
-          "name": "tokenProgram",
+          "name": "token_program",
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         },
         {
-          "name": "systemProgram",
+          "name": "system_program",
           "address": "11111111111111111111111111111111"
         }
       ],
       "args": []
     },
     {
-      "name": "withdrawLamports",
+      "name": "withdraw_lamports",
       "discriminator": [
         251,
         144,
@@ -477,7 +471,7 @@ export type FundsProgram = {
           ]
         },
         {
-          "name": "systemProgram",
+          "name": "system_program",
           "address": "11111111111111111111111111111111"
         }
       ],
@@ -489,7 +483,7 @@ export type FundsProgram = {
       ]
     },
     {
-      "name": "withdrawUsdc",
+      "name": "withdraw_usdc",
       "discriminator": [
         114,
         49,
@@ -524,7 +518,7 @@ export type FundsProgram = {
           }
         },
         {
-          "name": "vaultUsdc",
+          "name": "vault_usdc",
           "writable": true,
           "pda": {
             "seeds": [
@@ -544,7 +538,7 @@ export type FundsProgram = {
               },
               {
                 "kind": "account",
-                "path": "usdcMint"
+                "path": "usdc_mint"
               }
             ]
           }
@@ -554,7 +548,7 @@ export type FundsProgram = {
           "writable": true
         },
         {
-          "name": "receiverUsdc",
+          "name": "receiver_usdc",
           "writable": true,
           "pda": {
             "seeds": [
@@ -601,7 +595,7 @@ export type FundsProgram = {
               },
               {
                 "kind": "account",
-                "path": "usdcMint"
+                "path": "usdc_mint"
               }
             ],
             "program": {
@@ -652,18 +646,18 @@ export type FundsProgram = {
           ]
         },
         {
-          "name": "usdcMint"
+          "name": "usdc_mint"
         },
         {
-          "name": "tokenProgram",
+          "name": "token_program",
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         },
         {
-          "name": "associatedTokenProgram",
+          "name": "associated_token_program",
           "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
         },
         {
-          "name": "systemProgram",
+          "name": "system_program",
           "address": "11111111111111111111111111111111"
         }
       ],
@@ -677,7 +671,7 @@ export type FundsProgram = {
   ],
   "accounts": [
     {
-      "name": "state",
+      "name": "State",
       "discriminator": [
         216,
         146,
@@ -690,7 +684,7 @@ export type FundsProgram = {
       ]
     },
     {
-      "name": "userStats",
+      "name": "UserStats",
       "discriminator": [
         176,
         223,
@@ -703,7 +697,7 @@ export type FundsProgram = {
       ]
     },
     {
-      "name": "vault",
+      "name": "Vault",
       "discriminator": [
         211,
         8,
@@ -719,43 +713,43 @@ export type FundsProgram = {
   "errors": [
     {
       "code": 6000,
-      "name": "invalidQuartzAccount",
+      "name": "InvalidQuartzAccount",
       "msg": "Invalid Quartz account"
     },
     {
       "code": 6001,
-      "name": "invalidInitPayer",
+      "name": "InvalidInitPayer",
       "msg": "Invalid init_payer"
     },
     {
       "code": 6002,
-      "name": "insufficientFunds",
+      "name": "InsufficientFunds",
       "msg": "Insufficent funds for transaction"
     },
     {
       "code": 6003,
-      "name": "invalidMintAddress",
+      "name": "InvalidMintAddress",
       "msg": "Invalid SPL token mint address"
     },
     {
       "code": 6004,
-      "name": "invalidDriftAddress",
+      "name": "InvalidDriftAddress",
       "msg": "Invalid Drift program address"
     }
   ],
   "types": [
     {
-      "name": "feeStructure",
+      "name": "FeeStructure",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "feeTiers",
+            "name": "fee_tiers",
             "type": {
               "array": [
                 {
                   "defined": {
-                    "name": "feeTier"
+                    "name": "FeeTier"
                   }
                 },
                 10
@@ -763,74 +757,74 @@ export type FundsProgram = {
             }
           },
           {
-            "name": "fillerRewardStructure",
+            "name": "filler_reward_structure",
             "type": {
               "defined": {
-                "name": "orderFillerRewardStructure"
+                "name": "OrderFillerRewardStructure"
               }
             }
           },
           {
-            "name": "referrerRewardEpochUpperBound",
+            "name": "referrer_reward_epoch_upper_bound",
             "type": "u64"
           },
           {
-            "name": "flatFillerFee",
+            "name": "flat_filler_fee",
             "type": "u64"
           }
         ]
       }
     },
     {
-      "name": "feeTier",
+      "name": "FeeTier",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "feeNumerator",
+            "name": "fee_numerator",
             "type": "u32"
           },
           {
-            "name": "feeDenominator",
+            "name": "fee_denominator",
             "type": "u32"
           },
           {
-            "name": "makerRebateNumerator",
+            "name": "maker_rebate_numerator",
             "type": "u32"
           },
           {
-            "name": "makerRebateDenominator",
+            "name": "maker_rebate_denominator",
             "type": "u32"
           },
           {
-            "name": "referrerRewardNumerator",
+            "name": "referrer_reward_numerator",
             "type": "u32"
           },
           {
-            "name": "referrerRewardDenominator",
+            "name": "referrer_reward_denominator",
             "type": "u32"
           },
           {
-            "name": "refereeFeeNumerator",
+            "name": "referee_fee_numerator",
             "type": "u32"
           },
           {
-            "name": "refereeFeeDenominator",
+            "name": "referee_fee_denominator",
             "type": "u32"
           }
         ]
       }
     },
     {
-      "name": "oracleGuardRails",
+      "name": "OracleGuardRails",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "priceDivergence",
+            "name": "price_divergence",
             "type": {
               "defined": {
-                "name": "priceDivergenceGuardRails"
+                "name": "PriceDivergenceGuardRails"
               }
             }
           },
@@ -838,7 +832,7 @@ export type FundsProgram = {
             "name": "validity",
             "type": {
               "defined": {
-                "name": "validityGuardRails"
+                "name": "ValidityGuardRails"
               }
             }
           }
@@ -846,43 +840,43 @@ export type FundsProgram = {
       }
     },
     {
-      "name": "orderFillerRewardStructure",
+      "name": "OrderFillerRewardStructure",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "rewardNumerator",
+            "name": "reward_numerator",
             "type": "u32"
           },
           {
-            "name": "rewardDenominator",
+            "name": "reward_denominator",
             "type": "u32"
           },
           {
-            "name": "timeBasedRewardLowerBound",
+            "name": "time_based_reward_lower_bound",
             "type": "u128"
           }
         ]
       }
     },
     {
-      "name": "priceDivergenceGuardRails",
+      "name": "PriceDivergenceGuardRails",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "markOraclePercentDivergence",
+            "name": "mark_oracle_percent_divergence",
             "type": "u64"
           },
           {
-            "name": "oracleTwap5MinPercentDivergence",
+            "name": "oracle_twap_5_min_percent_divergence",
             "type": "u64"
           }
         ]
       }
     },
     {
-      "name": "state",
+      "name": "State",
       "type": {
         "kind": "struct",
         "fields": [
@@ -891,11 +885,11 @@ export type FundsProgram = {
             "type": "pubkey"
           },
           {
-            "name": "whitelistMint",
+            "name": "whitelist_mint",
             "type": "pubkey"
           },
           {
-            "name": "discountMint",
+            "name": "discount_mint",
             "type": "pubkey"
           },
           {
@@ -903,95 +897,95 @@ export type FundsProgram = {
             "type": "pubkey"
           },
           {
-            "name": "srmVault",
+            "name": "srm_vault",
             "type": "pubkey"
           },
           {
-            "name": "perpFeeStructure",
+            "name": "perp_fee_structure",
             "type": {
               "defined": {
-                "name": "feeStructure"
+                "name": "FeeStructure"
               }
             }
           },
           {
-            "name": "spotFeeStructure",
+            "name": "spot_fee_structure",
             "type": {
               "defined": {
-                "name": "feeStructure"
+                "name": "FeeStructure"
               }
             }
           },
           {
-            "name": "oracleGuardRails",
+            "name": "oracle_guard_rails",
             "type": {
               "defined": {
-                "name": "oracleGuardRails"
+                "name": "OracleGuardRails"
               }
             }
           },
           {
-            "name": "numberOfAuthorities",
+            "name": "number_of_authorities",
             "type": "u64"
           },
           {
-            "name": "numberOfSubAccounts",
+            "name": "number_of_sub_accounts",
             "type": "u64"
           },
           {
-            "name": "lpCooldownTime",
+            "name": "lp_cooldown_time",
             "type": "u64"
           },
           {
-            "name": "liquidationMarginBufferRatio",
+            "name": "liquidation_margin_buffer_ratio",
             "type": "u32"
           },
           {
-            "name": "settlementDuration",
+            "name": "settlement_duration",
             "type": "u16"
           },
           {
-            "name": "numberOfMarkets",
+            "name": "number_of_markets",
             "type": "u16"
           },
           {
-            "name": "numberOfSpotMarkets",
+            "name": "number_of_spot_markets",
             "type": "u16"
           },
           {
-            "name": "signerNonce",
+            "name": "signer_nonce",
             "type": "u8"
           },
           {
-            "name": "minPerpAuctionDuration",
+            "name": "min_perp_auction_duration",
             "type": "u8"
           },
           {
-            "name": "defaultMarketOrderTimeInForce",
+            "name": "default_market_order_time_in_force",
             "type": "u8"
           },
           {
-            "name": "defaultSpotAuctionDuration",
+            "name": "default_spot_auction_duration",
             "type": "u8"
           },
           {
-            "name": "exchangeStatus",
+            "name": "exchange_status",
             "type": "u8"
           },
           {
-            "name": "liquidationDuration",
+            "name": "liquidation_duration",
             "type": "u8"
           },
           {
-            "name": "initialPctToLiquidate",
+            "name": "initial_pct_to_liquidate",
             "type": "u16"
           },
           {
-            "name": "maxNumberOfSubAccounts",
+            "name": "max_number_of_sub_accounts",
             "type": "u16"
           },
           {
-            "name": "maxInitializeUserFee",
+            "name": "max_initialize_user_fee",
             "type": "u16"
           },
           {
@@ -1007,39 +1001,39 @@ export type FundsProgram = {
       }
     },
     {
-      "name": "userFees",
+      "name": "UserFees",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "totalFeePaid",
+            "name": "total_fee_paid",
             "type": "u64"
           },
           {
-            "name": "totalFeeRebate",
+            "name": "total_fee_rebate",
             "type": "u64"
           },
           {
-            "name": "totalTokenDiscount",
+            "name": "total_token_discount",
             "type": "u64"
           },
           {
-            "name": "totalRefereeDiscount",
+            "name": "total_referee_discount",
             "type": "u64"
           },
           {
-            "name": "totalReferrerReward",
+            "name": "total_referrer_reward",
             "type": "u64"
           },
           {
-            "name": "currentEpochReferrerReward",
+            "name": "current_epoch_referrer_reward",
             "type": "u64"
           }
         ]
       }
     },
     {
-      "name": "userStats",
+      "name": "UserStats",
       "type": {
         "kind": "struct",
         "fields": [
@@ -1055,60 +1049,60 @@ export type FundsProgram = {
             "name": "fees",
             "type": {
               "defined": {
-                "name": "userFees"
+                "name": "UserFees"
               }
             }
           },
           {
-            "name": "nextEpochTs",
+            "name": "next_epoch_ts",
             "type": "i64"
           },
           {
-            "name": "makerVolume30D",
+            "name": "maker_volume_30_d",
             "type": "u64"
           },
           {
-            "name": "takerVolume30D",
+            "name": "taker_volume_30_d",
             "type": "u64"
           },
           {
-            "name": "fillerVolume30D",
+            "name": "filler_volume_30_d",
             "type": "u64"
           },
           {
-            "name": "lastMakerVolume30DTs",
+            "name": "last_maker_volume_30_d_ts",
             "type": "i64"
           },
           {
-            "name": "lastTakerVolume30DTs",
+            "name": "last_taker_volume_30_d_ts",
             "type": "i64"
           },
           {
-            "name": "lastFillerVolume30DTs",
+            "name": "last_filler_volume_30_d_ts",
             "type": "i64"
           },
           {
-            "name": "ifStakedQuoteAssetAmount",
+            "name": "if_staked_quote_asset_amount",
             "type": "u64"
           },
           {
-            "name": "numberOfSubAccounts",
+            "name": "number_of_sub_accounts",
             "type": "u16"
           },
           {
-            "name": "numberOfSubAccountsCreated",
+            "name": "number_of_sub_accounts_created",
             "type": "u16"
           },
           {
-            "name": "isReferrer",
+            "name": "is_referrer",
             "type": "bool"
           },
           {
-            "name": "disableUpdatePerpBidAskTwap",
+            "name": "disable_update_perp_bid_ask_twap",
             "type": "bool"
           },
           {
-            "name": "padding1",
+            "name": "padding_1",
             "type": {
               "array": [
                 "u8",
@@ -1117,35 +1111,35 @@ export type FundsProgram = {
             }
           },
           {
-            "name": "fuelInsurance",
+            "name": "fuel_insurance",
             "type": "u32"
           },
           {
-            "name": "fuelDeposits",
+            "name": "fuel_deposits",
             "type": "u32"
           },
           {
-            "name": "fuelBorrows",
+            "name": "fuel_borrows",
             "type": "u32"
           },
           {
-            "name": "fuelPositions",
+            "name": "fuel_positions",
             "type": "u32"
           },
           {
-            "name": "fuelTaker",
+            "name": "fuel_taker",
             "type": "u32"
           },
           {
-            "name": "fuelMaker",
+            "name": "fuel_maker",
             "type": "u32"
           },
           {
-            "name": "ifStakedGovTokenAmount",
+            "name": "if_staked_gov_token_amount",
             "type": "u64"
           },
           {
-            "name": "lastFuelIfBonusUpdateTs",
+            "name": "last_fuel_if_bonus_update_ts",
             "type": "u32"
           },
           {
@@ -1161,31 +1155,31 @@ export type FundsProgram = {
       }
     },
     {
-      "name": "validityGuardRails",
+      "name": "ValidityGuardRails",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "slotsBeforeStaleForAmm",
+            "name": "slots_before_stale_for_amm",
             "type": "i64"
           },
           {
-            "name": "slotsBeforeStaleForMargin",
+            "name": "slots_before_stale_for_margin",
             "type": "i64"
           },
           {
-            "name": "confidenceIntervalMaxSize",
+            "name": "confidence_interval_max_size",
             "type": "u64"
           },
           {
-            "name": "tooVolatileRatio",
+            "name": "too_volatile_ratio",
             "type": "i64"
           }
         ]
       }
     },
     {
-      "name": "vault",
+      "name": "Vault",
       "type": {
         "kind": "struct",
         "fields": [
@@ -1203,9 +1197,9 @@ export type FundsProgram = {
   ],
   "constants": [
     {
-      "name": "usdcMintAddress",
+      "name": "USDC_MINT_ADDRESS",
       "type": "pubkey",
       "value": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
     }
   ]
-};
+}

@@ -1,10 +1,10 @@
 import { AnchorProvider, BN, Idl, Program, setProvider, web3 } from "@coral-xyz/anchor";
 import { AnchorWallet } from "@solana/wallet-adapter-react";
-import { USDC_MINT } from "./constants";
-import idl from "../idl/funds-program.json";
+import { DRIFT_PROGRAM_ID, USDC_MINT } from "./constants";
+import idl from "../idl/funds_program.json";
 import { FundsProgram } from "@/types/funds_program";
 import { TOKEN_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/utils/token";
-import { SystemProgram } from "@solana/web3.js";
+import { Keypair, PublicKey, SystemProgram, Transaction, VersionedTransaction } from "@solana/web3.js";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
 import { getVault } from "./utils";
 
@@ -14,8 +14,10 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
     const program = new Program(idl as Idl, provider) as unknown as Program<FundsProgram>;
     const [vaultPda, vaultUsdcPda] = getVault(wallet.publicKey);
 
+    const driftProgramId = new PublicKey(DRIFT_PROGRAM_ID);
+
     try {
-        const signature = await program.methods
+        const ix_initUser = await program.methods
             .initUser()
             .accounts({
                 // @ts-ignore - Causing an issue in Cursor IDE
@@ -26,7 +28,54 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
                 tokenProgram: TOKEN_PROGRAM_ID,
                 systemProgram: SystemProgram.programId,
             })
-            .rpc();
+            .instruction();
+
+        const userStatsPda = web3.PublicKey.findProgramAddressSync(
+            [Buffer.from("user_stats"), wallet.publicKey.toBuffer()],
+            new web3.PublicKey(DRIFT_PROGRAM_ID)
+        );
+
+        const statePda = web3.PublicKey.findProgramAddressSync(
+            [Buffer.from("drift_state")],
+            new web3.PublicKey(DRIFT_PROGRAM_ID)
+        );
+
+        const ix_initDriftAccount = await program.methods
+            .initDriftAccount()
+            .accounts({
+                // @ts-ignore - Causing an issue in Cursor IDE
+                vault: vaultPda,
+                owner: wallet.publicKey,
+                userStats: userStatsPda,
+                state: statePda,
+                rent: web3.SYSVAR_RENT_PUBKEY,
+                systemProgram: SystemProgram.programId,
+                driftProgram: driftProgramId
+            })
+            .instruction();
+
+        const tx = new Transaction().add(ix_initUser, ix_initDriftAccount);
+
+        const latestBlockhash = await connection.getLatestBlockhash();
+        tx.recentBlockhash = latestBlockhash.blockhash;
+        tx.feePayer = wallet.publicKey;
+
+        const versionedTx = new VersionedTransaction(tx.compileMessage());
+        const signedTx = await wallet.signTransaction(versionedTx);
+
+        const simulation = await connection.simulateTransaction(signedTx);
+        console.log("Simulation result:", simulation);
+
+        const signature = await provider.connection.sendRawTransaction(signedTx.serialize());
+        
+        await connection.confirmTransaction({
+            signature,
+            blockhash: latestBlockhash.blockhash,
+            lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
+        });
+
+        console.log(signature);
+
         return signature;
     } catch (err) {
         if (err instanceof WalletSignTransactionError) {
