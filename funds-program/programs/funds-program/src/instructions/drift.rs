@@ -1,5 +1,5 @@
-mod init_account;
-pub use init_account::*;
+mod init_drift_account;
+pub use init_drift_account::*;
 
 mod deposit;
 pub use deposit::*;

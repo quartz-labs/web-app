@@ -9,5 +9,7 @@ pub enum ErrorCode {
     #[msg("Insufficent funds for transaction")]
     InsufficientFunds,
     #[msg("Invalid SPL token mint address")]
-    InvalidMintAddress
+    InvalidMintAddress,
+    #[msg("Invalid Drift program address")]
+    InvalidDriftAddress
 }

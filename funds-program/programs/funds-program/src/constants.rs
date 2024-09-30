@@ -18,3 +18,5 @@ pub const USDC_MINT_ADDRESS: Pubkey = pubkey!("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEER
 #[cfg(not(any(feature = "local", feature = "devnet")))]
 #[constant]
 pub const USDC_MINT_ADDRESS: Pubkey = pubkey!("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");      // Mainnet USDC address
+
+pub const DRIFT_ADDRESS: Pubkey = pubkey!("dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH");

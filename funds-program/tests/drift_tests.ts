@@ -12,8 +12,7 @@ describe("drift tests", () => {
 
   before(async () => {
     testSetup = await setupTests();
-    // Replace this with the actual Drift program ID
-    driftProgramId = new PublicKey("dRifTnFRqKDRWnzK5isegHtghWBNi9yBJwW1JsUrhAp");
+    driftProgramId = new PublicKey("dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH");
   });
 
   it("drift_init_account", async () => {
@@ -26,17 +25,15 @@ describe("drift tests", () => {
 
     try {
       await program.methods
-        .driftInitAccount()
+        .initDriftAccount()
         .accounts({
-          pda_account: vaultPda,
-          user: driftUser.publicKey,
+          // @ts-ignore - Causing an issue in Cursor IDE
+          vault: vaultPda,
+          owner: driftUser.publicKey,
           userStats: driftUserStats.publicKey,
           state: driftState.publicKey,
-          authority: vaultPda,
-          payer: ownerKeypair.publicKey,
           rent: anchor.web3.SYSVAR_RENT_PUBKEY,
           systemProgram: SystemProgram.programId,
-          owner: ownerKeypair.publicKey,
           driftProgram: driftProgramId,
         })
         .signers([ownerKeypair])

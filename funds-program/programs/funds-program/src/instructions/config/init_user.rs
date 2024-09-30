@@ -45,11 +45,13 @@ pub struct InitializeUser<'info> {
 }
 
 pub fn init_user_handler(ctx: Context<InitializeUser>) -> Result<()> {
-    msg!("Initializing account");
+    msg!("init_user: Initializing account");
 
     // Set up vault state
     ctx.accounts.vault.owner = ctx.accounts.owner.key();
     ctx.accounts.vault.bump = ctx.bumps.vault;
+
+    msg!("init_user: Done");
 
     Ok(())
 }
