@@ -24,26 +24,23 @@ pub struct InitDriftAccount<'info> {
     #[account(mut)]
     pub owner: Signer<'info>,
 
+    /// CHECK: This account is initialized in the instruction
     #[account(
-        init,
         seeds = [b"user", vault.key().as_ref(), sub_account_id.to_le_bytes().as_ref()],
-        // TODO: calculate space, I got this from getting the size of a valid user account on mainnet
-        space = 4376,
-        bump,
-        payer = owner
-    )]
-    pub user: Account<'info, User>,
-
-    #[account(
-        mut,
-        seeds = [b"user_stats", owner.key().as_ref()],
         seeds::program = drift_program.key(),
         bump
     )]
-    pub user_stats: Account<'info, UserStats>,
+    pub user: UncheckedAccount<'info>,
+
+    /// CHECK: This account is initialized in the instruction
+    #[account(
+        seeds = [b"user_stats", vault.key().as_ref()],
+        seeds::program = drift_program.key(),
+        bump
+    )]
+    pub user_stats: UncheckedAccount<'info>,
 
     #[account(
-        mut,
         seeds = [b"drift_state"],
         seeds::program = drift_program.key(),
         bump
@@ -104,7 +101,7 @@ pub fn init_drift_account_handler(ctx: Context<InitDriftAccount>, sub_account_id
         signer_seeds
     );
  
-    initialize_user(create_user_cpi_context, 0, [0; 32])?;
+    initialize_user(create_user_cpi_context, sub_account_id, [0; 32])?;
 
     msg!("init_drift_account: Done");
 
