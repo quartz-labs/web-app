@@ -19,7 +19,7 @@ export const getVault = (owner: PublicKey) => {
     return [vault, vaultUsdc, vaultWSol];
 }
 
-export const getDriftPDAs = (owner: PublicKey, marketIndex: number) => {
+export const getDriftPDAs = (owner: PublicKey, marketIndex: number = 1) => {
     const [vaultPda, _usdc, _wsol] = getVault(owner);
 
     const [userPda] = web3.PublicKey.findProgramAddressSync(

@@ -13,7 +13,7 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
     setProvider(provider);
     const program = new Program(idl as Idl, provider) as unknown as Program<FundsProgram>;
     const [vaultPda, vaultUsdcPda, _wsol] = getVault(wallet.publicKey);
-    const [userPda, userStatsPda, statePda, _spotMarketVault] = getDriftPDAs(wallet.publicKey, 0);
+    const [userPda, userStatsPda, statePda, _spotMarketVault] = getDriftPDAs(wallet.publicKey);
 
     const driftProgramId = new PublicKey(DRIFT_PROGRAM_ID);
 
