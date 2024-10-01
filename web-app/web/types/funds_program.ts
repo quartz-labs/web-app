@@ -73,7 +73,7 @@ export type FundsProgram = {
       ],
       "accounts": [
         {
-          "name": "pdaAccount",
+          "name": "vault",
           "writable": true,
           "pda": {
             "seeds": [
@@ -95,24 +95,144 @@ export type FundsProgram = {
           }
         },
         {
-          "name": "state"
+          "name": "owner",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "vault"
+          ]
+        },
+        {
+          "name": "state",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  114,
+                  105,
+                  102,
+                  116,
+                  95,
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ]
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "driftProgram"
+            }
+          }
         },
         {
           "name": "user",
-          "writable": true
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  0,
+                  0
+                ]
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "driftProgram"
+            }
+          }
         },
         {
           "name": "userStats",
-          "writable": true
-        },
-        {
-          "name": "authority",
           "writable": true,
-          "signer": true
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  115,
+                  116,
+                  97,
+                  116,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "driftProgram"
+            }
+          }
         },
         {
           "name": "spotMarketVault",
-          "writable": true
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  112,
+                  111,
+                  116,
+                  95,
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "const",
+                "value": [
+                  0,
+                  0
+                ]
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "driftProgram"
+            }
+          }
         },
         {
           "name": "userTokenAccount",
@@ -122,26 +242,13 @@ export type FundsProgram = {
           "name": "tokenProgram"
         },
         {
-          "name": "owner",
-          "writable": true
-        },
-        {
-          "name": "systemProgram",
-          "address": "11111111111111111111111111111111"
+          "name": "driftProgram"
         }
       ],
       "args": [
         {
           "name": "amount",
           "type": "u64"
-        },
-        {
-          "name": "marketIndex",
-          "type": "u16"
-        },
-        {
-          "name": "reduceOnly",
-          "type": "bool"
         }
       ]
     },
@@ -190,6 +297,7 @@ export type FundsProgram = {
         },
         {
           "name": "user",
+          "writable": true,
           "pda": {
             "seeds": [
               {
@@ -221,6 +329,7 @@ export type FundsProgram = {
         },
         {
           "name": "userStats",
+          "writable": true,
           "pda": {
             "seeds": [
               {
@@ -251,6 +360,7 @@ export type FundsProgram = {
         },
         {
           "name": "state",
+          "writable": true,
           "pda": {
             "seeds": [
               {

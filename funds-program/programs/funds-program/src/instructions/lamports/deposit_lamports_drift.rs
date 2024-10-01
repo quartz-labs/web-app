@@ -1,74 +1,110 @@
 use anchor_lang::prelude::*;
+use anchor_spl::token_interface::{TokenInterface, TokenAccount};
+use drift_sdk::accounts::State;
 use drift_sdk::cpi::deposit;
 use drift_sdk::Deposit;
+
+use crate::{
+    constants::DRIFT_PROGRAM_ID,
+    errors::ErrorCode,
+    state::Vault
+};
 
 #[derive(Accounts)]
 pub struct DepositLamportsDrift<'info> {
     #[account(
         mut,
         seeds = [b"vault", owner.key().as_ref()],
+        bump = vault.bump,
+        has_one = owner
+    )]
+    pub vault: Account<'info, Vault>,
+
+    #[account(mut)]
+    pub owner: Signer<'info>,
+
+    #[account(
+        mut,
+        seeds = [b"drift_state"],
+        seeds::program = drift_program.key(),
+        bump
+    )]
+    pub state: Box<Account<'info, State>>,
+
+    /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
+    #[account(
+        mut,
+        seeds = [b"user", vault.key().as_ref(), (0u16).to_le_bytes().as_ref()],
+        seeds::program = drift_program.key(),
+        bump
+    )]
+    pub user: UncheckedAccount<'info>,
+
+    /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
+    #[account(
+        mut,
+        seeds = [b"user_stats", vault.key().as_ref()],
+        seeds::program = drift_program.key(),
+        bump
+    )]
+    pub user_stats: UncheckedAccount<'info>,
+
+    /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
+    #[account(
+        mut,
+        seeds = [b"spot_market_vault".as_ref(), (0u16).to_le_bytes().as_ref()], // 0 for SOL
+        seeds::program = drift_program.key(),
         bump,
     )]
-    pub pda_account: SystemAccount<'info>,
+    pub spot_market_vault: UncheckedAccount<'info>,
 
-    /// CHECK: Skip check
-    pub state: AccountInfo<'info>,
+    #[account(
+        mut,
+        token::authority = vault
+    )]
+    pub user_token_account: Box<InterfaceAccount<'info, TokenAccount>>,
 
-    /// CHECK: Skip check
-    #[account(mut)]
-    pub user: AccountInfo<'info>,
-    
-    /// CHECK: Skip check
-    #[account(mut)]
-    pub user_stats: AccountInfo<'info>,
+    pub token_program: Interface<'info, TokenInterface>,
 
-    /// CHECK: Skip check
-    #[account(mut, signer)]
-    pub authority: AccountInfo<'info>,
-    
-    /// CHECK: Skip check
-    #[account(mut)]
-    pub spot_market_vault: AccountInfo<'info>,
-
-    /// CHECK: Skip check
-    #[account(mut)]
-    pub user_token_account: AccountInfo<'info>,
-    
-    /// CHECK: Skip check
-    pub token_program: AccountInfo<'info>,
-    
-    #[account(mut)]
-    pub owner: SystemAccount<'info>,
-    
-    pub system_program: Program<'info, System>,
+    /// CHECK: Account is safe once the address is correct
+    #[account(
+        constraint = drift_program.key() == DRIFT_PROGRAM_ID @ ErrorCode::InvalidDriftProgram
+    )]
+    pub drift_program: UncheckedAccount<'info>,
 }
 
 pub fn deposit_lamports_drift_handler(
     ctx: Context<DepositLamportsDrift>, 
-    amount: u64, 
-    market_index: u16, 
-    reduce_only: bool
+    amount: u64
 ) -> Result<()> {
-    let program_id = ctx.accounts.system_program.to_account_info();
+    msg!("deposit_lamports_drift: Deposit {} lamports into Drift", amount);
     
-    let seed = ctx.accounts.owner.key();
-    let bump_seed = ctx.bumps.pda_account;
-    let signer_seeds: &[&[&[u8]]] = &[&[b"vault", seed.as_ref(), &[bump_seed]]];
+    let vault_bump = ctx.accounts.vault.bump;
+    let owner = ctx.accounts.owner.key();
+    let seeds = &[
+        b"vault",
+        owner.as_ref(),
+        &[vault_bump]
+    ];
+    let signer_seeds = &[&seeds[..]];
  
-    let cpi_context = CpiContext::new(
-        program_id,
+    let cpi_context = CpiContext::new_with_signer(
+        ctx.accounts.drift_program.to_account_info(),
         Deposit {
             state: ctx.accounts.state.to_account_info(),
             user: ctx.accounts.user.to_account_info(),
             user_stats: ctx.accounts.user_stats.to_account_info(),
-            authority: ctx.accounts.authority.to_account_info(),
+            authority: ctx.accounts.vault.to_account_info(),
             spot_market_vault: ctx.accounts.spot_market_vault.to_account_info(),
             user_token_account: ctx.accounts.user_token_account.to_account_info(),
             token_program: ctx.accounts.token_program.to_account_info(),
         },
-    )
-    .with_signer(signer_seeds);
+        signer_seeds
+    );
  
-    deposit(cpi_context, market_index, amount, reduce_only)?;
+    deposit(cpi_context, 0, amount, false)?;
+
+    msg!("deposit_lamports_drift: Done");
+
     Ok(())
 }

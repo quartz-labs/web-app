@@ -9,8 +9,8 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { isVaultInitialized } from '@/utils/utils';
 import Modal, { ModalProps } from '@/components/modal/Modal';
-import { withdrawSol } from '@/utils/instructions';
-import { LAMPORTS_PER_SOL, SystemProgram, Transaction } from '@solana/web3.js';
+import { getDepositSolIx, withdrawSol } from '@/utils/instructions';
+import { LAMPORTS_PER_SOL, SystemProgram, Transaction, VersionedTransaction } from '@solana/web3.js';
 import { getVault } from '@/utils/getPDAs';
 
 const WalletMultiButtonDynamic = dynamic(
@@ -49,21 +49,46 @@ export default function Dashboard() {
             denomination: "SOL",
             buttonText: "Deposit",
             onConfirm: async (amount: number) => {
-                if (!publicKey) {
+                if (!publicKey || !wallet) {
                     console.error("Error: Wallet not connected");
                     return;
                 }
 
                 const [vault, _] = getVault(publicKey);
-                const tx = new Transaction().add(
-                    SystemProgram.transfer({
-                        fromPubkey: publicKey,
-                        toPubkey: vault,
-                        lamports: amount * LAMPORTS_PER_SOL
-                    })
-                );
 
-                const signature = await sendTransaction(tx, connection);
+                const ix_transferLamports = SystemProgram.transfer({
+                    fromPubkey: publicKey,
+                    toPubkey: vault,
+                    lamports: amount * LAMPORTS_PER_SOL
+                });
+
+                const ix_depositLamportsDrift = await getDepositSolIx(wallet, connection, amount * LAMPORTS_PER_SOL);
+
+                if (!ix_depositLamportsDrift) {
+                    console.log("Error: User cancelled transaction")
+                    return;
+                }
+
+                const tx = new Transaction().add(ix_transferLamports, ix_depositLamportsDrift);
+
+                const latestBlockhash = await connection.getLatestBlockhash();
+                tx.recentBlockhash = latestBlockhash.blockhash;
+                tx.feePayer = wallet.publicKey;
+
+                const versionedTx = new VersionedTransaction(tx.compileMessage());
+                const signedTx = await wallet.signTransaction(versionedTx);
+
+                const simulation = await connection.simulateTransaction(signedTx);
+                console.log("Simulation result:", simulation);
+
+                const signature = await connection.sendRawTransaction(signedTx.serialize());
+                
+                await connection.confirmTransaction({
+                    signature,
+                    blockhash: latestBlockhash.blockhash,
+                    lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
+                });
+
                 console.log(signature);
                 if (signature) setModalEnabled(false);
             },

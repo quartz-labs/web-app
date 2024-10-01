@@ -6,14 +6,14 @@ import { FundsProgram } from "@/types/funds_program";
 import { TOKEN_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/utils/token";
 import { Keypair, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction, VersionedTransaction } from "@solana/web3.js";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
-import { getVault } from "./getPDAs";
-import { getUserAccountPublicKey } from "./driftHelpers";
+import { getDriftPDAs, getVault } from "./getPDAs";
 
 export const initAccount = async (wallet: AnchorWallet, connection: web3.Connection) => {
     const provider = new AnchorProvider(connection, wallet, {commitment: "confirmed"}); 
     setProvider(provider);
     const program = new Program(idl as Idl, provider) as unknown as Program<FundsProgram>;
     const [vaultPda, vaultUsdcPda] = getVault(wallet.publicKey);
+    const [userPda, userStatsPda, statePda, _] = getDriftPDAs(wallet.publicKey, 0);
 
     const driftProgramId = new PublicKey(DRIFT_PROGRAM_ID);
 
@@ -31,27 +31,13 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
             })
             .instruction();
 
-        const [userStatsPda] = web3.PublicKey.findProgramAddressSync(
-            [Buffer.from("user_stats"), vaultPda.toBuffer()],
-            new web3.PublicKey(DRIFT_PROGRAM_ID)
-        );
-
-        const [statePda] = web3.PublicKey.findProgramAddressSync(
-            [Buffer.from("drift_state")],
-            new web3.PublicKey(DRIFT_PROGRAM_ID)
-        );
-
-        const userAccountPublicKey = await getUserAccountPublicKey(
-            new web3.PublicKey(DRIFT_PROGRAM_ID),
-            vaultPda
-        );
-
         const ix_initDriftAccount = await program.methods
             .initDriftAccount()
             .accounts({
                 // @ts-ignore - Causing an issue in Cursor IDE
                 vault: vaultPda,
                 owner: wallet.publicKey,
+                user: userPda,
                 userStats: userStatsPda,
                 state: statePda,
                 driftProgram: driftProgramId,
@@ -108,6 +94,37 @@ export const withdrawSol = async(wallet: AnchorWallet, connection: web3.Connecti
             })
             .rpc();
         return signature;
+    } catch (err) {
+        if (err instanceof WalletSignTransactionError) {
+            return null;
+        } else throw err;
+    }
+}
+
+export const getDepositSolIx = async(wallet: AnchorWallet, connection: web3.Connection, amountLamports: number) => {
+    const provider = new AnchorProvider(connection, wallet, {commitment: "confirmed"}); 
+    setProvider(provider);
+    const program = new Program(idl as Idl, provider) as unknown as Program<FundsProgram>;
+    const [vaultPda, vaultUsdc] = getVault(wallet.publicKey);
+    const [userPda, userStatsPda, statePda, spotMarketVault] = getDriftPDAs(wallet.publicKey, 0);
+
+    try {
+        const ix_depositLamportsDrift = await program.methods
+            .depositLamportsDrift(new BN(amountLamports))
+            .accounts({
+                // @ts-ignore - Causing an issue in Cursor IDE
+                vault: vaultPda,
+                owner: wallet.publicKey,
+                state: statePda,
+                user: userPda,
+                userStats: userStatsPda,
+                spotMarketVault: spotMarketVault,
+                userTokenAccount: vaultUsdc,
+                tokenProgram: TOKEN_PROGRAM_ID,
+                driftProgram: DRIFT_PROGRAM_ID
+            })
+            .instruction();
+        return ix_depositLamportsDrift;
     } catch (err) {
         if (err instanceof WalletSignTransactionError) {
             return null;
