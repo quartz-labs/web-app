@@ -30,14 +30,6 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
                 systemProgram: SystemProgram.programId,
             })
             .instruction();
-        
-        const ix_deposit = new Transaction().add(
-            SystemProgram.transfer({
-                fromPubkey: wallet.publicKey,
-                toPubkey: vaultPda,
-                lamports: 0.2 * LAMPORTS_PER_SOL
-            })
-        );
 
         const [userStatsPda] = web3.PublicKey.findProgramAddressSync(
             [Buffer.from("user_stats"), vaultPda.toBuffer()],
@@ -69,7 +61,7 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
             })
             .instruction();
 
-        const tx = new Transaction().add(ix_initUser, ix_deposit, ix_initDriftAccount);
+        const tx = new Transaction().add(ix_initUser, ix_initDriftAccount);
 
         const latestBlockhash = await connection.getLatestBlockhash();
         tx.recentBlockhash = latestBlockhash.blockhash;
