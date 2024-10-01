@@ -7,6 +7,7 @@ import { TOKEN_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/utils/token";
 import { Keypair, PublicKey, SystemProgram, Transaction, VersionedTransaction } from "@solana/web3.js";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
 import { getVault } from "./utils";
+import { getUserAccountPublicKey } from "./driftHelpers";
 
 export const initAccount = async (wallet: AnchorWallet, connection: web3.Connection) => {
     const provider = new AnchorProvider(connection, wallet, {commitment: "confirmed"}); 
@@ -40,12 +41,18 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
             new web3.PublicKey(DRIFT_PROGRAM_ID)
         );
 
+        const userAccountPublicKey = await getUserAccountPublicKey(
+            new web3.PublicKey(DRIFT_PROGRAM_ID),
+            vaultPda
+        );
+
         const ix_initDriftAccount = await program.methods
-            .initDriftAccount()
+            .initDriftAccount(0)
             .accounts({
                 // @ts-ignore - Causing an issue in Cursor IDE
                 vault: vaultPda,
                 owner: wallet.publicKey,
+                user: userAccountPublicKey,
                 userStats: userStatsPda,
                 state: statePda,
                 rent: web3.SYSVAR_RENT_PUBKEY,

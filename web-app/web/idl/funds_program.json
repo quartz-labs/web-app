@@ -272,6 +272,31 @@
           ]
         },
         {
+          "name": "user",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault"
+              },
+              {
+                "kind": "arg",
+                "path": "sub_account_id"
+              }
+            ]
+          }
+        },
+        {
           "name": "user_stats",
           "writable": true,
           "pda": {
@@ -342,7 +367,12 @@
           "name": "drift_program"
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "sub_account_id",
+          "type": "u16"
+        }
+      ]
     },
     {
       "name": "init_user",
@@ -684,6 +714,19 @@
       ]
     },
     {
+      "name": "User",
+      "discriminator": [
+        159,
+        117,
+        95,
+        227,
+        239,
+        151,
+        58,
+        236
+      ]
+    },
+    {
       "name": "UserStats",
       "discriminator": [
         176,
@@ -735,6 +778,11 @@
       "code": 6004,
       "name": "InvalidDriftAddress",
       "msg": "Invalid Drift program address"
+    },
+    {
+      "code": 6005,
+      "name": "UnableToLoadAccountLoader",
+      "msg": "Unable to load account loader"
     }
   ],
   "types": [
@@ -816,6 +864,20 @@
       }
     },
     {
+      "name": "MarketType",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Spot"
+          },
+          {
+            "name": "Perp"
+          }
+        ]
+      }
+    },
+    {
       "name": "OracleGuardRails",
       "type": {
         "kind": "struct",
@@ -834,6 +896,139 @@
               "defined": {
                 "name": "ValidityGuardRails"
               }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Order",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "slot",
+            "type": "u64"
+          },
+          {
+            "name": "price",
+            "type": "u64"
+          },
+          {
+            "name": "base_asset_amount",
+            "type": "u64"
+          },
+          {
+            "name": "base_asset_amount_filled",
+            "type": "u64"
+          },
+          {
+            "name": "quote_asset_amount_filled",
+            "type": "u64"
+          },
+          {
+            "name": "trigger_price",
+            "type": "u64"
+          },
+          {
+            "name": "auction_start_price",
+            "type": "i64"
+          },
+          {
+            "name": "auction_end_price",
+            "type": "i64"
+          },
+          {
+            "name": "max_ts",
+            "type": "i64"
+          },
+          {
+            "name": "oracle_price_offset",
+            "type": "i32"
+          },
+          {
+            "name": "order_id",
+            "type": "u32"
+          },
+          {
+            "name": "market_index",
+            "type": "u16"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "OrderStatus"
+              }
+            }
+          },
+          {
+            "name": "order_type",
+            "type": {
+              "defined": {
+                "name": "OrderType"
+              }
+            }
+          },
+          {
+            "name": "market_type",
+            "type": {
+              "defined": {
+                "name": "MarketType"
+              }
+            }
+          },
+          {
+            "name": "user_order_id",
+            "type": "u8"
+          },
+          {
+            "name": "existing_position_direction",
+            "type": {
+              "defined": {
+                "name": "PositionDirection"
+              }
+            }
+          },
+          {
+            "name": "direction",
+            "type": {
+              "defined": {
+                "name": "PositionDirection"
+              }
+            }
+          },
+          {
+            "name": "reduce_only",
+            "type": "bool"
+          },
+          {
+            "name": "post_only",
+            "type": "bool"
+          },
+          {
+            "name": "immediate_or_cancel",
+            "type": "bool"
+          },
+          {
+            "name": "trigger_condition",
+            "type": {
+              "defined": {
+                "name": "OrderTriggerCondition"
+              }
+            }
+          },
+          {
+            "name": "auction_duration",
+            "type": "u8"
+          },
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                3
+              ]
             }
           }
         ]
@@ -860,6 +1055,151 @@
       }
     },
     {
+      "name": "OrderStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Init"
+          },
+          {
+            "name": "Open"
+          },
+          {
+            "name": "Filled"
+          },
+          {
+            "name": "Canceled"
+          }
+        ]
+      }
+    },
+    {
+      "name": "OrderTriggerCondition",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Above"
+          },
+          {
+            "name": "Below"
+          },
+          {
+            "name": "TriggeredAbove"
+          },
+          {
+            "name": "TriggeredBelow"
+          }
+        ]
+      }
+    },
+    {
+      "name": "OrderType",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Market"
+          },
+          {
+            "name": "Limit"
+          },
+          {
+            "name": "TriggerMarket"
+          },
+          {
+            "name": "TriggerLimit"
+          },
+          {
+            "name": "Oracle"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PerpPosition",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "last_cumulative_funding_rate",
+            "type": "i64"
+          },
+          {
+            "name": "base_asset_amount",
+            "type": "i64"
+          },
+          {
+            "name": "quote_asset_amount",
+            "type": "i64"
+          },
+          {
+            "name": "quote_break_even_amount",
+            "type": "i64"
+          },
+          {
+            "name": "quote_entry_amount",
+            "type": "i64"
+          },
+          {
+            "name": "open_bids",
+            "type": "i64"
+          },
+          {
+            "name": "open_asks",
+            "type": "i64"
+          },
+          {
+            "name": "settled_pnl",
+            "type": "i64"
+          },
+          {
+            "name": "lp_shares",
+            "type": "u64"
+          },
+          {
+            "name": "last_base_asset_amount_per_lp",
+            "type": "i64"
+          },
+          {
+            "name": "last_quote_asset_amount_per_lp",
+            "type": "i64"
+          },
+          {
+            "name": "remainder_base_asset_amount",
+            "type": "i32"
+          },
+          {
+            "name": "market_index",
+            "type": "u16"
+          },
+          {
+            "name": "open_orders",
+            "type": "u8"
+          },
+          {
+            "name": "per_lp_base",
+            "type": "i8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PositionDirection",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Long"
+          },
+          {
+            "name": "Short"
+          }
+        ]
+      }
+    },
+    {
       "name": "PriceDivergenceGuardRails",
       "type": {
         "kind": "struct",
@@ -871,6 +1211,69 @@
           {
             "name": "oracle_twap_5_min_percent_divergence",
             "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SpotBalanceType",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Deposit"
+          },
+          {
+            "name": "Borrow"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SpotPosition",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "scaled_balance",
+            "type": "u64"
+          },
+          {
+            "name": "open_bids",
+            "type": "i64"
+          },
+          {
+            "name": "open_asks",
+            "type": "i64"
+          },
+          {
+            "name": "cumulative_deposits",
+            "type": "i64"
+          },
+          {
+            "name": "market_index",
+            "type": "u16"
+          },
+          {
+            "name": "balance_type",
+            "type": {
+              "defined": {
+                "name": "SpotBalanceType"
+              }
+            }
+          },
+          {
+            "name": "open_orders",
+            "type": "u8"
+          },
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                4
+              ]
+            }
           }
         ]
       }
@@ -994,6 +1397,172 @@
               "array": [
                 "u8",
                 10
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "User",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "delegate",
+            "type": "pubkey"
+          },
+          {
+            "name": "name",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "spot_positions",
+            "type": {
+              "array": [
+                {
+                  "defined": {
+                    "name": "SpotPosition"
+                  }
+                },
+                8
+              ]
+            }
+          },
+          {
+            "name": "perp_positions",
+            "type": {
+              "array": [
+                {
+                  "defined": {
+                    "name": "PerpPosition"
+                  }
+                },
+                8
+              ]
+            }
+          },
+          {
+            "name": "orders",
+            "type": {
+              "array": [
+                {
+                  "defined": {
+                    "name": "Order"
+                  }
+                },
+                32
+              ]
+            }
+          },
+          {
+            "name": "last_add_perp_lp_shares_ts",
+            "type": "i64"
+          },
+          {
+            "name": "total_deposits",
+            "type": "u64"
+          },
+          {
+            "name": "total_withdraws",
+            "type": "u64"
+          },
+          {
+            "name": "total_social_loss",
+            "type": "u64"
+          },
+          {
+            "name": "settled_perp_pnl",
+            "type": "i64"
+          },
+          {
+            "name": "cumulative_spot_fees",
+            "type": "i64"
+          },
+          {
+            "name": "cumulative_perp_funding",
+            "type": "i64"
+          },
+          {
+            "name": "liquidation_margin_freed",
+            "type": "u64"
+          },
+          {
+            "name": "last_active_slot",
+            "type": "u64"
+          },
+          {
+            "name": "next_order_id",
+            "type": "u32"
+          },
+          {
+            "name": "max_margin_ratio",
+            "type": "u32"
+          },
+          {
+            "name": "next_liquidation_id",
+            "type": "u16"
+          },
+          {
+            "name": "sub_account_id",
+            "type": "u16"
+          },
+          {
+            "name": "status",
+            "type": "u8"
+          },
+          {
+            "name": "is_margin_trading_enabled",
+            "type": "bool"
+          },
+          {
+            "name": "idle",
+            "type": "bool"
+          },
+          {
+            "name": "open_orders",
+            "type": "u8"
+          },
+          {
+            "name": "has_open_order",
+            "type": "bool"
+          },
+          {
+            "name": "open_auctions",
+            "type": "u8"
+          },
+          {
+            "name": "has_open_auction",
+            "type": "bool"
+          },
+          {
+            "name": "padding_1",
+            "type": {
+              "array": [
+                "u8",
+                5
+              ]
+            }
+          },
+          {
+            "name": "last_fuel_bonus_update_ts",
+            "type": "u32"
+          },
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                12
               ]
             }
           }

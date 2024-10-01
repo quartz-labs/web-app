@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use drift_sdk::accounts::{State, UserStats};
+use drift_sdk::accounts::{State, UserStats, User};
 use drift_sdk::cpi::{initialize_user, initialize_user_stats};
 use drift_sdk::{InitializeUser, InitializeUserStats};
 use crate::{
@@ -9,6 +9,9 @@ use crate::{
 };
 
 #[derive(Accounts)]
+#[instruction(
+    sub_account_id: u16,
+)]
 pub struct InitDriftAccount<'info> {
     #[account(
         mut,
@@ -20,6 +23,16 @@ pub struct InitDriftAccount<'info> {
 
     #[account(mut)]
     pub owner: Signer<'info>,
+
+    #[account(
+        init,
+        seeds = [b"user", vault.key().as_ref(), sub_account_id.to_le_bytes().as_ref()],
+        // TODO: calculate space, I got this from getting the size of a valid user account on mainnet
+        space = 4376,
+        bump,
+        payer = owner
+    )]
+    pub user: Account<'info, User>,
 
     #[account(
         mut,
@@ -48,7 +61,7 @@ pub struct InitDriftAccount<'info> {
     pub drift_program: UncheckedAccount<'info>,
 }
 
-pub fn init_drift_account_handler(ctx: Context<InitDriftAccount>) -> Result<()> {    
+pub fn init_drift_account_handler(ctx: Context<InitDriftAccount>, sub_account_id: u16) -> Result<()> {    
     msg!("init_drift_account: Initialize user stats account");
 
     let vault_bump = ctx.accounts.vault.bump;
@@ -80,11 +93,11 @@ pub fn init_drift_account_handler(ctx: Context<InitDriftAccount>) -> Result<()> 
     let create_user_cpi_context = CpiContext::new_with_signer(
         ctx.accounts.drift_program.to_account_info(),
         InitializeUser {
-            user: ctx.accounts.owner.to_account_info(),
+            user: ctx.accounts.user.to_account_info(),
             user_stats: ctx.accounts.user_stats.to_account_info(),
             state: ctx.accounts.state.to_account_info(),
             authority: ctx.accounts.vault.to_account_info(),
-            payer: ctx.accounts.owner.to_account_info(),
+            payer: ctx.accounts.vault.to_account_info(),
             rent: ctx.accounts.rent.to_account_info(),
             system_program: ctx.accounts.system_program.to_account_info(),
         },
