@@ -25,8 +25,8 @@ pub mod funds_program {
     //     change_user_handler(ctx)
     // }
 
-    pub fn init_drift_account(ctx: Context<InitDriftAccount>, sub_account_id: u16) -> Result<()> {
-        init_drift_account_handler(ctx, sub_account_id)
+    pub fn init_drift_account(ctx: Context<InitDriftAccount>) -> Result<()> {
+        init_drift_account_handler(ctx)
     }
 
     pub fn withdraw_lamports(ctx: Context<WithdrawLamports>, amount: u64) -> Result<()> {
@@ -45,19 +45,4 @@ pub mod funds_program {
     pub fn withdraw_usdc(ctx: Context<WithdrawUSDC>, amount: u64) -> Result<()> {
         withdraw_usdc_handler(ctx, amount)
     }
-<<<<<<< HEAD
-=======
-
-    pub fn init_drift_account(ctx: Context<InitDriftAccount>) -> Result<()> {
-        init_drift_account_handler(ctx)
-    }
-
-    pub fn drift_deposit(ctx: Context<DriftDeposit>, amount: u64, market_index: u16, reduce_only: bool) -> Result<()> {
-        drift_deposit_handler(ctx, amount, market_index, reduce_only)
-    }
-
-    pub fn drift_withdraw_borrow(ctx: Context<DriftWithdrawBorrow>, amount: u64, market_index: u16, reduce_only: bool) -> Result<()> {
-        drift_withdraw_borrow_handler(ctx, amount, market_index, reduce_only)
-    }
->>>>>>> tmp
 }
