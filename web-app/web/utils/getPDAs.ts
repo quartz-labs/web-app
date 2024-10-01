@@ -41,7 +41,7 @@ export const getDriftPDAs = (owner: PublicKey, marketIndex: number) => {
     const [spotMarketVaultPda] = web3.PublicKey.findProgramAddressSync(
         [
             Buffer.from("spot_market_vault"), 
-            Buffer.from(new Uint32Array([marketIndex]).buffer)
+            new BN(marketIndex).toArrayLike(Buffer, 'le', 2)
         ],
         driftProgram
     )

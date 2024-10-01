@@ -52,7 +52,7 @@ pub struct DepositLamportsDrift<'info> {
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
         mut,
-        seeds = [b"spot_market_vault".as_ref(), (0u16).to_le_bytes().as_ref()], // 0 for SOL
+        seeds = [b"spot_market_vault", (0u16).to_le_bytes().as_ref()], // 0 for SOL
         seeds::program = drift_program.key(),
         bump,
     )]
