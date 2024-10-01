@@ -5,7 +5,7 @@ use drift_sdk::{InitializeUser, InitializeUserStats};
 use crate::{
     state::Vault,
     errors::ErrorCode,
-    constants::DRIFT_ADDRESS
+    constants::DRIFT_PROGRAM_ID
 };
 
 #[derive(Accounts)]
@@ -21,15 +21,36 @@ pub struct InitDriftAccount<'info> {
     #[account(mut)]
     pub owner: Signer<'info>,
 
-    /// CHECK: Tmp
-    #[account(mut)]
+    /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
+    #[account(
+        mut,
+        seeds = [b"user", vault.key().as_ref(), (0u16).to_le_bytes().as_ref()],
+        seeds::program = drift_program.key(),
+        bump
+    )]
+    pub user: UncheckedAccount<'info>,
+
+    /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
+    #[account(
+        mut,
+        seeds = [b"user_stats", vault.key().as_ref()],
+        seeds::program = drift_program.key(),
+        bump
+    )]
     pub user_stats: UncheckedAccount<'info>,
 
-    /// CHECK: Tmp
-    #[account(mut)]
-    pub state: UncheckedAccount<'info>,
+    #[account(
+        mut,
+        seeds = [b"drift_state"],
+        seeds::program = drift_program.key(),
+        bump
+    )]
+    pub state: Box<Account<'info, State>>,
 
-    /// CHECK: Tmp
+    /// CHECK: Account is safe once the address is correct
+    #[account(
+        constraint = drift_program.key() == DRIFT_PROGRAM_ID @ ErrorCode::InvalidDriftProgram
+    )]
     pub drift_program: UncheckedAccount<'info>,
 
     pub rent: Sysvar<'info, Rent>,
@@ -68,21 +89,21 @@ pub fn init_drift_account_handler(
 
     msg!("init_drift_account: Initialize user account");
 
-    // let create_user_cpi_context = CpiContext::new_with_signer(
-    //     ctx.accounts.drift_program.to_account_info(),
-    //     InitializeUser {
-    //         user: ctx.accounts.user.to_account_info(),
-    //         user_stats: ctx.accounts.user_stats.to_account_info(),
-    //         state: ctx.accounts.state.to_account_info(),
-    //         authority: ctx.accounts.vault.to_account_info(),
-    //         payer: ctx.accounts.vault.to_account_info(),
-    //         rent: ctx.accounts.rent.to_account_info(),
-    //         system_program: ctx.accounts.system_program.to_account_info(),
-    //     },
-    //     signer_seeds
-    // );
+    let create_user_cpi_context = CpiContext::new_with_signer(
+        ctx.accounts.drift_program.to_account_info(),
+        InitializeUser {
+            user: ctx.accounts.user.to_account_info(),
+            user_stats: ctx.accounts.user_stats.to_account_info(),
+            state: ctx.accounts.state.to_account_info(),
+            authority: ctx.accounts.vault.to_account_info(),
+            payer: ctx.accounts.owner.to_account_info(),
+            rent: ctx.accounts.rent.to_account_info(),
+            system_program: ctx.accounts.system_program.to_account_info(),
+        },
+        signer_seeds
+    );
  
-    // initialize_user(create_user_cpi_context, sub_account_id, [0; 32])?;
+    initialize_user(create_user_cpi_context, 0, [0; 32])?;
 
     msg!("init_drift_account: Done");
 

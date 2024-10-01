@@ -60,16 +60,16 @@ export type FundsProgram = {
       "args": []
     },
     {
-      "name": "driftDeposit",
+      "name": "depositLamportsDrift",
       "discriminator": [
-        252,
-        63,
-        250,
-        201,
-        98,
-        55,
-        130,
-        12
+        48,
+        216,
+        152,
+        244,
+        34,
+        1,
+        120,
+        16
       ],
       "accounts": [
         {
@@ -113,95 +113,6 @@ export type FundsProgram = {
         {
           "name": "spotMarketVault",
           "writable": true
-        },
-        {
-          "name": "userTokenAccount",
-          "writable": true
-        },
-        {
-          "name": "tokenProgram"
-        },
-        {
-          "name": "owner",
-          "writable": true
-        },
-        {
-          "name": "systemProgram",
-          "address": "11111111111111111111111111111111"
-        }
-      ],
-      "args": [
-        {
-          "name": "amount",
-          "type": "u64"
-        },
-        {
-          "name": "marketIndex",
-          "type": "u16"
-        },
-        {
-          "name": "reduceOnly",
-          "type": "bool"
-        }
-      ]
-    },
-    {
-      "name": "driftWithdrawBorrow",
-      "discriminator": [
-        175,
-        130,
-        177,
-        252,
-        228,
-        35,
-        179,
-        2
-      ],
-      "accounts": [
-        {
-          "name": "pdaAccount",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  118,
-                  97,
-                  117,
-                  108,
-                  116
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "owner"
-              }
-            ]
-          }
-        },
-        {
-          "name": "state"
-        },
-        {
-          "name": "user",
-          "writable": true
-        },
-        {
-          "name": "userStats",
-          "writable": true
-        },
-        {
-          "name": "authority",
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "spotMarketVault",
-          "writable": true
-        },
-        {
-          "name": "driftSigner"
         },
         {
           "name": "userTokenAccount",
@@ -278,12 +189,95 @@ export type FundsProgram = {
           ]
         },
         {
+          "name": "user",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  0,
+                  0
+                ]
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "driftProgram"
+            }
+          }
+        },
+        {
           "name": "userStats",
-          "writable": true
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  115,
+                  116,
+                  97,
+                  116,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "driftProgram"
+            }
+          }
         },
         {
           "name": "state",
-          "writable": true
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  114,
+                  105,
+                  102,
+                  116,
+                  95,
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ]
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "driftProgram"
+            }
+          }
         },
         {
           "name": "driftProgram"
@@ -626,6 +620,19 @@ export type FundsProgram = {
   ],
   "accounts": [
     {
+      "name": "state",
+      "discriminator": [
+        216,
+        146,
+        107,
+        94,
+        104,
+        75,
+        182,
+        177
+      ]
+    },
+    {
       "name": "vault",
       "discriminator": [
         211,
@@ -662,7 +669,7 @@ export type FundsProgram = {
     },
     {
       "code": 6004,
-      "name": "invalidDriftAddress",
+      "name": "invalidDriftProgram",
       "msg": "Invalid Drift program address"
     },
     {
@@ -672,6 +679,292 @@ export type FundsProgram = {
     }
   ],
   "types": [
+    {
+      "name": "feeStructure",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "feeTiers",
+            "type": {
+              "array": [
+                {
+                  "defined": {
+                    "name": "feeTier"
+                  }
+                },
+                10
+              ]
+            }
+          },
+          {
+            "name": "fillerRewardStructure",
+            "type": {
+              "defined": {
+                "name": "orderFillerRewardStructure"
+              }
+            }
+          },
+          {
+            "name": "referrerRewardEpochUpperBound",
+            "type": "u64"
+          },
+          {
+            "name": "flatFillerFee",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "feeTier",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "feeNumerator",
+            "type": "u32"
+          },
+          {
+            "name": "feeDenominator",
+            "type": "u32"
+          },
+          {
+            "name": "makerRebateNumerator",
+            "type": "u32"
+          },
+          {
+            "name": "makerRebateDenominator",
+            "type": "u32"
+          },
+          {
+            "name": "referrerRewardNumerator",
+            "type": "u32"
+          },
+          {
+            "name": "referrerRewardDenominator",
+            "type": "u32"
+          },
+          {
+            "name": "refereeFeeNumerator",
+            "type": "u32"
+          },
+          {
+            "name": "refereeFeeDenominator",
+            "type": "u32"
+          }
+        ]
+      }
+    },
+    {
+      "name": "oracleGuardRails",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "priceDivergence",
+            "type": {
+              "defined": {
+                "name": "priceDivergenceGuardRails"
+              }
+            }
+          },
+          {
+            "name": "validity",
+            "type": {
+              "defined": {
+                "name": "validityGuardRails"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "orderFillerRewardStructure",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "rewardNumerator",
+            "type": "u32"
+          },
+          {
+            "name": "rewardDenominator",
+            "type": "u32"
+          },
+          {
+            "name": "timeBasedRewardLowerBound",
+            "type": "u128"
+          }
+        ]
+      }
+    },
+    {
+      "name": "priceDivergenceGuardRails",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "markOraclePercentDivergence",
+            "type": "u64"
+          },
+          {
+            "name": "oracleTwap5MinPercentDivergence",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "state",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "whitelistMint",
+            "type": "pubkey"
+          },
+          {
+            "name": "discountMint",
+            "type": "pubkey"
+          },
+          {
+            "name": "signer",
+            "type": "pubkey"
+          },
+          {
+            "name": "srmVault",
+            "type": "pubkey"
+          },
+          {
+            "name": "perpFeeStructure",
+            "type": {
+              "defined": {
+                "name": "feeStructure"
+              }
+            }
+          },
+          {
+            "name": "spotFeeStructure",
+            "type": {
+              "defined": {
+                "name": "feeStructure"
+              }
+            }
+          },
+          {
+            "name": "oracleGuardRails",
+            "type": {
+              "defined": {
+                "name": "oracleGuardRails"
+              }
+            }
+          },
+          {
+            "name": "numberOfAuthorities",
+            "type": "u64"
+          },
+          {
+            "name": "numberOfSubAccounts",
+            "type": "u64"
+          },
+          {
+            "name": "lpCooldownTime",
+            "type": "u64"
+          },
+          {
+            "name": "liquidationMarginBufferRatio",
+            "type": "u32"
+          },
+          {
+            "name": "settlementDuration",
+            "type": "u16"
+          },
+          {
+            "name": "numberOfMarkets",
+            "type": "u16"
+          },
+          {
+            "name": "numberOfSpotMarkets",
+            "type": "u16"
+          },
+          {
+            "name": "signerNonce",
+            "type": "u8"
+          },
+          {
+            "name": "minPerpAuctionDuration",
+            "type": "u8"
+          },
+          {
+            "name": "defaultMarketOrderTimeInForce",
+            "type": "u8"
+          },
+          {
+            "name": "defaultSpotAuctionDuration",
+            "type": "u8"
+          },
+          {
+            "name": "exchangeStatus",
+            "type": "u8"
+          },
+          {
+            "name": "liquidationDuration",
+            "type": "u8"
+          },
+          {
+            "name": "initialPctToLiquidate",
+            "type": "u16"
+          },
+          {
+            "name": "maxNumberOfSubAccounts",
+            "type": "u16"
+          },
+          {
+            "name": "maxInitializeUserFee",
+            "type": "u16"
+          },
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                10
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "validityGuardRails",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "slotsBeforeStaleForAmm",
+            "type": "i64"
+          },
+          {
+            "name": "slotsBeforeStaleForMargin",
+            "type": "i64"
+          },
+          {
+            "name": "confidenceIntervalMaxSize",
+            "type": "u64"
+          },
+          {
+            "name": "tooVolatileRatio",
+            "type": "i64"
+          }
+        ]
+      }
+    },
     {
       "name": "vault",
       "type": {
