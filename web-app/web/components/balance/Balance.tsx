@@ -2,9 +2,10 @@
 
 import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import styles from "./Balance.module.css";
-import { getSolDailyEarnRate, getUsdcDailyBorrowRate, getVault, isVaultInitialized, roundToDecimalPlaces } from "@/utils/utils";
+import { getSolDailyEarnRate, getUsdcDailyBorrowRate, isVaultInitialized, roundToDecimalPlaces } from "@/utils/utils";
 import { useEffect, useState } from "react";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { getVault } from "@/utils/getPDAs";
 
 export default function Balance() {
     const { connection } = useConnection();

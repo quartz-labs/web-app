@@ -3,30 +3,37 @@ use drift_sdk::cpi::deposit;
 use drift_sdk::Deposit;
 
 #[derive(Accounts)]
-pub struct DriftDeposit<'info> {
+pub struct DepositLamportsDrift<'info> {
     #[account(
         mut,
         seeds = [b"vault", owner.key().as_ref()],
         bump,
     )]
     pub pda_account: SystemAccount<'info>,
+
     /// CHECK: Skip check
     pub state: AccountInfo<'info>,
-    #[account(mut)]
+
     /// CHECK: Skip check
+    #[account(mut)]
     pub user: AccountInfo<'info>,
-    #[account(mut)]
+    
     /// CHECK: Skip check
+    #[account(mut)]
     pub user_stats: AccountInfo<'info>,
+
+    /// CHECK: Skip check
     #[account(mut, signer)]
-    /// CHECK: Skip check
     pub authority: AccountInfo<'info>,
-    #[account(mut)]
+    
     /// CHECK: Skip check
+    #[account(mut)]
     pub spot_market_vault: AccountInfo<'info>,
-    #[account(mut)]
+
     /// CHECK: Skip check
+    #[account(mut)]
     pub user_token_account: AccountInfo<'info>,
+    
     /// CHECK: Skip check
     pub token_program: AccountInfo<'info>,
     
@@ -36,8 +43,8 @@ pub struct DriftDeposit<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn drift_deposit_handler(
-    ctx: Context<DriftDeposit>, 
+pub fn deposit_lamports_drift_handler(
+    ctx: Context<DepositLamportsDrift>, 
     amount: u64, 
     market_index: u16, 
     reduce_only: bool

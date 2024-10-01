@@ -6,7 +6,7 @@ import { FundsProgram } from "@/types/funds_program";
 import { TOKEN_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/utils/token";
 import { Keypair, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction, VersionedTransaction } from "@solana/web3.js";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
-import { getVault } from "./utils";
+import { getVault } from "./getPDAs";
 import { getUserAccountPublicKey } from "./driftHelpers";
 
 export const initAccount = async (wallet: AnchorWallet, connection: web3.Connection) => {
