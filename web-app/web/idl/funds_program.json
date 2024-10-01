@@ -54,16 +54,16 @@
       "args": []
     },
     {
-      "name": "drift_deposit",
+      "name": "deposit_lamports_drift",
       "discriminator": [
-        252,
-        63,
-        250,
-        201,
-        98,
-        55,
-        130,
-        12
+        48,
+        216,
+        152,
+        244,
+        34,
+        1,
+        120,
+        16
       ],
       "accounts": [
         {
@@ -107,95 +107,6 @@
         {
           "name": "spot_market_vault",
           "writable": true
-        },
-        {
-          "name": "user_token_account",
-          "writable": true
-        },
-        {
-          "name": "token_program"
-        },
-        {
-          "name": "owner",
-          "writable": true
-        },
-        {
-          "name": "system_program",
-          "address": "11111111111111111111111111111111"
-        }
-      ],
-      "args": [
-        {
-          "name": "amount",
-          "type": "u64"
-        },
-        {
-          "name": "market_index",
-          "type": "u16"
-        },
-        {
-          "name": "reduce_only",
-          "type": "bool"
-        }
-      ]
-    },
-    {
-      "name": "drift_withdraw_borrow",
-      "discriminator": [
-        175,
-        130,
-        177,
-        252,
-        228,
-        35,
-        179,
-        2
-      ],
-      "accounts": [
-        {
-          "name": "pda_account",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  118,
-                  97,
-                  117,
-                  108,
-                  116
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "owner"
-              }
-            ]
-          }
-        },
-        {
-          "name": "state"
-        },
-        {
-          "name": "user",
-          "writable": true
-        },
-        {
-          "name": "user_stats",
-          "writable": true
-        },
-        {
-          "name": "authority",
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "spot_market_vault",
-          "writable": true
-        },
-        {
-          "name": "drift_signer"
         },
         {
           "name": "user_token_account",
@@ -289,8 +200,11 @@
                 "path": "vault"
               },
               {
-                "kind": "arg",
-                "path": "sub_account_id"
+                "kind": "const",
+                "value": [
+                  0,
+                  0
+                ]
               }
             ],
             "program": {
@@ -357,23 +271,18 @@
           }
         },
         {
+          "name": "drift_program"
+        },
+        {
           "name": "rent",
           "address": "SysvarRent111111111111111111111111111111111"
         },
         {
           "name": "system_program",
           "address": "11111111111111111111111111111111"
-        },
-        {
-          "name": "drift_program"
         }
       ],
-      "args": [
-        {
-          "name": "sub_account_id",
-          "type": "u16"
-        }
-      ]
+      "args": []
     },
     {
       "name": "init_user",
@@ -751,7 +660,7 @@
     },
     {
       "code": 6004,
-      "name": "InvalidDriftAddress",
+      "name": "InvalidDriftProgram",
       "msg": "Invalid Drift program address"
     },
     {

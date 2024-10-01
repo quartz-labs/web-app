@@ -11,7 +11,7 @@ pub enum ErrorCode {
     #[msg("Invalid SPL token mint address")]
     InvalidMintAddress,
     #[msg("Invalid Drift program address")]
-    InvalidDriftAddress,
+    InvalidDriftProgram,
     #[msg("Unable to load account loader")]
     UnableToLoadAccountLoader
 }

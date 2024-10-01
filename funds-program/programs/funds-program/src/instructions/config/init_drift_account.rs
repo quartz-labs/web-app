@@ -1,17 +1,14 @@
 use anchor_lang::prelude::*;
-use drift_sdk::accounts::{State, UserStats, User};
+use drift_sdk::accounts::State;
 use drift_sdk::cpi::{initialize_user, initialize_user_stats};
 use drift_sdk::{InitializeUser, InitializeUserStats};
 use crate::{
     state::Vault,
     errors::ErrorCode,
-    constants::DRIFT_ADDRESS
+    constants::DRIFT_PROGRAM_ID
 };
 
 #[derive(Accounts)]
-#[instruction(
-    sub_account_id: u16,
-)]
 pub struct InitDriftAccount<'info> {
     #[account(
         mut,
@@ -24,16 +21,18 @@ pub struct InitDriftAccount<'info> {
     #[account(mut)]
     pub owner: Signer<'info>,
 
-    /// CHECK: This account is initialized in the instruction
+    /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
-        seeds = [b"user", vault.key().as_ref(), sub_account_id.to_le_bytes().as_ref()],
+        mut,
+        seeds = [b"user", vault.key().as_ref(), (0u16).to_le_bytes().as_ref()],
         seeds::program = drift_program.key(),
         bump
     )]
     pub user: UncheckedAccount<'info>,
 
-    /// CHECK: This account is initialized in the instruction
+    /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
+        mut,
         seeds = [b"user_stats", vault.key().as_ref()],
         seeds::program = drift_program.key(),
         bump
@@ -41,24 +40,27 @@ pub struct InitDriftAccount<'info> {
     pub user_stats: UncheckedAccount<'info>,
 
     #[account(
+        mut,
         seeds = [b"drift_state"],
         seeds::program = drift_program.key(),
         bump
     )]
     pub state: Box<Account<'info, State>>,
 
-    pub rent: Sysvar<'info, Rent>,
-    
-    pub system_program: Program<'info, System>,
-
-    /// CHECK: This account is safe once it's the correct address
+    /// CHECK: Account is safe once the address is correct
     #[account(
-        constraint = drift_program.key() == DRIFT_ADDRESS @ ErrorCode::InvalidDriftAddress
+        constraint = drift_program.key() == DRIFT_PROGRAM_ID @ ErrorCode::InvalidDriftProgram
     )]
     pub drift_program: UncheckedAccount<'info>,
+
+    pub rent: Sysvar<'info, Rent>,
+    
+    pub system_program: Program<'info, System>
 }
 
-pub fn init_drift_account_handler(ctx: Context<InitDriftAccount>, sub_account_id: u16) -> Result<()> {    
+pub fn init_drift_account_handler(
+    ctx: Context<InitDriftAccount>
+) -> Result<()> {    
     msg!("init_drift_account: Initialize user stats account");
 
     let vault_bump = ctx.accounts.vault.bump;
@@ -101,7 +103,7 @@ pub fn init_drift_account_handler(ctx: Context<InitDriftAccount>, sub_account_id
         signer_seeds
     );
  
-    initialize_user(create_user_cpi_context, sub_account_id, [0; 32])?;
+    initialize_user(create_user_cpi_context, 0, [0; 32])?;
 
     msg!("init_drift_account: Done");
 

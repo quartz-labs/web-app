@@ -75,28 +75,6 @@ pub fn withdraw_usdc_handler(
         &[vault_bump]
     ];
 
-    // TODO - This is only when vault is the payer
-    // // Initialize receiver's ATA if needed
-    // if ctx.accounts.receiver_usdc.amount == 0 {
-    //     msg!("No receiver ATA found, creating new with vault as payer");
-    //     // TODO - Check vault has enough SOL to cover creation?
-
-    //     anchor_spl::associated_token::create_idempotent(
-    //         CpiContext::new_with_signer(
-    //             ctx.accounts.associated_token_program.to_account_info(),
-    //             anchor_spl::associated_token::Create {
-    //                 payer: ctx.accounts.vault.to_account_info(),
-    //                 associated_token: ctx.accounts.receiver_usdc.to_account_info(),
-    //                 authority: ctx.accounts.receiver.to_account_info(),
-    //                 mint: ctx.accounts.usdc_mint.to_account_info(),
-    //                 system_program: ctx.accounts.system_program.to_account_info(),
-    //                 token_program: ctx.accounts.token_program.to_account_info(),
-    //             },
-    //             &[&signer_seeds[..]]
-    //         )
-    //     )?;
-    // }
-
     // Transfer tokens
     token::transfer(
         CpiContext::new_with_signer(

@@ -60,16 +60,16 @@ export type FundsProgram = {
       "args": []
     },
     {
-      "name": "driftDeposit",
+      "name": "depositLamportsDrift",
       "discriminator": [
-        252,
-        63,
-        250,
-        201,
-        98,
-        55,
-        130,
-        12
+        48,
+        216,
+        152,
+        244,
+        34,
+        1,
+        120,
+        16
       ],
       "accounts": [
         {
@@ -113,95 +113,6 @@ export type FundsProgram = {
         {
           "name": "spotMarketVault",
           "writable": true
-        },
-        {
-          "name": "userTokenAccount",
-          "writable": true
-        },
-        {
-          "name": "tokenProgram"
-        },
-        {
-          "name": "owner",
-          "writable": true
-        },
-        {
-          "name": "systemProgram",
-          "address": "11111111111111111111111111111111"
-        }
-      ],
-      "args": [
-        {
-          "name": "amount",
-          "type": "u64"
-        },
-        {
-          "name": "marketIndex",
-          "type": "u16"
-        },
-        {
-          "name": "reduceOnly",
-          "type": "bool"
-        }
-      ]
-    },
-    {
-      "name": "driftWithdrawBorrow",
-      "discriminator": [
-        175,
-        130,
-        177,
-        252,
-        228,
-        35,
-        179,
-        2
-      ],
-      "accounts": [
-        {
-          "name": "pdaAccount",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  118,
-                  97,
-                  117,
-                  108,
-                  116
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "owner"
-              }
-            ]
-          }
-        },
-        {
-          "name": "state"
-        },
-        {
-          "name": "user",
-          "writable": true
-        },
-        {
-          "name": "userStats",
-          "writable": true
-        },
-        {
-          "name": "authority",
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "spotMarketVault",
-          "writable": true
-        },
-        {
-          "name": "driftSigner"
         },
         {
           "name": "userTokenAccount",
@@ -295,8 +206,11 @@ export type FundsProgram = {
                 "path": "vault"
               },
               {
-                "kind": "arg",
-                "path": "subAccountId"
+                "kind": "const",
+                "value": [
+                  0,
+                  0
+                ]
               }
             ],
             "program": {
@@ -363,23 +277,18 @@ export type FundsProgram = {
           }
         },
         {
+          "name": "driftProgram"
+        },
+        {
           "name": "rent",
           "address": "SysvarRent111111111111111111111111111111111"
         },
         {
           "name": "systemProgram",
           "address": "11111111111111111111111111111111"
-        },
-        {
-          "name": "driftProgram"
         }
       ],
-      "args": [
-        {
-          "name": "subAccountId",
-          "type": "u16"
-        }
-      ]
+      "args": []
     },
     {
       "name": "initUser",
@@ -757,7 +666,7 @@ export type FundsProgram = {
     },
     {
       "code": 6004,
-      "name": "invalidDriftAddress",
+      "name": "invalidDriftProgram",
       "msg": "Invalid Drift program address"
     },
     {
