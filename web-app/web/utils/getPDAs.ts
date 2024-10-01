@@ -1,23 +1,26 @@
 import { BN, web3 } from "@coral-xyz/anchor";
 import { PublicKey } from "@solana/web3.js";
-import { DRIFT_PROGRAM_ID, FUNDS_PROGRAM_ID, USDC_MINT } from "./constants";
+import { DRIFT_PROGRAM_ID, FUNDS_PROGRAM_ID, USDC_MINT, WSOL_MINT } from "./constants";
 
 export const getVault = (owner: PublicKey) => {
-    const usdcMintPubkey = new web3.PublicKey(USDC_MINT);
-    const [pda] = web3.PublicKey.findProgramAddressSync(
+    const [vault] = web3.PublicKey.findProgramAddressSync(
         [Buffer.from("vault"), owner.toBuffer()],
         new web3.PublicKey(FUNDS_PROGRAM_ID)
     )
-    const [ata] = web3.PublicKey.findProgramAddressSync(
-        [Buffer.from("vault"), owner.toBuffer(), usdcMintPubkey.toBuffer()],
+    const [vaultUsdc] = web3.PublicKey.findProgramAddressSync(
+        [Buffer.from("vault"), owner.toBuffer(), USDC_MINT.toBuffer()],
         new web3.PublicKey(FUNDS_PROGRAM_ID)
     );
-    return [pda, ata];
+    const [vaultWSol] = web3.PublicKey.findProgramAddressSync(
+        [Buffer.from("vault"), owner.toBuffer(), WSOL_MINT.toBuffer()],
+        new web3.PublicKey(FUNDS_PROGRAM_ID)
+    );
+
+    return [vault, vaultUsdc, vaultWSol];
 }
 
 export const getDriftPDAs = (owner: PublicKey, marketIndex: number) => {
-    const driftProgram = new web3.PublicKey(DRIFT_PROGRAM_ID);
-    const [vaultPda, _] = getVault(owner);
+    const [vaultPda, _usdc, _wsol] = getVault(owner);
 
     const [userPda] = web3.PublicKey.findProgramAddressSync(
         [
@@ -25,17 +28,17 @@ export const getDriftPDAs = (owner: PublicKey, marketIndex: number) => {
 			vaultPda.toBuffer(),
 			new BN(0).toArrayLike(Buffer, 'le', 2),
 		],
-		driftProgram
+		DRIFT_PROGRAM_ID
     );
 
     const [userStatsPda] = web3.PublicKey.findProgramAddressSync(
         [Buffer.from("user_stats"), vaultPda.toBuffer()],
-        driftProgram
+        DRIFT_PROGRAM_ID
     );
 
     const [statePda] = web3.PublicKey.findProgramAddressSync(
         [Buffer.from("drift_state")],
-        driftProgram
+        DRIFT_PROGRAM_ID
     );
 
     const [spotMarketVaultPda] = web3.PublicKey.findProgramAddressSync(
@@ -43,7 +46,7 @@ export const getDriftPDAs = (owner: PublicKey, marketIndex: number) => {
             Buffer.from("spot_market_vault"), 
             new BN(marketIndex).toArrayLike(Buffer, 'le', 2)
         ],
-        driftProgram
+        DRIFT_PROGRAM_ID
     )
 
 

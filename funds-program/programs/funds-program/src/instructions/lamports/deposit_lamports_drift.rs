@@ -1,11 +1,14 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token_interface::{TokenInterface, TokenAccount};
+use anchor_spl::{
+    token::{Mint, Token}, 
+    token::TokenAccount
+};
 use drift_sdk::accounts::State;
 use drift_sdk::cpi::deposit;
 use drift_sdk::Deposit;
 
 use crate::{
-    constants::DRIFT_PROGRAM_ID,
+    constants::{DRIFT_PROGRAM_ID, WSOL_MINT_ADDRESS},
     errors::ErrorCode,
     state::Vault
 };
@@ -59,18 +62,29 @@ pub struct DepositLamportsDrift<'info> {
     pub spot_market_vault: UncheckedAccount<'info>,
 
     #[account(
-        mut,
+        init,
+        seeds = [b"vault", owner.key().as_ref(), wsol_mint.key().as_ref()],
+        bump,
+        payer = owner,
+        token::mint = wsol_mint,
         token::authority = vault
     )]
-    pub user_token_account: Box<InterfaceAccount<'info, TokenAccount>>,
+    pub user_token_account: Account<'info, TokenAccount>,
 
-    pub token_program: Interface<'info, TokenInterface>,
+    #[account(
+        constraint = wsol_mint.key() == WSOL_MINT_ADDRESS @ ErrorCode::InvalidMintAddress
+    )]
+    pub wsol_mint: Account<'info, Mint>,
+
+    pub token_program: Program<'info, Token>,
 
     /// CHECK: Account is safe once the address is correct
     #[account(
         constraint = drift_program.key() == DRIFT_PROGRAM_ID @ ErrorCode::InvalidDriftProgram
     )]
     pub drift_program: UncheckedAccount<'info>,
+
+    pub system_program: Program<'info, System>
 }
 
 pub fn deposit_lamports_drift_handler(

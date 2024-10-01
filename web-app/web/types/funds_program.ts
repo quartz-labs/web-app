@@ -236,13 +236,43 @@ export type FundsProgram = {
         },
         {
           "name": "userTokenAccount",
-          "writable": true
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              },
+              {
+                "kind": "account",
+                "path": "wsolMint"
+              }
+            ]
+          }
         },
         {
-          "name": "tokenProgram"
+          "name": "wsolMint"
+        },
+        {
+          "name": "tokenProgram",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         },
         {
           "name": "driftProgram"
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
         }
       ],
       "args": [
@@ -1094,6 +1124,11 @@ export type FundsProgram = {
       "name": "usdcMintAddress",
       "type": "pubkey",
       "value": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+    },
+    {
+      "name": "wsolMintAddress",
+      "type": "pubkey",
+      "value": "So11111111111111111111111111111111111111112"
     }
   ]
 };

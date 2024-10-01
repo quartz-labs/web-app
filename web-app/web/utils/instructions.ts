@@ -1,6 +1,6 @@
 import { AnchorProvider, BN, Idl, Program, setProvider, web3 } from "@coral-xyz/anchor";
 import { AnchorWallet } from "@solana/wallet-adapter-react";
-import { DRIFT_PROGRAM_ID, USDC_MINT } from "./constants";
+import { DRIFT_PROGRAM_ID, USDC_MINT, WSOL_MINT } from "./constants";
 import idl from "../idl/funds_program.json";
 import { FundsProgram } from "@/types/funds_program";
 import { TOKEN_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/utils/token";
@@ -12,8 +12,8 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
     const provider = new AnchorProvider(connection, wallet, {commitment: "confirmed"}); 
     setProvider(provider);
     const program = new Program(idl as Idl, provider) as unknown as Program<FundsProgram>;
-    const [vaultPda, vaultUsdcPda] = getVault(wallet.publicKey);
-    const [userPda, userStatsPda, statePda, _] = getDriftPDAs(wallet.publicKey, 0);
+    const [vaultPda, vaultUsdcPda, _wsol] = getVault(wallet.publicKey);
+    const [userPda, userStatsPda, statePda, _spotMarketVault] = getDriftPDAs(wallet.publicKey, 0);
 
     const driftProgramId = new PublicKey(DRIFT_PROGRAM_ID);
 
@@ -80,7 +80,7 @@ export const withdrawSol = async(wallet: AnchorWallet, connection: web3.Connecti
     const provider = new AnchorProvider(connection, wallet, {commitment: "confirmed"}); 
     setProvider(provider);
     const program = new Program(idl as Idl, provider) as unknown as Program<FundsProgram>;
-    const [vaultPda, _] = getVault(wallet.publicKey);
+    const [vaultPda, _usdc, _wsol] = getVault(wallet.publicKey);
 
     try {
         const signature = await program.methods
@@ -105,7 +105,7 @@ export const getDepositSolIx = async(wallet: AnchorWallet, connection: web3.Conn
     const provider = new AnchorProvider(connection, wallet, {commitment: "confirmed"}); 
     setProvider(provider);
     const program = new Program(idl as Idl, provider) as unknown as Program<FundsProgram>;
-    const [vaultPda, vaultUsdc] = getVault(wallet.publicKey);
+    const [vaultPda, _usdc, vaultWSol] = getVault(wallet.publicKey);
     const [userPda, userStatsPda, statePda, spotMarketVault] = getDriftPDAs(wallet.publicKey, 0);
 
     try {
@@ -119,9 +119,11 @@ export const getDepositSolIx = async(wallet: AnchorWallet, connection: web3.Conn
                 user: userPda,
                 userStats: userStatsPda,
                 spotMarketVault: spotMarketVault,
-                userTokenAccount: vaultUsdc,
+                userTokenAccount: vaultWSol,
+                wsolMint: WSOL_MINT,
                 tokenProgram: TOKEN_PROGRAM_ID,
-                driftProgram: DRIFT_PROGRAM_ID
+                driftProgram: DRIFT_PROGRAM_ID,
+                systemProgram: SystemProgram.programId
             })
             .instruction();
         return ix_depositLamportsDrift;

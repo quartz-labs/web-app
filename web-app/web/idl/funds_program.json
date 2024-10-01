@@ -230,13 +230,43 @@
         },
         {
           "name": "user_token_account",
-          "writable": true
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              },
+              {
+                "kind": "account",
+                "path": "wsol_mint"
+              }
+            ]
+          }
         },
         {
-          "name": "token_program"
+          "name": "wsol_mint"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         },
         {
           "name": "drift_program"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
         }
       ],
       "args": [
@@ -1088,6 +1118,11 @@
       "name": "USDC_MINT_ADDRESS",
       "type": "pubkey",
       "value": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+    },
+    {
+      "name": "WSOL_MINT_ADDRESS",
+      "type": "pubkey",
+      "value": "So11111111111111111111111111111111111111112"
     }
   ]
 }
