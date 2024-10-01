@@ -27,3 +27,16 @@ async function getUserAccountPublicKeyAndNonce(
 		programId
 	);
 }
+
+export function getUserStatsAccountPublicKey(
+	programId: PublicKey,
+	authority: PublicKey
+): PublicKey {
+	return PublicKey.findProgramAddressSync(
+		[
+			Buffer.from(anchor.utils.bytes.utf8.encode('user_stats')),
+			authority.toBuffer(),
+		],
+		programId
+	)[0];
+}
