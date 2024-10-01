@@ -47,17 +47,16 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
         );
 
         const ix_initDriftAccount = await program.methods
-            .initDriftAccount(0)
+            .initDriftAccount()
             .accounts({
                 // @ts-ignore - Causing an issue in Cursor IDE
                 vault: vaultPda,
                 owner: wallet.publicKey,
-                user: userAccountPublicKey,
                 userStats: userStatsPda,
                 state: statePda,
+                driftProgram: driftProgramId,
                 rent: web3.SYSVAR_RENT_PUBKEY,
                 systemProgram: SystemProgram.programId,
-                driftProgram: driftProgramId
             })
             .instruction();
 
