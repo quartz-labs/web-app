@@ -27,3 +27,4 @@ funds-program/.DS_Store
 funds-program/*.log
 funds-program/*.tsbuildinfo
 funds-program/anchor.lock
+funds-program/program_keypair.json
