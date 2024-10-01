@@ -106,7 +106,9 @@ export const getDepositSolIx = async(wallet: AnchorWallet, connection: web3.Conn
     setProvider(provider);
     const program = new Program(idl as Idl, provider) as unknown as Program<FundsProgram>;
     const [vaultPda, _usdc, vaultWSol] = getVault(wallet.publicKey);
-    const [userPda, userStatsPda, statePda, spotMarketVault] = getDriftPDAs(wallet.publicKey, 0);
+    const [userPda, userStatsPda, statePda, spotMarketVault] = getDriftPDAs(
+        wallet.publicKey, 1
+    ); // 1 for SOL
 
     try {
         const ix_depositLamportsDrift = await program.methods

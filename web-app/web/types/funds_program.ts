@@ -223,7 +223,7 @@ export type FundsProgram = {
               {
                 "kind": "const",
                 "value": [
-                  0,
+                  1,
                   0
                 ]
               }

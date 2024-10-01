@@ -55,7 +55,7 @@ pub struct DepositLamportsDrift<'info> {
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
         mut,
-        seeds = [b"spot_market_vault", (0u16).to_le_bytes().as_ref()], // 0 for SOL
+        seeds = [b"spot_market_vault", (1u16).to_le_bytes().as_ref()], // 1 for SOL
         seeds::program = drift_program.key(),
         bump,
     )]
@@ -116,7 +116,7 @@ pub fn deposit_lamports_drift_handler(
         signer_seeds
     );
  
-    deposit(cpi_context, 0, amount, false)?;
+    deposit(cpi_context, 1, amount, false)?;
 
     msg!("deposit_lamports_drift: Done");
 
