@@ -28,3 +28,4 @@ funds-program/*.log
 funds-program/*.tsbuildinfo
 funds-program/anchor.lock
 funds-program/program_keypair.json
+funds-program/recover-key.json
