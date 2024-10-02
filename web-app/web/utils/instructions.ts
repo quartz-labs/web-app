@@ -1,6 +1,6 @@
 import { AnchorProvider, BN, Idl, Program, setProvider, web3 } from "@coral-xyz/anchor";
 import { AnchorWallet } from "@solana/wallet-adapter-react";
-import { DRIFT_PROGRAM_ID, USDC_MINT, WSOL_MINT } from "./constants";
+import { DRIFT_PROGRAM_ID, DRIFT_SPOT_MARKET_SOL, DRIFT_SPOT_MARKET_USDC, DRIFT_VAULT, USDC_MINT, WSOL_MINT } from "./constants";
 import idl from "../idl/funds_program.json";
 import { FundsProgram } from "@/types/funds_program";
 import { ASSOCIATED_PROGRAM_ID, TOKEN_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/utils/token";
@@ -60,17 +60,32 @@ export const withdrawLamports = async(wallet: AnchorWallet, connection: web3.Con
     const provider = new AnchorProvider(connection, wallet, {commitment: "confirmed"}); 
     setProvider(provider);
     const program = new Program(idl as Idl, provider) as unknown as Program<FundsProgram>;
-    const [vaultPda, _usdc, _wsol] = getVault(wallet.publicKey);
+    const [vaultPda, _vaultUsdc, vaultWSol] = getVault(wallet.publicKey);
+    const [userPda, userStatsPda, statePda, spotMarketVault] = getDriftPDAs(
+        wallet.publicKey, 1
+    ); // 1 for SOL
 
     try {
         const signature = await program.methods
             .withdrawLamports(new BN(amountLamports))
             .accounts({
-            // @ts-ignore - Causing an issue in Cursor IDE
-            vault: vaultPda, 
-            receiver: wallet.publicKey,
-            owner: wallet.publicKey,
-            systemProgram: SystemProgram.programId
+                // @ts-ignore - Causing an issue in Cursor IDE
+                vault: vaultPda,
+                vaultWsol: vaultWSol,
+                owner: wallet.publicKey,    
+                state: statePda,
+                user: userPda,
+                userStats: userStatsPda,
+                spotMarketVault: spotMarketVault,
+                driftSigner: DRIFT_VAULT,
+                wsolMint: WSOL_MINT,
+                tokenProgram: TOKEN_PROGRAM_ID,
+                driftProgram: DRIFT_PROGRAM_ID,
+                constAccount: new PublicKey("J83w4HKfqxwcq3BEMMkPFSppX3gqekLyLJBexebFVkix"), // TODO - Remove hardcoding
+                additionalAccount: new PublicKey("5SSkXsEKQepHHAewytPVwdej4epN1nxgLVM84L4KXgy7"), // TODO - Remove hardcoding
+                spotMarketSol: DRIFT_SPOT_MARKET_SOL,
+                spotMarketUsdc: DRIFT_SPOT_MARKET_USDC,
+                systemProgram: SystemProgram.programId,
             })
             .rpc();
         return signature;
@@ -85,7 +100,7 @@ export const depositLamports = async(wallet: AnchorWallet, connection: web3.Conn
     const provider = new AnchorProvider(connection, wallet, {commitment: "confirmed"}); 
     setProvider(provider);
     const program = new Program(idl as Idl, provider) as unknown as Program<FundsProgram>;
-    const [vaultPda, _usdc, vaultWSol] = getVault(wallet.publicKey);
+    const [vaultPda, _vaultUsdc, vaultWSol] = getVault(wallet.publicKey);
     const [userPda, userStatsPda, statePda, spotMarketVault] = getDriftPDAs(
         wallet.publicKey, 1
     ); // 1 for SOL
@@ -96,17 +111,17 @@ export const depositLamports = async(wallet: AnchorWallet, connection: web3.Conn
             .accounts({
                 // @ts-ignore - Causing an issue in Cursor IDE
                 vault: vaultPda,
+                vaultWsol: vaultWSol,
                 owner: wallet.publicKey,    
                 state: statePda,
                 user: userPda,
                 userStats: userStatsPda,
                 spotMarketVault: spotMarketVault,
-                userTokenAccount: vaultWSol,
                 wsolMint: WSOL_MINT,
                 tokenProgram: TOKEN_PROGRAM_ID,
                 driftProgram: DRIFT_PROGRAM_ID,
                 constAccount: new PublicKey("J83w4HKfqxwcq3BEMMkPFSppX3gqekLyLJBexebFVkix"), // TODO - Remove hardcoding
-                spotMarket: new PublicKey("3x85u7SWkmmr7YQGYhtjARgxwegTLJgkSLRprfXod6rh"), // TODO - Remove hardcoding
+                spotMarket: DRIFT_SPOT_MARKET_SOL,
                 systemProgram: SystemProgram.programId,
             })
             .rpc();

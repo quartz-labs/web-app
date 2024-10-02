@@ -36,12 +36,13 @@ export default function Balance() {
         }
     }
 
-    useEffect(() => {
-        updateFinancialData();
-        const interval = setInterval(updateFinancialData, 10000);
+    // TODO - Uncomment to enable dynamic updates
+    // useEffect(() => {
+    //     updateFinancialData();
+    //     const interval = setInterval(updateFinancialData, 10000);
 
-        return () => clearInterval(interval);
-    }, []);
+    //     return () => clearInterval(interval);
+    // }, []);
     
     useEffect(() => {
         const updateBalance = async () => {

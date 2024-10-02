@@ -1,8 +1,7 @@
 use anchor_lang::prelude::*;
-use anchor_lang::system_program;
 use anchor_spl::{
     token,
-    token::{Mint, Token, SyncNative}, 
+    token::{Mint, Token}, 
     token::TokenAccount
 };
 use drift_sdk::{
@@ -32,7 +31,7 @@ pub struct WithdrawLamports<'info> {
         token::mint = wsol_mint,
         token::authority = vault
     )]
-    pub vault_wsol: Account<'info, TokenAccount>,
+    pub vault_wsol: Box<Account<'info, TokenAccount>>,
 
     #[account(mut)]
     pub owner: Signer<'info>,
@@ -78,7 +77,7 @@ pub struct WithdrawLamports<'info> {
     #[account(
         constraint = wsol_mint.key() == WSOL_MINT_ADDRESS @ ErrorCode::InvalidMintAddress
     )]
-    pub wsol_mint: Account<'info, Mint>,
+    pub wsol_mint: Box<Account<'info, Mint>>,
 
     pub token_program: Program<'info, Token>,
 
@@ -145,28 +144,7 @@ pub fn withdraw_lamports_handler(
 
     withdraw(cpi_ctx, 1, amount, true)?;
 
-    msg!("withdraw_lamports: Unwrapping sol and sending to {}", ctx.accounts.owner.key());
-
-    // Transfer wSOL from vault to user's SOL account
-    let cpi_ctx_transfer = CpiContext::new(
-        ctx.accounts.system_program.to_account_info(),
-        system_program::Transfer {
-            from: ctx.accounts.vault_wsol.to_account_info(),
-            to: ctx.accounts.owner.to_account_info(),
-        },
-    );
-    system_program::transfer(cpi_ctx_transfer, amount)?;
-
-    // Sync the native token to reflect the new wSOL balance as SOL
-    let cpi_ctx_sync = CpiContext::new(
-        ctx.accounts.token_program.to_account_info(),
-        SyncNative {
-            account: ctx.accounts.owner.to_account_info(),
-        },
-    );
-    token::sync_native(cpi_ctx_sync)?;
-
-    msg!("deposit_lamports_drift: Closing wSol vault");
+    msg!("deposit_lamports_drift: Closing wSol vault and paying sol to owner");
 
     let cpi_ctx_close = CpiContext::new_with_signer(
         ctx.accounts.token_program.to_account_info(),
