@@ -5,10 +5,11 @@ use anchor_spl::{
     token::{Mint, Token, SyncNative}, 
     token::TokenAccount
 };
-use drift_sdk::accounts::State;
-use drift_sdk::cpi::deposit;
-use drift_sdk::Deposit;
-
+use drift_sdk::{
+    accounts::State,
+    cpi::deposit,
+    Deposit
+};
 use crate::{
     constants::{DRIFT_PROGRAM_ID, WSOL_MINT_ADDRESS},
     errors::ErrorCode,
@@ -16,7 +17,7 @@ use crate::{
 };
 
 #[derive(Accounts)]
-pub struct DepositLamportsDrift<'info> {
+pub struct DepositLamports<'info> {
     #[account(
         mut,
         seeds = [b"vault", owner.key().as_ref()],
@@ -87,18 +88,17 @@ pub struct DepositLamportsDrift<'info> {
     pub drift_program: UncheckedAccount<'info>,
 
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
-    #[account()]
-    pub additional_account: UncheckedAccount<'info>,
+    pub const_account: UncheckedAccount<'info>,
 
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(mut)]
-    pub market_vault: UncheckedAccount<'info>,
+    pub spot_market: UncheckedAccount<'info>,
 
     pub system_program: Program<'info, System>
 }
 
-pub fn deposit_lamports_drift_handler(
-    ctx: Context<DepositLamportsDrift>, 
+pub fn deposit_lamports_handler(
+    ctx: Context<DepositLamports>, 
     amount: u64
 ) -> Result<()> {
     let vault_bump = ctx.accounts.vault.bump;
@@ -150,13 +150,13 @@ pub fn deposit_lamports_drift_handler(
 
     // Add additional_account and market_vault as remaining accounts
     cpi_ctx.remaining_accounts = vec![
-        ctx.accounts.additional_account.to_account_info(),
-        ctx.accounts.market_vault.to_account_info(),
+        ctx.accounts.const_account.to_account_info(),
+        ctx.accounts.spot_market.to_account_info(),
     ];
 
     deposit(cpi_ctx, 1, amount, false)?;
 
-    msg!("deposit_lamports_drift: Close wSol vault");
+    msg!("deposit_lamports_drift: Closing wSol vault");
 
     let cpi_ctx_close = CpiContext::new_with_signer(
         ctx.accounts.token_program.to_account_info(),

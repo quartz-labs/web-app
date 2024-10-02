@@ -33,8 +33,8 @@ pub mod funds_program {
         withdraw_lamports_handler(ctx, amount)
     }
 
-    pub fn deposit_lamports_drift(ctx: Context<DepositLamportsDrift>, amount: u64) -> Result<()> {
-        deposit_lamports_drift_handler(ctx, amount)
+    pub fn deposit_lamports(ctx: Context<DepositLamports>, amount: u64) -> Result<()> {
+        deposit_lamports_handler(ctx, amount)
     }
 
     // Not required until mobile app

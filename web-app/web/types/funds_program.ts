@@ -60,16 +60,16 @@ export type FundsProgram = {
       "args": []
     },
     {
-      "name": "depositLamportsDrift",
+      "name": "depositLamports",
       "discriminator": [
-        48,
-        216,
-        152,
-        244,
-        34,
-        1,
-        120,
-        16
+        108,
+        4,
+        176,
+        112,
+        110,
+        10,
+        202,
+        195
       ],
       "accounts": [
         {
@@ -261,10 +261,10 @@ export type FundsProgram = {
           "name": "driftProgram"
         },
         {
-          "name": "additionalAccount"
+          "name": "constAccount"
         },
         {
-          "name": "marketVault",
+          "name": "spotMarket",
           "writable": true
         },
         {
@@ -533,15 +533,186 @@ export type FundsProgram = {
           }
         },
         {
-          "name": "receiver",
-          "writable": true
+          "name": "vaultWsol",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "vault"
+              },
+              {
+                "kind": "account",
+                "path": "wsolMint"
+              }
+            ]
+          }
         },
         {
           "name": "owner",
+          "writable": true,
           "signer": true,
           "relations": [
             "vault"
           ]
+        },
+        {
+          "name": "state",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  114,
+                  105,
+                  102,
+                  116,
+                  95,
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ]
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "driftProgram"
+            }
+          }
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  0,
+                  0
+                ]
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "driftProgram"
+            }
+          }
+        },
+        {
+          "name": "userStats",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  115,
+                  116,
+                  97,
+                  116,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "driftProgram"
+            }
+          }
+        },
+        {
+          "name": "spotMarketVault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  112,
+                  111,
+                  116,
+                  95,
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "const",
+                "value": [
+                  1,
+                  0
+                ]
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "driftProgram"
+            }
+          }
+        },
+        {
+          "name": "driftSigner"
+        },
+        {
+          "name": "wsolMint"
+        },
+        {
+          "name": "tokenProgram",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "driftProgram"
+        },
+        {
+          "name": "constAccount"
+        },
+        {
+          "name": "additionalAccount"
+        },
+        {
+          "name": "spotMarketSol",
+          "writable": true
+        },
+        {
+          "name": "spotMarketUsdc"
         },
         {
           "name": "systemProgram",

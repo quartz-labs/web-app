@@ -92,11 +92,11 @@ export const depositLamports = async(wallet: AnchorWallet, connection: web3.Conn
 
     try {
         const signature = await program.methods
-            .depositLamportsDrift(new BN(amountLamports))
+            .depositLamports(new BN(amountLamports))
             .accounts({
                 // @ts-ignore - Causing an issue in Cursor IDE
                 vault: vaultPda,
-                owner: wallet.publicKey,
+                owner: wallet.publicKey,    
                 state: statePda,
                 user: userPda,
                 userStats: userStatsPda,
@@ -105,8 +105,8 @@ export const depositLamports = async(wallet: AnchorWallet, connection: web3.Conn
                 wsolMint: WSOL_MINT,
                 tokenProgram: TOKEN_PROGRAM_ID,
                 driftProgram: DRIFT_PROGRAM_ID,
-                additionalAccount: new PublicKey("J83w4HKfqxwcq3BEMMkPFSppX3gqekLyLJBexebFVkix"), // TODO - Remove hardcoding
-                marketVault: new PublicKey("3x85u7SWkmmr7YQGYhtjARgxwegTLJgkSLRprfXod6rh"), // TODO - Remove hardcoding
+                constAccount: new PublicKey("J83w4HKfqxwcq3BEMMkPFSppX3gqekLyLJBexebFVkix"), // TODO - Remove hardcoding
+                spotMarket: new PublicKey("3x85u7SWkmmr7YQGYhtjARgxwegTLJgkSLRprfXod6rh"), // TODO - Remove hardcoding
                 systemProgram: SystemProgram.programId,
             })
             .rpc();
