@@ -156,6 +156,19 @@ pub fn deposit_lamports_drift_handler(
 
     deposit(cpi_ctx, 1, amount, false)?;
 
+    msg!("deposit_lamports_drift: Close wSol vault");
+
+    let cpi_ctx_close = CpiContext::new_with_signer(
+        ctx.accounts.token_program.to_account_info(),
+        token::CloseAccount {
+            account: ctx.accounts.vault_wsol.to_account_info(),
+            destination: ctx.accounts.owner.to_account_info(),
+            authority: ctx.accounts.vault.to_account_info(),
+        },
+        signer_seeds
+    );
+    token::close_account(cpi_ctx_close)?;
+
     msg!("deposit_lamports_drift: Done");
 
     Ok(())

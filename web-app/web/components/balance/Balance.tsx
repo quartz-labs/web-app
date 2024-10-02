@@ -67,9 +67,6 @@ export default function Balance() {
                     vault,
                     updatedAccountInfo => {
                         const vaultBalance = updatedAccountInfo.lamports - rentExemptionThreshold;
-                        console.log(rentExemptionThreshold);
-                        console.log(updatedAccountInfo.lamports);
-                        console.log(vaultBalance);
                         setSolBalance(vaultBalance / LAMPORTS_PER_SOL);
                     },
                     "confirmed"

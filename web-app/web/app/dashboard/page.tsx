@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { isVaultInitialized } from '@/utils/utils';
 import Modal, { ModalProps } from '@/components/modal/Modal';
-import { getDepositSolIx, withdrawSol } from '@/utils/instructions';
+import { depositLamports, withdrawLamports } from '@/utils/instructions';
 import { LAMPORTS_PER_SOL, SystemProgram, Transaction, VersionedTransaction } from '@solana/web3.js';
 import { getVault } from '@/utils/getPDAs';
 
@@ -49,46 +49,11 @@ export default function Dashboard() {
             denomination: "SOL",
             buttonText: "Deposit",
             onConfirm: async (amount: number) => {
-                if (!publicKey || !wallet) {
+                if (!wallet) {
                     console.error("Error: Wallet not connected");
                     return;
                 }
-
-                const [vault, _] = getVault(publicKey);
-
-                const ix_transferLamports = SystemProgram.transfer({
-                    fromPubkey: publicKey,
-                    toPubkey: vault,
-                    lamports: amount * LAMPORTS_PER_SOL
-                });
-
-                const ix_depositLamportsDrift = await getDepositSolIx(wallet, connection, amount * LAMPORTS_PER_SOL);
-
-                if (!ix_depositLamportsDrift) {
-                    console.log("Error: User cancelled transaction")
-                    return;
-                }
-
-                const tx = new Transaction().add(ix_transferLamports, ix_depositLamportsDrift);
-
-                const latestBlockhash = await connection.getLatestBlockhash();
-                tx.recentBlockhash = latestBlockhash.blockhash;
-                tx.feePayer = wallet.publicKey;
-
-                const versionedTx = new VersionedTransaction(tx.compileMessage());
-                const signedTx = await wallet.signTransaction(versionedTx);
-
-                const simulation = await connection.simulateTransaction(signedTx);
-                console.log("Simulation result:", simulation);
-
-                const signature = await connection.sendRawTransaction(signedTx.serialize(), { skipPreflight: true });
-                
-                await connection.confirmTransaction({
-                    signature,
-                    blockhash: latestBlockhash.blockhash,
-                    lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
-                });
-
+                const signature = await depositLamports(wallet, connection, amount * LAMPORTS_PER_SOL);
                 console.log(signature);
                 if (signature) setModalEnabled(false);
             },
@@ -107,7 +72,7 @@ export default function Dashboard() {
                     console.error("Error: Wallet not connected");
                     return;
                 }
-                const signature = await withdrawSol(wallet, connection, amount * LAMPORTS_PER_SOL);
+                const signature = await withdrawLamports(wallet, connection, amount * LAMPORTS_PER_SOL);
                 console.log(signature);
                 if (signature) setModalEnabled(false);
             },

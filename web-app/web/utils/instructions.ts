@@ -47,27 +47,7 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
             .instruction();
 
         const tx = new Transaction().add(ix_initUser, ix_initDriftAccount);
-
-        const latestBlockhash = await connection.getLatestBlockhash();
-        tx.recentBlockhash = latestBlockhash.blockhash;
-        tx.feePayer = wallet.publicKey;
-
-        const versionedTx = new VersionedTransaction(tx.compileMessage());
-        const signedTx = await wallet.signTransaction(versionedTx);
-
-        const simulation = await connection.simulateTransaction(signedTx);
-        console.log("Simulation result:", simulation);
-
-        const signature = await provider.connection.sendRawTransaction(signedTx.serialize());
-        
-        await connection.confirmTransaction({
-            signature,
-            blockhash: latestBlockhash.blockhash,
-            lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
-        });
-
-        console.log(signature);
-
+        const signature = await provider.sendAndConfirm(tx);
         return signature;
     } catch (err) {
         if (err instanceof WalletSignTransactionError) {
@@ -76,7 +56,7 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
     }
 }
 
-export const withdrawSol = async(wallet: AnchorWallet, connection: web3.Connection, amountLamports: number) => {
+export const withdrawLamports = async(wallet: AnchorWallet, connection: web3.Connection, amountLamports: number) => {
     const provider = new AnchorProvider(connection, wallet, {commitment: "confirmed"}); 
     setProvider(provider);
     const program = new Program(idl as Idl, provider) as unknown as Program<FundsProgram>;
@@ -101,7 +81,7 @@ export const withdrawSol = async(wallet: AnchorWallet, connection: web3.Connecti
     }
 }
 
-export const getDepositSolIx = async(wallet: AnchorWallet, connection: web3.Connection, amountLamports: number) => {
+export const depositLamports = async(wallet: AnchorWallet, connection: web3.Connection, amountLamports: number) => {
     const provider = new AnchorProvider(connection, wallet, {commitment: "confirmed"}); 
     setProvider(provider);
     const program = new Program(idl as Idl, provider) as unknown as Program<FundsProgram>;
@@ -111,7 +91,7 @@ export const getDepositSolIx = async(wallet: AnchorWallet, connection: web3.Conn
     ); // 1 for SOL
 
     try {
-        const ix_depositLamportsDrift = await program.methods
+        const signature = await program.methods
             .depositLamportsDrift(new BN(amountLamports))
             .accounts({
                 // @ts-ignore - Causing an issue in Cursor IDE
@@ -125,12 +105,12 @@ export const getDepositSolIx = async(wallet: AnchorWallet, connection: web3.Conn
                 wsolMint: WSOL_MINT,
                 tokenProgram: TOKEN_PROGRAM_ID,
                 driftProgram: DRIFT_PROGRAM_ID,
-                additionalAccount: new PublicKey("J83w4HKfqxwcq3BEMMkPFSppX3gqekLyLJBexebFVkix"),
-                marketVault: new PublicKey("3x85u7SWkmmr7YQGYhtjARgxwegTLJgkSLRprfXod6rh"),
+                additionalAccount: new PublicKey("J83w4HKfqxwcq3BEMMkPFSppX3gqekLyLJBexebFVkix"), // TODO - Remove hardcoding
+                marketVault: new PublicKey("3x85u7SWkmmr7YQGYhtjARgxwegTLJgkSLRprfXod6rh"), // TODO - Remove hardcoding
                 systemProgram: SystemProgram.programId,
             })
-            .instruction();
-        return ix_depositLamportsDrift;
+            .rpc();
+        return signature;
     } catch (err) {
         if (err instanceof WalletSignTransactionError) {
             return null;
