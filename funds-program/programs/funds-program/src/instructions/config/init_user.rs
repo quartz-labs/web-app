@@ -23,7 +23,7 @@ pub struct InitializeUser<'info> {
 
     #[account(
         init,
-        seeds = [b"vault", owner.key().as_ref(), usdc_mint.key().as_ref()],
+        seeds = [vault.key().as_ref(), usdc_mint.key().as_ref()],
         bump,
         payer = owner,
         token::mint = usdc_mint,

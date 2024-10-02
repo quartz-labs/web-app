@@ -20,7 +20,7 @@ pub struct WithdrawUSDC<'info> {
 
     #[account(
         mut,
-        seeds = [b"vault", owner.key().as_ref(), usdc_mint.key().as_ref()],
+        seeds = [vault.key().as_ref(), usdc_mint.key().as_ref()],
         bump,
         token::mint = usdc_mint,
         token::authority = vault

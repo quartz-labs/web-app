@@ -124,11 +124,10 @@ export const getDepositSolIx = async(wallet: AnchorWallet, connection: web3.Conn
                 userTokenAccount: vaultWSol,
                 wsolMint: WSOL_MINT,
                 tokenProgram: TOKEN_PROGRAM_ID,
-                ataProgram: ASSOCIATED_PROGRAM_ID,
                 driftProgram: DRIFT_PROGRAM_ID,
-                systemProgram: SystemProgram.programId,
                 additionalAccount: new PublicKey("J83w4HKfqxwcq3BEMMkPFSppX3gqekLyLJBexebFVkix"),
-                marketVault: new PublicKey("3x85u7SWkmmr7YQGYhtjARgxwegTLJgkSLRprfXod6rh")
+                marketVault: new PublicKey("3x85u7SWkmmr7YQGYhtjARgxwegTLJgkSLRprfXod6rh"),
+                systemProgram: SystemProgram.programId,
             })
             .instruction();
         return ix_depositLamportsDrift;

@@ -22,7 +22,7 @@ pub struct SpendUSDC<'info> {
 
     #[account(
         mut,
-        seeds = [b"vault", backup.key().as_ref(), usdc_mint.key().as_ref()],
+        seeds = [vault.key().as_ref(), usdc_mint.key().as_ref()],
         bump,
         token::mint = usdc_mint,
         token::authority = vault

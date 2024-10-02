@@ -95,6 +95,22 @@ export type FundsProgram = {
           }
         },
         {
+          "name": "vaultWsol",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "vault"
+              },
+              {
+                "kind": "account",
+                "path": "wsolMint"
+              }
+            ]
+          }
+        },
+        {
           "name": "owner",
           "writable": true,
           "signer": true,
@@ -235,35 +251,11 @@ export type FundsProgram = {
           }
         },
         {
-          "name": "userTokenAccount",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "account",
-                "path": "ataProgram"
-              },
-              {
-                "kind": "account",
-                "path": "owner"
-              },
-              {
-                "kind": "account",
-                "path": "wsolMint"
-              }
-            ]
-          }
-        },
-        {
           "name": "wsolMint"
         },
         {
           "name": "tokenProgram",
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
-        },
-        {
-          "name": "ataProgram",
-          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
         },
         {
           "name": "driftProgram"
@@ -476,18 +468,8 @@ export type FundsProgram = {
           "pda": {
             "seeds": [
               {
-                "kind": "const",
-                "value": [
-                  118,
-                  97,
-                  117,
-                  108,
-                  116
-                ]
-              },
-              {
                 "kind": "account",
-                "path": "owner"
+                "path": "vault"
               },
               {
                 "kind": "account",
@@ -614,18 +596,8 @@ export type FundsProgram = {
           "pda": {
             "seeds": [
               {
-                "kind": "const",
-                "value": [
-                  118,
-                  97,
-                  117,
-                  108,
-                  116
-                ]
-              },
-              {
                 "kind": "account",
-                "path": "owner"
+                "path": "vault"
               },
               {
                 "kind": "account",
