@@ -21,7 +21,7 @@ pub struct DepositLamportsDrift<'info> {
         bump = vault.bump,
         has_one = owner
     )]
-    pub vault: Account<'info, Vault>,
+    pub vault: Box<Account<'info, Vault>>,
 
     #[account(mut)]
     pub owner: Signer<'info>,
@@ -69,7 +69,7 @@ pub struct DepositLamportsDrift<'info> {
         token::mint = wsol_mint,
         token::authority = vault
     )]
-    pub user_token_account: Account<'info, TokenAccount>,
+    pub user_token_account: Box<Account<'info, TokenAccount>>,
 
     #[account(
         constraint = wsol_mint.key() == WSOL_MINT_ADDRESS @ ErrorCode::InvalidMintAddress
