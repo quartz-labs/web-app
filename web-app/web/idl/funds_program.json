@@ -234,14 +234,8 @@
           "pda": {
             "seeds": [
               {
-                "kind": "const",
-                "value": [
-                  118,
-                  97,
-                  117,
-                  108,
-                  116
-                ]
+                "kind": "account",
+                "path": "ata_program"
               },
               {
                 "kind": "account",
@@ -260,6 +254,10 @@
         {
           "name": "token_program",
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "ata_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
         },
         {
           "name": "drift_program"

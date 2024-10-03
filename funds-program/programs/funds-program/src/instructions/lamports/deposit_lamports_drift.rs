@@ -3,6 +3,7 @@ use anchor_spl::{
     token::{Mint, Token}, 
     token::TokenAccount
 };
+use anchor_spl::associated_token::AssociatedToken;
 use drift_sdk::accounts::State;
 use drift_sdk::cpi::deposit;
 use drift_sdk::Deposit;
@@ -63,7 +64,7 @@ pub struct DepositLamportsDrift<'info> {
 
     #[account(
         init,
-        seeds = [b"vault", owner.key().as_ref(), wsol_mint.key().as_ref()],
+        seeds = [ata_program.key().as_ref(), owner.key().as_ref(), wsol_mint.key().as_ref()],
         bump,
         payer = owner,
         token::mint = wsol_mint,
@@ -77,6 +78,8 @@ pub struct DepositLamportsDrift<'info> {
     pub wsol_mint: Account<'info, Mint>,
 
     pub token_program: Program<'info, Token>,
+
+    pub ata_program: Program<'info, AssociatedToken>,
 
     /// CHECK: Account is safe once the address is correct
     #[account(

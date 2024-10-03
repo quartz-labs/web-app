@@ -240,14 +240,8 @@ export type FundsProgram = {
           "pda": {
             "seeds": [
               {
-                "kind": "const",
-                "value": [
-                  118,
-                  97,
-                  117,
-                  108,
-                  116
-                ]
+                "kind": "account",
+                "path": "ataProgram"
               },
               {
                 "kind": "account",
@@ -266,6 +260,10 @@ export type FundsProgram = {
         {
           "name": "tokenProgram",
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "ataProgram",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
         },
         {
           "name": "driftProgram"

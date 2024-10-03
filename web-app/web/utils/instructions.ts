@@ -3,7 +3,7 @@ import { AnchorWallet } from "@solana/wallet-adapter-react";
 import { DRIFT_PROGRAM_ID, USDC_MINT, WSOL_MINT } from "./constants";
 import idl from "../idl/funds_program.json";
 import { FundsProgram } from "@/types/funds_program";
-import { TOKEN_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/utils/token";
+import { ASSOCIATED_PROGRAM_ID, TOKEN_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/utils/token";
 import { Keypair, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction, VersionedTransaction } from "@solana/web3.js";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
 import { getDriftPDAs, getVault } from "./getPDAs";
@@ -124,6 +124,7 @@ export const getDepositSolIx = async(wallet: AnchorWallet, connection: web3.Conn
                 userTokenAccount: vaultWSol,
                 wsolMint: WSOL_MINT,
                 tokenProgram: TOKEN_PROGRAM_ID,
+                ataProgram: ASSOCIATED_PROGRAM_ID,
                 driftProgram: DRIFT_PROGRAM_ID,
                 systemProgram: SystemProgram.programId,
                 additionalAccount: new PublicKey("J83w4HKfqxwcq3BEMMkPFSppX3gqekLyLJBexebFVkix"),
