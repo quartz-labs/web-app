@@ -81,7 +81,7 @@ export default function Dashboard() {
                 const simulation = await connection.simulateTransaction(signedTx);
                 console.log("Simulation result:", simulation);
 
-                const signature = await connection.sendRawTransaction(signedTx.serialize());
+                const signature = await connection.sendRawTransaction(signedTx.serialize(), { skipPreflight: true });
                 
                 await connection.confirmTransaction({
                     signature,

@@ -84,6 +84,14 @@ pub struct DepositLamportsDrift<'info> {
     )]
     pub drift_program: UncheckedAccount<'info>,
 
+    /// CHECK: Additonal account needed for the Drift CPI
+    #[account()]
+    pub additional_account: UncheckedAccount<'info>,
+
+    /// CHECK: Additonal account needed for the Drift CPI
+    #[account(mut)]
+    pub market_vault: UncheckedAccount<'info>,
+
     pub system_program: Program<'info, System>
 }
 
@@ -102,21 +110,29 @@ pub fn deposit_lamports_drift_handler(
     ];
     let signer_seeds = &[&seeds[..]];
  
-    let cpi_context = CpiContext::new_with_signer(
+    let cpi_accounts = Deposit {
+        state: ctx.accounts.state.to_account_info(),
+        user: ctx.accounts.user.to_account_info(),
+        user_stats: ctx.accounts.user_stats.to_account_info(),
+        authority: ctx.accounts.vault.to_account_info(),
+        spot_market_vault: ctx.accounts.spot_market_vault.to_account_info(),
+        user_token_account: ctx.accounts.user_token_account.to_account_info(),
+        token_program: ctx.accounts.token_program.to_account_info(),
+    };
+
+    let mut cpi_ctx = CpiContext::new_with_signer(
         ctx.accounts.drift_program.to_account_info(),
-        Deposit {
-            state: ctx.accounts.state.to_account_info(),
-            user: ctx.accounts.user.to_account_info(),
-            user_stats: ctx.accounts.user_stats.to_account_info(),
-            authority: ctx.accounts.vault.to_account_info(),
-            spot_market_vault: ctx.accounts.spot_market_vault.to_account_info(),
-            user_token_account: ctx.accounts.user_token_account.to_account_info(),
-            token_program: ctx.accounts.token_program.to_account_info(),
-        },
+        cpi_accounts,
         signer_seeds
     );
- 
-    deposit(cpi_context, 1, amount, false)?;
+
+    // Add additional_account and market_vault as remaining accounts
+    cpi_ctx.remaining_accounts = vec![
+        ctx.accounts.additional_account.to_account_info(),
+        ctx.accounts.market_vault.to_account_info(),
+    ];
+
+    deposit(cpi_ctx, 1, amount, false)?;
 
     msg!("deposit_lamports_drift: Done");
 

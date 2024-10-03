@@ -265,6 +265,13 @@
           "name": "drift_program"
         },
         {
+          "name": "additional_account"
+        },
+        {
+          "name": "market_vault",
+          "writable": true
+        },
+        {
           "name": "system_program",
           "address": "11111111111111111111111111111111"
         }

@@ -271,6 +271,13 @@ export type FundsProgram = {
           "name": "driftProgram"
         },
         {
+          "name": "additionalAccount"
+        },
+        {
+          "name": "marketVault",
+          "writable": true
+        },
+        {
           "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         }
