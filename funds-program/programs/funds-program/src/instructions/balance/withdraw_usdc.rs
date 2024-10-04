@@ -3,7 +3,6 @@ use anchor_spl::{
     associated_token::AssociatedToken, token::{self, Mint, Token, TokenAccount}
 };
 use drift_sdk::{
-    accounts::State as DriftState, 
     cpi::withdraw, 
     Withdraw
 };
@@ -43,13 +42,14 @@ pub struct WithdrawUsdc<'info> {
     )]
     pub owner_usdc: Box<Account<'info, TokenAccount>>,
 
+    /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
         mut,
         seeds = [b"drift_state"],
         seeds::program = drift_program.key(),
         bump
     )]
-    pub state: Box<Account<'info, DriftState>>,
+    pub state: UncheckedAccount<'info>,
 
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
@@ -125,9 +125,7 @@ pub fn withdraw_usdc_handler(
     ];
     let signer_seeds = &[&seeds[..]];
 
-    msg!("withdraw_usdc: Withdrawing {} USDC from Drift", amount_cents / 100);
-
-    // Build Drift Deposit CPI
+    // Build Drift Withdraw CPI
     let mut cpi_ctx = CpiContext::new_with_signer(
         ctx.accounts.drift_program.to_account_info(),
         Withdraw {
@@ -143,7 +141,7 @@ pub fn withdraw_usdc_handler(
         signer_seeds
     );
 
-    // Add additional_account and market_vault as remaining accounts
+    // Add remaining accounts and send CPI
     cpi_ctx.remaining_accounts = vec![
         ctx.accounts.const_account.to_account_info(),
         ctx.accounts.additional_account.to_account_info(),
@@ -153,9 +151,8 @@ pub fn withdraw_usdc_handler(
 
     withdraw(cpi_ctx, DRIFT_MARKET_INDEX_USDC, amount_cents, true)?;
 
-    msg!("withdraw_usdc: Sending {} USDC to {}", amount_cents / 100, ctx.accounts.owner_usdc.key());
+    // Transfer USDC to owner's ATA
 
-    // Transfer tokens
     token::transfer(
         CpiContext::new_with_signer(
             ctx.accounts.token_program.to_account_info(), 
@@ -169,7 +166,7 @@ pub fn withdraw_usdc_handler(
         amount_cents
     )?;
 
-    msg!("withdraw_lamports: Closing usdc vault and paying usdc to owner");
+    // Close vault USDC
 
     let cpi_ctx_close = CpiContext::new_with_signer(
         ctx.accounts.token_program.to_account_info(),
@@ -181,8 +178,6 @@ pub fn withdraw_usdc_handler(
         signer_seeds
     );
     token::close_account(cpi_ctx_close)?;
-
-    msg!("withdraw_lamports: Done");
 
     Ok(())
 }

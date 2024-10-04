@@ -17,6 +17,5 @@ pub struct CloseUser<'info> {
 }
 
 pub fn close_user_handler(_ctx: Context<CloseUser>) -> Result<()> {
-    msg!("Closing user account");
     Ok(())
 }

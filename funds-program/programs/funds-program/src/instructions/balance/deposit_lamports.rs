@@ -6,12 +6,11 @@ use anchor_spl::{
     token::TokenAccount
 };
 use drift_sdk::{
-    accounts::State as DriftState,
     cpi::deposit,
     Deposit
 };
 use crate::{
-    constants::{DRIFT_PROGRAM_ID, WSOL_MINT_ADDRESS},
+    constants::{DRIFT_PROGRAM_ID, WSOL_MINT_ADDRESS, DRIFT_MARKET_INDEX_SOL},
     errors::ErrorCode,
     state::Vault
 };
@@ -39,13 +38,14 @@ pub struct DepositLamports<'info> {
     #[account(mut)]
     pub owner: Signer<'info>,
 
+    /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
         mut,
         seeds = [b"drift_state"],
         seeds::program = drift_program.key(),
         bump
     )]
-    pub state: Box<Account<'info, DriftState>>,
+    pub drift_state: UncheckedAccount<'info>,
     
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
@@ -54,7 +54,7 @@ pub struct DepositLamports<'info> {
         seeds::program = drift_program.key(),
         bump
     )]
-    pub user: UncheckedAccount<'info>,
+    pub drift_user: UncheckedAccount<'info>,
 
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
@@ -63,11 +63,11 @@ pub struct DepositLamports<'info> {
         seeds::program = drift_program.key(),
         bump
     )]
-    pub user_stats: UncheckedAccount<'info>,
+    pub drift_user_stats: UncheckedAccount<'info>,
 
     #[account(
         mut,
-        seeds = [b"spot_market_vault", (1u16).to_le_bytes().as_ref()], // 1 for SOL
+        seeds = [b"spot_market_vault", (DRIFT_MARKET_INDEX_SOL).to_le_bytes().as_ref()],
         seeds::program = drift_program.key(),
         token::mint = wsol_mint,
         bump,
@@ -110,8 +110,6 @@ pub fn deposit_lamports_handler(
     ];
     let signer_seeds = &[&seeds[..]];
 
-    msg!("deposit_lamprots: Wrapping {} lamports", amount);
-
     // Transfer SOL from user to vault wSOL account
     let cpi_ctx_transfer = CpiContext::new(
         ctx.accounts.system_program.to_account_info(),
@@ -131,15 +129,13 @@ pub fn deposit_lamports_handler(
     );
     token::sync_native(cpi_ctx_sync)?;
 
-    msg!("deposit_lamprots: Deposit {} wSol lamports into Drift", amount);
-
     // Build Drift Deposit CPI
     let mut cpi_ctx = CpiContext::new_with_signer(
         ctx.accounts.drift_program.to_account_info(),
         Deposit {
-            state: ctx.accounts.state.to_account_info(),
-            user: ctx.accounts.user.to_account_info(),
-            user_stats: ctx.accounts.user_stats.to_account_info(),
+            state: ctx.accounts.drift_state.to_account_info(),
+            user: ctx.accounts.drift_user.to_account_info(),
+            user_stats: ctx.accounts.drift_user_stats.to_account_info(),
             authority: ctx.accounts.vault.to_account_info(),
             spot_market_vault: ctx.accounts.spot_market_vault.to_account_info(),
             user_token_account: ctx.accounts.vault_wsol.to_account_info(),
@@ -148,7 +144,7 @@ pub fn deposit_lamports_handler(
         signer_seeds
     );
 
-    // Add additional_account and market_vault as remaining accounts
+    // Add remaining accounts and send CPI
     cpi_ctx.remaining_accounts = vec![
         ctx.accounts.const_account.to_account_info(),
         ctx.accounts.spot_market.to_account_info(),
@@ -156,7 +152,7 @@ pub fn deposit_lamports_handler(
 
     deposit(cpi_ctx, 1, amount, false)?;
 
-    msg!("deposit_lamprots: Closing wSol vault");
+    // Close wSol vault
 
     let cpi_ctx_close = CpiContext::new_with_signer(
         ctx.accounts.token_program.to_account_info(),
@@ -168,8 +164,6 @@ pub fn deposit_lamports_handler(
         signer_seeds
     );
     token::close_account(cpi_ctx_close)?;
-
-    msg!("deposit_lamprots: Done");
 
     Ok(())
 }

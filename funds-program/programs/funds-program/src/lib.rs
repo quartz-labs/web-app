@@ -12,6 +12,8 @@ declare_id!("B6gXhjcwsD8uFsaaPNFxeswxSNM79iP5mPgBnmxQJjn2");
 pub mod funds_program {
     use super::*;
 
+    // Config
+
     pub fn init_user(ctx: Context<InitializeUser>) -> Result<()> {
         init_user_handler(ctx)
     }
@@ -20,14 +22,11 @@ pub mod funds_program {
         close_user_handler(ctx)
     }
 
-    // Not required until mobile app
-    // pub fn change_user(ctx: Context<ChangeUser>) -> Result<()> {
-    //     change_user_handler(ctx)
-    // }
-
     pub fn init_drift_account(ctx: Context<InitDriftAccount>) -> Result<()> {
         init_drift_account_handler(ctx)
     }
+
+    // Balance
 
     pub fn withdraw_lamports(ctx: Context<WithdrawLamports>, amount: u64) -> Result<()> {
         withdraw_lamports_handler(ctx, amount)
@@ -37,12 +36,15 @@ pub mod funds_program {
         deposit_lamports_handler(ctx, amount)
     }
 
-    // Not required until mobile app
-    // pub fn spend_usdc(ctx: Context<SpendUSDC>, amount_cents: u64) -> Result<()> {
-    //     spend_usdc_handler(ctx, amount_cents)
-    // }
-
     pub fn withdraw_usdc<'info>(ctx: Context<'_, '_, '_, 'info, WithdrawUsdc<'info>>, amount_cents: u64) -> Result<()> {
         withdraw_usdc_handler(ctx, amount_cents)
+    }
+
+    pub fn begin_swap(ctx: Context<Swap>) -> Result<()> {
+        begin_swap_handler(ctx)
+    }
+
+    pub fn end_swap(ctx: Context<Swap>) -> Result<()> {
+        end_swap_handler(ctx)
     }
 }
