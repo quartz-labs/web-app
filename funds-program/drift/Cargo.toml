@@ -21,3 +21,4 @@ default = ["rpc", "i11n", "cpi", "events"]
 anchor-lang = "0.30.0"
 anchor-i11n = { optional = true, version = "0.1.0"}
 bytemuck = { version = "1.4.0" }
+borsh = "0.10.3"

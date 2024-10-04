@@ -1097,6 +1097,7 @@ version = "2.92.0"
 dependencies = [
  "anchor-i11n",
  "anchor-lang 0.30.1",
+ "borsh 0.10.3",
  "bytemuck",
 ]
 

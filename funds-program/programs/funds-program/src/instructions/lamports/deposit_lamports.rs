@@ -6,11 +6,7 @@ use anchor_spl::{
     token::TokenAccount
 };
 use drift_sdk::{
-    accounts::{
-        State as DriftState, 
-        User as DriftUser,
-        UserStats as DriftUserStats
-    }, 
+    accounts::State as DriftState,
     cpi::deposit,
     Deposit
 };
@@ -51,29 +47,32 @@ pub struct DepositLamports<'info> {
     )]
     pub state: Box<Account<'info, DriftState>>,
     
+    /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
         mut,
         seeds = [b"user", vault.key().as_ref(), (0u16).to_le_bytes().as_ref()],
         seeds::program = drift_program.key(),
         bump
     )]
-    pub user: AccountLoader<'info, DriftUser>,
+    pub user: UncheckedAccount<'info>,
 
+    /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
         mut,
         seeds = [b"user_stats", vault.key().as_ref()],
         seeds::program = drift_program.key(),
         bump
     )]
-    pub user_stats: Account<'info, DriftUserStats>,
+    pub user_stats: UncheckedAccount<'info>,
 
     #[account(
         mut,
         seeds = [b"spot_market_vault", (1u16).to_le_bytes().as_ref()], // 1 for SOL
         seeds::program = drift_program.key(),
+        token::mint = wsol_mint,
         bump,
     )]
-    pub spot_market_vault: Account<'info, TokenAccount>,
+    pub spot_market_vault: Box<Account<'info, TokenAccount>>,
 
     #[account(
         constraint = wsol_mint.key() == WSOL_MINT_ADDRESS @ ErrorCode::InvalidMintAddress

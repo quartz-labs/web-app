@@ -3,11 +3,7 @@ use anchor_spl::{
     associated_token::AssociatedToken, token::{self, Mint, Token, TokenAccount}
 };
 use drift_sdk::{
-    accounts::{
-        State as DriftState, 
-        User as DriftUser,
-        UserStats as DriftUserStats
-    }, 
+    accounts::State as DriftState, 
     cpi::withdraw, 
     Withdraw
 };
@@ -41,8 +37,7 @@ pub struct WithdrawUsdc<'info> {
     pub owner: Signer<'info>,
 
     #[account(
-        init_if_needed,
-        payer = owner,
+        mut,
         associated_token::mint = usdc_mint,
         associated_token::authority = owner
     )]
@@ -56,29 +51,32 @@ pub struct WithdrawUsdc<'info> {
     )]
     pub state: Box<Account<'info, DriftState>>,
 
+    /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
         mut,
         seeds = [b"user", vault.key().as_ref(), (0u16).to_le_bytes().as_ref()],
         seeds::program = drift_program.key(),
         bump
     )]
-    pub user: Box<Account<'info, DriftUser>>,
+    pub user: UncheckedAccount<'info>,
     
+    /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
         mut,
         seeds = [b"user_stats", vault.key().as_ref()],
         seeds::program = drift_program.key(),
         bump
     )]
-    pub user_stats: Box<Account<'info, DriftUserStats>>,
+    pub user_stats: UncheckedAccount<'info>,
     
     #[account(
         mut,
         seeds = [b"spot_market_vault", (DRIFT_MARKET_INDEX_USDC).to_le_bytes().as_ref()],
         seeds::program = drift_program.key(),
+        token::mint = usdc_mint,
         bump,
     )]
-    pub spot_market_vault: Account<'info, TokenAccount>,
+    pub spot_market_vault: Box<Account<'info, TokenAccount>>,
     
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     pub drift_signer: UncheckedAccount<'info>,
@@ -105,10 +103,10 @@ pub struct WithdrawUsdc<'info> {
     pub additional_account: UncheckedAccount<'info>,
 
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
-    #[account(mut)]
     pub spot_market_sol: UncheckedAccount<'info>,
 
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
+    #[account(mut)]
     pub spot_market_usdc: UncheckedAccount<'info>,
 
     pub system_program: Program<'info, System>,
@@ -127,7 +125,7 @@ pub fn withdraw_usdc_handler(
     ];
     let signer_seeds = &[&seeds[..]];
 
-    msg!("withdraw_usdc: Withdrawing {} USDC from Drift", amount_cents * 100);
+    msg!("withdraw_usdc: Withdrawing {} USDC from Drift", amount_cents / 100);
 
     // Build Drift Deposit CPI
     let mut cpi_ctx = CpiContext::new_with_signer(
@@ -155,21 +153,21 @@ pub fn withdraw_usdc_handler(
 
     withdraw(cpi_ctx, DRIFT_MARKET_INDEX_USDC, amount_cents, true)?;
 
-    // msg!("withdraw_usdc: Sending {} USDC to {}", amount_cents*100, ctx.accounts.owner_usdc.key());
+    msg!("withdraw_usdc: Sending {} USDC to {}", amount_cents / 100, ctx.accounts.owner_usdc.key());
 
-    // // Transfer tokens
-    // token::transfer(
-    //     CpiContext::new_with_signer(
-    //         ctx.accounts.token_program.to_account_info(), 
-    //         token::Transfer { 
-    //             from: ctx.accounts.vault_usdc.to_account_info(), 
-    //             to: ctx.accounts.owner_usdc.to_account_info(), 
-    //             authority: ctx.accounts.vault.to_account_info()
-    //         }, 
-    //         signer_seeds
-    //     ),
-    //     amount_cents
-    // )?;
+    // Transfer tokens
+    token::transfer(
+        CpiContext::new_with_signer(
+            ctx.accounts.token_program.to_account_info(), 
+            token::Transfer { 
+                from: ctx.accounts.vault_usdc.to_account_info(), 
+                to: ctx.accounts.owner_usdc.to_account_info(), 
+                authority: ctx.accounts.vault.to_account_info()
+            }, 
+            signer_seeds
+        ),
+        amount_cents
+    )?;
 
     msg!("withdraw_lamports: Closing usdc vault and paying usdc to owner");
 

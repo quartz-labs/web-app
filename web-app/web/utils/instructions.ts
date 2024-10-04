@@ -1,10 +1,10 @@
 import { AnchorProvider, BN, Idl, Program, setProvider, web3 } from "@coral-xyz/anchor";
 import { AnchorWallet } from "@solana/wallet-adapter-react";
-import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC, DRIFT_PROGRAM_ID, DRIFT_SPOT_MARKET_SOL, DRIFT_SPOT_MARKET_USDC, DRIFT_VAULT, USDC_MINT, WSOL_MINT } from "./constants";
+import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC, DRIFT_PROGRAM_ID, DRIFT_SPOT_MARKET_SOL, DRIFT_SPOT_MARKET_USDC, DRIFT_SIGNER, USDC_MINT, WSOL_MINT } from "./constants";
 import idl from "../idl/funds_program.json";
 import { FundsProgram } from "@/types/funds_program";
 import { ASSOCIATED_PROGRAM_ID, TOKEN_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/utils/token";
-import { PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
+import { PublicKey, SystemProgram, Transaction, VersionedTransaction } from "@solana/web3.js";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
 import { getDriftSpotMarketVault, getDriftState, getDriftUser, getDriftUserStats, getVault, getVaultUsdc, getVaultWsol } from "./getPDAs";
 import { createAssociatedTokenAccount, createAssociatedTokenAccountInstruction, getAssociatedTokenAddress } from "@solana/spl-token";
@@ -80,7 +80,7 @@ export const withdrawLamports = async(wallet: AnchorWallet, connection: web3.Con
                 user: driftUser,
                 userStats: driftUserStats,
                 spotMarketVault: driftSpotMarketVault,
-                driftSigner: DRIFT_VAULT,
+                driftSigner: DRIFT_SIGNER,
                 wsolMint: WSOL_MINT,
                 tokenProgram: TOKEN_PROGRAM_ID,
                 driftProgram: DRIFT_PROGRAM_ID,
@@ -150,11 +150,12 @@ export const withdrawUsdc = async(wallet: AnchorWallet, connection: web3.Connect
     const driftUser = getDriftUser(vaultPda);
     const driftUserStats = getDriftUserStats(vaultPda);
     const driftSpotMarketVault = getDriftSpotMarketVault(DRIFT_MARKET_INDEX_USDC);
+    console.log(driftSpotMarketVault.toString());
 
     const walletUsdc = await getOrCreateAssociatedTokenAccountAnchor(wallet, connection, provider, USDC_MINT);
 
     try {
-        const signature = await program.methods
+        const tx = await program.methods
             .withdrawUsdc(new BN(amountCents))
             .accounts({
                 // @ts-ignore - Causing an issue in Cursor IDE
@@ -166,18 +167,37 @@ export const withdrawUsdc = async(wallet: AnchorWallet, connection: web3.Connect
                 user: driftUser,
                 userStats: driftUserStats,
                 spotMarketVault: driftSpotMarketVault,
-                driftSigner: DRIFT_VAULT,
+                driftSigner: DRIFT_SIGNER,
                 usdcMint: USDC_MINT,
                 tokenProgram: TOKEN_PROGRAM_ID,
                 associatedTokenProgram: ASSOCIATED_PROGRAM_ID,
                 driftProgram: DRIFT_PROGRAM_ID,
-                constAccount: new PublicKey("BAtFj4kQttZRVep3UZS2aZRDixkGYgWsbqTBVDbnSsPF"), // TODO - Remove hardcoding
-                additionalAccount: new PublicKey("En8hkHLkRe9d9DraYmBTrus518BvmVH448YcvmrFM6Ce"), // TODO - Remove hardcoding
+                constAccount: new PublicKey("J83w4HKfqxwcq3BEMMkPFSppX3gqekLyLJBexebFVkix"), // TODO - Remove hardcoding
+                additionalAccount: new PublicKey("5SSkXsEKQepHHAewytPVwdej4epN1nxgLVM84L4KXgy7"), // TODO - Remove hardcoding
                 spotMarketSol: DRIFT_SPOT_MARKET_SOL,
                 spotMarketUsdc: DRIFT_SPOT_MARKET_USDC,
                 systemProgram: SystemProgram.programId,
             })
-            .rpc();
+            .transaction();
+
+        const latestBlockhash = await connection.getLatestBlockhash();
+        tx.recentBlockhash = latestBlockhash.blockhash;
+        tx.feePayer = wallet.publicKey;
+
+        const versionedTx = new VersionedTransaction(tx.compileMessage());
+        const signedTx = await wallet.signTransaction(versionedTx);
+
+        const simulation = await connection.simulateTransaction(signedTx);
+        console.log("Simulation result:", simulation);
+
+        const signature = await provider.connection.sendRawTransaction(signedTx.serialize(), {skipPreflight: true});
+        
+        await connection.confirmTransaction({
+            signature,
+            blockhash: latestBlockhash.blockhash,
+            lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
+        });
+
         return signature;
     } catch (err) {
         if (err instanceof WalletSignTransactionError) {
