@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { isVaultInitialized } from '@/utils/utils';
 import Modal, { ModalProps } from '@/components/modal/Modal';
-import { depositLamports, withdrawLamports } from '@/utils/instructions';
+import { depositLamports, withdrawLamports, withdrawUsdc } from '@/utils/instructions';
 import { LAMPORTS_PER_SOL, SystemProgram, Transaction, VersionedTransaction } from '@solana/web3.js';
 import { getVault } from '@/utils/getPDAs';
 
@@ -22,7 +22,6 @@ export default function Dashboard() {
     const { connection } = useConnection();
     const wallet = useAnchorWallet();
     const router = useRouter();
-    const {publicKey, sendTransaction} = useWallet();
 
     const [modalEnabled, setModalEnabled] = useState(false);
     const [modalData, setModalData] = useState<ModalProps>({
@@ -101,8 +100,13 @@ export default function Dashboard() {
             denomination: "USDC",
             buttonText: "Offramp",
             onConfirm: async (amount: number) => {
-                console.log("Offramp " + amount);
-                setModalEnabled(false);
+                if (!wallet) {
+                    console.error("Error: Wallet not connected");
+                    return;
+                }
+                const signature = await withdrawUsdc(wallet, connection, amount * 100);
+                console.log(signature);
+                if (signature) setModalEnabled(false);
             },
             onCancel: () => { setModalEnabled(false); }
         })

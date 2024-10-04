@@ -52,7 +52,7 @@ export default function Balance() {
             }
 
             try {
-                const [vault, _] = getVault(wallet.publicKey);
+                const vault = getVault(wallet.publicKey);
                 
                 const vaultAccount = await connection.getAccountInfo(vault);
                 if (vaultAccount) {

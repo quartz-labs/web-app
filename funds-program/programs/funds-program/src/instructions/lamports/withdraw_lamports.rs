@@ -5,12 +5,18 @@ use anchor_spl::{
     token::TokenAccount
 };
 use drift_sdk::{
-    accounts::State, 
+    accounts::{
+        State as DriftState, 
+        User as DriftUser,
+        UserStats as DriftUserStats
+    }, 
     cpi::withdraw, 
     Withdraw
 };
 use crate::{
-    constants::{DRIFT_PROGRAM_ID, WSOL_MINT_ADDRESS}, errors::ErrorCode, state::Vault
+    constants::{DRIFT_MARKET_INDEX_SOL, DRIFT_PROGRAM_ID, WSOL_MINT_ADDRESS}, 
+    errors::ErrorCode, 
+    state::Vault
 };
 
 #[derive(Accounts)]
@@ -42,34 +48,32 @@ pub struct WithdrawLamports<'info> {
         seeds::program = drift_program.key(),
         bump
     )]
-    pub state: Box<Account<'info, State>>,
+    pub state: Box<Account<'info, DriftState>>,
 
-    /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
         mut,
         seeds = [b"user", vault.key().as_ref(), (0u16).to_le_bytes().as_ref()],
         seeds::program = drift_program.key(),
         bump
     )]
-    pub user: UncheckedAccount<'info>,
+    pub user: Account<'info, DriftUser>,
     
-    /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
         mut,
         seeds = [b"user_stats", vault.key().as_ref()],
         seeds::program = drift_program.key(),
         bump
     )]
-    pub user_stats: UncheckedAccount<'info>,
+    pub user_stats: Account<'info, DriftUserStats>,
     
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
         mut,
-        seeds = [b"spot_market_vault", (1u16).to_le_bytes().as_ref()], // 1 for SOL
+        seeds = [b"spot_market_vault", (DRIFT_MARKET_INDEX_SOL).to_le_bytes().as_ref()],
         seeds::program = drift_program.key(),
         bump,
     )]
-    pub spot_market_vault: UncheckedAccount<'info>,
+    pub spot_market_vault: Account<'info, TokenAccount>,
     
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     pub drift_signer: UncheckedAccount<'info>,
@@ -119,7 +123,7 @@ pub fn withdraw_lamports_handler(
     msg!("withdraw_lamports: Withdrawing {} lamports from Drift", amount);
 
     // Build Drift Deposit CPI
-    let mut cpi_ctx = CpiContext::new_with_signer(
+    let cpi_ctx = CpiContext::new_with_signer(
         ctx.accounts.drift_program.to_account_info(),
         Withdraw {
             state: ctx.accounts.state.to_account_info(),
@@ -132,19 +136,16 @@ pub fn withdraw_lamports_handler(
             token_program: ctx.accounts.token_program.to_account_info(),
         },
         signer_seeds
-    );
-
-    // Add additional_account and market_vault as remaining accounts
-    cpi_ctx.remaining_accounts = vec![
+    ).with_remaining_accounts(vec![
         ctx.accounts.const_account.to_account_info(),
         ctx.accounts.additional_account.to_account_info(),
         ctx.accounts.spot_market_sol.to_account_info(),
-        ctx.accounts.spot_market_usdc.to_account_info(),
-    ];
+        ctx.accounts.spot_market_usdc.to_account_info()
+    ]);
 
-    withdraw(cpi_ctx, 1, amount, true)?;
+    withdraw(cpi_ctx, DRIFT_MARKET_INDEX_SOL, amount, true)?;
 
-    msg!("deposit_lamports_drift: Closing wSol vault and paying sol to owner");
+    msg!("withdraw_lamports: Closing wSol vault and paying sol to owner");
 
     let cpi_ctx_close = CpiContext::new_with_signer(
         ctx.accounts.token_program.to_account_info(),

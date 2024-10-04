@@ -42,7 +42,7 @@ pub mod funds_program {
     //     spend_usdc_handler(ctx, amount_cents)
     // }
 
-    pub fn withdraw_usdc(ctx: Context<WithdrawUSDC>, amount: u64) -> Result<()> {
-        withdraw_usdc_handler(ctx, amount)
+    pub fn withdraw_usdc<'info>(ctx: Context<'_, '_, '_, 'info, WithdrawUsdc<'info>>, amount_cents: u64) -> Result<()> {
+        withdraw_usdc_handler(ctx, amount_cents)
     }
 }

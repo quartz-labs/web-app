@@ -4,6 +4,8 @@ pub const ANCHOR_DISCRIMINATOR: usize = 8;
 pub const PUBKEY_SIZE: usize = 32;
 pub const U8_SIZE: usize = 1;
 
+pub const DRIFT_MARKET_INDEX_USDC: u16 = 0;
+pub const DRIFT_MARKET_INDEX_SOL: u16 = 1;
 
 pub const DRIFT_PROGRAM_ID: Pubkey = pubkey!("dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH");
 // pub const QUARTZ_HOLDING_ADDRESS: Pubkey = pubkey!("5XY5pQbBjwv8ByBxKPNE7Xyb9dVcdFgd51xcxKDJjGWE");
