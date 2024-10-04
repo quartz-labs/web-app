@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 
 use super::Swap;
 
-pub fn end_swap_handler(ctx: Context<Swap>) {
+pub fn end_swap_handler(ctx: Context<Swap>) -> Result<()> {
     let vault_bump = ctx.accounts.vault.bump;
     let owner = ctx.accounts.owner.key();
     let seeds = &[
@@ -12,5 +12,5 @@ pub fn end_swap_handler(ctx: Context<Swap>) {
     ];
     let signer_seeds = &[&seeds[..]];
 
-    
+    Ok(())
 }
