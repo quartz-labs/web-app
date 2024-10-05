@@ -50,6 +50,7 @@ pub struct EndSwap<'info> {
     )]
     pub owner_usdc: Box<Account<'info, TokenAccount>>,
 
+    /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
         mut,
         seeds = [b"drift_state"],

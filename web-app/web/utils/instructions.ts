@@ -4,7 +4,7 @@ import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC, DRIFT_PROGRAM_ID, DRIF
 import idl from "../idl/funds_program.json";
 import { FundsProgram } from "@/types/funds_program";
 import { ASSOCIATED_PROGRAM_ID, TOKEN_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/utils/token";
-import { PublicKey, SystemProgram, Transaction, VersionedTransaction } from "@solana/web3.js";
+import { PublicKey, SystemProgram, SYSVAR_INSTRUCTIONS_PUBKEY, Transaction, VersionedTransaction } from "@solana/web3.js";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
 import { getDriftSpotMarketVault, getDriftState, getDriftUser, getDriftUserStats, getVault, getVaultUsdc, getVaultWsol } from "./getPDAs";
 import { createAssociatedTokenAccount, createAssociatedTokenAccountInstruction, getAssociatedTokenAddress } from "@solana/spl-token";
@@ -14,11 +14,7 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
     const provider = new AnchorProvider(connection, wallet, {commitment: "confirmed"}); 
     setProvider(provider);
     const program = new Program(idl as Idl, provider) as unknown as Program<FundsProgram>;
-    
     const vaultPda = getVault(wallet.publicKey);
-    const driftUser = getDriftUser(vaultPda);
-    const driftUserStats = getDriftUserStats(vaultPda);
-    const driftState = getDriftState();
 
     try {
         const ix_initUser = await program.methods
@@ -37,9 +33,9 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
                 // @ts-ignore - Causing an issue in Cursor IDE
                 vault: vaultPda,
                 owner: wallet.publicKey,
-                driftUser: driftUser,
-                driftUserStats: driftUserStats,
-                driftState: driftState,
+                driftUser: getDriftUser(vaultPda),
+                driftUserStats: getDriftUserStats(vaultPda),
+                driftState: getDriftState(),
                 driftProgram: DRIFT_PROGRAM_ID,
                 rent: web3.SYSVAR_RENT_PUBKEY,
                 systemProgram: SystemProgram.programId,
@@ -60,13 +56,7 @@ export const withdrawLamports = async(wallet: AnchorWallet, connection: web3.Con
     const provider = new AnchorProvider(connection, wallet, {commitment: "confirmed"}); 
     setProvider(provider);
     const program = new Program(idl as Idl, provider) as unknown as Program<FundsProgram>;
-
     const vaultPda = getVault(wallet.publicKey);
-    const vaultWSol = getVaultWsol(vaultPda);
-    const driftState = getDriftState();
-    const driftUser = getDriftUser(vaultPda);
-    const driftUserStats = getDriftUserStats(vaultPda);
-    const driftSpotMarketVault = getDriftSpotMarketVault(DRIFT_MARKET_INDEX_SOL);
 
     try {
         const signature = await program.methods
@@ -74,12 +64,12 @@ export const withdrawLamports = async(wallet: AnchorWallet, connection: web3.Con
             .accounts({
                 // @ts-ignore - Causing an issue in Cursor IDE
                 vault: vaultPda,
-                vaultWsol: vaultWSol,
+                vaultWsol: getVaultWsol(vaultPda),
                 owner: wallet.publicKey,    
-                driftState: driftState,
-                driftUser: driftUser,
-                driftUserStats: driftUserStats,
-                spotMarketVault: driftSpotMarketVault,
+                driftState: getDriftState(),
+                driftUser: getDriftUser(vaultPda),
+                driftUserStats: getDriftUserStats(vaultPda),
+                spotMarketVault: getDriftSpotMarketVault(DRIFT_MARKET_INDEX_SOL),
                 driftSigner: DRIFT_SIGNER,
                 wsolMint: WSOL_MINT,
                 tokenProgram: TOKEN_PROGRAM_ID,
@@ -103,13 +93,7 @@ export const depositLamports = async(wallet: AnchorWallet, connection: web3.Conn
     const provider = new AnchorProvider(connection, wallet, {commitment: "confirmed"}); 
     setProvider(provider);
     const program = new Program(idl as Idl, provider) as unknown as Program<FundsProgram>;
-    
     const vaultPda = getVault(wallet.publicKey);
-    const vaultWSol = getVaultWsol(vaultPda);
-    const driftState = getDriftState();
-    const driftUser = getDriftUser(vaultPda);
-    const driftUserStats = getDriftUserStats(vaultPda);
-    const driftSpotMarketVault = getDriftSpotMarketVault(DRIFT_MARKET_INDEX_SOL);
 
     try {
         const signature = await program.methods
@@ -117,12 +101,12 @@ export const depositLamports = async(wallet: AnchorWallet, connection: web3.Conn
             .accounts({
                 // @ts-ignore - Causing an issue in Cursor IDE
                 vault: vaultPda,
-                vaultWsol: vaultWSol,
+                vaultWsol: getVaultWsol(vaultPda),
                 owner: wallet.publicKey,    
-                driftState: driftState,
-                driftUser: driftUser,
-                driftUserStats: driftUserStats,
-                spotMarketVault: driftSpotMarketVault,
+                driftState: getDriftState(),
+                driftUser: getDriftUser(vaultPda),
+                driftUserStats: getDriftUserStats(vaultPda),
+                spotMarketVault: getDriftSpotMarketVault(DRIFT_MARKET_INDEX_SOL),
                 wsolMint: WSOL_MINT,
                 tokenProgram: TOKEN_PROGRAM_ID,
                 driftProgram: DRIFT_PROGRAM_ID,
@@ -143,25 +127,70 @@ export const liquidateSol = async(wallet: AnchorWallet, connection: web3.Connect
     const provider = new AnchorProvider(connection, wallet, {commitment: "confirmed"}); 
     setProvider(provider);
     const program = new Program(idl as Idl, provider) as unknown as Program<FundsProgram>;
+    const vaultPda = getVault(wallet.publicKey);
+    const walletUsdc = await getOrCreateAssociatedTokenAccountAnchor(wallet, connection, provider, USDC_MINT);
+
+    if (!walletUsdc) return null;
 
     try {
         const ix_beginSwap = await program.methods
             .beginSwap(new BN(amountLamports))
             .accounts({
-
+                // @ts-ignore - Causing an issue in Cursor IDE
+                vault: vaultPda,
+                vaultWsol: getVaultWsol(vaultPda),
+                vaultUsdc: getVaultUsdc(vaultPda),
+                owner: wallet.publicKey,
+                driftState: getDriftState(),
+                driftUser: getDriftUser(vaultPda),
+                driftUserStats: getDriftUserStats(vaultPda),
+                inSpotMarketVault: getDriftSpotMarketVault(DRIFT_MARKET_INDEX_SOL),
+                outSpotMarketVault: getDriftSpotMarketVault(DRIFT_MARKET_INDEX_USDC),
+                driftSigner: DRIFT_SIGNER,
+                wsolMint: WSOL_MINT,
+                usdcMint: USDC_MINT,
+                instructions: SYSVAR_INSTRUCTIONS_PUBKEY,
+                constAccount: new PublicKey("J83w4HKfqxwcq3BEMMkPFSppX3gqekLyLJBexebFVkix"), // TODO - Remove hardcoding
+                additionalAccount: new PublicKey("5SSkXsEKQepHHAewytPVwdej4epN1nxgLVM84L4KXgy7"), // TODO - Remove hardcoding
+                spotMarketSol: DRIFT_SPOT_MARKET_SOL,
+                spotMarketUsdc: DRIFT_SPOT_MARKET_USDC,
+                driftProgram: DRIFT_PROGRAM_ID,
+                tokenProgram: TOKEN_PROGRAM_ID,
+                systemProgram: SystemProgram.programId
             })
             .instruction();
 
-        const ix_jupiter = await ;
+        // const ix_jupiter = await ;
 
         const ix_endSwap = await program.methods
             .endSwap()
             .accounts({
-
+                // @ts-ignore - Causing an issue in Cursor IDE
+                vault: vaultPda,
+                vaultWsol: getVaultWsol(vaultPda),
+                vaultUsdc: getVaultUsdc(vaultPda),
+                owner: wallet.publicKey,
+                ownerUsdc: walletUsdc,
+                driftState: getDriftState(),
+                driftUser: getDriftUser(vaultPda),
+                driftUserStats: getDriftUserStats(vaultPda),
+                inSpotMarketVault: getDriftSpotMarketVault(DRIFT_MARKET_INDEX_SOL),
+                outSpotMarketVault: getDriftSpotMarketVault(DRIFT_MARKET_INDEX_USDC),
+                driftSigner: DRIFT_SIGNER,
+                wsolMint: WSOL_MINT,
+                usdcMint: USDC_MINT,
+                instructions: SYSVAR_INSTRUCTIONS_PUBKEY,
+                constAccount: new PublicKey("J83w4HKfqxwcq3BEMMkPFSppX3gqekLyLJBexebFVkix"), // TODO - Remove hardcoding
+                additionalAccount: new PublicKey("5SSkXsEKQepHHAewytPVwdej4epN1nxgLVM84L4KXgy7"), // TODO - Remove hardcoding
+                spotMarketSol: DRIFT_SPOT_MARKET_SOL,
+                spotMarketUsdc: DRIFT_SPOT_MARKET_USDC,
+                driftProgram: DRIFT_PROGRAM_ID,
+                tokenProgram: TOKEN_PROGRAM_ID,
+                systemProgram: SystemProgram.programId
             })
             .instruction(); 
 
-        const tx = new Transaction().add(ix_beginSwap, ix_jupiter, ix_endSwap);
+        const tx = new Transaction().add(ix_beginSwap, ix_endSwap);
 
         const latestBlockhash = await connection.getLatestBlockhash();
         tx.recentBlockhash = latestBlockhash.blockhash;
@@ -193,16 +222,10 @@ export const withdrawUsdc = async(wallet: AnchorWallet, connection: web3.Connect
     const provider = new AnchorProvider(connection, wallet, {commitment: "confirmed"}); 
     setProvider(provider);
     const program = new Program(idl as Idl, provider) as unknown as Program<FundsProgram>;
-
     const vaultPda = getVault(wallet.publicKey);
-    const vaultUsdc = getVaultUsdc(vaultPda);
-    const driftState = getDriftState();
-    const driftUser = getDriftUser(vaultPda);
-    const driftUserStats = getDriftUserStats(vaultPda);
-    const driftSpotMarketVault = getDriftSpotMarketVault(DRIFT_MARKET_INDEX_USDC);
-    console.log(driftSpotMarketVault.toString());
-
     const walletUsdc = await getOrCreateAssociatedTokenAccountAnchor(wallet, connection, provider, USDC_MINT);
+
+    if (!walletUsdc) return null;
 
     try {
         const tx = await program.methods
@@ -210,13 +233,13 @@ export const withdrawUsdc = async(wallet: AnchorWallet, connection: web3.Connect
             .accounts({
                 // @ts-ignore - Causing an issue in Cursor IDE
                 vault: vaultPda,
-                vaultUsdc: vaultUsdc,
+                vaultUsdc: getVaultUsdc(vaultPda),
                 owner: wallet.publicKey,    
                 ownerUsdc: walletUsdc,
-                driftState: driftState,
-                driftUser: driftUser,
-                driftUserStats: driftUserStats,
-                spotMarketVault: driftSpotMarketVault,
+                driftState: getDriftState(),
+                driftUser: getDriftUser(vaultPda),
+                driftUserStats: getDriftUserStats(vaultPda),
+                spotMarketVault: getDriftSpotMarketVault(DRIFT_MARKET_INDEX_USDC),
                 driftSigner: DRIFT_SIGNER,
                 usdcMint: USDC_MINT,
                 tokenProgram: TOKEN_PROGRAM_ID,

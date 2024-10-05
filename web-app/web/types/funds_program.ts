@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/funds_program.json`.
  */
 export type FundsProgram = {
-  "address": "B6gXhjcwsD8uFsaaPNFxeswxSNM79iP5mPgBnmxQJjn2",
+  "address": "6ggU2Pwj8XgHxTerNNhvCxarQN5GGVLYmnvPgWDm6BUX",
   "metadata": {
     "name": "fundsProgram",
     "version": "0.0.1",
@@ -13,6 +13,299 @@ export type FundsProgram = {
     "description": "Quartz funds program"
   },
   "instructions": [
+    {
+      "name": "beginSwap",
+      "discriminator": [
+        174,
+        109,
+        228,
+        1,
+        242,
+        105,
+        232,
+        105
+      ],
+      "accounts": [
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vaultWsol",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "vault"
+              },
+              {
+                "kind": "account",
+                "path": "wsolMint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vaultUsdc",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "vault"
+              },
+              {
+                "kind": "account",
+                "path": "usdcMint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "vault"
+          ]
+        },
+        {
+          "name": "driftState",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  114,
+                  105,
+                  102,
+                  116,
+                  95,
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ]
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "driftProgram"
+            }
+          }
+        },
+        {
+          "name": "driftUser",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  0,
+                  0
+                ]
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "driftProgram"
+            }
+          }
+        },
+        {
+          "name": "driftUserStats",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  115,
+                  116,
+                  97,
+                  116,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "driftProgram"
+            }
+          }
+        },
+        {
+          "name": "inSpotMarketVault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  112,
+                  111,
+                  116,
+                  95,
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "const",
+                "value": [
+                  1,
+                  0
+                ]
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "driftProgram"
+            }
+          }
+        },
+        {
+          "name": "outSpotMarketVault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  112,
+                  111,
+                  116,
+                  95,
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "const",
+                "value": [
+                  0,
+                  0
+                ]
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "driftProgram"
+            }
+          }
+        },
+        {
+          "name": "driftSigner"
+        },
+        {
+          "name": "wsolMint"
+        },
+        {
+          "name": "usdcMint"
+        },
+        {
+          "name": "instructions"
+        },
+        {
+          "name": "constAccount"
+        },
+        {
+          "name": "additionalAccount"
+        },
+        {
+          "name": "spotMarketSol",
+          "writable": true
+        },
+        {
+          "name": "spotMarketUsdc",
+          "writable": true
+        },
+        {
+          "name": "driftProgram"
+        },
+        {
+          "name": "tokenProgram",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amountIn",
+          "type": "u64"
+        }
+      ]
+    },
     {
       "name": "closeUser",
       "discriminator": [
@@ -119,7 +412,7 @@ export type FundsProgram = {
           ]
         },
         {
-          "name": "state",
+          "name": "driftState",
           "writable": true,
           "pda": {
             "seeds": [
@@ -147,7 +440,7 @@ export type FundsProgram = {
           }
         },
         {
-          "name": "user",
+          "name": "driftUser",
           "writable": true,
           "pda": {
             "seeds": [
@@ -179,7 +472,7 @@ export type FundsProgram = {
           }
         },
         {
-          "name": "userStats",
+          "name": "driftUserStats",
           "writable": true,
           "pda": {
             "seeds": [
@@ -280,6 +573,384 @@ export type FundsProgram = {
       ]
     },
     {
+      "name": "endSwap",
+      "discriminator": [
+        177,
+        184,
+        27,
+        193,
+        34,
+        13,
+        210,
+        145
+      ],
+      "accounts": [
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vaultWsol",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "vault"
+              },
+              {
+                "kind": "account",
+                "path": "wsolMint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vaultUsdc",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "vault"
+              },
+              {
+                "kind": "account",
+                "path": "usdcMint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "vault"
+          ]
+        },
+        {
+          "name": "ownerUsdc",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "owner"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "usdcMint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "driftState",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  114,
+                  105,
+                  102,
+                  116,
+                  95,
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ]
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "driftProgram"
+            }
+          }
+        },
+        {
+          "name": "driftUser",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  0,
+                  0
+                ]
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "driftProgram"
+            }
+          }
+        },
+        {
+          "name": "driftUserStats",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  115,
+                  116,
+                  97,
+                  116,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "driftProgram"
+            }
+          }
+        },
+        {
+          "name": "inSpotMarketVault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  112,
+                  111,
+                  116,
+                  95,
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "const",
+                "value": [
+                  1,
+                  0
+                ]
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "driftProgram"
+            }
+          }
+        },
+        {
+          "name": "outSpotMarketVault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  112,
+                  111,
+                  116,
+                  95,
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "const",
+                "value": [
+                  0,
+                  0
+                ]
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "driftProgram"
+            }
+          }
+        },
+        {
+          "name": "driftSigner"
+        },
+        {
+          "name": "wsolMint"
+        },
+        {
+          "name": "usdcMint"
+        },
+        {
+          "name": "instructions"
+        },
+        {
+          "name": "constAccount"
+        },
+        {
+          "name": "additionalAccount"
+        },
+        {
+          "name": "spotMarketSol",
+          "writable": true
+        },
+        {
+          "name": "spotMarketUsdc",
+          "writable": true
+        },
+        {
+          "name": "driftProgram"
+        },
+        {
+          "name": "tokenProgram",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "initDriftAccount",
       "discriminator": [
         148,
@@ -323,7 +994,7 @@ export type FundsProgram = {
           ]
         },
         {
-          "name": "user",
+          "name": "driftUser",
           "writable": true,
           "pda": {
             "seeds": [
@@ -355,7 +1026,7 @@ export type FundsProgram = {
           }
         },
         {
-          "name": "userStats",
+          "name": "driftUserStats",
           "writable": true,
           "pda": {
             "seeds": [
@@ -386,7 +1057,7 @@ export type FundsProgram = {
           }
         },
         {
-          "name": "state",
+          "name": "driftState",
           "writable": true,
           "pda": {
             "seeds": [
@@ -534,7 +1205,7 @@ export type FundsProgram = {
           ]
         },
         {
-          "name": "state",
+          "name": "driftState",
           "writable": true,
           "pda": {
             "seeds": [
@@ -562,7 +1233,7 @@ export type FundsProgram = {
           }
         },
         {
-          "name": "user",
+          "name": "driftUser",
           "writable": true,
           "pda": {
             "seeds": [
@@ -594,7 +1265,7 @@ export type FundsProgram = {
           }
         },
         {
-          "name": "userStats",
+          "name": "driftUserStats",
           "writable": true,
           "pda": {
             "seeds": [
@@ -853,7 +1524,7 @@ export type FundsProgram = {
           }
         },
         {
-          "name": "state",
+          "name": "driftState",
           "writable": true,
           "pda": {
             "seeds": [
@@ -881,7 +1552,7 @@ export type FundsProgram = {
           }
         },
         {
-          "name": "user",
+          "name": "driftUser",
           "writable": true,
           "pda": {
             "seeds": [
@@ -913,7 +1584,7 @@ export type FundsProgram = {
           }
         },
         {
-          "name": "userStats",
+          "name": "driftUserStats",
           "writable": true,
           "pda": {
             "seeds": [
@@ -1029,19 +1700,6 @@ export type FundsProgram = {
   ],
   "accounts": [
     {
-      "name": "state",
-      "discriminator": [
-        216,
-        146,
-        107,
-        94,
-        104,
-        75,
-        182,
-        177
-      ]
-    },
-    {
       "name": "vault",
       "discriminator": [
         211,
@@ -1088,292 +1746,6 @@ export type FundsProgram = {
     }
   ],
   "types": [
-    {
-      "name": "feeStructure",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "feeTiers",
-            "type": {
-              "array": [
-                {
-                  "defined": {
-                    "name": "feeTier"
-                  }
-                },
-                10
-              ]
-            }
-          },
-          {
-            "name": "fillerRewardStructure",
-            "type": {
-              "defined": {
-                "name": "orderFillerRewardStructure"
-              }
-            }
-          },
-          {
-            "name": "referrerRewardEpochUpperBound",
-            "type": "u64"
-          },
-          {
-            "name": "flatFillerFee",
-            "type": "u64"
-          }
-        ]
-      }
-    },
-    {
-      "name": "feeTier",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "feeNumerator",
-            "type": "u32"
-          },
-          {
-            "name": "feeDenominator",
-            "type": "u32"
-          },
-          {
-            "name": "makerRebateNumerator",
-            "type": "u32"
-          },
-          {
-            "name": "makerRebateDenominator",
-            "type": "u32"
-          },
-          {
-            "name": "referrerRewardNumerator",
-            "type": "u32"
-          },
-          {
-            "name": "referrerRewardDenominator",
-            "type": "u32"
-          },
-          {
-            "name": "refereeFeeNumerator",
-            "type": "u32"
-          },
-          {
-            "name": "refereeFeeDenominator",
-            "type": "u32"
-          }
-        ]
-      }
-    },
-    {
-      "name": "oracleGuardRails",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "priceDivergence",
-            "type": {
-              "defined": {
-                "name": "priceDivergenceGuardRails"
-              }
-            }
-          },
-          {
-            "name": "validity",
-            "type": {
-              "defined": {
-                "name": "validityGuardRails"
-              }
-            }
-          }
-        ]
-      }
-    },
-    {
-      "name": "orderFillerRewardStructure",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "rewardNumerator",
-            "type": "u32"
-          },
-          {
-            "name": "rewardDenominator",
-            "type": "u32"
-          },
-          {
-            "name": "timeBasedRewardLowerBound",
-            "type": "u128"
-          }
-        ]
-      }
-    },
-    {
-      "name": "priceDivergenceGuardRails",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "markOraclePercentDivergence",
-            "type": "u64"
-          },
-          {
-            "name": "oracleTwap5MinPercentDivergence",
-            "type": "u64"
-          }
-        ]
-      }
-    },
-    {
-      "name": "state",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "admin",
-            "type": "pubkey"
-          },
-          {
-            "name": "whitelistMint",
-            "type": "pubkey"
-          },
-          {
-            "name": "discountMint",
-            "type": "pubkey"
-          },
-          {
-            "name": "signer",
-            "type": "pubkey"
-          },
-          {
-            "name": "srmVault",
-            "type": "pubkey"
-          },
-          {
-            "name": "perpFeeStructure",
-            "type": {
-              "defined": {
-                "name": "feeStructure"
-              }
-            }
-          },
-          {
-            "name": "spotFeeStructure",
-            "type": {
-              "defined": {
-                "name": "feeStructure"
-              }
-            }
-          },
-          {
-            "name": "oracleGuardRails",
-            "type": {
-              "defined": {
-                "name": "oracleGuardRails"
-              }
-            }
-          },
-          {
-            "name": "numberOfAuthorities",
-            "type": "u64"
-          },
-          {
-            "name": "numberOfSubAccounts",
-            "type": "u64"
-          },
-          {
-            "name": "lpCooldownTime",
-            "type": "u64"
-          },
-          {
-            "name": "liquidationMarginBufferRatio",
-            "type": "u32"
-          },
-          {
-            "name": "settlementDuration",
-            "type": "u16"
-          },
-          {
-            "name": "numberOfMarkets",
-            "type": "u16"
-          },
-          {
-            "name": "numberOfSpotMarkets",
-            "type": "u16"
-          },
-          {
-            "name": "signerNonce",
-            "type": "u8"
-          },
-          {
-            "name": "minPerpAuctionDuration",
-            "type": "u8"
-          },
-          {
-            "name": "defaultMarketOrderTimeInForce",
-            "type": "u8"
-          },
-          {
-            "name": "defaultSpotAuctionDuration",
-            "type": "u8"
-          },
-          {
-            "name": "exchangeStatus",
-            "type": "u8"
-          },
-          {
-            "name": "liquidationDuration",
-            "type": "u8"
-          },
-          {
-            "name": "initialPctToLiquidate",
-            "type": "u16"
-          },
-          {
-            "name": "maxNumberOfSubAccounts",
-            "type": "u16"
-          },
-          {
-            "name": "maxInitializeUserFee",
-            "type": "u16"
-          },
-          {
-            "name": "padding",
-            "type": {
-              "array": [
-                "u8",
-                10
-              ]
-            }
-          }
-        ]
-      }
-    },
-    {
-      "name": "validityGuardRails",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "slotsBeforeStaleForAmm",
-            "type": "i64"
-          },
-          {
-            "name": "slotsBeforeStaleForMargin",
-            "type": "i64"
-          },
-          {
-            "name": "confidenceIntervalMaxSize",
-            "type": "u64"
-          },
-          {
-            "name": "tooVolatileRatio",
-            "type": "i64"
-          }
-        ]
-      }
-    },
     {
       "name": "vault",
       "type": {

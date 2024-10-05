@@ -1,9 +1,9 @@
 import { AnchorProvider, web3 } from "@coral-xyz/anchor";
 import { AnchorWallet } from "@solana/wallet-adapter-react";
-import { FUNDS_PROGRAM_ID, USDC_MINT } from "./constants";
+import { USDC_MINT } from "./constants";
 import { Connection, PublicKey, Transaction } from "@solana/web3.js";
 import { getVault } from "./getPDAs";
-import { createAssociatedTokenAccountInstruction, getAssociatedTokenAddress } from "@solana/spl-token";
+import { ASSOCIATED_TOKEN_PROGRAM_ID, createAssociatedTokenAccountInstruction, getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 
 export const isVaultInitialized = async (wallet: AnchorWallet, connection: web3.Connection) => {
     const vaultPda = getVault(wallet.publicKey);
@@ -30,8 +30,11 @@ export const roundToDecimalPlaces = (num: number, place: number) => {
 
 export const getOrCreateAssociatedTokenAccountAnchor = async (wallet: AnchorWallet, connection: Connection, provider: AnchorProvider, mint: PublicKey) => {
     const associatedTokenAddress = await getAssociatedTokenAddress(
-        USDC_MINT,
-        wallet.publicKey
+        mint,
+        wallet.publicKey,
+        false,
+        TOKEN_PROGRAM_ID,
+        ASSOCIATED_TOKEN_PROGRAM_ID
     );
 
     const accountInfo = await connection.getAccountInfo(associatedTokenAddress);
@@ -41,12 +44,19 @@ export const getOrCreateAssociatedTokenAccountAnchor = async (wallet: AnchorWall
                 wallet.publicKey,
                 associatedTokenAddress,
                 wallet.publicKey,
-                mint
+                mint,
+                TOKEN_PROGRAM_ID,
+                ASSOCIATED_TOKEN_PROGRAM_ID
             )
         );
 
-        const signature = await provider.sendAndConfirm(tx);
-        if (!signature) return null;
+        try {
+            const signature = await provider.sendAndConfirm(tx);
+            console.log("Associated token account created. Signature:", signature);
+        } catch (error) {
+            console.error("Error creating associated token account:", error);
+            return null;
+        }
     }
 
     return associatedTokenAddress;
