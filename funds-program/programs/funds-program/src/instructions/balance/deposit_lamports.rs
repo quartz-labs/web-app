@@ -33,7 +33,7 @@ pub struct DepositLamports<'info> {
         token::mint = wsol_mint,
         token::authority = vault
     )]
-    pub vault_wsol: Account<'info, TokenAccount>,
+    pub vault_wsol: Box<Account<'info, TokenAccount>>,
 
     #[account(mut)]
     pub owner: Signer<'info>,

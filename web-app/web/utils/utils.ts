@@ -31,10 +31,7 @@ export const roundToDecimalPlaces = (num: number, place: number) => {
 export const getOrCreateAssociatedTokenAccountAnchor = async (wallet: AnchorWallet, connection: Connection, provider: AnchorProvider, mint: PublicKey) => {
     const associatedTokenAddress = await getAssociatedTokenAddress(
         mint,
-        wallet.publicKey,
-        false,
-        TOKEN_PROGRAM_ID,
-        ASSOCIATED_TOKEN_PROGRAM_ID
+        wallet.publicKey
     );
 
     const accountInfo = await connection.getAccountInfo(associatedTokenAddress);
@@ -44,19 +41,12 @@ export const getOrCreateAssociatedTokenAccountAnchor = async (wallet: AnchorWall
                 wallet.publicKey,
                 associatedTokenAddress,
                 wallet.publicKey,
-                mint,
-                TOKEN_PROGRAM_ID,
-                ASSOCIATED_TOKEN_PROGRAM_ID
+                mint
             )
         );
 
-        try {
-            const signature = await provider.sendAndConfirm(tx);
-            console.log("Associated token account created. Signature:", signature);
-        } catch (error) {
-            console.error("Error creating associated token account:", error);
-            return null;
-        }
+        const signature = await provider.sendAndConfirm(tx);
+        console.log(signature);
     }
 
     return associatedTokenAddress;

@@ -23,30 +23,32 @@ pub struct EndSwap<'info> {
     pub vault: Box<Account<'info, Vault>>,
 
     #[account(
-        mut,
+        init,
         seeds = [vault.key().as_ref(), wsol_mint.key().as_ref()],
         bump,
+        payer = owner,
         token::mint = wsol_mint,
         token::authority = vault
     )]
     pub vault_wsol: Box<Account<'info, TokenAccount>>,
 
     #[account(
-        mut,
+        init,
         seeds = [vault.key().as_ref(), usdc_mint.key().as_ref()],
         bump,
+        payer = owner,
         token::mint = usdc_mint,
         token::authority = vault
     )]
-    pub vault_usdc: Box<Account<'info, TokenAccount>>, // TODO - Note, possible space saving here is not to use mint account in instruction, just have "usdc" as seed and check it's the same as output's
-
+    pub vault_usdc: Box<Account<'info, TokenAccount>>,
+    
     #[account(mut)]
     pub owner: Signer<'info>,
 
     #[account(
         mut,
+        associated_token::authority = owner,
         associated_token::mint = usdc_mint,
-        associated_token::authority = owner
     )]
     pub owner_usdc: Box<Account<'info, TokenAccount>>,
 
@@ -81,7 +83,7 @@ pub struct EndSwap<'info> {
         mut,
         seeds = [b"spot_market_vault", (DRIFT_MARKET_INDEX_SOL).to_le_bytes().as_ref()],
         seeds::program = drift_program.key(),
-        token::mint = wsol_mint,
+        constraint = &out_spot_market_vault.mint.eq(&vault_wsol.mint),
         bump,
     )]
     pub in_spot_market_vault: Box<Account<'info, TokenAccount>>,
@@ -90,7 +92,7 @@ pub struct EndSwap<'info> {
         mut,
         seeds = [b"spot_market_vault", (DRIFT_MARKET_INDEX_USDC).to_le_bytes().as_ref()],
         seeds::program = drift_program.key(),
-        token::mint = usdc_mint,
+        constraint = &out_spot_market_vault.mint.eq(&vault_usdc.mint),
         bump,
     )]
     pub out_spot_market_vault: Box<Account<'info, TokenAccount>>,
