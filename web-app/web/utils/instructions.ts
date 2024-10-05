@@ -37,9 +37,9 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
                 // @ts-ignore - Causing an issue in Cursor IDE
                 vault: vaultPda,
                 owner: wallet.publicKey,
-                user: driftUser,
-                userStats: driftUserStats,
-                state: driftState,
+                driftUser: driftUser,
+                driftUserStats: driftUserStats,
+                driftState: driftState,
                 driftProgram: DRIFT_PROGRAM_ID,
                 rent: web3.SYSVAR_RENT_PUBKEY,
                 systemProgram: SystemProgram.programId,
@@ -76,9 +76,9 @@ export const withdrawLamports = async(wallet: AnchorWallet, connection: web3.Con
                 vault: vaultPda,
                 vaultWsol: vaultWSol,
                 owner: wallet.publicKey,    
-                state: driftState,
-                user: driftUser,
-                userStats: driftUserStats,
+                driftState: driftState,
+                driftUser: driftUser,
+                driftUserStats: driftUserStats,
                 spotMarketVault: driftSpotMarketVault,
                 driftSigner: DRIFT_SIGNER,
                 wsolMint: WSOL_MINT,
@@ -119,9 +119,9 @@ export const depositLamports = async(wallet: AnchorWallet, connection: web3.Conn
                 vault: vaultPda,
                 vaultWsol: vaultWSol,
                 owner: wallet.publicKey,    
-                state: driftState,
-                user: driftUser,
-                userStats: driftUserStats,
+                driftState: driftState,
+                driftUser: driftUser,
+                driftUserStats: driftUserStats,
                 spotMarketVault: driftSpotMarketVault,
                 wsolMint: WSOL_MINT,
                 tokenProgram: TOKEN_PROGRAM_ID,
@@ -131,6 +131,56 @@ export const depositLamports = async(wallet: AnchorWallet, connection: web3.Conn
                 systemProgram: SystemProgram.programId,
             })
             .rpc();
+        return signature;
+    } catch (err) {
+        if (err instanceof WalletSignTransactionError) {
+            return null;
+        } else throw err;
+    }
+}
+
+export const liquidateSol = async(wallet: AnchorWallet, connection: web3.Connection, amountLamports: number) => {
+    const provider = new AnchorProvider(connection, wallet, {commitment: "confirmed"}); 
+    setProvider(provider);
+    const program = new Program(idl as Idl, provider) as unknown as Program<FundsProgram>;
+
+    try {
+        const ix_beginSwap = await program.methods
+            .beginSwap(new BN(amountLamports))
+            .accounts({
+
+            })
+            .instruction();
+
+        const ix_jupiter = await ;
+
+        const ix_endSwap = await program.methods
+            .endSwap()
+            .accounts({
+
+            })
+            .instruction(); 
+
+        const tx = new Transaction().add(ix_beginSwap, ix_jupiter, ix_endSwap);
+
+        const latestBlockhash = await connection.getLatestBlockhash();
+        tx.recentBlockhash = latestBlockhash.blockhash;
+        tx.feePayer = wallet.publicKey;
+
+        const versionedTx = new VersionedTransaction(tx.compileMessage());
+        const signedTx = await wallet.signTransaction(versionedTx);
+
+        const simulation = await connection.simulateTransaction(signedTx);
+        console.log("Simulation result:", simulation);
+
+        const signature = await provider.connection.sendRawTransaction(signedTx.serialize(), {skipPreflight: true});
+        
+        await connection.confirmTransaction({
+            signature,
+            blockhash: latestBlockhash.blockhash,
+            lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
+        });
+
         return signature;
     } catch (err) {
         if (err instanceof WalletSignTransactionError) {
@@ -163,9 +213,9 @@ export const withdrawUsdc = async(wallet: AnchorWallet, connection: web3.Connect
                 vaultUsdc: vaultUsdc,
                 owner: wallet.publicKey,    
                 ownerUsdc: walletUsdc,
-                state: driftState,
-                user: driftUser,
-                userStats: driftUserStats,
+                driftState: driftState,
+                driftUser: driftUser,
+                driftUserStats: driftUserStats,
                 spotMarketVault: driftSpotMarketVault,
                 driftSigner: DRIFT_SIGNER,
                 usdcMint: USDC_MINT,

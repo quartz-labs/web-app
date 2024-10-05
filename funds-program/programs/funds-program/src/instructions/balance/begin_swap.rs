@@ -1,5 +1,9 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{Mint, Token, TokenAccount};
+use drift_sdk::{
+    cpi::begin_swap as drift_begin_swap,  
+    BeginSwap as DriftBeginSwap
+};
 use crate::{
     constants::{
         DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC, DRIFT_PROGRAM_ID, USDC_MINT_ADDRESS, WSOL_MINT_ADDRESS
@@ -9,7 +13,7 @@ use crate::{
 };
 
 #[derive(Accounts)]
-pub struct Swap<'info> {
+pub struct BeginSwap<'info> {
     #[account(
         mut,
         seeds = [b"vault", owner.key().as_ref()],
@@ -40,6 +44,14 @@ pub struct Swap<'info> {
 
     #[account(mut)]
     pub owner: Signer<'info>,
+
+    #[account(
+        mut,
+        seeds = [b"drift_state"],
+        seeds::program = drift_program.key(),
+        bump
+    )]
+    pub drift_state: UncheckedAccount<'info>,
 
      /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
      #[account(
@@ -83,12 +95,12 @@ pub struct Swap<'info> {
     #[account(
         constraint = wsol_mint.key() == WSOL_MINT_ADDRESS @ ErrorCode::InvalidMintAddress
     )]
-    pub wsol_mint: Account<'info, Mint>,
+    pub wsol_mint: Box<Account<'info, Mint>>,
 
     #[account(
         constraint = wsol_mint.key() == USDC_MINT_ADDRESS @ ErrorCode::InvalidMintAddress
     )]
-    pub usdc_mint: Account<'info, Mint>,
+    pub usdc_mint: Box<Account<'info, Mint>>,
 
     /// CHECK: TODO - This is actually unsafe, but temporary
     pub instructions: UncheckedAccount<'info>,
@@ -118,7 +130,10 @@ pub struct Swap<'info> {
     pub system_program: Program<'info, System>
 }
 
-pub fn begin_swap_handler(ctx: Context<Swap>) -> Result<()> {
+pub fn begin_swap_handler(
+    ctx: Context<BeginSwap>,
+    amount_in: u64
+) -> Result<()> {
     let vault_bump = ctx.accounts.vault.bump;
     let owner = ctx.accounts.owner.key();
     let seeds = &[
@@ -127,6 +142,35 @@ pub fn begin_swap_handler(ctx: Context<Swap>) -> Result<()> {
         &[vault_bump]
     ];
     let signer_seeds = &[&seeds[..]];
+
+    // Call Drift CPI
+
+    let mut cpi_ctx = CpiContext::new_with_signer(
+        ctx.accounts.drift_program.to_account_info(),
+        DriftBeginSwap {
+            state: ctx.accounts.drift_state.to_account_info(),
+            user: ctx.accounts.drift_user.to_account_info(),
+            user_stats: ctx.accounts.drift_user_stats.to_account_info(),
+            authority: ctx.accounts.vault.to_account_info(),
+            out_spot_market_vault: ctx.accounts.out_spot_market_vault.to_account_info(),
+            in_spot_market_vault: ctx.accounts.in_spot_market_vault.to_account_info(),
+            out_token_account: ctx.accounts.vault_usdc.to_account_info(),
+            in_token_account: ctx.accounts.vault_wsol.to_account_info(),
+            token_program: ctx.accounts.token_program.to_account_info(),
+            drift_signer: ctx.accounts.drift_signer.to_account_info(),
+            instructions: ctx.accounts.instructions.to_account_info()
+        },
+        signer_seeds
+    );
+
+    cpi_ctx.remaining_accounts = vec![
+        ctx.accounts.const_account.to_account_info(),
+        ctx.accounts.additional_account.to_account_info(),
+        ctx.accounts.spot_market_usdc.to_account_info(),
+        ctx.accounts.spot_market_sol.to_account_info(),
+    ];
+
+    drift_begin_swap(cpi_ctx, DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC, amount_in)?;
 
     Ok(())
 }

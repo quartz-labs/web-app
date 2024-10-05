@@ -49,7 +49,7 @@ pub struct WithdrawUsdc<'info> {
         seeds::program = drift_program.key(),
         bump
     )]
-    pub state: UncheckedAccount<'info>,
+    pub drift_state: UncheckedAccount<'info>,
 
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
@@ -58,7 +58,7 @@ pub struct WithdrawUsdc<'info> {
         seeds::program = drift_program.key(),
         bump
     )]
-    pub user: UncheckedAccount<'info>,
+    pub drift_user: UncheckedAccount<'info>,
     
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
@@ -67,7 +67,7 @@ pub struct WithdrawUsdc<'info> {
         seeds::program = drift_program.key(),
         bump
     )]
-    pub user_stats: UncheckedAccount<'info>,
+    pub drift_user_stats: UncheckedAccount<'info>,
     
     #[account(
         mut,
@@ -129,9 +129,9 @@ pub fn withdraw_usdc_handler(
     let mut cpi_ctx = CpiContext::new_with_signer(
         ctx.accounts.drift_program.to_account_info(),
         Withdraw {
-            state: ctx.accounts.state.to_account_info(),
-            user: ctx.accounts.user.to_account_info(),
-            user_stats: ctx.accounts.user_stats.to_account_info(),
+            state: ctx.accounts.drift_state.to_account_info(),
+            user: ctx.accounts.drift_user.to_account_info(),
+            user_stats: ctx.accounts.drift_user_stats.to_account_info(),
             authority: ctx.accounts.vault.to_account_info(),
             spot_market_vault: ctx.accounts.spot_market_vault.to_account_info(),
             drift_signer: ctx.accounts.drift_signer.to_account_info(),

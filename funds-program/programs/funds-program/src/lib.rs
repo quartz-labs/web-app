@@ -40,11 +40,11 @@ pub mod funds_program {
         withdraw_usdc_handler(ctx, amount_cents)
     }
 
-    pub fn begin_swap(ctx: Context<Swap>) -> Result<()> {
-        begin_swap_handler(ctx)
+    pub fn begin_swap(ctx: Context<BeginSwap>, amount_in: u64) -> Result<()> {
+        begin_swap_handler(ctx, amount_in)
     }
 
-    pub fn end_swap(ctx: Context<Swap>) -> Result<()> {
+    pub fn end_swap(ctx: Context<EndSwap>) -> Result<()> {
         end_swap_handler(ctx)
     }
 }
