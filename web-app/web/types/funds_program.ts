@@ -117,69 +117,6 @@ export type FundsProgram = {
           }
         },
         {
-          "name": "driftUser",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  117,
-                  115,
-                  101,
-                  114
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "vault"
-              },
-              {
-                "kind": "const",
-                "value": [
-                  0,
-                  0
-                ]
-              }
-            ],
-            "program": {
-              "kind": "account",
-              "path": "driftProgram"
-            }
-          }
-        },
-        {
-          "name": "driftUserStats",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  117,
-                  115,
-                  101,
-                  114,
-                  95,
-                  115,
-                  116,
-                  97,
-                  116,
-                  115
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "vault"
-              }
-            ],
-            "program": {
-              "kind": "account",
-              "path": "driftProgram"
-            }
-          }
-        },
-        {
           "name": "inSpotMarketVault",
           "writable": true,
           "pda": {
@@ -272,20 +209,6 @@ export type FundsProgram = {
         },
         {
           "name": "instructions"
-        },
-        {
-          "name": "constAccount"
-        },
-        {
-          "name": "additionalAccount"
-        },
-        {
-          "name": "spotMarketSol",
-          "writable": true
-        },
-        {
-          "name": "spotMarketUsdc",
-          "writable": true
         },
         {
           "name": "driftProgram"

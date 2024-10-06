@@ -111,69 +111,6 @@
           }
         },
         {
-          "name": "drift_user",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  117,
-                  115,
-                  101,
-                  114
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "vault"
-              },
-              {
-                "kind": "const",
-                "value": [
-                  0,
-                  0
-                ]
-              }
-            ],
-            "program": {
-              "kind": "account",
-              "path": "drift_program"
-            }
-          }
-        },
-        {
-          "name": "drift_user_stats",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  117,
-                  115,
-                  101,
-                  114,
-                  95,
-                  115,
-                  116,
-                  97,
-                  116,
-                  115
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "vault"
-              }
-            ],
-            "program": {
-              "kind": "account",
-              "path": "drift_program"
-            }
-          }
-        },
-        {
           "name": "in_spot_market_vault",
           "writable": true,
           "pda": {
@@ -266,20 +203,6 @@
         },
         {
           "name": "instructions"
-        },
-        {
-          "name": "const_account"
-        },
-        {
-          "name": "additional_account"
-        },
-        {
-          "name": "spot_market_sol",
-          "writable": true
-        },
-        {
-          "name": "spot_market_usdc",
-          "writable": true
         },
         {
           "name": "drift_program"

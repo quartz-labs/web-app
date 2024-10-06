@@ -36,11 +36,14 @@ pub mod funds_program {
         deposit_lamports_handler(ctx, amount)
     }
 
-    pub fn withdraw_usdc<'info>(ctx: Context<'_, '_, '_, 'info, WithdrawUsdc<'info>>, amount_cents: u64) -> Result<()> {
+    pub fn withdraw_usdc(ctx: Context<WithdrawUsdc>, amount_cents: u64) -> Result<()> {
         withdraw_usdc_handler(ctx, amount_cents)
     }
 
-    pub fn begin_swap(ctx: Context<BeginSwap>, amount_in: u64) -> Result<()> {
+    pub fn begin_swap<'a, 'b, 'c, 'info>(
+        ctx: Context<'a, 'b, 'c, 'info, BeginSwap<'info>>, 
+        amount_in: u64
+    ) -> Result<()> {
         begin_swap_handler(ctx, amount_in)
     }
 

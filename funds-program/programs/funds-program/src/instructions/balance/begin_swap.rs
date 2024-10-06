@@ -106,6 +106,20 @@ pub struct BeginSwap<'info> {
     /// CHECK: TODO - This is actually unsafe, but temporary
     pub instructions: UncheckedAccount<'info>,
 
+    /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
+    pub const_account: UncheckedAccount<'info>,
+
+    /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
+    pub additional_account: UncheckedAccount<'info>,
+
+    /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
+    #[account(mut)]
+    pub spot_market_sol: UncheckedAccount<'info>,
+
+    /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
+    #[account(mut)]
+    pub spot_market_usdc: UncheckedAccount<'info>,
+
     /// CHECK: Account is safe once the address is correct
     #[account(
         constraint = drift_program.key() == DRIFT_PROGRAM_ID @ ErrorCode::InvalidDriftProgram
@@ -150,7 +164,12 @@ pub fn begin_swap_handler(
         signer_seeds
     );
 
-    cpi_ctx.remaining_accounts = ctx.remaining_accounts.to_vec();
+    cpi_ctx.remaining_accounts = vec![
+        ctx.accounts.const_account.to_account_info(),
+        ctx.accounts.additional_account.to_account_info(),
+        ctx.accounts.spot_market_usdc.to_account_info(),
+        ctx.accounts.spot_market_sol.to_account_info(),
+    ];
 
     drift_begin_swap(cpi_ctx, DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC, amount_in)?;
 

@@ -148,32 +148,14 @@ export const liquidateSol = async(wallet: AnchorWallet, connection: web3.Connect
                 wsolMint: WSOL_MINT,
                 usdcMint: USDC_MINT,
                 instructions: SYSVAR_INSTRUCTIONS_PUBKEY,
+                constAccount: new PublicKey("J83w4HKfqxwcq3BEMMkPFSppX3gqekLyLJBexebFVkix"), // TODO - Remove hardcoding
+                additionalAccount: new PublicKey("5SSkXsEKQepHHAewytPVwdej4epN1nxgLVM84L4KXgy7"), // TODO - Remove hardcoding
+                spotMarketSol: DRIFT_SPOT_MARKET_SOL,
+                spotMarketUsdc: DRIFT_SPOT_MARKET_USDC,
                 driftProgram: DRIFT_PROGRAM_ID,
                 tokenProgram: TOKEN_PROGRAM_ID,
                 systemProgram: SystemProgram.programId
             })
-            .remainingAccounts([
-                {
-                    pubkey: new PublicKey("J83w4HKfqxwcq3BEMMkPFSppX3gqekLyLJBexebFVkix"), // TODO - Remove hardcoding
-                    isWritable: false,
-                    isSigner: false
-                },
-                {
-                    pubkey: new PublicKey("5SSkXsEKQepHHAewytPVwdej4epN1nxgLVM84L4KXgy7"), // TODO - Remove hardcoding
-                    isWritable: false,
-                    isSigner: false
-                },
-                {
-                    pubkey: DRIFT_SPOT_MARKET_SOL,
-                    isWritable: true,
-                    isSigner: false
-                },
-                {
-                    pubkey: DRIFT_SPOT_MARKET_USDC,
-                    isWritable: true,
-                    isSigner: false
-                }
-            ])
             .instruction();
 
         // const ix_jupiter = await ;
