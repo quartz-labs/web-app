@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use anchor_lang::system_program::ID;
 use borsh::{BorshDeserialize, BorshSerialize};
 
 #[account(zero_copy(unsafe))]
@@ -167,7 +168,7 @@ pub struct PerpPosition {
 }
 
 #[repr(C)]
-#[derive(AnchorSerialize, AnchorDeserialize, PartialEq, Debug, Eq, Default)]
+#[derive(AnchorSerialize, AnchorDeserialize, PartialEq, Debug, Eq, Default, Copy, Clone)]
 pub struct Order {
     /// The slot the order was placed
     pub slot: u64,

@@ -10,14 +10,14 @@ name = "drift_state"
 
 [features]
 rpc = []
-i11n = ["anchor-i11n"]
 no-entrypoint=[]
 cpi = ["no-entrypoint"]
 events = []
 solana = []
-default = ["rpc", "i11n", "cpi", "events"]
+default = ["rpc", "cpi", "events"]
 
 [dependencies]
 anchor-lang = "0.29.0"
+solana-program = "1.16"
 bytemuck = { version = "1.4.0" }
 borsh = "0.10.3"

@@ -1700,6 +1700,19 @@ export type FundsProgram = {
   ],
   "accounts": [
     {
+      "name": "state",
+      "discriminator": [
+        216,
+        146,
+        107,
+        94,
+        104,
+        75,
+        182,
+        177
+      ]
+    },
+    {
       "name": "vault",
       "discriminator": [
         211,
@@ -1746,6 +1759,292 @@ export type FundsProgram = {
     }
   ],
   "types": [
+    {
+      "name": "feeStructure",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "feeTiers",
+            "type": {
+              "array": [
+                {
+                  "defined": {
+                    "name": "feeTier"
+                  }
+                },
+                10
+              ]
+            }
+          },
+          {
+            "name": "fillerRewardStructure",
+            "type": {
+              "defined": {
+                "name": "orderFillerRewardStructure"
+              }
+            }
+          },
+          {
+            "name": "referrerRewardEpochUpperBound",
+            "type": "u64"
+          },
+          {
+            "name": "flatFillerFee",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "feeTier",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "feeNumerator",
+            "type": "u32"
+          },
+          {
+            "name": "feeDenominator",
+            "type": "u32"
+          },
+          {
+            "name": "makerRebateNumerator",
+            "type": "u32"
+          },
+          {
+            "name": "makerRebateDenominator",
+            "type": "u32"
+          },
+          {
+            "name": "referrerRewardNumerator",
+            "type": "u32"
+          },
+          {
+            "name": "referrerRewardDenominator",
+            "type": "u32"
+          },
+          {
+            "name": "refereeFeeNumerator",
+            "type": "u32"
+          },
+          {
+            "name": "refereeFeeDenominator",
+            "type": "u32"
+          }
+        ]
+      }
+    },
+    {
+      "name": "oracleGuardRails",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "priceDivergence",
+            "type": {
+              "defined": {
+                "name": "priceDivergenceGuardRails"
+              }
+            }
+          },
+          {
+            "name": "validity",
+            "type": {
+              "defined": {
+                "name": "validityGuardRails"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "orderFillerRewardStructure",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "rewardNumerator",
+            "type": "u32"
+          },
+          {
+            "name": "rewardDenominator",
+            "type": "u32"
+          },
+          {
+            "name": "timeBasedRewardLowerBound",
+            "type": "u128"
+          }
+        ]
+      }
+    },
+    {
+      "name": "priceDivergenceGuardRails",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "markOraclePercentDivergence",
+            "type": "u64"
+          },
+          {
+            "name": "oracleTwap5MinPercentDivergence",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "state",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "whitelistMint",
+            "type": "pubkey"
+          },
+          {
+            "name": "discountMint",
+            "type": "pubkey"
+          },
+          {
+            "name": "signer",
+            "type": "pubkey"
+          },
+          {
+            "name": "srmVault",
+            "type": "pubkey"
+          },
+          {
+            "name": "perpFeeStructure",
+            "type": {
+              "defined": {
+                "name": "feeStructure"
+              }
+            }
+          },
+          {
+            "name": "spotFeeStructure",
+            "type": {
+              "defined": {
+                "name": "feeStructure"
+              }
+            }
+          },
+          {
+            "name": "oracleGuardRails",
+            "type": {
+              "defined": {
+                "name": "oracleGuardRails"
+              }
+            }
+          },
+          {
+            "name": "numberOfAuthorities",
+            "type": "u64"
+          },
+          {
+            "name": "numberOfSubAccounts",
+            "type": "u64"
+          },
+          {
+            "name": "lpCooldownTime",
+            "type": "u64"
+          },
+          {
+            "name": "liquidationMarginBufferRatio",
+            "type": "u32"
+          },
+          {
+            "name": "settlementDuration",
+            "type": "u16"
+          },
+          {
+            "name": "numberOfMarkets",
+            "type": "u16"
+          },
+          {
+            "name": "numberOfSpotMarkets",
+            "type": "u16"
+          },
+          {
+            "name": "signerNonce",
+            "type": "u8"
+          },
+          {
+            "name": "minPerpAuctionDuration",
+            "type": "u8"
+          },
+          {
+            "name": "defaultMarketOrderTimeInForce",
+            "type": "u8"
+          },
+          {
+            "name": "defaultSpotAuctionDuration",
+            "type": "u8"
+          },
+          {
+            "name": "exchangeStatus",
+            "type": "u8"
+          },
+          {
+            "name": "liquidationDuration",
+            "type": "u8"
+          },
+          {
+            "name": "initialPctToLiquidate",
+            "type": "u16"
+          },
+          {
+            "name": "maxNumberOfSubAccounts",
+            "type": "u16"
+          },
+          {
+            "name": "maxInitializeUserFee",
+            "type": "u16"
+          },
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                10
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "validityGuardRails",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "slotsBeforeStaleForAmm",
+            "type": "i64"
+          },
+          {
+            "name": "slotsBeforeStaleForMargin",
+            "type": "i64"
+          },
+          {
+            "name": "confidenceIntervalMaxSize",
+            "type": "u64"
+          },
+          {
+            "name": "tooVolatileRatio",
+            "type": "i64"
+          }
+        ]
+      }
+    },
     {
       "name": "vault",
       "type": {

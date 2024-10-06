@@ -1,7 +1,6 @@
 use anchor_lang::prelude::*;
 use drift_cpi::{
-    cpi::{initialize_user, initialize_user_stats},
-    {InitializeUser, InitializeUserStats}
+    accounts::State, cpi::{initialize_user, initialize_user_stats}, InitializeUser, InitializeUserStats
 };
 use crate::{
     state::Vault,
@@ -47,7 +46,7 @@ pub struct InitDriftAccount<'info> {
         seeds::program = drift_program.key(),
         bump
     )]
-    pub drift_state: UncheckedAccount<'info>,
+    pub drift_state: Box<Account<'info, State>>,
 
     /// CHECK: Account is safe once the address is correct
     #[account(
