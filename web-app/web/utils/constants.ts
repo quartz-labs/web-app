@@ -1,6 +1,6 @@
 import { PublicKey } from "@solana/web3.js";
 
-export const FUNDS_PROGRAM_ID = new PublicKey("6ggU2Pwj8XgHxTerNNhvCxarQN5GGVLYmnvPgWDm6BUX");
+export const FUNDS_PROGRAM_ID = new PublicKey("6yHj1c33TU8JA49N26VTRYR9E5SQrHT94dQStcpJqq4a");
 // export const USDC_MINT = new PublicKey("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU"); // Real devnet mint
 export const USDC_MINT = new PublicKey("8zGuJQqwhZafTah7Uc7Z4tXRnguqkn5KLFAP8oV6PHe2"); // Drift's devnet mint
 // export const USDC_MINT = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"); // Mainnet devnet mint

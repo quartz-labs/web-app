@@ -1,12 +1,12 @@
 [package]
-name = "drift-sdk"
+name = "drift-state"
 version = "2.92.0"
 description = "Created with IDLGen"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "drift_sdk"
+name = "drift_state"
 
 [features]
 rpc = []
@@ -18,7 +18,6 @@ solana = []
 default = ["rpc", "i11n", "cpi", "events"]
 
 [dependencies]
-anchor-lang = "0.30.0"
-anchor-i11n = { optional = true, version = "0.1.0"}
+anchor-lang = "0.29.0"
 bytemuck = { version = "1.4.0" }
 borsh = "0.10.3"

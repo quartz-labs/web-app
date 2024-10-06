@@ -5,10 +5,10 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-funds_program = "B6gXhjcwsD8uFsaaPNFxeswxSNM79iP5mPgBnmxQJjn2"
+funds_program = "6yHj1c33TU8JA49N26VTRYR9E5SQrHT94dQStcpJqq4a"
 
 [programs.devnet]
-funds_program = "B6gXhjcwsD8uFsaaPNFxeswxSNM79iP5mPgBnmxQJjn2"
+funds_program = "6yHj1c33TU8JA49N26VTRYR9E5SQrHT94dQStcpJqq4a"
 
 [registry]
 url = "https://api.apr.dev"

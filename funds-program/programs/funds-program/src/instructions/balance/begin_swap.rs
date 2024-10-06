@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{Mint, Token, TokenAccount};
-use drift_sdk::{
+use drift_cpi::{
     cpi::begin_swap as drift_begin_swap,  
     BeginSwap as DriftBeginSwap
 };

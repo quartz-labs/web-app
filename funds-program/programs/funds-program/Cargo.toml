@@ -21,4 +21,4 @@ devnet = []
 [dependencies]
 anchor-lang = "0.30.1"
 anchor-spl = "0.30.1"
-drift-sdk = { path = "../../drift", features = ["cpi"] }
+drift-cpi = { path = "../../deps/drift-cpi" }

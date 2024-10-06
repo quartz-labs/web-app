@@ -5,7 +5,7 @@ use anchor_spl::{
     token::{Mint, Token, SyncNative}, 
     token::TokenAccount
 };
-use drift_sdk::{
+use drift_cpi::{
     cpi::deposit,
     Deposit
 };

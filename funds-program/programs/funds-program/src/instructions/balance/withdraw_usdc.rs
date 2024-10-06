@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::AssociatedToken, token::{self, Mint, Token, TokenAccount}
 };
-use drift_sdk::{
+use drift_cpi::{
     cpi::withdraw, 
     Withdraw
 };

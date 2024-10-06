@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/funds_program.json`.
  */
 export type FundsProgram = {
-  "address": "6ggU2Pwj8XgHxTerNNhvCxarQN5GGVLYmnvPgWDm6BUX",
+  "address": "6yHj1c33TU8JA49N26VTRYR9E5SQrHT94dQStcpJqq4a",
   "metadata": {
     "name": "fundsProgram",
     "version": "0.0.1",
@@ -117,6 +117,69 @@ export type FundsProgram = {
           }
         },
         {
+          "name": "driftUser",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  0,
+                  0
+                ]
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "driftProgram"
+            }
+          }
+        },
+        {
+          "name": "driftUserStats",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  115,
+                  116,
+                  97,
+                  116,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "driftProgram"
+            }
+          }
+        },
+        {
           "name": "inSpotMarketVault",
           "writable": true,
           "pda": {
@@ -209,6 +272,20 @@ export type FundsProgram = {
         },
         {
           "name": "instructions"
+        },
+        {
+          "name": "constAccount"
+        },
+        {
+          "name": "additionalAccount"
+        },
+        {
+          "name": "spotMarketSol",
+          "writable": true
+        },
+        {
+          "name": "spotMarketUsdc",
+          "writable": true
         },
         {
           "name": "driftProgram"

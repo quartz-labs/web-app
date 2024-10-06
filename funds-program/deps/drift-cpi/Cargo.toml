@@ -1,0 +1,24 @@
+[package]
+name = "drift-cpi"
+version = "2.92.0"
+description = "Created with IDLGen"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "drift_cpi"
+
+[features]
+rpc = []
+i11n = ["anchor-i11n"]
+no-entrypoint=[]
+cpi = ["no-entrypoint"]
+events = []
+solana = []
+default = ["rpc", "i11n", "cpi", "events"]
+
+[dependencies]
+anchor-lang = "0.30.0"
+anchor-i11n = { optional = true, version = "0.1.0"}
+bytemuck = { version = "1.4.0" }
+borsh = "0.10.3"

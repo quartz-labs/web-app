@@ -4,7 +4,7 @@ use anchor_spl::{
     token::{Mint, Token}, 
     token::TokenAccount
 };
-use drift_sdk::{
+use drift_cpi::{
     cpi::withdraw, 
     Withdraw
 };

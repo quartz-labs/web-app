@@ -1,6 +1,8 @@
 use anchor_lang::prelude::*;
-use drift_sdk::cpi::{initialize_user, initialize_user_stats};
-use drift_sdk::{InitializeUser, InitializeUserStats};
+use drift_cpi::{
+    cpi::{initialize_user, initialize_user_stats},
+    {InitializeUser, InitializeUserStats}
+};
 use crate::{
     state::Vault,
     errors::ErrorCode,
