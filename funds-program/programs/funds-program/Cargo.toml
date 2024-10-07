@@ -22,4 +22,4 @@ devnet = []
 anchor-lang = "0.30.1"
 anchor-spl = "0.30.1"
 drift-cpi = { path = "../../deps/drift-cpi" }
-# drift-state = { path = "../../deps/drift-state" }
+drift-state = { path = "../../deps/drift-state" }
