@@ -1,6 +1,5 @@
 use anchor_lang::prelude::*;
 use anchor_lang::system_program::ID;
-use borsh::{BorshDeserialize, BorshSerialize};
 
 #[account(zero_copy(unsafe))]
 #[derive(Default, Eq, PartialEq, Debug)]
@@ -106,7 +105,8 @@ pub struct SpotPosition {
     pub padding: [u8; 4],
 }
 
-#[derive(Clone, Copy, BorshSerialize, BorshDeserialize, PartialEq, Eq, Debug, Default)]
+#[derive(Clone, Copy, AnchorSerialize, AnchorDeserialize, PartialEq, Eq, Debug, Default)]
+#[repr(u8)]
 pub enum SpotBalanceType {
     #[default]
     Deposit,
@@ -230,7 +230,8 @@ pub struct Order {
     pub padding: [u8; 3],
 }
 
-#[derive(Clone, Copy, BorshSerialize, BorshDeserialize, PartialEq, Debug, Eq, Default)]
+#[derive(Clone, Copy, AnchorSerialize, AnchorDeserialize, PartialEq, Debug, Eq, Default)]
+#[repr(u8)] 
 pub enum OrderType {
     Market,
     #[default]
@@ -241,14 +242,15 @@ pub enum OrderType {
     Oracle,
 }
 
-#[derive(Default, Clone, Copy, BorshSerialize, BorshDeserialize, PartialEq, Debug, Eq)]
+#[derive(Default, Clone, Copy, AnchorSerialize, AnchorDeserialize, PartialEq, Debug, Eq)]
+#[repr(u8)] 
 pub enum MarketType {
     #[default]
     Spot,
     Perp,
 }
 
-#[derive(Clone, Copy, BorshSerialize, BorshDeserialize, PartialEq, Eq, Debug, Default)]
+#[derive(Clone, Copy, AnchorSerialize, AnchorDeserialize, PartialEq, Eq, Debug, Default)]
 pub enum OrderStatus {
     /// The order is not in use
     #[default]
@@ -261,14 +263,14 @@ pub enum OrderStatus {
     Canceled,
 }
 
-#[derive(Clone, Copy, BorshSerialize, BorshDeserialize, PartialEq, Debug, Eq, Default)]
+#[derive(Clone, Copy, AnchorSerialize, AnchorDeserialize, PartialEq, Debug, Eq, Default)]
 pub enum PositionDirection {
     #[default]
     Long,
     Short,
 }
 
-#[derive(Clone, Copy, BorshSerialize, BorshDeserialize, PartialEq, Debug, Eq, Default)]
+#[derive(Clone, Copy, AnchorSerialize, AnchorDeserialize, PartialEq, Debug, Eq, Default)]
 pub enum OrderTriggerCondition {
     #[default]
     Above,
