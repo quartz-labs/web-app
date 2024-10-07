@@ -1,7 +1,12 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{Mint, Token, TokenAccount};
 use drift_cpi::{
-    accounts::State, cpi::begin_swap as drift_begin_swap, BeginSwap as DriftBeginSwap
+    cpi::begin_swap as drift_begin_swap, BeginSwap as DriftBeginSwap
+};
+use drift_state::{
+    State as DriftState,
+    User as DriftUser,
+    UserStats as DriftUserStats
 };
 use crate::{
     constants::{
@@ -51,7 +56,7 @@ pub struct BeginSwap<'info> {
         seeds::program = drift_program.key(),
         bump
     )]
-    pub drift_state: Box<Account<'info, State>>,
+    pub drift_state: Box<Account<'info, DriftState>>,
 
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
@@ -60,7 +65,7 @@ pub struct BeginSwap<'info> {
         seeds::program = drift_program.key(),
         bump
     )]
-    pub drift_user: UncheckedAccount<'info>,
+    pub drift_user: AccountLoader<'info, DriftUser>,
 
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
@@ -69,7 +74,7 @@ pub struct BeginSwap<'info> {
         seeds::program = drift_program.key(),
         bump
     )]
-    pub drift_user_stats: UncheckedAccount<'info>,
+    pub drift_user_stats: AccountLoader<'info, DriftUserStats>,
 
     #[account(
         mut,

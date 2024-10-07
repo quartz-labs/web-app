@@ -15,7 +15,7 @@ url = "https://api.apr.dev"
 
 [provider]
 cluster = "devnet"
-wallet = "./program_keypair.json"
+wallet = "~/.config/solana/id.json"
 
 
 [scripts]
