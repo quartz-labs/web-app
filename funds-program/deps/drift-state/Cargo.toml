@@ -17,7 +17,7 @@ solana = []
 default = ["rpc", "cpi", "events"]
 
 [dependencies]
-anchor-lang = "0.29.0"
+anchor-lang = "0.30.1"
 solana-program = "1.16"
 bytemuck = { version = "1.4.0" }
 borsh = "0.10.3"
