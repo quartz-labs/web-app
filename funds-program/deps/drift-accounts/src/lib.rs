@@ -1,5 +1,6 @@
 use anchor_lang::prelude::*;
-use anchor_lang::system_program::ID;
+
+declare_id!("dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH");
 
 #[account(zero_copy(unsafe))]
 #[derive(Default, Eq, PartialEq, Debug)]

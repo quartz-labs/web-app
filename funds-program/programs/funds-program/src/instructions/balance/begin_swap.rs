@@ -4,7 +4,7 @@ use drift_cpi::{
     cpi::begin_swap as drift_begin_swap, 
     BeginSwap as DriftBeginSwap
 };
-use drift_state::{
+use drift_accounts::{
     State as DriftState,
     User as DriftUser,
     UserStats as DriftUserStats

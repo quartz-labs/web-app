@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use drift_cpi::{
     cpi::{initialize_user, initialize_user_stats}, InitializeUser, InitializeUserStats
 };
-use drift_state::{
+use drift_accounts::{
     State as DriftState
 };
 use crate::{

@@ -200,7 +200,7 @@ export const liquidateSol = async(wallet: AnchorWallet, connection: web3.Connect
             })
             .instruction(); 
 
-        const tx = new Transaction().add(ix_initSwapAccounts, ix_endSwap, ix_beginSwap);
+        const tx = new Transaction().add(ix_initSwapAccounts, ix_beginSwap, ix_endSwap);
 
         const latestBlockhash = await connection.getLatestBlockhash();
         tx.recentBlockhash = latestBlockhash.blockhash;

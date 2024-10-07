@@ -3,7 +3,7 @@ use anchor_spl::token::{self, Mint, Token, TokenAccount};
 use drift_cpi::{
     cpi::end_swap as drift_end_swap, EndSwap as DriftEndSwap, SwapReduceOnly
 };
-use drift_state::{
+use drift_accounts::{
     State as DriftState,
     User as DriftUser,
     UserStats as DriftUserStats

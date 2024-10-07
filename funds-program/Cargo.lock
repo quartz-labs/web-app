@@ -1092,6 +1092,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "drift-accounts"
+version = "2.92.0"
+dependencies = [
+ "anchor-lang 0.30.1",
+ "borsh 0.10.3",
+ "bytemuck",
+ "solana-program",
+]
+
+[[package]]
 name = "drift-cpi"
 version = "2.92.0"
 dependencies = [
@@ -1099,16 +1109,6 @@ dependencies = [
  "anchor-lang 0.30.1",
  "borsh 0.10.3",
  "bytemuck",
-]
-
-[[package]]
-name = "drift-state"
-version = "2.92.0"
-dependencies = [
- "anchor-lang 0.30.1",
- "borsh 0.10.3",
- "bytemuck",
- "solana-program",
 ]
 
 [[package]]
@@ -1189,8 +1189,8 @@ version = "0.0.1"
 dependencies = [
  "anchor-lang 0.30.1",
  "anchor-spl",
+ "drift-accounts",
  "drift-cpi",
- "drift-state",
 ]
 
 [[package]]
