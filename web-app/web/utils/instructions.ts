@@ -96,7 +96,7 @@ export const depositLamports = async(wallet: AnchorWallet, connection: web3.Conn
     const vaultPda = getVault(wallet.publicKey);
 
     try {
-        const signature = await program.methods
+        const tx = await program.methods
             .depositLamports(new BN(amountLamports))
             .accounts({
                 // @ts-ignore - Causing an issue in Cursor IDE
@@ -114,7 +114,26 @@ export const depositLamports = async(wallet: AnchorWallet, connection: web3.Conn
                 spotMarket: DRIFT_SPOT_MARKET_SOL,
                 systemProgram: SystemProgram.programId,
             })
-            .rpc();
+            .transaction();
+
+        const latestBlockhash = await connection.getLatestBlockhash();
+        tx.recentBlockhash = latestBlockhash.blockhash;
+        tx.feePayer = wallet.publicKey;
+
+        const versionedTx = new VersionedTransaction(tx.compileMessage());
+        const signedTx = await wallet.signTransaction(versionedTx);
+
+        const simulation = await connection.simulateTransaction(signedTx);
+        console.log("Simulation result:", simulation);
+
+        const signature = await provider.connection.sendRawTransaction(signedTx.serialize(), {skipPreflight: true});
+        
+        await connection.confirmTransaction({
+            signature,
+            blockhash: latestBlockhash.blockhash,
+            lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
+        });
+
         return signature;
     } catch (err) {
         if (err instanceof WalletSignTransactionError) {
@@ -194,36 +213,36 @@ export const depositLamports = async(wallet: AnchorWallet, connection: web3.Conn
 //                 additionalAccount: new PublicKey("5SSkXsEKQepHHAewytPVwdej4epN1nxgLVM84L4KXgy7"), // TODO - Remove hardcoding
 //                 spotMarketSol: DRIFT_SPOT_MARKET_SOL,
 //                 spotMarketUsdc: DRIFT_SPOT_MARKET_USDC,
-//                 driftProgram: DRIFT_PROGRAM_ID,
-//                 tokenProgram: TOKEN_PROGRAM_ID,
-//                 systemProgram: SystemProgram.programId
-//             })
-//             .instruction(); 
+    //             driftProgram: DRIFT_PROGRAM_ID,
+    //             tokenProgram: TOKEN_PROGRAM_ID,
+    //             systemProgram: SystemProgram.programId
+    //         })
+    //         .instruction(); 
 
-//         const tx = new Transaction().add(ix_initSwapAccounts, ix_beginSwap, ix_endSwap);
+    //     const tx = new Transaction().add(ix_initSwapAccounts, ix_beginSwap, ix_endSwap);
 
-//         const latestBlockhash = await connection.getLatestBlockhash();
-//         tx.recentBlockhash = latestBlockhash.blockhash;
-//         tx.feePayer = wallet.publicKey;
+    //     const latestBlockhash = await connection.getLatestBlockhash();
+    //     tx.recentBlockhash = latestBlockhash.blockhash;
+    //     tx.feePayer = wallet.publicKey;
 
-//         const versionedTx = new VersionedTransaction(tx.compileMessage());
-//         const signedTx = await wallet.signTransaction(versionedTx);
+    //     const versionedTx = new VersionedTransaction(tx.compileMessage());
+    //     const signedTx = await wallet.signTransaction(versionedTx);
 
-//         const simulation = await connection.simulateTransaction(signedTx);
-//         console.log("Simulation result:", simulation);
+    //     const simulation = await connection.simulateTransaction(signedTx);
+    //     console.log("Simulation result:", simulation);
 
-//         const signature = await provider.connection.sendRawTransaction(signedTx.serialize(), {skipPreflight: true});
+    //     const signature = await provider.connection.sendRawTransaction(signedTx.serialize(), {skipPreflight: true});
         
-//         await connection.confirmTransaction({
-//             signature,
-//             blockhash: latestBlockhash.blockhash,
-//             lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
-//         });
+    //     await connection.confirmTransaction({
+    //         signature,
+    //         blockhash: latestBlockhash.blockhash,
+    //         lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
+    //     });
 
-//         return signature;
-//     } catch (err) {
-//         if (err instanceof WalletSignTransactionError) {
-//             return null;
+    //     return signature;
+    // } catch (err) {
+    //     if (err instanceof WalletSignTransactionError) {
+    //         return null;
 //         } else throw err;
 //     }
 // }
@@ -250,7 +269,7 @@ export const depositUsdc = async(wallet: AnchorWallet, connection: web3.Connecti
                 driftUser: getDriftUser(vaultPda),
                 driftUserStats: getDriftUserStats(vaultPda),
                 spotMarketVault: getDriftSpotMarketVault(DRIFT_MARKET_INDEX_USDC),
-                usdcMind: USDC_MINT,
+                usdcMint: USDC_MINT,
                 tokenProgram: TOKEN_PROGRAM_ID,
                 associatedTokenProgram: ASSOCIATED_PROGRAM_ID,
                 driftProgram: DRIFT_PROGRAM_ID,

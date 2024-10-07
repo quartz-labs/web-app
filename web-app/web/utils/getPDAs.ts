@@ -13,7 +13,7 @@ export const getVault = (owner: PublicKey) => {
 
 export const getVaultUsdc = (vaultPda: PublicKey) => {
     const [vaultUsdc] = web3.PublicKey.findProgramAddressSync(
-        [vaultPda.toBuffer(), Buffer.from("usdc")],
+        [vaultPda.toBuffer(), USDC_MINT.toBuffer()],
         new web3.PublicKey(FUNDS_PROGRAM_ID)
     );
     return vaultUsdc;
@@ -21,7 +21,7 @@ export const getVaultUsdc = (vaultPda: PublicKey) => {
 
 export const getVaultWsol = (vaultPda: PublicKey) => {
     const [vaultWSol] = web3.PublicKey.findProgramAddressSync(
-        [vaultPda.toBuffer(), Buffer.from("wsol")],
+        [vaultPda.toBuffer(), WSOL_MINT.toBuffer()],
         new web3.PublicKey(FUNDS_PROGRAM_ID)
     );
     return vaultWSol;

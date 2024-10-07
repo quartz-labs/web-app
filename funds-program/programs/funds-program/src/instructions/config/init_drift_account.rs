@@ -2,11 +2,7 @@ use anchor_lang::prelude::*;
 use drift_cpi::{
     cpi::{initialize_user, initialize_user_stats}, InitializeUser, InitializeUserStats
 };
-use drift_accounts::{
-    State as DriftState,
-    User as DriftUser,
-    UserStats as DriftUserStats
-};
+use drift_accounts::State as DriftState;
 use crate::{
     state::Vault,
     errors::ErrorCode,
@@ -33,7 +29,7 @@ pub struct InitDriftAccount<'info> {
         seeds::program = drift_program.key(),
         bump
     )]
-    pub drift_user: AccountLoader<'info, DriftUser>,
+    pub drift_user: UncheckedAccount<'info>,
 
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
@@ -42,9 +38,8 @@ pub struct InitDriftAccount<'info> {
         seeds::program = drift_program.key(),
         bump
     )]
-    pub drift_user_stats: AccountLoader<'info, DriftUserStats>,
+    pub drift_user_stats: UncheckedAccount<'info>,
 
-    /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
         mut,
         seeds = [b"drift_state"],

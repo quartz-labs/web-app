@@ -47,7 +47,6 @@ pub struct WithdrawUsdc<'info> {
     )]
     pub owner_usdc: Box<Account<'info, TokenAccount>>,
 
-    /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
         mut,
         seeds = [b"drift_state"],
@@ -56,7 +55,6 @@ pub struct WithdrawUsdc<'info> {
     )]
     pub drift_state: Box<Account<'info, DriftState>>,
 
-    /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
         mut,
         seeds = [b"user", vault.key().as_ref(), (0u16).to_le_bytes().as_ref()],
@@ -65,7 +63,6 @@ pub struct WithdrawUsdc<'info> {
     )]
     pub drift_user: AccountLoader<'info, DriftUser>,
     
-    /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
         mut,
         seeds = [b"user_stats", vault.key().as_ref()],
