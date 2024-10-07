@@ -7,6 +7,9 @@ pub use deposit_lamports::*;
 mod withdraw_usdc;
 pub use withdraw_usdc::*;
 
+mod init_swap_accounts;
+pub use init_swap_accounts::*;
+
 mod begin_swap;
 pub use begin_swap::*;
 

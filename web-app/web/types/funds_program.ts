@@ -58,8 +58,13 @@ export type FundsProgram = {
                 "path": "vault"
               },
               {
-                "kind": "account",
-                "path": "wsolMint"
+                "kind": "const",
+                "value": [
+                  119,
+                  115,
+                  111,
+                  108
+                ]
               }
             ]
           }
@@ -74,8 +79,13 @@ export type FundsProgram = {
                 "path": "vault"
               },
               {
-                "kind": "account",
-                "path": "usdcMint"
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  100,
+                  99
+                ]
               }
             ]
           }
@@ -265,12 +275,6 @@ export type FundsProgram = {
           "name": "driftSigner"
         },
         {
-          "name": "wsolMint"
-        },
-        {
-          "name": "usdcMint"
-        },
-        {
           "name": "instructions"
         },
         {
@@ -293,10 +297,6 @@ export type FundsProgram = {
         {
           "name": "tokenProgram",
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
-        },
-        {
-          "name": "systemProgram",
-          "address": "11111111111111111111111111111111"
         }
       ],
       "args": [
@@ -1090,6 +1090,108 @@ export type FundsProgram = {
         {
           "name": "rent",
           "address": "SysvarRent111111111111111111111111111111111"
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "initSwapAccounts",
+      "discriminator": [
+        140,
+        193,
+        204,
+        4,
+        66,
+        75,
+        148,
+        63
+      ],
+      "accounts": [
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vaultWsol",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "vault"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  119,
+                  115,
+                  111,
+                  108
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "vaultUsdc",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "vault"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  100,
+                  99
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "vault"
+          ]
+        },
+        {
+          "name": "wsolMint"
+        },
+        {
+          "name": "usdcMint"
+        },
+        {
+          "name": "tokenProgram",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         },
         {
           "name": "systemProgram",

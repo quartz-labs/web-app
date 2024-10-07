@@ -4,7 +4,9 @@ use drift_cpi::{
     cpi::end_swap as drift_end_swap, EndSwap as DriftEndSwap, SwapReduceOnly
 };
 use drift_state::{
-    State as DriftState
+    State as DriftState,
+    User as DriftUser,
+    UserStats as DriftUserStats
 };
 use crate::{
     constants::{
@@ -25,34 +27,23 @@ pub struct EndSwap<'info> {
     pub vault: Box<Account<'info, Vault>>,
 
     #[account(
-        init,
-        seeds = [vault.key().as_ref(), wsol_mint.key().as_ref()],
+        mut,
+        seeds = [vault.key().as_ref(), b"wsol"],
         bump,
-        payer = owner,
-        token::mint = wsol_mint,
         token::authority = vault
     )]
     pub vault_wsol: Box<Account<'info, TokenAccount>>,
 
     #[account(
-        init,
-        seeds = [vault.key().as_ref(), usdc_mint.key().as_ref()],
+        mut,
+        seeds = [vault.key().as_ref(), b"usdc"],
         bump,
-        payer = owner,
-        token::mint = usdc_mint,
         token::authority = vault
     )]
     pub vault_usdc: Box<Account<'info, TokenAccount>>,
     
     #[account(mut)]
     pub owner: Signer<'info>,
-
-    #[account(
-        mut,
-        associated_token::authority = owner,
-        associated_token::mint = usdc_mint,
-    )]
-    pub owner_usdc: Box<Account<'info, TokenAccount>>,
 
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
@@ -70,7 +61,7 @@ pub struct EndSwap<'info> {
         seeds::program = drift_program.key(),
         bump
     )]
-    pub drift_user: UncheckedAccount<'info>,
+    pub drift_user: AccountLoader<'info, DriftUser>,
 
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
@@ -79,7 +70,7 @@ pub struct EndSwap<'info> {
         seeds::program = drift_program.key(),
         bump
     )]
-    pub drift_user_stats: UncheckedAccount<'info>,
+    pub drift_user_stats: AccountLoader<'info, DriftUserStats>,
 
     #[account(
         mut,
@@ -101,16 +92,6 @@ pub struct EndSwap<'info> {
 
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     pub drift_signer: UncheckedAccount<'info>,
-
-    #[account(
-        constraint = wsol_mint.key() == WSOL_MINT_ADDRESS @ ErrorCode::InvalidMintAddress
-    )]
-    pub wsol_mint: Box<Account<'info, Mint>>,
-
-    #[account(
-        constraint = wsol_mint.key() == USDC_MINT_ADDRESS @ ErrorCode::InvalidMintAddress
-    )]
-    pub usdc_mint: Box<Account<'info, Mint>>,
 
     /// CHECK: TODO - This is actually unsafe, but temporary
     pub instructions: UncheckedAccount<'info>,
@@ -136,8 +117,6 @@ pub struct EndSwap<'info> {
     pub drift_program: UncheckedAccount<'info>,
 
     pub token_program: Program<'info, Token>,
-
-    pub system_program: Program<'info, System>
 }
 
 pub fn end_swap_handler(ctx: Context<EndSwap>) -> Result<()> {
@@ -184,44 +163,44 @@ pub fn end_swap_handler(ctx: Context<EndSwap>) -> Result<()> {
 
     // Transfer all USDC to owner
 
-    token::transfer(
-        CpiContext::new_with_signer(
-            ctx.accounts.token_program.to_account_info(), 
-            token::Transfer { 
-                from: ctx.accounts.vault_usdc.to_account_info(), 
-                to: ctx.accounts.owner_usdc.to_account_info(), 
-                authority: ctx.accounts.vault.to_account_info()
-            }, 
-            signer_seeds
-        ),
-        ctx.accounts.vault_usdc.amount
-    )?;
+    // token::transfer(
+    //     CpiContext::new_with_signer(
+    //         ctx.accounts.token_program.to_account_info(), 
+    //         token::Transfer { 
+    //             from: ctx.accounts.vault_usdc.to_account_info(), 
+    //             to: ctx.accounts.owner_usdc.to_account_info(), 
+    //             authority: ctx.accounts.vault.to_account_info()
+    //         }, 
+    //         signer_seeds
+    //     ),
+    //     ctx.accounts.vault_usdc.amount
+    // )?;
 
-    // Close USDC vault
+    // // Close USDC vault
 
-    let cpi_ctx_close = CpiContext::new_with_signer(
-        ctx.accounts.token_program.to_account_info(),
-        token::CloseAccount {
-            account: ctx.accounts.vault_usdc.to_account_info(),
-            destination: ctx.accounts.owner_usdc.to_account_info(),
-            authority: ctx.accounts.vault.to_account_info(),
-        },
-        signer_seeds
-    );
-    token::close_account(cpi_ctx_close)?;
+    // let cpi_ctx_close = CpiContext::new_with_signer(
+    //     ctx.accounts.token_program.to_account_info(),
+    //     token::CloseAccount {
+    //         account: ctx.accounts.vault_usdc.to_account_info(),
+    //         destination: ctx.accounts.owner_usdc.to_account_info(),
+    //         authority: ctx.accounts.vault.to_account_info(),
+    //     },
+    //     signer_seeds
+    // );
+    // token::close_account(cpi_ctx_close)?;
 
     // Close wSol vault
 
-    let cpi_ctx_close = CpiContext::new_with_signer(
-        ctx.accounts.token_program.to_account_info(),
-        token::CloseAccount {
-            account: ctx.accounts.vault_wsol.to_account_info(),
-            destination: ctx.accounts.owner.to_account_info(),
-            authority: ctx.accounts.vault.to_account_info(),
-        },
-        signer_seeds
-    );
-    token::close_account(cpi_ctx_close)?;
+    // let cpi_ctx_close = CpiContext::new_with_signer(
+    //     ctx.accounts.token_program.to_account_info(),
+    //     token::CloseAccount {
+    //         account: ctx.accounts.vault_wsol.to_account_info(),
+    //         destination: ctx.accounts.owner.to_account_info(),
+    //         authority: ctx.accounts.vault.to_account_info(),
+    //     },
+    //     signer_seeds
+    // );
+    // token::close_account(cpi_ctx_close)?;
 
     Ok(())
 }

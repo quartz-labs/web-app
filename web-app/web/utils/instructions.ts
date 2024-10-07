@@ -131,6 +131,21 @@ export const liquidateSol = async(wallet: AnchorWallet, connection: web3.Connect
     const walletUsdc = await getOrCreateAssociatedTokenAccountAnchor(wallet, connection, provider, USDC_MINT);
 
     try {
+        const ix_initSwapAccounts = await program.methods
+            .initSwapAccounts()
+            .accounts({
+                // @ts-ignore - Causing an issue in Cursor IDE
+                vault: vaultPda,
+                vaultWsol: getVaultWsol(vaultPda),
+                vaultUsdc: getVaultUsdc(vaultPda),
+                owner: wallet.publicKey,
+                wsolMint: WSOL_MINT,
+                usdcMint: USDC_MINT,
+                tokenProgram: TOKEN_PROGRAM_ID,
+                systemProgram: SystemProgram.programId,
+            })
+            .instruction();
+
         const ix_beginSwap = await program.methods
             .beginSwap(new BN(amountLamports))
             .accounts({
@@ -145,16 +160,13 @@ export const liquidateSol = async(wallet: AnchorWallet, connection: web3.Connect
                 inSpotMarketVault: getDriftSpotMarketVault(DRIFT_MARKET_INDEX_SOL),
                 outSpotMarketVault: getDriftSpotMarketVault(DRIFT_MARKET_INDEX_USDC),
                 driftSigner: DRIFT_SIGNER,
-                wsolMint: WSOL_MINT,
-                usdcMint: USDC_MINT,
                 instructions: SYSVAR_INSTRUCTIONS_PUBKEY,
                 constAccount: new PublicKey("J83w4HKfqxwcq3BEMMkPFSppX3gqekLyLJBexebFVkix"), // TODO - Remove hardcoding
                 additionalAccount: new PublicKey("5SSkXsEKQepHHAewytPVwdej4epN1nxgLVM84L4KXgy7"), // TODO - Remove hardcoding
                 spotMarketSol: DRIFT_SPOT_MARKET_SOL,
                 spotMarketUsdc: DRIFT_SPOT_MARKET_USDC,
                 driftProgram: DRIFT_PROGRAM_ID,
-                tokenProgram: TOKEN_PROGRAM_ID,
-                systemProgram: SystemProgram.programId
+                tokenProgram: TOKEN_PROGRAM_ID
             })
             .instruction();
 
@@ -188,7 +200,7 @@ export const liquidateSol = async(wallet: AnchorWallet, connection: web3.Connect
             })
             .instruction(); 
 
-        const tx = new Transaction().add(ix_beginSwap, ix_endSwap);
+        const tx = new Transaction().add(ix_initSwapAccounts, ix_endSwap, ix_beginSwap);
 
         const latestBlockhash = await connection.getLatestBlockhash();
         tx.recentBlockhash = latestBlockhash.blockhash;

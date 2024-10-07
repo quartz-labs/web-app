@@ -1,7 +1,8 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{Mint, Token, TokenAccount};
 use drift_cpi::{
-    cpi::begin_swap as drift_begin_swap, BeginSwap as DriftBeginSwap
+    cpi::begin_swap as drift_begin_swap, 
+    BeginSwap as DriftBeginSwap
 };
 use drift_state::{
     State as DriftState,
@@ -27,21 +28,17 @@ pub struct BeginSwap<'info> {
     pub vault: Box<Account<'info, Vault>>,
 
     #[account(
-        init,
-        seeds = [vault.key().as_ref(), wsol_mint.key().as_ref()],
+        mut,
+        seeds = [vault.key().as_ref(), b"wsol"],
         bump,
-        payer = owner,
-        token::mint = wsol_mint,
         token::authority = vault
     )]
     pub vault_wsol: Box<Account<'info, TokenAccount>>,
 
     #[account(
-        init,
-        seeds = [vault.key().as_ref(), usdc_mint.key().as_ref()],
+        mut,
+        seeds = [vault.key().as_ref(), b"usdc"],
         bump,
-        payer = owner,
-        token::mint = usdc_mint,
         token::authority = vault
     )]
     pub vault_usdc: Box<Account<'info, TokenAccount>>,
@@ -80,32 +77,20 @@ pub struct BeginSwap<'info> {
         mut,
         seeds = [b"spot_market_vault", (DRIFT_MARKET_INDEX_SOL).to_le_bytes().as_ref()],
         seeds::program = drift_program.key(),
-        token::mint = wsol_mint,
         bump,
-    )]
+    )] // TODO - Add mint checks
     pub in_spot_market_vault: Box<Account<'info, TokenAccount>>,
 
     #[account(
         mut,
         seeds = [b"spot_market_vault", (DRIFT_MARKET_INDEX_USDC).to_le_bytes().as_ref()],
         seeds::program = drift_program.key(),
-        token::mint = usdc_mint,
         bump,
     )]
     pub out_spot_market_vault: Box<Account<'info, TokenAccount>>,
 
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     pub drift_signer: UncheckedAccount<'info>,
-
-    #[account(
-        constraint = wsol_mint.key() == WSOL_MINT_ADDRESS @ ErrorCode::InvalidMintAddress
-    )]
-    pub wsol_mint: Box<Account<'info, Mint>>,
-
-    #[account(
-        constraint = wsol_mint.key() == USDC_MINT_ADDRESS @ ErrorCode::InvalidMintAddress
-    )]
-    pub usdc_mint: Box<Account<'info, Mint>>,
 
     /// CHECK: TODO - This is actually unsafe, but temporary
     pub instructions: UncheckedAccount<'info>,
@@ -131,8 +116,6 @@ pub struct BeginSwap<'info> {
     pub drift_program: UncheckedAccount<'info>,
 
     pub token_program: Program<'info, Token>,
-
-    pub system_program: Program<'info, System>
 }
 
 pub fn begin_swap_handler(
