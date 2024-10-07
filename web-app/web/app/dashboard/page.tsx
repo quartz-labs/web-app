@@ -9,9 +9,10 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { isVaultInitialized } from '@/utils/utils';
 import Modal, { ModalProps } from '@/components/modal/Modal';
-import { depositLamports, liquidateSol, withdrawLamports, withdrawUsdc } from '@/utils/instructions';
+import { depositLamports, depositUsdc, liquidateSol, withdrawLamports, withdrawUsdc } from '@/utils/instructions';
 import { LAMPORTS_PER_SOL, SystemProgram, Transaction, VersionedTransaction } from '@solana/web3.js';
 import { getVault } from '@/utils/getPDAs';
+import { MICRO_CENTS_PER_USDC } from '@/utils/constants';
 
 const WalletMultiButtonDynamic = dynamic(
     () => import("@solana/wallet-adapter-react-ui").then((mod) => mod.WalletMultiButton),
@@ -79,18 +80,18 @@ export default function Dashboard() {
         })
     }
 
-    const handleLiquidate = () => {
+    const handleRepayUsdc = () => {
         setModalEnabled(true);
         setModalData({
-            title: "Liquidate SOL",
-            denomination: "SOL",
-            buttonText: "Liquidate",
+            title: "Repay USDC Loan",
+            denomination: "USDC",
+            buttonText: "Repay",
             onConfirm: async (amount: number) => {
                 if (!wallet) {
                     console.error("Error: Wallet not connected");
                     return;
                 }
-                const signature = await liquidateSol(wallet, connection, amount * LAMPORTS_PER_SOL);
+                const signature = await depositUsdc(wallet, connection, amount * MICRO_CENTS_PER_USDC);
                 console.log(signature);
                 if (signature) setModalEnabled(false);
             },
@@ -109,7 +110,7 @@ export default function Dashboard() {
                     console.error("Error: Wallet not connected");
                     return;
                 }
-                const signature = await withdrawUsdc(wallet, connection, amount * 100);
+                const signature = await withdrawUsdc(wallet, connection, amount * MICRO_CENTS_PER_USDC);
                 console.log(signature);
                 if (signature) setModalEnabled(false);
             },
@@ -139,7 +140,7 @@ export default function Dashboard() {
             <div className={styles.buttons}>
                 <button onClick={handleDeposit} className={`${styles.mainButton} glassButton`}>Deposit</button>
                 <button onClick={handleWithdraw} className={`${styles.mainButton} glassButton`}>Withdraw</button>
-                <button onClick={handleLiquidate} className={`${styles.mainButton} glassButton`}>Liquidate</button>
+                <button onClick={handleRepayUsdc} className={`${styles.mainButton} glassButton`}>Repay USDC</button>
                 <button onClick={handleOfframp} className={`${styles.mainButton} glassButton`}>Off-ramp</button>
             </div>
         </main>

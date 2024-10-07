@@ -228,7 +228,48 @@ export const liquidateSol = async(wallet: AnchorWallet, connection: web3.Connect
     }
 }
 
-export const withdrawUsdc = async(wallet: AnchorWallet, connection: web3.Connection, amountCents: number) => {
+export const depositUsdc = async(wallet: AnchorWallet, connection: web3.Connection, amountMicroCents: number) => {
+    const provider = new AnchorProvider(connection, wallet, {commitment: "confirmed"}); 
+    setProvider(provider);
+    const program = new Program(idl as Idl, provider) as unknown as Program<FundsProgram>;
+    const vaultPda = getVault(wallet.publicKey);
+
+    const walletUsdc = await getAssociatedTokenAddress(USDC_MINT, wallet.publicKey);
+    if (!walletUsdc) throw new Error("No USDC account found on connected wallet");
+
+    try {
+        const signature = await program.methods
+            .depositUsdc(new BN(amountMicroCents))
+            .accounts({
+                // @ts-ignore - Causing an issue in Cursor IDE
+                vault: vaultPda,
+                vaultUsdc: getVaultUsdc(vaultPda),
+                owner: wallet.publicKey,    
+                ownerUsdc: walletUsdc,
+                driftState: getDriftState(),
+                driftUser: getDriftUser(vaultPda),
+                driftUserStats: getDriftUserStats(vaultPda),
+                spotMarketVault: getDriftSpotMarketVault(DRIFT_MARKET_INDEX_USDC),
+                usdcMind: USDC_MINT,
+                tokenProgram: TOKEN_PROGRAM_ID,
+                associatedTokenProgram: ASSOCIATED_PROGRAM_ID,
+                driftProgram: DRIFT_PROGRAM_ID,
+                constAccount: new PublicKey("J83w4HKfqxwcq3BEMMkPFSppX3gqekLyLJBexebFVkix"), // TODO - Remove hardcoding
+                additionalAccount: new PublicKey("5SSkXsEKQepHHAewytPVwdej4epN1nxgLVM84L4KXgy7"), // TODO - Remove hardcoding
+                spotMarketSol: DRIFT_SPOT_MARKET_SOL,
+                spotMarketUsdc: DRIFT_SPOT_MARKET_USDC,
+                systemProgram: SystemProgram.programId,
+            })
+            .rpc();
+        return signature;
+    } catch (err) {
+        if (err instanceof WalletSignTransactionError) {
+            return null;
+        } else throw err;
+    }
+}
+
+export const withdrawUsdc = async(wallet: AnchorWallet, connection: web3.Connection, amountMicroCents: number) => {
     const provider = new AnchorProvider(connection, wallet, {commitment: "confirmed"}); 
     setProvider(provider);
     const program = new Program(idl as Idl, provider) as unknown as Program<FundsProgram>;
@@ -237,7 +278,7 @@ export const withdrawUsdc = async(wallet: AnchorWallet, connection: web3.Connect
 
     try {
         const tx = await program.methods
-            .withdrawUsdc(new BN(amountCents))
+            .withdrawUsdc(new BN(amountMicroCents))
             .accounts({
                 // @ts-ignore - Causing an issue in Cursor IDE
                 vault: vaultPda,

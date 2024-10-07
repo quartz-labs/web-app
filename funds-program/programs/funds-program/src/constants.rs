@@ -16,8 +16,8 @@ pub const USDC_MINT_ADDRESS: Pubkey = pubkey!("envrJbV6GbhBTi8Pu6h9MwNViLuAmu3mF
 
 #[cfg(feature = "devnet")]
 #[constant]
-// pub const USDC_MINT_ADDRESS: Pubkey = pubkey!("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU");
-pub const USDC_MINT_ADDRESS: Pubkey = pubkey!("8zGuJQqwhZafTah7Uc7Z4tXRnguqkn5KLFAP8oV6PHe2");
+// pub const USDC_MINT_ADDRESS: Pubkey = pubkey!("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU");  // True USDC token
+pub const USDC_MINT_ADDRESS: Pubkey = pubkey!("8zGuJQqwhZafTah7Uc7Z4tXRnguqkn5KLFAP8oV6PHe2");   // Drift's token
 
 #[cfg(not(any(feature = "local", feature = "devnet")))]
 #[constant]

@@ -8,6 +8,11 @@ use drift_cpi::{
     cpi::withdraw, 
     Withdraw
 };
+use drift_accounts::{
+    State as DriftState,
+    User as DriftUser,
+    UserStats as DriftUserStats
+};
 use crate::{
     constants::{DRIFT_MARKET_INDEX_SOL, DRIFT_PROGRAM_ID, WSOL_MINT_ADDRESS}, 
     errors::ErrorCode, 
@@ -44,7 +49,7 @@ pub struct WithdrawLamports<'info> {
         seeds::program = drift_program.key(),
         bump
     )]
-    pub drift_state: UncheckedAccount<'info>,
+    pub drift_state: Box<Account<'info, DriftState>>,
 
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
@@ -53,7 +58,7 @@ pub struct WithdrawLamports<'info> {
         seeds::program = drift_program.key(),
         bump
     )]
-    pub drift_user: UncheckedAccount<'info>,
+    pub drift_user: AccountLoader<'info, DriftUser>,
     
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
@@ -62,7 +67,7 @@ pub struct WithdrawLamports<'info> {
         seeds::program = drift_program.key(),
         bump
     )]
-    pub drift_user_stats: UncheckedAccount<'info>,
+    pub drift_user_stats: AccountLoader<'info, DriftUserStats>,
     
     #[account(
         mut,

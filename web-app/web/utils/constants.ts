@@ -12,3 +12,4 @@ export const DRIFT_SPOT_MARKET_USDC = new PublicKey("6gMq3mRCKf8aP3ttTyYhuijVZ2L
 
 export const DRIFT_MARKET_INDEX_USDC = 0;
 export const DRIFT_MARKET_INDEX_SOL = 1;
+export const MICRO_CENTS_PER_USDC = 6;

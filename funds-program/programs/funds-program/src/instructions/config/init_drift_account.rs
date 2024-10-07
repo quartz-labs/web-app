@@ -3,7 +3,9 @@ use drift_cpi::{
     cpi::{initialize_user, initialize_user_stats}, InitializeUser, InitializeUserStats
 };
 use drift_accounts::{
-    State as DriftState
+    State as DriftState,
+    User as DriftUser,
+    UserStats as DriftUserStats
 };
 use crate::{
     state::Vault,
@@ -31,7 +33,7 @@ pub struct InitDriftAccount<'info> {
         seeds::program = drift_program.key(),
         bump
     )]
-    pub drift_user: UncheckedAccount<'info>,
+    pub drift_user: AccountLoader<'info, DriftUser>,
 
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
@@ -40,7 +42,7 @@ pub struct InitDriftAccount<'info> {
         seeds::program = drift_program.key(),
         bump
     )]
-    pub drift_user_stats: UncheckedAccount<'info>,
+    pub drift_user_stats: AccountLoader<'info, DriftUserStats>,
 
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
