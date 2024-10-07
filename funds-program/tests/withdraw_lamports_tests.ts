@@ -128,49 +128,6 @@ describe("withdraw_lamports tests", () => {
   })
 
 
-  // TODO - Implement when doing mobile app
-  // it("withdraw_lamports incorrect backup", async () => {
-  //   const { provider, program, vaultPda, userKeypair } = testSetup;
-  //   const desiredErrorCode = "ConstraintSeeds"
-  //   const destinationAccount = Keypair.generate().publicKey;
-
-  //   try {
-  //     expect(
-  //       await provider.connection.getBalance(destinationAccount)
-  //     ).to.equal(0);
-
-  //     // Send SOL to vaultPda
-  //     const transaction = new Transaction().add(
-  //       SystemProgram.transfer({
-  //         fromPubkey: provider.wallet.publicKey,
-  //         toPubkey: vaultPda,
-  //         lamports: LAMPORTS_PER_SOL * 2,
-  //       })
-  //     )
-  //     await provider.sendAndConfirm(transaction);
-
-  //     // Call PDA to transfer SOL
-  //     await program.methods
-  //       .withdrawLamports(new anchor.BN(LAMPORTS_PER_SOL))
-  //       .accounts({
-  //         // @ts-ignore - Causing an issue in Cursor IDE
-  //         vault: vaultPda, 
-  //         receiver: destinationAccount,
-  //         backup: Keypair.generate().publicKey,
-  //         user: userKeypair.publicKey,
-  //         systemProgram: SystemProgram.programId
-  //       })
-  //       .signers([userKeypair])
-  //       .rpc();
-
-  //     assert.fail(0, 1, "withdraw_lamports instruction call should have failed")
-  //   } catch(err) {
-  //     expect(err).to.be.instanceOf(Error);
-  //     expect((err as AnchorError).error.errorCode.code).to.equal(desiredErrorCode);
-  //   }
-  // })
-
-
   it("withdraw_lamports incorrect vaultPda", async () => {
     const { provider, program, vaultPda, ownerKeypair, otherKeypairVaultPda } = testSetup;
     const desiredErrorCode = "AccountNotInitialized"

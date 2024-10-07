@@ -79,7 +79,6 @@ export default function Balance() {
         updateBalance();
     }, [wallet, rentExemptionThreshold]);
 
-    // TODO - If collateralized SOL is not earning, this calculation must be adjusted as it assumes all SOL is earning yield
     const dailySolChange = solDailyEarnRate * solBalance * solPrice;
     const dailyUsdcChange = usdcDailyBorrowRate * usdcLoanBalance;
     const dailyNetChange = dailySolChange - dailyUsdcChange;

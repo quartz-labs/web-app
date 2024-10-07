@@ -4,14 +4,13 @@ import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import styles from './page.module.css';
 import Balance from "@/components/balance/Balance";
-import { useAnchorWallet, useConnection, useWallet } from '@solana/wallet-adapter-react';
+import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { isVaultInitialized } from '@/utils/utils';
 import Modal, { ModalProps } from '@/components/modal/Modal';
-import { depositLamports, depositUsdc, liquidateSol, withdrawLamports, withdrawUsdc } from '@/utils/instructions';
-import { LAMPORTS_PER_SOL, SystemProgram, Transaction, VersionedTransaction } from '@solana/web3.js';
-import { getVault } from '@/utils/getPDAs';
+import { depositLamports, depositUsdc, withdrawLamports, withdrawUsdc } from '@/utils/instructions';
+import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { MICRO_CENTS_PER_USDC } from '@/utils/constants';
 
 const WalletMultiButtonDynamic = dynamic(

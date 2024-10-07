@@ -10,7 +10,7 @@ pub struct CloseUser<'info> {
         has_one = owner,
         close = owner,
     )]
-    pub vault: Account<'info, Vault>,
+    pub vault: Box<Account<'info, Vault>>,
 
     #[account(mut)]
     pub owner: Signer<'info>,

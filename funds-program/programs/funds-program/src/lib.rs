@@ -6,7 +6,7 @@ mod constants;
 mod instructions;
 use instructions::*;
 
-declare_id!("6yHj1c33TU8JA49N26VTRYR9E5SQrHT94dQStcpJqq4a");
+declare_id!("6JjHXLheGSNvvexgzMthEcgjkcirDrGduc3HAKB2P1v2");
 
 #[program]
 pub mod funds_program {
@@ -42,20 +42,5 @@ pub mod funds_program {
 
     pub fn withdraw_usdc(ctx: Context<WithdrawUsdc>, amount_micro_cents: u64) -> Result<()> {
         withdraw_usdc_handler(ctx, amount_micro_cents)
-    }
-
-    pub fn init_swap_accounts(ctx: Context<InitSwapAccounts>) -> Result<()> {
-        init_swap_accounts_handler(ctx)
-    }
-
-    pub fn begin_swap<'a, 'b, 'c, 'info>(
-        ctx: Context<'a, 'b, 'c, 'info, BeginSwap<'info>>, 
-        amount_in: u64
-    ) -> Result<()> {
-        begin_swap_handler(ctx, amount_in)
-    }
-
-    pub fn end_swap(ctx: Context<EndSwap>) -> Result<()> {
-        end_swap_handler(ctx)
     }
 }

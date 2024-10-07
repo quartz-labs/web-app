@@ -21,7 +21,7 @@ pub struct InitDriftAccount<'info> {
         bump = vault.bump,
         has_one = owner
     )]
-    pub vault: Account<'info, Vault>,
+    pub vault: Box<Account<'info, Vault>>,
 
     #[account(mut)]
     pub owner: Signer<'info>,

@@ -65,42 +65,4 @@ describe("init_user tests", () => {
     const account = await program.account.vault.fetch(otherKeypairVaultPda);
     expect(account.owner.equals(otherOwnerKeypair.publicKey)).to.be.true;
   });
-
-
-  // TODO - Add in when doing mobile app
-  // it("init_user by quartz", async () => {
-  //   const {program, testUsdcKeypair, testUsdcMint, quartzManagerKeypair} = testSetup;
-
-  //   const testBackupKeypair = Keypair.generate();
-  //   const testUserKeypair = Keypair.generate();
-  //   const [testPDa] = anchor.web3.PublicKey.findProgramAddressSync(
-  //     [Buffer.from("vault"), testBackupKeypair.publicKey.toBuffer()],
-  //     program.programId
-  //   );
-  //   const [testUsdcPda] = anchor.web3.PublicKey.findProgramAddressSync(
-  //     [Buffer.from("vault"), testBackupKeypair.publicKey.toBuffer(), testUsdcKeypair.publicKey.toBuffer()],
-  //     program.programId
-  //   );
-
-  //   await program.methods
-  //     .initUser()
-  //     .accounts({
-  //       // @ts-ignore - Causing an issue in Cursor IDE
-  //       vault: testPDa,
-  //       vaultUsdc: testUsdcPda,
-  //       payer: quartzManagerKeypair.publicKey,
-  //       backup: testBackupKeypair.publicKey,
-  //       user: testUserKeypair.publicKey,
-  //       usdcMint: testUsdcMint,
-  //       tokenProgram: TOKEN_PROGRAM_ID,
-  //       systemProgram: SystemProgram.programId,
-  //     })
-  //     .signers([quartzManagerKeypair])
-  //     .rpc();
-    
-  //   const account = await program.account.vault.fetch(testPDa);
-  //   expect(account.backup.equals(testBackupKeypair.publicKey)).to.be.true;
-  //   expect(account.user.equals(testUserKeypair.publicKey)).to.be.true;
-  //   expect(account.initPayer.equals(quartzManagerKeypair.publicKey)).to.be.true;
-  // });
 });

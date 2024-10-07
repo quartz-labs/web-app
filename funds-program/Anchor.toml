@@ -5,18 +5,21 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-funds_program = "6yHj1c33TU8JA49N26VTRYR9E5SQrHT94dQStcpJqq4a"
+funds_program = "6JjHXLheGSNvvexgzMthEcgjkcirDrGduc3HAKB2P1v2"
 
 [programs.devnet]
-funds_program = "6yHj1c33TU8JA49N26VTRYR9E5SQrHT94dQStcpJqq4a"
+funds_program = "6JjHXLheGSNvvexgzMthEcgjkcirDrGduc3HAKB2P1v2"
+
+[programs.mainnet]
+funds_program = "6JjHXLheGSNvvexgzMthEcgjkcirDrGduc3HAKB2P1v2"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "devnet"
+cluster = "mainnet"
 wallet = "~/.config/solana/id.json"
-
+buffer_authority = "./target/deploy/recover.json"
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/$TEST_FILE"
