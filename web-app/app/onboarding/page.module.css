@@ -29,6 +29,14 @@
     flex: 1;
 }
 
+.checkboxText a {
+    text-decoration: underline;
+}
+
+.checkboxText a:hover {
+    color: #d8f3ff;
+}
+
 .checkboxes li label input[type="checkbox"] {
     cursor: pointer;
     background: transparent;
@@ -63,4 +71,9 @@
 
 .missingLabel {
     color: var(--color-text-error);
+}
+
+.mainButton {
+    min-height: 55px;
+    min-width: 175px;
 }

@@ -41,3 +41,16 @@
     align-items: baseline;
     justify-content: flex-start;
 }
+
+.loadingBalance{
+    display: flex;
+    align-items: center;
+}
+
+.smallMargin {
+    margin-right: 6px;
+}
+
+.loader {
+    margin-top: 8px;
+}

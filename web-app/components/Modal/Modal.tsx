@@ -1,5 +1,6 @@
 import { useState } from "react";
 import styles from "./Modal.module.css";
+import { PuffLoader } from "react-spinners";
 
 export interface ModalProps {
     title: string;
@@ -61,7 +62,18 @@ export default function Modal(
                         className={`glass-button ${styles.modalButton}`}
                         onClick={() => handleConfirm(amount)}
                     >
-                        {awaitingSign ? "Loading..." : buttonText}
+                        {awaitingSign &&
+                            <PuffLoader
+                                color={"#ffffff"}
+                                size={30}
+                                aria-label="Loading"
+                                data-testid="loader"
+                            />
+                        }
+
+                        {!awaitingSign &&
+                            <p>{buttonText}</p>
+                        }
                     </button>
                     <button 
                         className={`glass-button ghost ${styles.modalButton}`}

@@ -49,7 +49,7 @@
 }
 
 .modalButton {
-    flex-grow: 1;
+    width: 100%;
     padding: 15px 30px;
     border-radius: 15px;
 }

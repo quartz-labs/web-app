@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { isVaultInitialized } from '@/utils/utils';
 import Account from '@/components/Account/Account';
 import Link from 'next/link';
+import { PuffLoader } from 'react-spinners';
 
 export default function Onboarding() {
     const { connection } = useConnection();
@@ -46,7 +47,11 @@ export default function Onboarding() {
         setAwaitingSign(true);
         
         const signature = await initAccount(wallet, connection);
-        if (signature) router.push("/dashboard");
+        if (signature) {
+            router.push("/dashboard");
+        } else {
+            setAwaitingSign(false);
+        }
     };
     
     return (
@@ -111,8 +116,19 @@ export default function Onboarding() {
                     </li>
                 </ul>
 
-                <button onClick={handleCreateAccount} className={"glass-button font-small"}>
-                    {awaitingSign ? "Loading..." : "Create Account"}
+                <button onClick={handleCreateAccount} className={`glass-button font-small ${styles.mainButton}`}>
+                    {awaitingSign &&
+                        <PuffLoader
+                            color={"#ffffff"}
+                            size={30}
+                            aria-label="Loading"
+                            data-testid="loader"
+                        />
+                    }
+
+                    {!awaitingSign &&
+                        <p>Create Account</p>
+                    }
                 </button>
 
                 {attemptFailed && 

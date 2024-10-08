@@ -6,6 +6,7 @@ import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import Image from "next/image";
 import styles from "./MainView.module.css";
 import { getSign, roundToDecimalPlaces, roundToDecimalPlacesAbsolute } from "@/utils/utils";
+import { PuffLoader } from "react-spinners";
 
 export default function MainView (
     {solPrice, totalSolBalance, usdcLoanBalance, solDailyRate, usdcDailyRate, balanceLoaded, swapView, enableModal, disableModal, enableOfframpModal} : ViewProps
@@ -76,7 +77,16 @@ export default function MainView (
         <div>
             {!balanceLoaded &&
                 <div className={styles.balanceWrapper}>
-                    <p>Loading...</p>   
+                    <div className={styles.loadingBalance}>
+                        <p className={`${styles.fiatAmount} ${styles.smallMargin}`}>$</p>
+                        <PuffLoader
+                            color={"#ffffff"}
+                            size={50}
+                            aria-label="Loading"
+                            data-testid="loader"
+                            className={styles.loader}
+                        />
+                    </div>
                 </div>
             }
 

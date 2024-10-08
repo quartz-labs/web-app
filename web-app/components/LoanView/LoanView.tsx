@@ -4,6 +4,7 @@ import { depositUsdc } from "@/utils/instructions";
 import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import styles from "./LoanView.module.css";
 import { getSign, roundToDecimalPlaces, roundToDecimalPlacesAbsolute } from "@/utils/utils";
+import { PuffLoader } from "react-spinners";
 
 export default function LoanView (
     {solPrice, totalSolBalance, usdcLoanBalance, solDailyRate, usdcDailyRate, balanceLoaded, swapView, enableModal, disableModal, enableOfframpModal} : ViewProps
@@ -39,7 +40,13 @@ export default function LoanView (
                     <p className={styles.title}>Total Assets</p>
 
                     {!balanceLoaded &&
-                        <p>Loading...</p>
+                        <PuffLoader
+                            color={"#ffffff"}
+                            size={50}
+                            aria-label="Loading"
+                            data-testid="loader"
+                            className={styles.loader}
+                        />
                     }
 
                     {balanceLoaded &&         
@@ -58,7 +65,13 @@ export default function LoanView (
                     <p className={styles.title}>Loans</p>
 
                     {!balanceLoaded &&
-                        <p>Loading...</p>
+                        <PuffLoader
+                            color={"#ffffff"}
+                            size={50}
+                            aria-label="Loading"
+                            data-testid="loader"
+                            className={styles.loader}
+                        />
                     }
 
                     {balanceLoaded &&         
@@ -77,7 +90,13 @@ export default function LoanView (
                     <p className={styles.title}>Net Balance</p>
 
                     {!balanceLoaded &&
-                        <p>Loading...</p>
+                        <PuffLoader
+                            color={"#ffffff"}
+                            size={50}
+                            aria-label="Loading"
+                            data-testid="loader"
+                            className={styles.loader}
+                        />
                     }
 
                     {balanceLoaded &&  
