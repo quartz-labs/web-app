@@ -1,4 +1,4 @@
-import { AddressLookupTableAccount, Connection, Keypair, PublicKey, TransactionInstruction, TransactionMessage, VersionedTransaction } from '@solana/web3.js';
+import { AddressLookupTableAccount, Connection, PublicKey, TransactionInstruction, TransactionMessage, VersionedTransaction } from '@solana/web3.js';
 
 export async function getJupiterSwapIx(walletPubkey: PublicKey, amount: number, inputMint: string, outputMint: string) {
 
@@ -13,7 +13,6 @@ export async function getJupiterSwapIx(walletPubkey: PublicKey, amount: number, 
       &slippageBps=50`
         )
     ).json();
-
 
     const instructions = await (
         await fetch('https://quote-api.jup.ag/v6/swap-instructions', {
@@ -42,11 +41,14 @@ export async function getJupiterSwapIx(walletPubkey: PublicKey, amount: number, 
         addressLookupTableAddresses, // The lookup table addresses that you can use if you are using versioned transaction.
     } = instructions;
 
-    return [
-        ...setupInstructions.map(deserializeInstruction),
-        deserializeInstruction(swapInstructionPayload),
-        // uncomment if needed: deserializeInstruction(cleanupInstruction),
-    ]
+    return {
+        instructions: [
+            ...setupInstructions.map(deserializeInstruction),
+            deserializeInstruction(swapInstructionPayload),
+            // deserializeInstruction(cleanupInstruction),
+        ],
+        addressLookupTableAddresses,
+    };
 }
 
 const deserializeInstruction = (instruction: any) => {
@@ -86,14 +88,14 @@ const getAddressLookupTableAccounts = async (
     }, new Array<AddressLookupTableAccount>());
 };
 
-const buildAndSignTransaction = async (connection: Connection, walletPubkey: PublicKey, jupiterSwapIx: any, addressLookupTableAddresses: string[], withdrawUsdcIx: any) => {
+export async function buildAndSignTransaction(connection: Connection, walletPubkey: PublicKey, jupiterSwapIx: any, addressLookupTableAddresses: string[], withdrawUsdcIx: any) {
 
     const addressLookupTableAccounts: AddressLookupTableAccount[] = [];
 
     addressLookupTableAccounts.push(
         ...(await getAddressLookupTableAccounts(connection, addressLookupTableAddresses))
     );
-    
+
     const blockhash = (await connection.getLatestBlockhash()).blockhash;
     const messageV0 = new TransactionMessage({
         payerKey: walletPubkey,
@@ -104,7 +106,7 @@ const buildAndSignTransaction = async (connection: Connection, walletPubkey: Pub
         ]
     }).compileToV0Message(addressLookupTableAccounts);
     const transaction = new VersionedTransaction(messageV0);
-    
+
     return transaction;
 }
 
