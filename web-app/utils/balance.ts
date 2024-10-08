@@ -3,13 +3,13 @@ import { PublicKey } from "@solana/web3.js";
 export const getUsdcDailyBorrowRate = async () => {
     // TODO - Implement pulling real data
 
-    return 0.1125 / 365;
+    return 0.133799 / 365;
 }
 
 export const getSolDailyEarnRate = async () => {
     // TODO - Implement pulling real data
 
-    return 0.07 / 365;
+    return 0.012636 / 365;
 }
 
 export const fetchDriftData = async (vaultAddress: PublicKey, token: string) => {

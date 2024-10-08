@@ -98,7 +98,7 @@ export default function Dashboard() {
         const usdcLoanBalance = await fetchDriftData(vault, "USDC");
 
         setTotalSolBalance(totalSolBalance);
-        setUsdcLoanBalance(usdcLoanBalance);
+        setUsdcLoanBalance(-usdcLoanBalance);
         setBalanceLoaded(true);
 
         updateFinancialData();
