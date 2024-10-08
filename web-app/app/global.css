@@ -21,53 +21,59 @@
   --color-text-light: #ffffff55;
 }
 
+.font-small {
+  font-size: 18px !important;
+}
+
 html,
 body {
   height: 100%;
   background: #0B111D;
   color: white;
   font-weight: 200;
+  font-size: 16px;
 }
 
-.glassButton {
+.glass-button {
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
 
-  gap: 10px;
-  padding: 20px 30px;
+  gap: 15px;
+  padding: 14px 28px;
   background: var(--gradient-glass-stroke);
 
-  border-radius: 14px;
+  font-size: 20px;
+  border-radius: 10px;
   background-image: var(--gradient-glass-stroke);
   background-origin: border-box;
   background-clip: padding-box, border-box;
 }
 
-.glassButton:hover {
+.glass-button:hover {
   background-image: 
     var(--overlay), 
     var(--gradient-glass-stroke);
 }
 
-.glassButton:active {
+.glass-button:active {
   background-image: 
     var(--overlay), 
     var(--overlay), 
     var(--gradient-glass-stroke);
 }
 
-.glassButton.ghost {
+.glass-button.ghost {
   background: transparent;
-  border: double 1px var(--placeholder-glass-stroke);
+  border: 2px solid var(--placeholder-glass-stroke);
 }
 
-.glassButton.ghost:hover {
+.glass-button.ghost:hover {
   background: var(--overlay);
 }
 
-.glassButton.ghost:active {
+.glass-button.ghost:active {
   background: var(--overlay), var(--overlay);
 }
 
@@ -110,7 +116,7 @@ body {
 
 .two-col-grid {
   margin: 0px auto;
-  height: 100VH;
+  height: 100%;
   width: 75VW;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
