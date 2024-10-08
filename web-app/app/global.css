@@ -117,7 +117,7 @@ body {
 .two-col-grid {
   margin: 0px auto;
   height: 100%;
-  width: 75VW;
+  width: 65VW;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   justify-items: center;
@@ -130,4 +130,5 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  width: 100%;
 }

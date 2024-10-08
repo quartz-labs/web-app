@@ -1,0 +1,23 @@
+.buttons {
+    width: 100%;
+    font-size: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+.buttons button {
+    width: 100%;
+}
+
+.buttonsRow {
+    width: 100%;
+    display: flex;
+    gap: 22px;
+}
+
+.mainBalance {
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-start;
+}

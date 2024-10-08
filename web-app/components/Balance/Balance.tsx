@@ -156,23 +156,7 @@ export default function Balance() {
     }
     else {
         return (
-            <div className={styles.balanceWrapper}>
-                <h2 className={styles.heading}>Net Balance</h2>
-                <div className={styles.balanceCell}>
-                    <p className={styles.mainBalance}>
-                        ${((solBalance * solPrice) - usdcLoanBalance).toLocaleString(
-                            'en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }
-                        )}
-                    </p>
-                    <p className={styles.subBalance}>{solBalance} SOL</p>
-                </div>
-                <button
-                    className={`glassButton ghost ${styles.viewButton}`}
-                    onClick={() => setDetailedView(true)}
-                >
-                    View Breakdown
-                </button>
-            </div>
+            
         )
     }
 

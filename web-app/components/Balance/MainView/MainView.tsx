@@ -1,9 +1,11 @@
 import { ViewProps } from "@/app/dashboard/page";
 import { MICRO_CENTS_PER_USDC } from "@/utils/constants";
-import { depositLamports, depositUsdc, withdrawLamports, withdrawUsdc } from "@/utils/instructions";
+import { depositLamports, withdrawLamports, withdrawUsdc } from "@/utils/instructions";
 import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
-import Balance from "../Balance/Balance";
+import Image from "next/image";
+import styles from "./MainView.module.css";
+import balanceStyles from "../Balance.module.css";
 
 export default function MainView({swapView, enableModal, disableModal} : ViewProps) {
     const { connection } = useConnection();
@@ -45,24 +47,6 @@ export default function MainView({swapView, enableModal, disableModal} : ViewPro
         })
     }
 
-    const handleRepayUsdc = () => {
-        enableModal({
-            title: "Repay USDC Loan",
-            denomination: "USDC",
-            buttonText: "Repay",
-            onConfirm: async (amount: number) => {
-                if (!wallet) {
-                    console.error("Error: Wallet not connected");
-                    return;
-                }
-                const signature = await depositUsdc(wallet, connection, amount * MICRO_CENTS_PER_USDC);
-                console.log(signature);
-                if (signature) disableModal();
-            },
-            onCancel: () => { disableModal(); }
-        })
-    }
-
     const handleOfframp = () => {
         enableModal({
             title: "Offramp USDC",
@@ -83,13 +67,29 @@ export default function MainView({swapView, enableModal, disableModal} : ViewPro
 
     return (
         <div>
-            <Balance/>
+            <div className={balanceStyles.balanceWrapper}>
+                <p className={balanceStyles.subBalance}>0 SOL</p>
+                <div className={styles.mainBalance}>
+                    <p className={balanceStyles.fiatAmount}>$0</p>
+                    <p className={balanceStyles.dailyChange}>+$0 /day</p>
+                </div>
+            </div>
 
-            <div>
-                <button onClick={handleDeposit} className={"glass-button"}>Deposit</button>
-                <button onClick={handleWithdraw} className={"glass-button"}>Withdraw</button>
-                <button onClick={handleRepayUsdc} className={"glass-button"}>Repay USDC</button>
-                <button onClick={handleOfframp} className={"glass-button"}>Off-ramp</button>
+            <div className={styles.buttons}>
+                <div className={styles.buttonsRow}>
+                    <button onClick={handleDeposit} className={"glass-button"}>Deposit SOL</button>
+                    <button onClick={handleWithdraw} className={"glass-button"}>Withdraw SOL</button>
+                </div>
+                <button onClick={handleOfframp} className={"glass-button"}>
+                    Off-ramp to USD
+                    <Image 
+                        src="/arrow.svg" 
+                        alt="" 
+                        width={22} 
+                        height={22}
+                    />
+                </button>
+                <button onClick={swapView} className={"glass-button ghost"}>Manage Loans</button>
             </div>
         </div>
     )
