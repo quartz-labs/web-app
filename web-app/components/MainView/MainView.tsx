@@ -8,7 +8,7 @@ import styles from "./MainView.module.css";
 import { getSign, roundToDecimalPlaces, roundToDecimalPlacesAbsolute } from "@/utils/utils";
 
 export default function MainView (
-    {solPrice, totalSolBalance, usdcLoanBalance, solDailyRate, usdcDailyRate, swapView, enableModal, disableModal, enableOfframpModal} : ViewProps
+    {solPrice, totalSolBalance, usdcLoanBalance, solDailyRate, usdcDailyRate, balanceLoaded, swapView, enableModal, disableModal, enableOfframpModal} : ViewProps
 ) {
     const { connection } = useConnection();
     const wallet = useAnchorWallet();
@@ -74,19 +74,27 @@ export default function MainView (
 
     return (
         <div>
-            <div className={styles.balanceWrapper}>
-                <p className={styles.title}>
-                    {roundToDecimalPlaces(netSolBalance, 4)} SOL
-                </p>
-                <div className={styles.mainBalance}>
-                    <p className={styles.fiatAmount}>
-                        ${(netSolBalance * solPrice).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </p>
-                    <p className={styles.subBalance}>
-                        {getSign(dailyNetChange)}${roundToDecimalPlacesAbsolute(dailyNetChange, 4)} /day
-                    </p>
+            {!balanceLoaded &&
+                <div className={styles.balanceWrapper}>
+                    <p>Loading...</p>   
                 </div>
-            </div>
+            }
+
+            {balanceLoaded &&
+                <div className={styles.balanceWrapper}>
+                    <p className={styles.title}>
+                        {roundToDecimalPlaces(netSolBalance, 4)} SOL
+                    </p>
+                    <div className={styles.mainBalance}>
+                        <p className={styles.fiatAmount}>
+                            ${(netSolBalance * solPrice).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </p>
+                        <p className={styles.subBalance}>
+                            {getSign(dailyNetChange)}${roundToDecimalPlacesAbsolute(dailyNetChange, 4)} /day
+                        </p>
+                    </div>
+                </div>
+            }
 
             <div className={styles.buttons}>
                 <div className={styles.buttonsRow}>

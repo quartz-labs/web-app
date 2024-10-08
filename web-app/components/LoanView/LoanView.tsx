@@ -6,7 +6,7 @@ import styles from "./LoanView.module.css";
 import { getSign, roundToDecimalPlaces, roundToDecimalPlacesAbsolute } from "@/utils/utils";
 
 export default function LoanView (
-    {solPrice, totalSolBalance, usdcLoanBalance, solDailyRate, usdcDailyRate, swapView, enableModal, disableModal, enableOfframpModal} : ViewProps
+    {solPrice, totalSolBalance, usdcLoanBalance, solDailyRate, usdcDailyRate, balanceLoaded, swapView, enableModal, disableModal, enableOfframpModal} : ViewProps
 ) {
     const { connection } = useConnection();
     const wallet = useAnchorWallet();
@@ -37,32 +37,59 @@ export default function LoanView (
             <div className={styles.balanceWrapper}>
                 <div>
                     <p className={styles.title}>Total Assets</p>
-                    <p className={styles.fiatAmount}>
-                        ${(totalSolBalance * solPrice).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </p>
-                    <p className={styles.subBalance}>
-                        {roundToDecimalPlaces(totalSolBalance, 4)} SOL ({getSign(dailySolChange)}${roundToDecimalPlacesAbsolute(dailySolChange, 4)} /day)
-                    </p>
+
+                    {!balanceLoaded &&
+                        <p>Loading...</p>
+                    }
+
+                    {balanceLoaded &&         
+                        <div>            
+                            <p className={styles.fiatAmount}>
+                                ${(totalSolBalance * solPrice).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </p>
+                            <p className={styles.subBalance}>
+                                {roundToDecimalPlaces(totalSolBalance, 4)} SOL ({getSign(dailySolChange)}${roundToDecimalPlacesAbsolute(dailySolChange, 4)} /day)
+                            </p>
+                        </div>  
+                    }
                 </div>
                 
                 <div>
                     <p className={styles.title}>Loans</p>
-                    <p className={styles.fiatAmount}>
-                        ${usdcLoanBalance.toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </p>
-                    <p className={styles.subBalance}>
-                        USDT ({getSign(dailyUsdcChange)}${roundToDecimalPlacesAbsolute(dailyUsdcChange, 4)} /day)
-                    </p>
+
+                    {!balanceLoaded &&
+                        <p>Loading...</p>
+                    }
+
+                    {balanceLoaded &&         
+                        <div>
+                            <p className={styles.fiatAmount}>
+                                ${usdcLoanBalance.toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </p>
+                            <p className={styles.subBalance}>
+                                USDT ({getSign(dailyUsdcChange)}${roundToDecimalPlacesAbsolute(dailyUsdcChange, 4)} /day)
+                            </p>
+                        </div>
+                    }
                 </div>
 
                 <div>
                     <p className={styles.title}>Net Balance</p>
-                    <p className={styles.fiatAmount}>
-                        ${(netSolBalance * solPrice).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </p>
-                    <p className={styles.subBalance}>
-                        After outstanding loans ({getSign(dailyNetChange)}${roundToDecimalPlacesAbsolute(dailyNetChange, 4)} /day)
-                    </p>
+
+                    {!balanceLoaded &&
+                        <p>Loading...</p>
+                    }
+
+                    {balanceLoaded &&  
+                        <div> 
+                            <p className={styles.fiatAmount}>
+                                ${(netSolBalance * solPrice).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </p>
+                            <p className={styles.subBalance}>
+                                After outstanding loans ({getSign(dailyNetChange)}${roundToDecimalPlacesAbsolute(dailyNetChange, 4)} /day)
+                            </p>
+                        </div>
+                    }
                 </div>
             </div>
 

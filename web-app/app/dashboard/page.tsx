@@ -19,6 +19,7 @@ export interface ViewProps {
     usdcLoanBalance: number;
     solDailyRate: number;
     usdcDailyRate: number;
+    balanceLoaded: boolean;
     swapView: () => void;
     enableModal: (data: ModalProps) => void;
     disableModal: () => void;
@@ -58,6 +59,7 @@ export default function Dashboard() {
     const [usdcLoanBalance, setUsdcLoanBalance] = useState(0);
     const [solDailyRate, setSolDailyRate] = useState(0);
     const [usdcDailyRate, setUsdcDailyRate] = useState(0);
+    const [balanceLoaded, setBalanceLoaded] = useState(false);
 
     const enableModal = (data: ModalProps) => {
         setModalData(data);
@@ -92,8 +94,13 @@ export default function Dashboard() {
         if (!connection || !wallet || !await isVaultInitialized(wallet, connection)) return;
 
         const vault = getVault(wallet.publicKey);
-        setTotalSolBalance(await fetchDriftData(vault, "SOL"));
-        setUsdcLoanBalance(-await fetchDriftData(vault, "USDC"));
+        const totalSolBalance = await fetchDriftData(vault, "SOL");
+        const usdcLoanBalance = await fetchDriftData(vault, "USDC");
+
+        setTotalSolBalance(totalSolBalance);
+        setUsdcLoanBalance(usdcLoanBalance);
+        setBalanceLoaded(true);
+
         updateFinancialData();
     }
 
@@ -124,6 +131,7 @@ export default function Dashboard() {
                         usdcLoanBalance={usdcLoanBalance}
                         solDailyRate={solDailyRate}
                         usdcDailyRate={usdcDailyRate}
+                        balanceLoaded={balanceLoaded}
                         swapView={() => setMainView(false)}
                         enableModal={enableModal}
                         disableModal={disableModal}
@@ -138,6 +146,7 @@ export default function Dashboard() {
                         usdcLoanBalance={usdcLoanBalance}
                         solDailyRate={solDailyRate}
                         usdcDailyRate={usdcDailyRate} 
+                        balanceLoaded={balanceLoaded}
                         swapView={() => setMainView(true)}
                         enableModal={enableModal}
                         disableModal={disableModal}
