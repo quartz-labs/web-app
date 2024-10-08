@@ -1,0 +1,5 @@
+{
+  "/page": "app/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/api/solana-price/route": "app/api/solana-price/route.js"
+}

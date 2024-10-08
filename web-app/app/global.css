@@ -108,10 +108,20 @@ body {
   font-family: inherit !important;
 }
 
-.container {
+.two-col-grid {
   margin: 0px auto;
-  width: 100%;
+  height: 100VH;
+  width: 75VW;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  justify-items: center;
+  align-itmes: center;
+  gap: 100px;
+}
+
+.two-col-grid > * {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
 }

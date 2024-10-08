@@ -23,6 +23,14 @@ export default function Dashboard() {
     const wallet = useAnchorWallet();
     const router = useRouter();
 
+    useEffect(() => {
+        const isLoggedIn = async () => {
+            if (!wallet) router.push("/");
+            else if (!await isVaultInitialized(wallet, connection)) router.push("/onboarding");
+        }
+        isLoggedIn();
+    }, [wallet]);
+
     const [modalEnabled, setModalEnabled] = useState(false);
     const [modalData, setModalData] = useState<ModalProps>({
         title: "",
@@ -31,15 +39,6 @@ export default function Dashboard() {
         onConfirm: (amount: number) => {},
         onCancel: () => {}
     });
-
-    useEffect(() => {
-        const isLoggedIn = async () => {
-            if (!wallet || !await isVaultInitialized(wallet, connection)) {
-                router.push("/");
-            }
-        }
-        isLoggedIn();
-    }, [wallet]);
     
     const handleDeposit = () => {
         setModalEnabled(true);

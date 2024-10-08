@@ -1,0 +1,326 @@
+{
+  "version": "6.0",
+  "nxVersion": "19.3.2",
+  "deps": {
+    "@coral-xyz/anchor": "^0.30.1",
+    "@solana-developers/preset-next": "3.1.0",
+    "@solana/spl-token": "^0.4.8",
+    "@solana/wallet-adapter-base": "^0.9.23",
+    "@solana/wallet-adapter-react": "^0.15.35",
+    "@solana/wallet-adapter-react-ui": "^0.9.35",
+    "@solana/web3.js": "1.95.3",
+    "@tabler/icons-react": "3.5.0",
+    "@tailwindcss/typography": "0.5.13",
+    "@tanstack/react-query": "5.40.0",
+    "@tanstack/react-query-next-experimental": "5.40.0",
+    "bs58": "4.0.1",
+    "buffer": "6.0.3",
+    "daisyui": "4.11.1",
+    "encoding": "0.1.13",
+    "jotai": "2.8.3",
+    "next": "^14.2.13",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-hot-toast": "2.4.1",
+    "tslib": "^2.3.0",
+    "@nx/eslint": "19.3.2",
+    "@nx/eslint-plugin": "19.3.2",
+    "@nx/js": "19.3.2",
+    "@nx/next": "19.3.2",
+    "@nx/workspace": "19.3.2",
+    "@swc-node/register": "~1.9.1",
+    "@swc/core": "~1.5.7",
+    "@swc/helpers": "~0.5.11",
+    "@types/react": "18.3.1",
+    "@types/react-dom": "18.3.0",
+    "@typescript-eslint/eslint-plugin": "^7.3.0",
+    "@typescript-eslint/parser": "^7.3.0",
+    "autoprefixer": "10.4.13",
+    "eslint": "~8.57.0",
+    "eslint-config-next": "14.2.3",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-import": "2.27.5",
+    "eslint-plugin-jsx-a11y": "6.7.1",
+    "eslint-plugin-react": "7.32.2",
+    "eslint-plugin-react-hooks": "4.6.0",
+    "nx": "19.3.2",
+    "postcss": "8.4.38",
+    "prettier": "^2.6.2",
+    "tailwindcss": "3.4.3",
+    "typescript": "~5.4.2"
+  },
+  "pathMappings": {
+    "@/*": [
+      "./web/*"
+    ]
+  },
+  "nxJsonPlugins": [],
+  "fileMap": {
+    "nonProjectFiles": [
+      {
+        "file": ".vscode/extensions.json",
+        "hash": "4134969992917317260"
+      },
+      {
+        "file": ".gitignore",
+        "hash": "12051862159648514512"
+      },
+      {
+        "file": ".eslintrc.json",
+        "hash": "17866138117546000433"
+      },
+      {
+        "file": ".eslintignore",
+        "hash": "7663861978715868291"
+      },
+      {
+        "file": "nx.json",
+        "hash": "4016400154553827196"
+      },
+      {
+        "file": "tsconfig.base.json",
+        "hash": "16965330727927312399"
+      },
+      {
+        "file": ".prettierignore",
+        "hash": "14688272390704683536"
+      },
+      {
+        "file": "package.json",
+        "hash": "8554607286170548097"
+      },
+      {
+        "file": ".prettierrc",
+        "hash": "16267754514737964994"
+      },
+      {
+        "file": "package-lock.json",
+        "hash": "10816616205804321765"
+      },
+      {
+        "file": "vercel.json",
+        "hash": "1598408354266276258"
+      },
+      {
+        "file": ".editorconfig",
+        "hash": "5443105041930014821"
+      }
+    ],
+    "projectFileMap": {
+      "web": [
+        {
+          "file": "web/.eslintrc.json",
+          "hash": "14075324894068274553"
+        },
+        {
+          "file": "web/app/api/solana-price/route.ts",
+          "hash": "13855960088195402093",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "web/app/dashboard/page.module.css",
+          "hash": "1301664985199379743"
+        },
+        {
+          "file": "web/app/dashboard/page.tsx",
+          "hash": "7311483677646427849",
+          "deps": [
+            "npm:next",
+            "npm:@solana/wallet-adapter-react",
+            "npm:react",
+            "npm:@solana/web3.js",
+            [
+              "npm:@solana/wallet-adapter-react-ui",
+              "dynamic"
+            ]
+          ]
+        },
+        {
+          "file": "web/app/global.css",
+          "hash": "5598345765081064356"
+        },
+        {
+          "file": "web/app/layout.tsx",
+          "hash": "9283079351119576869",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "web/app/page.module.css",
+          "hash": "9635675402591381739"
+        },
+        {
+          "file": "web/app/page.tsx",
+          "hash": "8313748790754143790",
+          "deps": [
+            "npm:next",
+            "npm:@solana/wallet-adapter-react-ui",
+            "npm:@solana/wallet-adapter-react",
+            "npm:react",
+            "npm:@coral-xyz/anchor",
+            [
+              "npm:@solana/wallet-adapter-react-ui",
+              "dynamic"
+            ]
+          ]
+        },
+        {
+          "file": "web/app/react-query-provider.tsx",
+          "hash": "3045630838846882828",
+          "deps": [
+            "npm:react",
+            "npm:@tanstack/react-query-next-experimental",
+            "npm:@tanstack/react-query"
+          ]
+        },
+        {
+          "file": "web/components/balance/Balance.module.css",
+          "hash": "16003347559746671171"
+        },
+        {
+          "file": "web/components/balance/Balance.tsx",
+          "hash": "17071780799741806328",
+          "deps": [
+            "npm:@solana/wallet-adapter-react",
+            "npm:react",
+            "npm:@solana/web3.js"
+          ]
+        },
+        {
+          "file": "web/components/modal/Modal.module.css",
+          "hash": "3496065071177837241"
+        },
+        {
+          "file": "web/components/modal/Modal.tsx",
+          "hash": "9452940420058806895",
+          "deps": [
+            "npm:react"
+          ]
+        },
+        {
+          "file": "web/components/solana/cluster-data-access.tsx",
+          "hash": "10485683769835153257",
+          "deps": [
+            "npm:@solana/web3.js",
+            "npm:jotai",
+            "npm:react",
+            "npm:react-hot-toast"
+          ]
+        },
+        {
+          "file": "web/components/solana/solana-provider.tsx",
+          "hash": "16443957187133008415",
+          "deps": [
+            "npm:next",
+            "npm:@solana/wallet-adapter-base",
+            "npm:@solana/wallet-adapter-react",
+            "npm:@solana/wallet-adapter-react-ui",
+            "npm:react",
+            [
+              "npm:@solana/wallet-adapter-react-ui",
+              "dynamic"
+            ]
+          ]
+        },
+        {
+          "file": "web/idl/funds_program.json",
+          "hash": "14577344935936608067"
+        },
+        {
+          "file": "web/index.d.ts",
+          "hash": "5498222895072842432"
+        },
+        {
+          "file": "web/next-env.d.ts",
+          "hash": "13904763933831424769"
+        },
+        {
+          "file": "web/next.config.js",
+          "hash": "11075275437133129850",
+          "deps": [
+            "npm:@nx/next"
+          ]
+        },
+        {
+          "file": "web/postcss.config.js",
+          "hash": "2759402739052110475"
+        },
+        {
+          "file": "web/project.json",
+          "hash": "2951579398516498055"
+        },
+        {
+          "file": "web/public/.gitkeep",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "web/public/favicon.ico",
+          "hash": "967033946642301367"
+        },
+        {
+          "file": "web/public/logo.svg",
+          "hash": "5597620378391647540"
+        },
+        {
+          "file": "web/public/noise.png",
+          "hash": "15387814847938374778"
+        },
+        {
+          "file": "web/tailwind.config.js",
+          "hash": "15953156811378497776",
+          "deps": [
+            "npm:@nx/react",
+            "npm:daisyui"
+          ]
+        },
+        {
+          "file": "web/tsconfig.json",
+          "hash": "10836663897421372905"
+        },
+        {
+          "file": "web/types/funds_program.ts",
+          "hash": "2520570666048147086"
+        },
+        {
+          "file": "web/utils/constants.ts",
+          "hash": "8878022193512829864",
+          "deps": [
+            "npm:@solana/web3.js"
+          ]
+        },
+        {
+          "file": "web/utils/getPDAs.ts",
+          "hash": "10173124361527352181",
+          "deps": [
+            "npm:@coral-xyz/anchor",
+            "npm:@solana/web3.js"
+          ]
+        },
+        {
+          "file": "web/utils/instructions.ts",
+          "hash": "4944244746175431399",
+          "deps": [
+            "npm:@coral-xyz/anchor",
+            "npm:@solana/wallet-adapter-react",
+            "npm:@solana/web3.js",
+            "npm:@solana/wallet-adapter-base",
+            "npm:@solana/spl-token"
+          ]
+        },
+        {
+          "file": "web/utils/utils.ts",
+          "hash": "2991537151321460620",
+          "deps": [
+            "npm:@coral-xyz/anchor",
+            "npm:@solana/wallet-adapter-react",
+            "npm:@solana/web3.js",
+            "npm:@solana/spl-token"
+          ]
+        }
+      ]
+    }
+  }
+}
