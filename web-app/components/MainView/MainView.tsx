@@ -6,9 +6,10 @@ import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import Image from "next/image";
 import styles from "./MainView.module.css";
 import { getSign, roundToDecimalPlaces, roundToDecimalPlacesAbsolute } from "@/utils/utils";
+import { buildAndSignTransaction, getJupiterSwapIx } from "@/utils/jup";
 
-export default function MainView (
-    {solPrice, totalSolBalance, usdcLoanBalance, solDailyRate, usdcDailyRate, swapView, enableModal, disableModal, enableOfframpModal} : ViewProps
+export default function MainView(
+    { solPrice, totalSolBalance, usdcLoanBalance, solDailyRate, usdcDailyRate, swapView, enableModal, disableModal, enableOfframpModal }: ViewProps
 ) {
     const { connection } = useConnection();
     const wallet = useAnchorWallet();
@@ -54,12 +55,21 @@ export default function MainView (
             onConfirm: async (amount: number) => {
                 if (!wallet) return;
 
-                const signature = await withdrawUsdc(wallet, connection, amount * MICRO_CENTS_PER_USDC);
+                const withdrawUsdcIx = await withdrawUsdc(wallet, connection, amount * MICRO_CENTS_PER_USDC);
+
+                // Start of Selection
+                //get Jupiter quote
+                const { instructions, addressLookupTableAddresses } = await getJupiterSwapIx(wallet.publicKey, amount, "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB")
+                //Create a transaction
+                const transaction = await buildAndSignTransaction(connection, wallet.publicKey, instructions, addressLookupTableAddresses, withdrawUsdcIx);
+                //send transaction and get the signature
+                const signature = await connection.sendRawTransaction(transaction.serialize());
+
                 if (!signature) return;
-                
+
                 const amountTrunc = amount.toFixed(2);
                 const url = `https://exchange.mercuryo.io/?widget_id=52148ead-2e7d-4f05-8f98-426f20ab2e74&fiat_currency=USD&currency=USDT&network=SOLANA&amount=${amountTrunc}&type=sell`;
-                
+
                 enableOfframpModal(url);
                 window.open(url, "_blank", "noopener,noreferrer");
             },
@@ -95,10 +105,10 @@ export default function MainView (
                 </div>
                 <button onClick={handleOfframp} className={"glass-button"}>
                     Off-ramp to USD
-                    <Image 
-                        src="/arrow.svg" 
-                        alt="" 
-                        width={22} 
+                    <Image
+                        src="/arrow.svg"
+                        alt=""
+                        width={22}
                         height={22}
                     />
                 </button>

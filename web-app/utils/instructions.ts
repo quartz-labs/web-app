@@ -277,7 +277,7 @@ export const withdrawUsdc = async(wallet: AnchorWallet, connection: web3.Connect
     const walletUsdc = await getOrCreateAssociatedTokenAccountAnchor(wallet, connection, provider, USDC_MINT);
 
     try {
-        const signature = await program.methods
+        const ix = await program.methods
             .withdrawUsdc(new BN(amountMicroCents), false)
             .accounts({
                 // @ts-ignore - Causing an issue in Cursor IDE
@@ -300,8 +300,8 @@ export const withdrawUsdc = async(wallet: AnchorWallet, connection: web3.Connect
                 spotMarketUsdc: DRIFT_SPOT_MARKET_USDC,
                 systemProgram: SystemProgram.programId,
             })
-            .rpc();
-        return signature;
+            .instruction();
+        return ix;
     } catch (err) {
         if (err instanceof WalletSignTransactionError) {
             return null;
