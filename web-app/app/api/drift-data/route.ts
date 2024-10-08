@@ -1,7 +1,7 @@
 // /app/api/drift-data/route.ts
 import { NextResponse } from 'next/server';
-import { Connection} from '@solana/web3.js'
-import { DriftClient, Wallet, loadKeypair, PerpMarkets, PerpMarketConfig } from '@drift-labs/sdk';
+import { Connection, PublicKey } from '@solana/web3.js'
+import { DriftClient, Wallet, loadKeypair, PerpMarkets, PerpMarketConfig, BN } from '@drift-labs/sdk';
 
 // Interface for the enhanced market data
 interface EnhancedMarketData {
@@ -11,17 +11,26 @@ interface EnhancedMarketData {
   openInterest: number;
 }
 
-export async function GET() {
+// Start of Selection
+export async function GET(request: Request) {
   console.log('Starting GET request to /api/drift-data');
   try {
     // Initialize connection to Solana devnet
-    const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL || 'https://api.devnet.solana.com';
+    const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL || 'https://api.mainnet.solana.com';
     console.log('RPC URL:', rpcUrl);
     const connection = new Connection(rpcUrl);
+
+    // Get address from GET params
+    const { searchParams } = new URL(request.url);
+    const address = searchParams.get('address');
+    if (!address) {
+      return NextResponse.json({ error: 'Address parameter is required' }, { status: 400 });
+    }
+    console.log('Address from params:', address);
     console.log(`Solana ${connection.rpcEndpoint} connection established successfully`);
 
     // Load the keypair from the environment variable
-    const keypairFile = "/Users/diegogarcia/workspaces/Quartz/Products/quartz-app/funds-program/program_keypair.json";
+    const keypairFile = process.env.NEXT_PUBLIC_KEYPAIR_FILE || "~/.config/solana/id.json";
     console.log('Keypair file path:', keypairFile);
     if (!keypairFile) {
       throw new Error('Keypair path not found in environment variables');
@@ -49,7 +58,7 @@ export async function GET() {
     const emulationStatus = await driftClient.emulateAccount(new PublicKey(address));
 
     if (!emulationStatus) {
-        throw new Error('Failed to emulate account');
+      throw new Error('Failed to emulate account');
     }
 
     console.log('Getting drift user..');
@@ -59,35 +68,17 @@ export async function GET() {
 
     const marketIndex = 1
 
-
     const tokenAmount = user.getTokenAmount(
-        marketIndex,
+      marketIndex,
     );
 
-    console.log("drift token amount for market index 1", tokenAmount);
+    const solBalance = tokenAmount.div(new BN(10).pow(new BN(6)));
+    console.log("sol balance", solBalance.toString(10));
 
-
-    // Fetch enhanced market data
-    // console.log('Fetching enhanced perpetual market data...');
-    // const enhancedMarketData: EnhancedMarketData[] = await Promise.all(
-    //   PerpMarkets['devnet'].map(async (market: PerpMarketConfig) => {
-    //     const perpMarket = driftClient.getPerpMarketAccount(market.marketIndex);
-    //     const price = perpMarket ? perpMarket.amm.historicalOracleData.lastOraclePriceTwap.toNumber() : 0;
-    //     const volume24h = perpMarket ? perpMarket.amm.volume24H.toNumber() : 0;
-    //     const openInterest = perpMarket ? perpMarket.amm.baseAssetAmountWithAmm.toNumber() : 0;
-
-    //     return {
-    //       symbol: market.symbol,
-    //       price: price / 1e6, // Convert to standard units
-    //       volume24h: volume24h / 1e6, // Convert to standard units
-    //       openInterest: openInterest / 1e9, // Convert to standard units
-    //     };
-    //   })
-    // );
-    // console.log('Fetched enhanced market data:', enhancedMarketData);
+    console.log("drift token amount for market index 1", tokenAmount.toString(10));
 
     return NextResponse.json({ tokenAmount: tokenAmount });
-} catch (error) {
+  } catch (error) {
     console.error('Error fetching Drift data:', error);
     return NextResponse.json({ error: 'Failed to fetch Drift data' }, { status: 500 });
   }

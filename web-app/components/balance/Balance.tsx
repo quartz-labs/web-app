@@ -42,6 +42,8 @@ export default function Balance() {
             const vault = getVault(wallet!.publicKey);
 
             const response = await fetch('/api/drift-data?address=' + vault.toBase58());
+            //const response = await fetch('/api/drift-data?address=' + "DR1nQvpbT3PTswV4MSZS3WGQiKktJzmpQK8gzD548sXd");
+
             const data = await response.json();
             console.log(data);
             if (!response.ok) {
@@ -76,8 +78,8 @@ export default function Balance() {
                     const requiredRent = await connection.getMinimumBalanceForRentExemption(vaultAccount.data.length);
                     setRentExemptionThreshold(requiredRent);
 
-                    // const driftBalance = fetchDriftData()
-                    // console.log(driftBalance);
+                    const driftBalance = fetchDriftData()
+                    console.log(driftBalance);
 
                     const vaultBalance = vaultAccount.lamports - requiredRent;
                     setSolBalance(vaultBalance / LAMPORTS_PER_SOL);
