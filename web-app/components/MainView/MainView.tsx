@@ -1,6 +1,6 @@
 import { ViewProps } from "@/app/dashboard/page";
 import { MICRO_CENTS_PER_USDC } from "@/utils/constants";
-import { depositLamports, withdrawLamports, withdrawUsdc } from "@/utils/instructions";
+import { depositLamports, withdrawLamports, withdrawUsdt } from "@/utils/instructions";
 import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import Image from "next/image";
@@ -8,8 +8,8 @@ import styles from "./MainView.module.css";
 import { getSign, roundToDecimalPlaces, roundToDecimalPlacesAbsolute } from "@/utils/utils";
 import { PuffLoader } from "react-spinners";
 
-export default function MainView (
-    {solPrice, totalSolBalance, usdcLoanBalance, solDailyRate, usdcDailyRate, balanceLoaded, swapView, enableModal, disableModal, enableOfframpModal} : ViewProps
+export default function MainView(
+    { solPrice, totalSolBalance, usdcLoanBalance, solDailyRate, usdcDailyRate, swapView, enableModal, disableModal, enableOfframpModal }: ViewProps
 ) {
     const { connection } = useConnection();
     const wallet = useAnchorWallet();
@@ -55,12 +55,12 @@ export default function MainView (
             onConfirm: async (amount: number) => {
                 if (!wallet) return;
 
-                const signature = await withdrawUsdc(wallet, connection, amount * MICRO_CENTS_PER_USDC);
+                const signature = await withdrawUsdt(wallet, connection, amount * MICRO_CENTS_PER_USDC);
                 if (!signature) return;
-                
+
                 const amountTrunc = amount.toFixed(2);
                 const url = `https://exchange.mercuryo.io/?widget_id=52148ead-2e7d-4f05-8f98-426f20ab2e74&fiat_currency=USD&currency=USDT&network=SOLANA&amount=${amountTrunc}&type=sell`;
-                
+
                 enableOfframpModal(url);
                 window.open(url, "_blank", "noopener,noreferrer");
             },
@@ -113,10 +113,10 @@ export default function MainView (
                 </div>
                 <button onClick={handleOfframp} className={"glass-button"}>
                     Off-ramp to USD
-                    <Image 
-                        src="/arrow.svg" 
-                        alt="" 
-                        width={22} 
+                    <Image
+                        src="/arrow.svg"
+                        alt=""
+                        width={22}
                         height={22}
                     />
                 </button>
