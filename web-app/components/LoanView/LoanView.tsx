@@ -10,8 +10,8 @@ export default function LoanView({swapView, enableModal, disableModal} : ViewPro
 
     const handleRepayUsdc = () => {
         enableModal({
-            title: "Repay USDC Loan",
-            denomination: "USDC",
+            title: "Repay USDT Loan",
+            denomination: "USDT",
             buttonText: "Repay",
             onConfirm: async (amount: number) => {
                 if (!wallet) {

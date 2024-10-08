@@ -48,9 +48,9 @@ export default function MainView({swapView, enableModal, disableModal} : ViewPro
 
     const handleOfframp = () => {
         enableModal({
-            title: "Offramp USDC",
-            denomination: "USDC",
-            buttonText: "Offramp",
+            title: "Off-ramp to USD",
+            denomination: "USD",
+            buttonText: "Off-ramp",
             onConfirm: async (amount: number) => {
                 if (!wallet) {
                     console.error("Error: Wallet not connected");

@@ -66,7 +66,7 @@ body {
 
 .glass-button.ghost {
   background: transparent;
-  border: 2px solid var(--placeholder-glass-stroke);
+  border: 1.5px solid var(--placeholder-glass-stroke);
 }
 
 .glass-button.ghost:hover {

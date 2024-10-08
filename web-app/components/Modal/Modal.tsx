@@ -33,13 +33,13 @@ export default function Modal(
                 
                 <div className={styles.buttons}>
                     <button 
-                        className={`glassButton ${styles.modalButton}`}
+                        className={`glass-button ${styles.modalButton}`}
                         onClick={() => onConfirm(Number(amount))}
                     >
                         {buttonText}
                     </button>
                     <button 
-                        className={`glassButton ghost ${styles.modalButton}`}
+                        className={`glass-button ghost ${styles.modalButton}`}
                         onClick={() => onCancel()}
                     >
                         Cancel
