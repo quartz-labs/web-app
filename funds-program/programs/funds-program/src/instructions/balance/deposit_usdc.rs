@@ -113,7 +113,8 @@ pub struct DepositUsdc<'info> {
 
 pub fn deposit_usdc_handler(
     ctx: Context<DepositUsdc>, 
-    amount_micro_cents: u64
+    amount_micro_cents: u64,
+    reduce_only: bool
 ) -> Result<()> {
     let vault_bump = ctx.accounts.vault.bump;
     let owner = ctx.accounts.owner.key();
@@ -161,7 +162,7 @@ pub fn deposit_usdc_handler(
         ctx.accounts.spot_market_sol.to_account_info(),
     ];
 
-    deposit(cpi_ctx, DRIFT_MARKET_INDEX_USDC, amount_micro_cents, true)?;
+    deposit(cpi_ctx, DRIFT_MARKET_INDEX_USDC, amount_micro_cents, reduce_only)?;
 
     // Close vault USDC
 

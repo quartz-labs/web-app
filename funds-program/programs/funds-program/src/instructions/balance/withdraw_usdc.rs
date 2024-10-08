@@ -116,7 +116,8 @@ pub struct WithdrawUsdc<'info> {
 
 pub fn withdraw_usdc_handler(
     ctx: Context<WithdrawUsdc>, 
-    amount_micro_cents: u64
+    amount_micro_cents: u64,
+    reduce_only: bool
 ) -> Result<()> {
     let vault_bump = ctx.accounts.vault.bump;
     let owner = ctx.accounts.owner.key();
@@ -151,7 +152,7 @@ pub fn withdraw_usdc_handler(
         ctx.accounts.spot_market_usdc.to_account_info(),
     ];
 
-    withdraw(cpi_ctx, DRIFT_MARKET_INDEX_USDC, amount_micro_cents, true)?;
+    withdraw(cpi_ctx, DRIFT_MARKET_INDEX_USDC, amount_micro_cents, reduce_only)?;
 
     // Transfer USDC to owner's ATA
 

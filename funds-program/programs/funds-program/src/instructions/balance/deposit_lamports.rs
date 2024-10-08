@@ -101,7 +101,8 @@ pub struct DepositLamports<'info> {
 
 pub fn deposit_lamports_handler(
     ctx: Context<DepositLamports>, 
-    amount: u64
+    amount: u64,
+    reduce_only: bool
 ) -> Result<()> {
     let vault_bump = ctx.accounts.vault.bump;
     let owner = ctx.accounts.owner.key();
@@ -152,7 +153,7 @@ pub fn deposit_lamports_handler(
         ctx.accounts.spot_market.to_account_info(),
     ];
 
-    deposit(cpi_ctx, 1, amount, false)?;
+    deposit(cpi_ctx, DRIFT_MARKET_INDEX_SOL, amount, reduce_only)?;
 
     // Close wSol vault
 
