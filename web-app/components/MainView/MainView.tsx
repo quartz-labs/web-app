@@ -9,7 +9,7 @@ import { getSign, roundToDecimalPlaces, roundToDecimalPlacesAbsolute } from "@/u
 import { PuffLoader } from "react-spinners";
 
 export default function MainView(
-    { solPrice, totalSolBalance, usdcLoanBalance, solDailyRate, usdcDailyRate, swapView, enableModal, disableModal, enableOfframpModal }: ViewProps
+    { solPrice, totalSolBalance, usdcLoanBalance, solDailyRate, usdcDailyRate, balanceLoaded, swapView, enableModal, disableModal, enableOfframpModal }: ViewProps
 ) {
     const { connection } = useConnection();
     const wallet = useAnchorWallet();

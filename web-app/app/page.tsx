@@ -1,13 +1,12 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import Image from "next/image";
 import styles from './page.module.css';
 import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { isVaultInitialized } from "@/utils/utils";
 import { WalletButton } from "@/components/solana/solana-provider";
+import Logo from "@/components/Logo/Logo";
 
 export default function Page() {
   const { connection } = useConnection();
@@ -27,12 +26,7 @@ export default function Page() {
   return (
     <main className={"two-col-grid"}>
       <div className={styles.title}>
-        <Image 
-          src="/logo.svg" 
-          alt="Quartz" 
-          width={360} 
-          height={125}
-        />
+        <Logo />
 
         <h1 className={styles.subheading}>Off-ramp without selling your assets</h1>
       </div>

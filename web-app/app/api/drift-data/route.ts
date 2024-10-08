@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { Connection, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js'
 import { DriftClient, Wallet, loadKeypair, PerpMarkets, PerpMarketConfig, BN } from '@drift-labs/sdk';
 import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC, MICRO_CENTS_PER_USDC } from '@/utils/constants';
+import { Keypair } from '@solana/web3.js';
 
 let driftClient: DriftClient | null = null;
 
@@ -12,12 +13,13 @@ async function initializeDriftClient() {
   const rpcUrl = "https://janella-g42vor-fast-mainnet.helius-rpc.com";
   const connection = new Connection(rpcUrl);
 
-  const keypairFile = process.env.NEXT_PUBLIC_DRIFT_KEYPAIR;
-  if (!keypairFile) {
+  const secretKeyString = process.env.NEXT_PUBLIC_DRIFT_KEYPAIR;
+  if (!secretKeyString) {
     throw new Error('Keypair path not found in environment variables');
   }
 
-  const driftWallet = new Wallet(loadKeypair(keypairFile));
+  const secretKey = new Uint8Array(JSON.parse(secretKeyString));
+  const driftWallet = new Wallet(Keypair.fromSecretKey(secretKey));
   driftClient = new DriftClient({
     connection,
     wallet: driftWallet,
