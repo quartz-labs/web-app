@@ -6,8 +6,8 @@ import { useEffect, useState } from 'react';
 import { isVaultInitialized } from '@/utils/utils';
 import Modal, { ModalProps } from '@/components/Modal/Modal';
 import Account from '@/components/Account/Account';
-import MainView from '@/components/Balance/MainView/MainView';
-import LoanView from '@/components/Balance/LoanView/LoanView';
+import MainView from '@/components/MainView/MainView';
+import LoanView from '@/components/LoanView/LoanView';
 import styles from "./page.module.css";
 
 export interface ViewProps {

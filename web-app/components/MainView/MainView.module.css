@@ -1,3 +1,23 @@
+.balanceWrapper {
+    width: 100%;
+    margin-bottom: 70px;
+}
+
+.title {
+    color: var(--color-text-light);
+    font-size: 26px;
+}
+
+.fiatAmount {
+    font-size: 60px;
+    margin-right: 18px;
+}
+
+.subBalance {
+    color: var(--color-text-light);
+    font-size: 22px;
+}
+
 .buttons {
     width: 100%;
     font-size: 20px;

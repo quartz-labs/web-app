@@ -5,7 +5,6 @@ import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import Image from "next/image";
 import styles from "./MainView.module.css";
-import balanceStyles from "../Balance.module.css";
 
 export default function MainView({swapView, enableModal, disableModal} : ViewProps) {
     const { connection } = useConnection();
@@ -67,11 +66,11 @@ export default function MainView({swapView, enableModal, disableModal} : ViewPro
 
     return (
         <div>
-            <div className={balanceStyles.balanceWrapper}>
-                <p className={balanceStyles.subBalance}>0 SOL</p>
+            <div className={styles.balanceWrapper}>
+                <p className={styles.title}>0 SOL</p>
                 <div className={styles.mainBalance}>
-                    <p className={balanceStyles.fiatAmount}>$0</p>
-                    <p className={balanceStyles.dailyChange}>+$0 /day</p>
+                    <p className={styles.fiatAmount}>$0</p>
+                    <p className={styles.subBalance}>+$0 /day</p>
                 </div>
             </div>
 
