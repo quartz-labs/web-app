@@ -9,11 +9,13 @@ import Account from '@/components/Account/Account';
 import MainView from '@/components/MainView/MainView';
 import LoanView from '@/components/LoanView/LoanView';
 import styles from "./page.module.css";
+import OfframpModal from '@/components/Modal/OfframpModal';
 
 export interface ViewProps {
     swapView: () => void;
     enableModal: (data: ModalProps) => void;
     disableModal: () => void;
+    enableOfframpModal: (url: string) => void;
 }
 
 export default function Dashboard() {
@@ -30,14 +32,19 @@ export default function Dashboard() {
     }, [wallet]);
 
     const [mainView, setMainView] = useState(true);
+
     const [modalEnabled, setModalEnabled] = useState(false);
     const [modalData, setModalData] = useState<ModalProps>({
         title: "",
         denomination: "",
         buttonText: "",
-        onConfirm: (amount: number) => {},
+        minAmount: 0,
+        onConfirm: () => {},
         onCancel: () => {}
     });
+
+    const [offrampModalEnabled, setOfframpModalEnabled] = useState(true);
+    const [offrampUrl, setOfframpUrl] = useState("");
 
     const enableModal = (data: ModalProps) => {
         setModalData(data);
@@ -45,11 +52,21 @@ export default function Dashboard() {
     }
     const disableModal = () => setModalEnabled(false);
 
+    const enableOfframpModal = (url: string) => {
+        setOfframpUrl(url);
+        setOfframpModalEnabled(true);
+        setModalEnabled(false);
+    }
+
     return (
         <main className={styles.maxHeight}>
-            {modalEnabled && (
+            {modalEnabled && 
                 <Modal {...modalData} />
-            )}
+            }
+
+            {offrampModalEnabled &&
+                <OfframpModal url={offrampUrl} closeModal={() => setOfframpModalEnabled(false)} />
+            }
 
             <div className="two-col-grid">
                 <Account />
@@ -59,6 +76,7 @@ export default function Dashboard() {
                         swapView={() => setMainView(false)}
                         enableModal={enableModal}
                         disableModal={disableModal}
+                        enableOfframpModal={enableOfframpModal}
                     />
                 }
 
@@ -67,6 +85,7 @@ export default function Dashboard() {
                         swapView={() => setMainView(true)}
                         enableModal={enableModal}
                         disableModal={disableModal}
+                        enableOfframpModal={() => {}}
                     />
                 }
             </div>

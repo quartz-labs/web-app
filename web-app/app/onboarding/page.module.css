@@ -62,5 +62,5 @@
 }
 
 .missingLabel {
-    color: #FF8080;
+    color: var(--color-text-error);
 }

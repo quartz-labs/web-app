@@ -6,7 +6,7 @@ import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import Image from "next/image";
 import styles from "./MainView.module.css";
 
-export default function MainView({swapView, enableModal, disableModal} : ViewProps) {
+export default function MainView({swapView, enableModal, disableModal, enableOfframpModal} : ViewProps) {
     const { connection } = useConnection();
     const wallet = useAnchorWallet();
 
@@ -15,13 +15,11 @@ export default function MainView({swapView, enableModal, disableModal} : ViewPro
             title: "Deposit SOL",
             denomination: "SOL",
             buttonText: "Deposit",
+            minAmount: 0,
             onConfirm: async (amount: number) => {
-                if (!wallet) {
-                    console.error("Error: Wallet not connected");
-                    return;
-                }
+                if (!wallet) return;
+
                 const signature = await depositLamports(wallet, connection, amount * LAMPORTS_PER_SOL);
-                console.log(signature);
                 if (signature) disableModal();
             },
             onCancel: () => { disableModal(); }
@@ -33,13 +31,11 @@ export default function MainView({swapView, enableModal, disableModal} : ViewPro
             title: "Withdraw SOL",
             denomination: "SOL",
             buttonText: "Withdraw",
+            minAmount: 0,
             onConfirm: async (amount: number) => {
-                if (!wallet) {
-                    console.error("Error: Wallet not connected");
-                    return;
-                }
+                if (!wallet) return;
+
                 const signature = await withdrawLamports(wallet, connection, amount * LAMPORTS_PER_SOL);
-                console.log(signature);
                 if (signature) disableModal();
             },
             onCancel: () => { disableModal(); }
@@ -51,14 +47,18 @@ export default function MainView({swapView, enableModal, disableModal} : ViewPro
             title: "Off-ramp to USD",
             denomination: "USD",
             buttonText: "Off-ramp",
+            minAmount: 0,
             onConfirm: async (amount: number) => {
-                if (!wallet) {
-                    console.error("Error: Wallet not connected");
-                    return;
-                }
+                if (!wallet) return;
+
                 const signature = await withdrawUsdc(wallet, connection, amount * MICRO_CENTS_PER_USDC);
-                console.log(signature);
-                if (signature) disableModal();
+                if (!signature) return;
+                
+                const amountTrunc = amount.toFixed(2);
+                const url = `https://exchange.mercuryo.io/?widget_id=52148ead-2e7d-4f05-8f98-426f20ab2e74&fiat_currency=USD&currency=USDT&network=SOLANA&amount=${amountTrunc}&type=sell`;
+                
+                enableOfframpModal(url);
+                window.open(url, "_blank", "noopener,noreferrer");
             },
             onCancel: () => { disableModal(); }
         })

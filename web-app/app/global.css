@@ -19,6 +19,7 @@
   --color-background: #0B111D;
   --color-text: #ffffff;
   --color-text-light: #ffffff55;
+  --color-text-error: #FF8080;
 }
 
 .font-small {
@@ -95,9 +96,9 @@ body {
     url("/noise.png"),
     radial-gradient(circle at 80% 20%, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%),
     linear-gradient(#ffffff03, #ffffff03),
-    linear-gradient(#0B111D50, #0B111D50);
+    linear-gradient(#0B111D99, #0B111D99);
   background-size: 17% auto, auto, auto, auto;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(22px);
 
   /* Border */
   border: var(--glass-border);

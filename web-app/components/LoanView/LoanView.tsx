@@ -4,7 +4,7 @@ import { depositUsdc } from "@/utils/instructions";
 import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import styles from "./LoanView.module.css";
 
-export default function LoanView({swapView, enableModal, disableModal} : ViewProps) {
+export default function LoanView({swapView, enableModal, disableModal, enableOfframpModal} : ViewProps) {
     const { connection } = useConnection();
     const wallet = useAnchorWallet();
 
@@ -13,13 +13,11 @@ export default function LoanView({swapView, enableModal, disableModal} : ViewPro
             title: "Repay USDT Loan",
             denomination: "USDT",
             buttonText: "Repay",
+            minAmount: 0,
             onConfirm: async (amount: number) => {
-                if (!wallet) {
-                    console.error("Error: Wallet not connected");
-                    return;
-                }
+                if (!wallet) return;
+
                 const signature = await depositUsdc(wallet, connection, amount * MICRO_CENTS_PER_USDC);
-                console.log(signature);
                 if (signature) disableModal();
             },
             onCancel: () => { disableModal(); }

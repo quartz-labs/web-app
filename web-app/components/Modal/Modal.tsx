@@ -5,14 +5,36 @@ export interface ModalProps {
     title: string;
     denomination: string;
     buttonText: string;
+    minAmount: number;
     onConfirm: (amount: number) => void;
     onCancel: () => void;
 }
 
 export default function Modal(
-    { title, denomination, buttonText, onConfirm, onCancel }: ModalProps
+    { title, denomination, buttonText, minAmount, onConfirm, onCancel }: ModalProps
 ) {
-    const [amount, setAmount] = useState<number | string>(''); 
+    const [awaitingSign, setAwaitingSign] = useState(false);
+    const [amount, setAmount] = useState(""); 
+    const [errorText, setErrorText] = useState("");
+
+    const handleConfirm = (amount: string) => {
+        let numAmount;
+        try {
+            numAmount = Number(amount);
+        } catch {
+            setErrorText("Invalid input");
+            return;
+        }
+
+        if (numAmount < minAmount) {
+            setErrorText("Minimum amount: " + minAmount);
+            return;
+        }
+
+        setErrorText("");
+        setAwaitingSign(true);
+        onConfirm(numAmount);
+    }
 
     return (
         <div className={styles.modalWrapper}>
@@ -29,14 +51,17 @@ export default function Modal(
                             setAmount(e.target.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1'))
                         }
                     />
+                    {errorText &&
+                        <p className={styles.error}>{errorText}</p>
+                    }  
                 </div>
                 
                 <div className={styles.buttons}>
                     <button 
                         className={`glass-button ${styles.modalButton}`}
-                        onClick={() => onConfirm(Number(amount))}
+                        onClick={() => handleConfirm(amount)}
                     >
-                        {buttonText}
+                        {awaitingSign ? "Loading..." : buttonText}
                     </button>
                     <button 
                         className={`glass-button ghost ${styles.modalButton}`}
@@ -44,7 +69,7 @@ export default function Modal(
                     >
                         Cancel
                     </button>
-                </div>
+                </div>              
             </div>
         </div>
     )

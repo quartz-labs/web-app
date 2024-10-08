@@ -4,10 +4,10 @@ import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC, DRIFT_PROGRAM_ID, DRIF
 import idl from "../idl/funds_program.json";
 import { FundsProgram } from "@/types/funds_program";
 import { ASSOCIATED_PROGRAM_ID, TOKEN_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/utils/token";
-import { PublicKey, SystemProgram, SYSVAR_INSTRUCTIONS_PUBKEY, Transaction, VersionedTransaction } from "@solana/web3.js";
+import { SystemProgram, Transaction, VersionedTransaction } from "@solana/web3.js";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
 import { getDriftSpotMarketVault, getDriftState, getDriftUser, getDriftUserStats, getVault, getVaultUsdc, getVaultWsol } from "./getPDAs";
-import { createAssociatedTokenAccount, createAssociatedTokenAccountInstruction, getAssociatedTokenAddress } from "@solana/spl-token";
+import { getAssociatedTokenAddress } from "@solana/spl-token";
 import { getOrCreateAssociatedTokenAccountAnchor } from "./utils";
 
 export const initAccount = async (wallet: AnchorWallet, connection: web3.Connection) => {
@@ -96,7 +96,7 @@ export const depositLamports = async(wallet: AnchorWallet, connection: web3.Conn
     const vaultPda = getVault(wallet.publicKey);
 
     try {
-        const tx = await program.methods
+        const signature = await program.methods
             .depositLamports(new BN(amountLamports), false)
             .accounts({
                 // @ts-ignore - Causing an issue in Cursor IDE
@@ -114,26 +114,7 @@ export const depositLamports = async(wallet: AnchorWallet, connection: web3.Conn
                 spotMarket: DRIFT_SPOT_MARKET_SOL,
                 systemProgram: SystemProgram.programId,
             })
-            .transaction();
-
-        const latestBlockhash = await connection.getLatestBlockhash();
-        tx.recentBlockhash = latestBlockhash.blockhash;
-        tx.feePayer = wallet.publicKey;
-
-        const versionedTx = new VersionedTransaction(tx.compileMessage());
-        const signedTx = await wallet.signTransaction(versionedTx);
-
-        const simulation = await connection.simulateTransaction(signedTx);
-        console.log("Simulation result:", simulation);
-
-        const signature = await provider.connection.sendRawTransaction(signedTx.serialize(), {skipPreflight: true});
-        
-        await connection.confirmTransaction({
-            signature,
-            blockhash: latestBlockhash.blockhash,
-            lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
-        });
-
+            .rpc();
         return signature;
     } catch (err) {
         if (err instanceof WalletSignTransactionError) {
@@ -296,7 +277,7 @@ export const withdrawUsdc = async(wallet: AnchorWallet, connection: web3.Connect
     const walletUsdc = await getOrCreateAssociatedTokenAccountAnchor(wallet, connection, provider, USDC_MINT);
 
     try {
-        const tx = await program.methods
+        const signature = await program.methods
             .withdrawUsdc(new BN(amountMicroCents), false)
             .accounts({
                 // @ts-ignore - Causing an issue in Cursor IDE
@@ -319,26 +300,7 @@ export const withdrawUsdc = async(wallet: AnchorWallet, connection: web3.Connect
                 spotMarketUsdc: DRIFT_SPOT_MARKET_USDC,
                 systemProgram: SystemProgram.programId,
             })
-            .transaction();
-
-        const latestBlockhash = await connection.getLatestBlockhash();
-        tx.recentBlockhash = latestBlockhash.blockhash;
-        tx.feePayer = wallet.publicKey;
-
-        const versionedTx = new VersionedTransaction(tx.compileMessage());
-        const signedTx = await wallet.signTransaction(versionedTx);
-
-        const simulation = await connection.simulateTransaction(signedTx);
-        console.log("Simulation result:", simulation);
-
-        const signature = await provider.connection.sendRawTransaction(signedTx.serialize(), {skipPreflight: true});
-        
-        await connection.confirmTransaction({
-            signature,
-            blockhash: latestBlockhash.blockhash,
-            lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
-        });
-
+            .rpc();
         return signature;
     } catch (err) {
         if (err instanceof WalletSignTransactionError) {
