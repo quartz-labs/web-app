@@ -3,14 +3,43 @@ import { NextResponse } from 'next/server';
 import { Connection, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js'
 import { DriftClient, Wallet, loadKeypair, PerpMarkets, PerpMarketConfig, BN } from '@drift-labs/sdk';
 
-// Start of Selection
+let driftClient: DriftClient | null = null;
+
+async function initializeDriftClient() {
+  if (driftClient) return driftClient;
+
+  const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL || 'https://api.mainnet.solana.com';
+  console.log('RPC URL:', rpcUrl);
+  const connection = new Connection(rpcUrl);
+
+  const keypairFile = process.env.NEXT_PUBLIC_KEYPAIR_FILE || "~/.config/solana/id.json";
+  console.log('Keypair file path:', keypairFile);
+  if (!keypairFile) {
+    throw new Error('Keypair path not found in environment variables');
+  }
+
+  console.log('Loading keypair...');
+  const wallet = new Wallet(loadKeypair(keypairFile));
+  console.log('Wallet created successfully with public key:', wallet.publicKey.toString());
+
+  console.log('Initializing Drift client...');
+  driftClient = new DriftClient({
+    connection,
+    wallet,
+    env: 'devnet',
+  });
+
+  console.log('Subscribing to Drift client...');
+  await driftClient.subscribe();
+  console.log('Drift client subscribed successfully');
+
+  return driftClient;
+}
+
 export async function GET(request: Request) {
   console.log('Starting GET request to /api/drift-data');
   try {
-    // Initialize connection to Solana devnet
-    const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL || 'https://api.mainnet.solana.com';
-    console.log('RPC URL:', rpcUrl);
-    const connection = new Connection(rpcUrl);
+    const client = await initializeDriftClient();
 
     // Get address from GET params
     const { searchParams } = new URL(request.url);
@@ -19,35 +48,8 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Address parameter is required' }, { status: 400 });
     }
     console.log('Address from params:', address);
-    console.log(`Solana ${connection.rpcEndpoint} connection established successfully`);
 
-    // Load the keypair from the environment variable
-    const keypairFile = process.env.NEXT_PUBLIC_KEYPAIR_FILE || "~/.config/solana/id.json";
-    console.log('Keypair file path:', keypairFile);
-    if (!keypairFile) {
-      throw new Error('Keypair path not found in environment variables');
-    }
-
-    // Create wallet instance
-    console.log('Loading keypair...');
-    const wallet = new Wallet(loadKeypair(keypairFile));
-    console.log('Wallet created successfully with public key:', wallet.publicKey.toString());
-
-    // Initialize Drift client
-    console.log('Initializing Drift client...');
-    const driftClient = new DriftClient({
-      connection,
-      wallet,
-      env: 'devnet',
-    });
-    console.log('Drift client initialized successfully');
-
-    // Initialize the Drift client
-    console.log('Subscribing to Drift client...');
-    await driftClient.subscribe();
-    console.log('Drift client subscribed successfully');
-
-    const emulationStatus = await driftClient.emulateAccount(new PublicKey(address));
+    const emulationStatus = await client.emulateAccount(new PublicKey(address));
 
     if (!emulationStatus) {
       throw new Error('Failed to emulate account');
@@ -55,7 +57,7 @@ export async function GET(request: Request) {
 
     console.log('Getting drift user..');
 
-    const user = driftClient.getUser();
+    const user = client.getUser();
 
     const marketIndex = 1
 
