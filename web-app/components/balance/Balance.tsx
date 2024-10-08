@@ -4,7 +4,7 @@ import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import styles from "./Balance.module.css";
 import { getSolDailyEarnRate, getUsdcDailyBorrowRate, isVaultInitialized, roundToDecimalPlaces } from "@/utils/utils";
 import { useEffect, useState } from "react";
-import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { getVault } from "@/utils/getPDAs";
 
 export default function Balance() {
@@ -37,19 +37,16 @@ export default function Balance() {
     }
 
 
-    const fetchDriftData = async () => {
+    const fetchDriftData = async (vaultAddress: PublicKey) => {
         try {
-            const vault = getVault(wallet!.publicKey);
-
-            const response = await fetch('/api/drift-data?address=' + vault.toBase58());
-            //const response = await fetch('/api/drift-data?address=' + "DR1nQvpbT3PTswV4MSZS3WGQiKktJzmpQK8gzD548sXd");
+            const response = await fetch('/api/drift-data?address=' + vaultAddress.toBase58());
 
             const data = await response.json();
-            console.log(data);
+            console.log("Data from drift api call: ", data);
             if (!response.ok) {
                 throw new Error('Failed to fetch Drift data');
             }
-            return data.markets;
+            return data.tokenAmount;
         } catch (error) {
             console.error('Error fetching Drift data:', error);
         }
@@ -78,11 +75,11 @@ export default function Balance() {
                     const requiredRent = await connection.getMinimumBalanceForRentExemption(vaultAccount.data.length);
                     setRentExemptionThreshold(requiredRent);
 
-                    const driftBalance = fetchDriftData()
-                    console.log(driftBalance);
+                    const driftBalance = await fetchDriftData(vault)
+                    console.log("Drift account balance: ", driftBalance);
 
                     const vaultBalance = vaultAccount.lamports - requiredRent;
-                    setSolBalance(vaultBalance / LAMPORTS_PER_SOL);
+                    setSolBalance((vaultBalance / LAMPORTS_PER_SOL) + driftBalance);
                     updateFinancialData();
                 }
 

@@ -1,15 +1,7 @@
 // /app/api/drift-data/route.ts
 import { NextResponse } from 'next/server';
-import { Connection, PublicKey } from '@solana/web3.js'
+import { Connection, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js'
 import { DriftClient, Wallet, loadKeypair, PerpMarkets, PerpMarketConfig, BN } from '@drift-labs/sdk';
-
-// Interface for the enhanced market data
-interface EnhancedMarketData {
-  symbol: string;
-  price: number;
-  volume24h: number;
-  openInterest: number;
-}
 
 // Start of Selection
 export async function GET(request: Request) {
@@ -64,7 +56,6 @@ export async function GET(request: Request) {
     console.log('Getting drift user..');
 
     const user = driftClient.getUser();
-    console.log(user);
 
     const marketIndex = 1
 
@@ -72,12 +63,11 @@ export async function GET(request: Request) {
       marketIndex,
     );
 
-    const solBalance = tokenAmount.div(new BN(10).pow(new BN(6)));
-    console.log("sol balance", solBalance.toString(10));
+    const solBalance = Number(tokenAmount.toString(10)) / LAMPORTS_PER_SOL;
 
-    console.log("drift token amount for market index 1", tokenAmount.toString(10));
+    console.log('Sol balance:', solBalance);
 
-    return NextResponse.json({ tokenAmount: tokenAmount });
+    return NextResponse.json({ tokenAmount: solBalance });
   } catch (error) {
     console.error('Error fetching Drift data:', error);
     return NextResponse.json({ error: 'Failed to fetch Drift data' }, { status: 500 });
