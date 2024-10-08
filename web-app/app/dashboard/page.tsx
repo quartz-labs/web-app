@@ -1,22 +1,19 @@
 "use client";
 
-import dynamic from 'next/dynamic';
-import Image from 'next/image';
-import styles from './page.module.css';
-import Balance from "@/components/balance/Balance";
 import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { isVaultInitialized } from '@/utils/utils';
-import Modal, { ModalProps } from '@/components/modal/Modal';
-import { depositLamports, depositUsdc, withdrawLamports, withdrawUsdc } from '@/utils/instructions';
-import { LAMPORTS_PER_SOL } from '@solana/web3.js';
-import { MICRO_CENTS_PER_USDC } from '@/utils/constants';
+import Modal, { ModalProps } from '@/components/Modal/Modal';
+import Account from '@/components/Account/Account';
+import MainView from '@/components/MainView/MainView';
+import LoanView from '@/components/LoanView/LoanView';
 
-const WalletMultiButtonDynamic = dynamic(
-    () => import("@solana/wallet-adapter-react-ui").then((mod) => mod.WalletMultiButton),
-    { ssr: false }
-);
+export interface ViewProps {
+    swapView: () => void;
+    enableModal: (data: ModalProps) => void;
+    disableModal: () => void;
+}
 
 export default function Dashboard() {
     const { connection } = useConnection();
@@ -31,6 +28,7 @@ export default function Dashboard() {
         isLoggedIn();
     }, [wallet]);
 
+    const [mainView, setMainView] = useState(true);
     const [modalEnabled, setModalEnabled] = useState(false);
     const [modalData, setModalData] = useState<ModalProps>({
         title: "",
@@ -39,107 +37,37 @@ export default function Dashboard() {
         onConfirm: (amount: number) => {},
         onCancel: () => {}
     });
-    
-    const handleDeposit = () => {
-        setModalEnabled(true);
-        setModalData({
-            title: "Deposit SOL",
-            denomination: "SOL",
-            buttonText: "Deposit",
-            onConfirm: async (amount: number) => {
-                if (!wallet) {
-                    console.error("Error: Wallet not connected");
-                    return;
-                }
-                const signature = await depositLamports(wallet, connection, amount * LAMPORTS_PER_SOL);
-                console.log(signature);
-                if (signature) setModalEnabled(false);
-            },
-            onCancel: () => { setModalEnabled(false); }
-        })
-    }
 
-    const handleWithdraw = () => {
+    const enableModal = (data: ModalProps) => {
+        setModalData(data);
         setModalEnabled(true);
-        setModalData({
-            title: "Withdraw SOL",
-            denomination: "SOL",
-            buttonText: "Withdraw",
-            onConfirm: async (amount: number) => {
-                if (!wallet) {
-                    console.error("Error: Wallet not connected");
-                    return;
-                }
-                const signature = await withdrawLamports(wallet, connection, amount * LAMPORTS_PER_SOL);
-                console.log(signature);
-                if (signature) setModalEnabled(false);
-            },
-            onCancel: () => { setModalEnabled(false); }
-        })
     }
-
-    const handleRepayUsdc = () => {
-        setModalEnabled(true);
-        setModalData({
-            title: "Repay USDC Loan",
-            denomination: "USDC",
-            buttonText: "Repay",
-            onConfirm: async (amount: number) => {
-                if (!wallet) {
-                    console.error("Error: Wallet not connected");
-                    return;
-                }
-                const signature = await depositUsdc(wallet, connection, amount * MICRO_CENTS_PER_USDC);
-                console.log(signature);
-                if (signature) setModalEnabled(false);
-            },
-            onCancel: () => { setModalEnabled(false); }
-        })
-    }
-
-    const handleOfframp = () => {
-        setModalEnabled(true);
-        setModalData({
-            title: "Offramp USDC",
-            denomination: "USDC",
-            buttonText: "Offramp",
-            onConfirm: async (amount: number) => {
-                if (!wallet) {
-                    console.error("Error: Wallet not connected");
-                    return;
-                }
-                const signature = await withdrawUsdc(wallet, connection, amount * MICRO_CENTS_PER_USDC);
-                console.log(signature);
-                if (signature) setModalEnabled(false);
-            },
-            onCancel: () => { setModalEnabled(false); }
-        })
-    }
+    const disableModal = () => setModalEnabled(false);
 
     return (
-        <main className="container">
+        <main>
             {modalEnabled && (
                 <Modal {...modalData} />
             )}
 
-            <div className={styles.navBar}>
-                <Image 
-                    src="/logo.svg" 
-                    alt="Quartz" 
-                    width={200} 
-                    height={69}
-                />
+            <div className="two-col-grid">
+                <Account />
+                
+                {mainView &&
+                    <MainView 
+                        swapView={() => setMainView(false)}
+                        enableModal={enableModal}
+                        disableModal={disableModal}
+                    />
+                }
 
-                <WalletMultiButtonDynamic />
-            </div>
-            
-            <Balance/>
-
-            <div className={styles.buttons}>
-                <button onClick={handleDeposit} className={`${styles.mainButton} glassButton`}>Deposit</button>
-                <button onClick={handleWithdraw} className={`${styles.mainButton} glassButton`}>Withdraw</button>
-                <button onClick={handleRepayUsdc} className={`${styles.mainButton} glassButton`}>Repay USDC</button>
-                <button onClick={handleOfframp} className={`${styles.mainButton} glassButton`}>Off-ramp</button>
+                {!mainView &&
+                    <LoanView 
+                        swapView={() => setMainView(true)}
+                        enableModal={enableModal}
+                        disableModal={disableModal}
+                    />
+                }
             </div>
         </main>
     )

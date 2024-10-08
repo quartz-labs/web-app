@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { initAccount } from '@/utils/instructions';
 import { useEffect, useState } from 'react';
 import { isVaultInitialized } from '@/utils/utils';
-import Account from '@/components/account/Account';
+import Account from '@/components/Account/Account';
 import Link from 'next/link';
 
 export default function Onboarding() {
