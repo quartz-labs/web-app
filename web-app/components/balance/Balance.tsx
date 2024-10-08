@@ -36,6 +36,23 @@ export default function Balance() {
         }
     }
 
+
+    const fetchDriftData = async () => {
+        try {
+            const [vault, _] = getVault(wallet!.publicKey);
+
+            const response = await fetch('/api/drift-data?address=' + vault.toBase58());
+            const data = await response.json();
+            console.log(data);
+            if (!response.ok) {
+                throw new Error('Failed to fetch Drift data');
+            }
+            return data.markets;
+        } catch (error) {
+            console.error('Error fetching Drift data:', error);
+        }
+    };
+
     // TODO - Uncomment to enable dynamic updates
     // useEffect(() => {
     //     updateFinancialData();
@@ -43,7 +60,7 @@ export default function Balance() {
 
     //     return () => clearInterval(interval);
     // }, []);
-    
+
     useEffect(() => {
         const updateBalance = async () => {
             if (!connection || !wallet || !await isVaultInitialized(wallet, connection)) {
@@ -53,11 +70,14 @@ export default function Balance() {
 
             try {
                 const [vault, _] = getVault(wallet.publicKey);
-                
+
                 const vaultAccount = await connection.getAccountInfo(vault);
                 if (vaultAccount) {
                     const requiredRent = await connection.getMinimumBalanceForRentExemption(vaultAccount.data.length);
                     setRentExemptionThreshold(requiredRent);
+
+                    // const driftBalance = fetchDriftData()
+                    // console.log(driftBalance);
 
                     const vaultBalance = vaultAccount.lamports - requiredRent;
                     setSolBalance(vaultBalance / LAMPORTS_PER_SOL);
@@ -93,7 +113,7 @@ export default function Balance() {
                     <div className={styles.balanceCell}>
                         <h3 className={styles.subheading}>Total Assets</h3>
                         <p className={styles.mainBalance}>
-                            ${(solBalance * solPrice).toLocaleString('en-IE', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                            ${(solBalance * solPrice).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
                         <p className={styles.subBalance}>{solBalance} SOL</p>
                         <p className={styles.dailyChange}>
@@ -104,7 +124,7 @@ export default function Balance() {
                     <div className={styles.balanceCell}>
                         <h3 className={styles.subheading}>Loans</h3>
                         <p className={styles.mainBalance}>
-                            ${(usdcLoanBalance).toLocaleString('en-IE', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                            ${(usdcLoanBalance).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
                         <p className={styles.subBalance}>USDC</p>
                         <p className={styles.dailyChange}>
@@ -116,25 +136,25 @@ export default function Balance() {
                         <h3 className={styles.subheading}>Net Balance</h3>
                         <p className={styles.mainBalance}>
                             ${((solBalance * solPrice) - usdcLoanBalance).toLocaleString(
-                                'en-IE', {minimumFractionDigits: 2, maximumFractionDigits: 2}
+                                'en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }
                             )}
                         </p>
                         <p className={styles.subBalance}>After outstanding loans</p>
                         <p className={styles.dailyChange}>
-                            +${roundToDecimalPlaces(dailyNetChange,4)} /day
+                            +${roundToDecimalPlaces(dailyNetChange, 4)} /day
                         </p>
                     </div>
                 </div>
-                
-                <button 
+
+                <button
                     className={`glassButton ghost ${styles.viewButton}`}
-                    onClick={ () => setDetailedView(false) }
+                    onClick={() => setDetailedView(false)}
                 >
                     Simple View
                 </button>
             </div>
         )
-    } 
+    }
     else {
         return (
             <div className={styles.balanceWrapper}>
@@ -142,19 +162,19 @@ export default function Balance() {
                 <div className={styles.balanceCell}>
                     <p className={styles.mainBalance}>
                         ${((solBalance * solPrice) - usdcLoanBalance).toLocaleString(
-                            'en-IE', {minimumFractionDigits: 2, maximumFractionDigits: 2}
+                            'en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }
                         )}
                     </p>
                     <p className={styles.subBalance}>{solBalance} SOL</p>
                 </div>
-                <button 
+                <button
                     className={`glassButton ghost ${styles.viewButton}`}
-                    onClick={ () => setDetailedView(true) }
+                    onClick={() => setDetailedView(true)}
                 >
                     View Breakdown
                 </button>
             </div>
         )
     }
-    
+
 }
