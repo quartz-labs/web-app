@@ -8,7 +8,7 @@ export type FundsProgram = {
   "address": "6JjHXLheGSNvvexgzMthEcgjkcirDrGduc3HAKB2P1v2",
   "metadata": {
     "name": "fundsProgram",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "spec": "0.1.0",
     "description": "Quartz funds program"
   },
@@ -276,6 +276,10 @@ export type FundsProgram = {
         {
           "name": "amount",
           "type": "u64"
+        },
+        {
+          "name": "reduceOnly",
+          "type": "bool"
         }
       ]
     },
@@ -596,6 +600,10 @@ export type FundsProgram = {
         {
           "name": "amountMicroCents",
           "type": "u64"
+        },
+        {
+          "name": "reduceOnly",
+          "type": "bool"
         }
       ]
     },
@@ -1020,6 +1028,10 @@ export type FundsProgram = {
         {
           "name": "amount",
           "type": "u64"
+        },
+        {
+          "name": "reduceOnly",
+          "type": "bool"
         }
       ]
     },
@@ -1343,6 +1355,10 @@ export type FundsProgram = {
         {
           "name": "amountMicroCents",
           "type": "u64"
+        },
+        {
+          "name": "reduceOnly",
+          "type": "bool"
         }
       ]
     }

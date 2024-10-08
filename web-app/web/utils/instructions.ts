@@ -60,7 +60,7 @@ export const withdrawLamports = async(wallet: AnchorWallet, connection: web3.Con
 
     try {
         const signature = await program.methods
-            .withdrawLamports(new BN(amountLamports))
+            .withdrawLamports(new BN(amountLamports), true)
             .accounts({
                 // @ts-ignore - Causing an issue in Cursor IDE
                 vault: vaultPda,
@@ -97,7 +97,7 @@ export const depositLamports = async(wallet: AnchorWallet, connection: web3.Conn
 
     try {
         const tx = await program.methods
-            .depositLamports(new BN(amountLamports))
+            .depositLamports(new BN(amountLamports), false)
             .accounts({
                 // @ts-ignore - Causing an issue in Cursor IDE
                 vault: vaultPda,
@@ -258,7 +258,7 @@ export const depositUsdc = async(wallet: AnchorWallet, connection: web3.Connecti
 
     try {
         const signature = await program.methods
-            .depositUsdc(new BN(amountMicroCents))
+            .depositUsdc(new BN(amountMicroCents), false)
             .accounts({
                 // @ts-ignore - Causing an issue in Cursor IDE
                 vault: vaultPda,
@@ -297,7 +297,7 @@ export const withdrawUsdc = async(wallet: AnchorWallet, connection: web3.Connect
 
     try {
         const tx = await program.methods
-            .withdrawUsdc(new BN(amountMicroCents))
+            .withdrawUsdc(new BN(amountMicroCents), false)
             .accounts({
                 // @ts-ignore - Causing an issue in Cursor IDE
                 vault: vaultPda,

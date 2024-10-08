@@ -2,7 +2,7 @@
   "address": "6JjHXLheGSNvvexgzMthEcgjkcirDrGduc3HAKB2P1v2",
   "metadata": {
     "name": "funds_program",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "spec": "0.1.0",
     "description": "Quartz funds program"
   },
@@ -270,6 +270,10 @@
         {
           "name": "amount",
           "type": "u64"
+        },
+        {
+          "name": "reduce_only",
+          "type": "bool"
         }
       ]
     },
@@ -590,6 +594,10 @@
         {
           "name": "amount_micro_cents",
           "type": "u64"
+        },
+        {
+          "name": "reduce_only",
+          "type": "bool"
         }
       ]
     },
@@ -1014,6 +1022,10 @@
         {
           "name": "amount",
           "type": "u64"
+        },
+        {
+          "name": "reduce_only",
+          "type": "bool"
         }
       ]
     },
@@ -1337,6 +1349,10 @@
         {
           "name": "amount_micro_cents",
           "type": "u64"
+        },
+        {
+          "name": "reduce_only",
+          "type": "bool"
         }
       ]
     }
