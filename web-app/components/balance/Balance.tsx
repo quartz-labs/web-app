@@ -39,7 +39,7 @@ export default function Balance() {
 
     const fetchDriftData = async () => {
         try {
-            const [vault, _] = getVault(wallet!.publicKey);
+            const vault = getVault(wallet!.publicKey);
 
             const response = await fetch('/api/drift-data?address=' + vault.toBase58());
             const data = await response.json();
@@ -69,8 +69,8 @@ export default function Balance() {
             }
 
             try {
-                const [vault, _] = getVault(wallet.publicKey);
-
+                const vault = getVault(wallet.publicKey);
+                
                 const vaultAccount = await connection.getAccountInfo(vault);
                 if (vaultAccount) {
                     const requiredRent = await connection.getMinimumBalanceForRentExemption(vaultAccount.data.length);
@@ -99,7 +99,6 @@ export default function Balance() {
         updateBalance();
     }, [wallet, rentExemptionThreshold]);
 
-    // TODO - If collateralized SOL is not earning, this calculation must be adjusted as it assumes all SOL is earning yield
     const dailySolChange = solDailyEarnRate * solBalance * solPrice;
     const dailyUsdcChange = usdcDailyBorrowRate * usdcLoanBalance;
     const dailyNetChange = dailySolChange - dailyUsdcChange;

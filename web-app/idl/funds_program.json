@@ -1,8 +1,8 @@
 {
-  "address": "B6gXhjcwsD8uFsaaPNFxeswxSNM79iP5mPgBnmxQJjn2",
+  "address": "6JjHXLheGSNvvexgzMthEcgjkcirDrGduc3HAKB2P1v2",
   "metadata": {
     "name": "funds_program",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "spec": "0.1.0",
     "description": "Quartz funds program"
   },
@@ -113,7 +113,7 @@
           ]
         },
         {
-          "name": "state",
+          "name": "drift_state",
           "writable": true,
           "pda": {
             "seeds": [
@@ -141,7 +141,7 @@
           }
         },
         {
-          "name": "user",
+          "name": "drift_user",
           "writable": true,
           "pda": {
             "seeds": [
@@ -173,7 +173,7 @@
           }
         },
         {
-          "name": "user_stats",
+          "name": "drift_user_stats",
           "writable": true,
           "pda": {
             "seeds": [
@@ -270,6 +270,334 @@
         {
           "name": "amount",
           "type": "u64"
+        },
+        {
+          "name": "reduce_only",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "deposit_usdc",
+      "discriminator": [
+        184,
+        148,
+        250,
+        169,
+        224,
+        213,
+        34,
+        126
+      ],
+      "accounts": [
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault_usdc",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "vault"
+              },
+              {
+                "kind": "account",
+                "path": "usdc_mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "vault"
+          ]
+        },
+        {
+          "name": "owner_usdc",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "owner"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "usdc_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "drift_state",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  114,
+                  105,
+                  102,
+                  116,
+                  95,
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ]
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "drift_program"
+            }
+          }
+        },
+        {
+          "name": "drift_user",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  0,
+                  0
+                ]
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "drift_program"
+            }
+          }
+        },
+        {
+          "name": "drift_user_stats",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  115,
+                  116,
+                  97,
+                  116,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "drift_program"
+            }
+          }
+        },
+        {
+          "name": "spot_market_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  112,
+                  111,
+                  116,
+                  95,
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "const",
+                "value": [
+                  0,
+                  0
+                ]
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "drift_program"
+            }
+          }
+        },
+        {
+          "name": "usdc_mint"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "drift_program"
+        },
+        {
+          "name": "const_account"
+        },
+        {
+          "name": "additional_account"
+        },
+        {
+          "name": "spot_market_sol"
+        },
+        {
+          "name": "spot_market_usdc",
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount_micro_cents",
+          "type": "u64"
+        },
+        {
+          "name": "reduce_only",
+          "type": "bool"
         }
       ]
     },
@@ -317,7 +645,7 @@
           ]
         },
         {
-          "name": "user",
+          "name": "drift_user",
           "writable": true,
           "pda": {
             "seeds": [
@@ -349,7 +677,7 @@
           }
         },
         {
-          "name": "user_stats",
+          "name": "drift_user_stats",
           "writable": true,
           "pda": {
             "seeds": [
@@ -380,7 +708,7 @@
           }
         },
         {
-          "name": "state",
+          "name": "drift_state",
           "writable": true,
           "pda": {
             "seeds": [
@@ -457,32 +785,9 @@
           }
         },
         {
-          "name": "vault_usdc",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "account",
-                "path": "vault"
-              },
-              {
-                "kind": "account",
-                "path": "usdc_mint"
-              }
-            ]
-          }
-        },
-        {
           "name": "owner",
           "writable": true,
           "signer": true
-        },
-        {
-          "name": "usdc_mint"
-        },
-        {
-          "name": "token_program",
-          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         },
         {
           "name": "system_program",
@@ -551,7 +856,7 @@
           ]
         },
         {
-          "name": "state",
+          "name": "drift_state",
           "writable": true,
           "pda": {
             "seeds": [
@@ -579,7 +884,7 @@
           }
         },
         {
-          "name": "user",
+          "name": "drift_user",
           "writable": true,
           "pda": {
             "seeds": [
@@ -611,7 +916,7 @@
           }
         },
         {
-          "name": "user_stats",
+          "name": "drift_user_stats",
           "writable": true,
           "pda": {
             "seeds": [
@@ -717,6 +1022,10 @@
         {
           "name": "amount",
           "type": "u64"
+        },
+        {
+          "name": "reduce_only",
+          "type": "bool"
         }
       ]
     },
@@ -772,17 +1081,21 @@
           }
         },
         {
-          "name": "receiver",
-          "writable": true
+          "name": "owner",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "vault"
+          ]
         },
         {
-          "name": "receiver_usdc",
+          "name": "owner_usdc",
           "writable": true,
           "pda": {
             "seeds": [
               {
                 "kind": "account",
-                "path": "receiver"
+                "path": "owner"
               },
               {
                 "kind": "const",
@@ -866,12 +1179,139 @@
           }
         },
         {
-          "name": "owner",
+          "name": "drift_state",
           "writable": true,
-          "signer": true,
-          "relations": [
-            "vault"
-          ]
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  114,
+                  105,
+                  102,
+                  116,
+                  95,
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ]
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "drift_program"
+            }
+          }
+        },
+        {
+          "name": "drift_user",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  0,
+                  0
+                ]
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "drift_program"
+            }
+          }
+        },
+        {
+          "name": "drift_user_stats",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  115,
+                  116,
+                  97,
+                  116,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "drift_program"
+            }
+          }
+        },
+        {
+          "name": "spot_market_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  112,
+                  111,
+                  116,
+                  95,
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "const",
+                "value": [
+                  0,
+                  0
+                ]
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "drift_program"
+            }
+          }
+        },
+        {
+          "name": "drift_signer"
         },
         {
           "name": "usdc_mint"
@@ -885,14 +1325,34 @@
           "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
         },
         {
+          "name": "drift_program"
+        },
+        {
+          "name": "const_account"
+        },
+        {
+          "name": "additional_account"
+        },
+        {
+          "name": "spot_market_sol"
+        },
+        {
+          "name": "spot_market_usdc",
+          "writable": true
+        },
+        {
           "name": "system_program",
           "address": "11111111111111111111111111111111"
         }
       ],
       "args": [
         {
-          "name": "amount",
+          "name": "amount_micro_cents",
           "type": "u64"
+        },
+        {
+          "name": "reduce_only",
+          "type": "bool"
         }
       ]
     }
@@ -909,6 +1369,32 @@
         75,
         182,
         177
+      ]
+    },
+    {
+      "name": "User",
+      "discriminator": [
+        159,
+        117,
+        95,
+        227,
+        239,
+        151,
+        58,
+        236
+      ]
+    },
+    {
+      "name": "UserStats",
+      "discriminator": [
+        176,
+        223,
+        136,
+        27,
+        122,
+        79,
+        32,
+        227
       ]
     },
     {
@@ -1036,6 +1522,23 @@
       }
     },
     {
+      "name": "MarketType",
+      "repr": {
+        "kind": "rust"
+      },
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Spot"
+          },
+          {
+            "name": "Perp"
+          }
+        ]
+      }
+    },
+    {
       "name": "OracleGuardRails",
       "type": {
         "kind": "struct",
@@ -1054,6 +1557,222 @@
               "defined": {
                 "name": "ValidityGuardRails"
               }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Order",
+      "repr": {
+        "kind": "c"
+      },
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "slot",
+            "docs": [
+              "The slot the order was placed"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "price",
+            "docs": [
+              "The limit price for the order (can be 0 for market orders)",
+              "For orders with an auction, this price isn't used until the auction is complete",
+              "precision: PRICE_PRECISION"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "base_asset_amount",
+            "docs": [
+              "The size of the order",
+              "precision for perps: BASE_PRECISION",
+              "precision for spot: token mint precision"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "base_asset_amount_filled",
+            "docs": [
+              "The amount of the order filled",
+              "precision for perps: BASE_PRECISION",
+              "precision for spot: token mint precision"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "quote_asset_amount_filled",
+            "docs": [
+              "The amount of quote filled for the order",
+              "precision: QUOTE_PRECISION"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "trigger_price",
+            "docs": [
+              "At what price the order will be triggered. Only relevant for trigger orders",
+              "precision: PRICE_PRECISION"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "auction_start_price",
+            "docs": [
+              "The start price for the auction. Only relevant for market/oracle orders",
+              "precision: PRICE_PRECISION"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "auction_end_price",
+            "docs": [
+              "The end price for the auction. Only relevant for market/oracle orders",
+              "precision: PRICE_PRECISION"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "max_ts",
+            "docs": [
+              "The time when the order will expire"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "oracle_price_offset",
+            "docs": [
+              "If set, the order limit price is the oracle price + this offset",
+              "precision: PRICE_PRECISION"
+            ],
+            "type": "i32"
+          },
+          {
+            "name": "order_id",
+            "docs": [
+              "The id for the order. Each users has their own order id space"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "market_index",
+            "docs": [
+              "The perp/spot market index"
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "status",
+            "docs": [
+              "Whether the order is open or unused"
+            ],
+            "type": {
+              "defined": {
+                "name": "OrderStatus"
+              }
+            }
+          },
+          {
+            "name": "order_type",
+            "docs": [
+              "The type of order"
+            ],
+            "type": {
+              "defined": {
+                "name": "OrderType"
+              }
+            }
+          },
+          {
+            "name": "market_type",
+            "docs": [
+              "Whether market is spot or perp"
+            ],
+            "type": {
+              "defined": {
+                "name": "MarketType"
+              }
+            }
+          },
+          {
+            "name": "user_order_id",
+            "docs": [
+              "User generated order id. Can make it easier to place/cancel orders"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "existing_position_direction",
+            "docs": [
+              "What the users position was when the order was placed"
+            ],
+            "type": {
+              "defined": {
+                "name": "PositionDirection"
+              }
+            }
+          },
+          {
+            "name": "direction",
+            "docs": [
+              "Whether the user is going long or short. LONG = bid, SHORT = ask"
+            ],
+            "type": {
+              "defined": {
+                "name": "PositionDirection"
+              }
+            }
+          },
+          {
+            "name": "reduce_only",
+            "docs": [
+              "Whether the order is allowed to only reduce position size"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "post_only",
+            "docs": [
+              "Whether the order must be a maker"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "immediate_or_cancel",
+            "docs": [
+              "Whether the order must be canceled the same slot it is placed"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "trigger_condition",
+            "docs": [
+              "Whether the order is triggered above or below the trigger price. Only relevant for trigger orders"
+            ],
+            "type": {
+              "defined": {
+                "name": "OrderTriggerCondition"
+              }
+            }
+          },
+          {
+            "name": "auction_duration",
+            "docs": [
+              "How many slots the auction lasts"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                3
+              ]
             }
           }
         ]
@@ -1080,6 +1799,219 @@
       }
     },
     {
+      "name": "OrderStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Init"
+          },
+          {
+            "name": "Open"
+          },
+          {
+            "name": "Filled"
+          },
+          {
+            "name": "Canceled"
+          }
+        ]
+      }
+    },
+    {
+      "name": "OrderTriggerCondition",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Above"
+          },
+          {
+            "name": "Below"
+          },
+          {
+            "name": "TriggeredAbove"
+          },
+          {
+            "name": "TriggeredBelow"
+          }
+        ]
+      }
+    },
+    {
+      "name": "OrderType",
+      "repr": {
+        "kind": "rust"
+      },
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Market"
+          },
+          {
+            "name": "Limit"
+          },
+          {
+            "name": "TriggerMarket"
+          },
+          {
+            "name": "TriggerLimit"
+          },
+          {
+            "name": "Oracle"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PerpPosition",
+      "serialization": "bytemuckunsafe",
+      "repr": {
+        "kind": "c"
+      },
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "last_cumulative_funding_rate",
+            "docs": [
+              "The perp market's last cumulative funding rate. Used to calculate the funding payment owed to user",
+              "precision: FUNDING_RATE_PRECISION"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "base_asset_amount",
+            "docs": [
+              "the size of the users perp position",
+              "precision: BASE_PRECISION"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "quote_asset_amount",
+            "docs": [
+              "Used to calculate the users pnl. Upon entry, is equal to base_asset_amount * avg entry price - fees",
+              "Updated when the user open/closes position or settles pnl. Includes fees/funding",
+              "precision: QUOTE_PRECISION"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "quote_break_even_amount",
+            "docs": [
+              "The amount of quote the user would need to exit their position at to break even",
+              "Updated when the user open/closes position or settles pnl. Includes fees/funding",
+              "precision: QUOTE_PRECISION"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "quote_entry_amount",
+            "docs": [
+              "The amount quote the user entered the position with. Equal to base asset amount * avg entry price",
+              "Updated when the user open/closes position. Excludes fees/funding",
+              "precision: QUOTE_PRECISION"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "open_bids",
+            "docs": [
+              "The amount of open bids the user has in this perp market",
+              "precision: BASE_PRECISION"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "open_asks",
+            "docs": [
+              "The amount of open asks the user has in this perp market",
+              "precision: BASE_PRECISION"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "settled_pnl",
+            "docs": [
+              "The amount of pnl settled in this market since opening the position",
+              "precision: QUOTE_PRECISION"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "lp_shares",
+            "docs": [
+              "The number of lp (liquidity provider) shares the user has in this perp market",
+              "LP shares allow users to provide liquidity via the AMM",
+              "precision: BASE_PRECISION"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "last_base_asset_amount_per_lp",
+            "docs": [
+              "The last base asset amount per lp the amm had",
+              "Used to settle the users lp position",
+              "precision: BASE_PRECISION"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "last_quote_asset_amount_per_lp",
+            "docs": [
+              "The last quote asset amount per lp the amm had",
+              "Used to settle the users lp position",
+              "precision: QUOTE_PRECISION"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "remainder_base_asset_amount",
+            "docs": [
+              "Settling LP position can lead to a small amount of base asset being left over smaller than step size",
+              "This records that remainder so it can be settled later on",
+              "precision: BASE_PRECISION"
+            ],
+            "type": "i32"
+          },
+          {
+            "name": "market_index",
+            "docs": [
+              "The market index for the perp market"
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "open_orders",
+            "docs": [
+              "The number of open orders"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "per_lp_base",
+            "type": "i8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PositionDirection",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Long"
+          },
+          {
+            "name": "Short"
+          }
+        ]
+      }
+    },
+    {
       "name": "PriceDivergenceGuardRails",
       "type": {
         "kind": "struct",
@@ -1089,14 +2021,113 @@
             "type": "u64"
           },
           {
-            "name": "oracle_twap_5_min_percent_divergence",
+            "name": "oracle_twap_5min_percent_divergence",
             "type": "u64"
           }
         ]
       }
     },
     {
+      "name": "SpotBalanceType",
+      "repr": {
+        "kind": "rust"
+      },
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Deposit"
+          },
+          {
+            "name": "Borrow"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SpotPosition",
+      "serialization": "bytemuckunsafe",
+      "repr": {
+        "kind": "c"
+      },
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "scaled_balance",
+            "docs": [
+              "The scaled balance of the position. To get the token amount, multiply by the cumulative deposit/borrow",
+              "interest of corresponding market.",
+              "precision: SPOT_BALANCE_PRECISION"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "open_bids",
+            "docs": [
+              "How many spot bids the user has open",
+              "precision: token mint precision"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "open_asks",
+            "docs": [
+              "How many spot asks the user has open",
+              "precision: token mint precision"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "cumulative_deposits",
+            "docs": [
+              "The cumulative deposits/borrows a user has made into a market",
+              "precision: token mint precision"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "market_index",
+            "docs": [
+              "The market index of the corresponding spot market"
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "balance_type",
+            "docs": [
+              "Whether the position is deposit or borrow"
+            ],
+            "type": {
+              "defined": {
+                "name": "SpotBalanceType"
+              }
+            }
+          },
+          {
+            "name": "open_orders",
+            "docs": [
+              "Number of open orders"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                4
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "State",
+      "repr": {
+        "kind": "c"
+      },
       "type": {
         "kind": "struct",
         "fields": [
@@ -1214,6 +2245,520 @@
               "array": [
                 "u8",
                 10
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "User",
+      "serialization": "bytemuckunsafe",
+      "repr": {
+        "kind": "c"
+      },
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "docs": [
+              "The owner/authority of the account"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "delegate",
+            "docs": [
+              "An addresses that can control the account on the authority's behalf. Has limited power, cant withdraw"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "name",
+            "docs": [
+              "Encoded display name e.g. \"toly\""
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "spot_positions",
+            "docs": [
+              "The user's spot positions"
+            ],
+            "type": {
+              "array": [
+                {
+                  "defined": {
+                    "name": "SpotPosition"
+                  }
+                },
+                8
+              ]
+            }
+          },
+          {
+            "name": "perp_positions",
+            "docs": [
+              "The user's perp positions"
+            ],
+            "type": {
+              "array": [
+                {
+                  "defined": {
+                    "name": "PerpPosition"
+                  }
+                },
+                8
+              ]
+            }
+          },
+          {
+            "name": "orders",
+            "docs": [
+              "The user's orders"
+            ],
+            "type": {
+              "array": [
+                {
+                  "defined": {
+                    "name": "Order"
+                  }
+                },
+                32
+              ]
+            }
+          },
+          {
+            "name": "last_add_perp_lp_shares_ts",
+            "docs": [
+              "The last time the user added perp lp positions"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "total_deposits",
+            "docs": [
+              "The total values of deposits the user has made",
+              "precision: QUOTE_PRECISION"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "total_withdraws",
+            "docs": [
+              "The total values of withdrawals the user has made",
+              "precision: QUOTE_PRECISION"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "total_social_loss",
+            "docs": [
+              "The total socialized loss the users has incurred upon the protocol",
+              "precision: QUOTE_PRECISION"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "settled_perp_pnl",
+            "docs": [
+              "Fees (taker fees, maker rebate, referrer reward, filler reward) and pnl for perps",
+              "precision: QUOTE_PRECISION"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "cumulative_spot_fees",
+            "docs": [
+              "Fees (taker fees, maker rebate, filler reward) for spot",
+              "precision: QUOTE_PRECISION"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "cumulative_perp_funding",
+            "docs": [
+              "Cumulative funding paid/received for perps",
+              "precision: QUOTE_PRECISION"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "liquidation_margin_freed",
+            "docs": [
+              "The amount of margin freed during liquidation. Used to force the liquidation to occur over a period of time",
+              "Defaults to zero when not being liquidated",
+              "precision: QUOTE_PRECISION"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "last_active_slot",
+            "docs": [
+              "The last slot a user was active. Used to determine if a user is idle"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "next_order_id",
+            "docs": [
+              "Every user order has an order id. This is the next order id to be used"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "max_margin_ratio",
+            "docs": [
+              "Custom max initial margin ratio for the user"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "next_liquidation_id",
+            "docs": [
+              "The next liquidation id to be used for user"
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "sub_account_id",
+            "docs": [
+              "The sub account id for this user"
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "status",
+            "docs": [
+              "Whether the user is active, being liquidated or bankrupt"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "is_margin_trading_enabled",
+            "docs": [
+              "Whether the user has enabled margin trading"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "idle",
+            "docs": [
+              "User is idle if they haven't interacted with the protocol in 1 week and they have no orders, perp positions or borrows",
+              "Off-chain keeper bots can ignore users that are idle"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "open_orders",
+            "docs": [
+              "number of open orders"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "has_open_order",
+            "docs": [
+              "Whether or not user has open order"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "open_auctions",
+            "docs": [
+              "number of open orders with auction"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "has_open_auction",
+            "docs": [
+              "Whether or not user has open order with auction"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "padding1",
+            "type": {
+              "array": [
+                "u8",
+                5
+              ]
+            }
+          },
+          {
+            "name": "last_fuel_bonus_update_ts",
+            "type": "u32"
+          },
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                12
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "UserFees",
+      "serialization": "bytemuckunsafe",
+      "repr": {
+        "kind": "c"
+      },
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "total_fee_paid",
+            "docs": [
+              "Total taker fee paid",
+              "precision: QUOTE_PRECISION"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "total_fee_rebate",
+            "docs": [
+              "Total maker fee rebate",
+              "precision: QUOTE_PRECISION"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "total_token_discount",
+            "docs": [
+              "Total discount from holding token",
+              "precision: QUOTE_PRECISION"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "total_referee_discount",
+            "docs": [
+              "Total discount from being referred",
+              "precision: QUOTE_PRECISION"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "total_referrer_reward",
+            "docs": [
+              "Total reward to referrer",
+              "precision: QUOTE_PRECISION"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "current_epoch_referrer_reward",
+            "docs": [
+              "Total reward to referrer this epoch",
+              "precision: QUOTE_PRECISION"
+            ],
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UserStats",
+      "serialization": "bytemuckunsafe",
+      "repr": {
+        "kind": "c"
+      },
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "docs": [
+              "The authority for all of a users sub accounts"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "referrer",
+            "docs": [
+              "The address that referred this user"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "fees",
+            "docs": [
+              "Stats on the fees paid by the user"
+            ],
+            "type": {
+              "defined": {
+                "name": "UserFees"
+              }
+            }
+          },
+          {
+            "name": "next_epoch_ts",
+            "docs": [
+              "The timestamp of the next epoch",
+              "Epoch is used to limit referrer rewards earned in single epoch"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "maker_volume_30d",
+            "docs": [
+              "Rolling 30day maker volume for user",
+              "precision: QUOTE_PRECISION"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "taker_volume_30d",
+            "docs": [
+              "Rolling 30day taker volume for user",
+              "precision: QUOTE_PRECISION"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "filler_volume_30d",
+            "docs": [
+              "Rolling 30day filler volume for user",
+              "precision: QUOTE_PRECISION"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "last_maker_volume_30d_ts",
+            "docs": [
+              "last time the maker volume was updated"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "last_taker_volume_30d_ts",
+            "docs": [
+              "last time the taker volume was updated"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "last_filler_volume_30d_ts",
+            "docs": [
+              "last time the filler volume was updated"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "if_staked_quote_asset_amount",
+            "docs": [
+              "The amount of tokens staked in the quote spot markets if"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "number_of_sub_accounts",
+            "docs": [
+              "The current number of sub accounts"
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "number_of_sub_accounts_created",
+            "docs": [
+              "The number of sub accounts created. Can be greater than the number of sub accounts if user",
+              "has deleted sub accounts"
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "is_referrer",
+            "docs": [
+              "Whether the user is a referrer. Sub account 0 can not be deleted if user is a referrer"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "disable_update_perp_bid_ask_twap",
+            "type": "bool"
+          },
+          {
+            "name": "padding1",
+            "type": {
+              "array": [
+                "u8",
+                2
+              ]
+            }
+          },
+          {
+            "name": "fuel_insurance",
+            "docs": [
+              "accumulated fuel for token amounts of insurance"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "fuel_deposits",
+            "docs": [
+              "accumulated fuel for notional of deposits"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "fuel_borrows",
+            "docs": [
+              "accumulate fuel bonus for notional of borrows"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "fuel_positions",
+            "docs": [
+              "accumulated fuel for perp open interest"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "fuel_taker",
+            "docs": [
+              "accumulate fuel bonus for taker volume"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "fuel_maker",
+            "docs": [
+              "accumulate fuel bonus for maker volume"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "if_staked_gov_token_amount",
+            "docs": [
+              "The amount of tokens staked in the governance spot markets if"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "last_fuel_if_bonus_update_ts",
+            "docs": [
+              "last unix ts user stats data was used to update if fuel (u32 to save space)"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                12
               ]
             }
           }

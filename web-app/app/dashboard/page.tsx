@@ -4,14 +4,14 @@ import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import styles from './page.module.css';
 import Balance from "@/components/balance/Balance";
-import { useAnchorWallet, useConnection, useWallet } from '@solana/wallet-adapter-react';
+import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { isVaultInitialized } from '@/utils/utils';
 import Modal, { ModalProps } from '@/components/modal/Modal';
-import { depositLamports, withdrawLamports } from '@/utils/instructions';
-import { LAMPORTS_PER_SOL, SystemProgram, Transaction, VersionedTransaction } from '@solana/web3.js';
-import { getVault } from '@/utils/getPDAs';
+import { depositLamports, depositUsdc, withdrawLamports, withdrawUsdc } from '@/utils/instructions';
+import { LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { MICRO_CENTS_PER_USDC } from '@/utils/constants';
 
 const WalletMultiButtonDynamic = dynamic(
     () => import("@solana/wallet-adapter-react-ui").then((mod) => mod.WalletMultiButton),
@@ -22,7 +22,6 @@ export default function Dashboard() {
     const { connection } = useConnection();
     const wallet = useAnchorWallet();
     const router = useRouter();
-    const {publicKey, sendTransaction} = useWallet();
 
     const [modalEnabled, setModalEnabled] = useState(false);
     const [modalData, setModalData] = useState<ModalProps>({
@@ -80,15 +79,20 @@ export default function Dashboard() {
         })
     }
 
-    const handleLiquidate = () => {
+    const handleRepayUsdc = () => {
         setModalEnabled(true);
         setModalData({
-            title: "Liquidate SOL",
-            denomination: "SOL",
-            buttonText: "Liquidate",
+            title: "Repay USDC Loan",
+            denomination: "USDC",
+            buttonText: "Repay",
             onConfirm: async (amount: number) => {
-                console.log("Liquidate " + amount);
-                setModalEnabled(false);
+                if (!wallet) {
+                    console.error("Error: Wallet not connected");
+                    return;
+                }
+                const signature = await depositUsdc(wallet, connection, amount * MICRO_CENTS_PER_USDC);
+                console.log(signature);
+                if (signature) setModalEnabled(false);
             },
             onCancel: () => { setModalEnabled(false); }
         })
@@ -101,8 +105,13 @@ export default function Dashboard() {
             denomination: "USDC",
             buttonText: "Offramp",
             onConfirm: async (amount: number) => {
-                console.log("Offramp " + amount);
-                setModalEnabled(false);
+                if (!wallet) {
+                    console.error("Error: Wallet not connected");
+                    return;
+                }
+                const signature = await withdrawUsdc(wallet, connection, amount * MICRO_CENTS_PER_USDC);
+                console.log(signature);
+                if (signature) setModalEnabled(false);
             },
             onCancel: () => { setModalEnabled(false); }
         })
@@ -130,7 +139,7 @@ export default function Dashboard() {
             <div className={styles.buttons}>
                 <button onClick={handleDeposit} className={`${styles.mainButton} glassButton`}>Deposit</button>
                 <button onClick={handleWithdraw} className={`${styles.mainButton} glassButton`}>Withdraw</button>
-                <button onClick={handleLiquidate} className={`${styles.mainButton} glassButton`}>Liquidate</button>
+                <button onClick={handleRepayUsdc} className={`${styles.mainButton} glassButton`}>Repay USDC</button>
                 <button onClick={handleOfframp} className={`${styles.mainButton} glassButton`}>Off-ramp</button>
             </div>
         </main>

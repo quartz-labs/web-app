@@ -25,9 +25,10 @@ export enum ClusterNetwork {
 // To use the mainnet-beta cluster, provide a custom endpoint
 export const defaultClusters: Cluster[] = [
   {
-    name: 'devnet',
-    endpoint: clusterApiUrl('devnet'),
-    network: ClusterNetwork.Devnet,
+    name: 'mainnet-beta',
+    endpoint: "https://janella-g42vor-fast-mainnet.helius-rpc.com",
+    // endpoint: clusterApiUrl('devnet'),
+    network: ClusterNetwork.Mainnet,
   },
 //   { name: 'local', endpoint: 'http://localhost:8899' },
 ];
