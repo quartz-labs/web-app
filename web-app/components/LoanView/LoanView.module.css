@@ -1,0 +1,45 @@
+.balanceWrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 50px;
+    margin-bottom: 70px;
+}
+
+.title {
+    color: var(--color-text-light);
+    font-size: 23.4px;
+}
+
+.fiatAmount {
+    font-size: 54px;
+}
+
+.subBalance {
+    color: var(--color-text-light);
+    font-size: 19.8px;
+}
+
+.buttons {
+    width: 100%;
+    font-size: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+.buttons button {
+    width: 100%;
+}
+
+.buttonsRow {
+    width: 100%;
+    display: flex;
+    gap: 22px;
+}
+
+.mainBalance {
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-start;
+}

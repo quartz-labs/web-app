@@ -1,0 +1,93 @@
+.modalWrapper {
+    position: absolute;
+    z-index: 9999;
+    top: 0px;
+    left: 0px;
+    height: 100VH;
+    width: 100VW;
+    background: rgb(0, 0, 0, 0.35);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal {
+    width: 600px;
+    padding: 80px 0px;
+    border-radius: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.heading {
+    font-size: 38px;
+    margin-bottom: 55px;
+}
+
+.inputFieldWrapper {
+    width: 60%;
+    margin-bottom: 55px;
+}
+
+.inputField {
+    margin-top: 8px;
+    width: 100%;
+    min-height: 80px;
+    background: var(--color-background);
+    padding: 12px;
+    border-radius: 14px;
+    border: 1px solid var(--placeholder-glass-stroke);
+    font-size: 22px;
+}
+
+.buttons {
+    display: flex;
+    width: 60%;
+    gap: 25px;
+}
+
+.modalButton {
+    flex-grow: 1;
+    padding: 15px 30px;
+    border-radius: 15px;
+}
+
+.error {
+    margin-top: 10px;
+    color: var(--color-text-error);
+}
+
+.contentWrapper {
+    max-width: 70%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.offrampTitle {
+    font-size: 28px;
+    margin-bottom: 20px;
+}
+
+.offrampRedirect {
+    font-size: 14px;
+    color: var(--color-text-light);
+    margin-bottom: 50px;
+}
+
+.offrampRedirect a {
+    text-decoration: underline;
+}
+
+.offrampBodyStart {
+    font-size: 16px;
+}
+
+.offrampBody {
+    font-size: 16px;
+    margin-bottom: 50px;
+}

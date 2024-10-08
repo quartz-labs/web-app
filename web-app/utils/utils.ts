@@ -1,26 +1,13 @@
 import { AnchorProvider, web3 } from "@coral-xyz/anchor";
 import { AnchorWallet } from "@solana/wallet-adapter-react";
-import { USDC_MINT } from "./constants";
 import { Connection, PublicKey, Transaction } from "@solana/web3.js";
 import { getVault } from "./getPDAs";
-import { ASSOCIATED_TOKEN_PROGRAM_ID, createAssociatedTokenAccountInstruction, getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { createAssociatedTokenAccountInstruction, getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 
 export const isVaultInitialized = async (wallet: AnchorWallet, connection: web3.Connection) => {
     const vaultPda = getVault(wallet.publicKey);
     const vaultPdaAccount = await connection.getAccountInfo(vaultPda);
     return (vaultPdaAccount !== null);
-}
-
-export const getUsdcDailyBorrowRate = async () => {
-    // TODO - Implement pulling real data
-
-    return 0.1125 / 365;
-}
-
-export const getSolDailyEarnRate = async () => {
-    // TODO - Implement pulling real data
-
-    return 0.07 / 365;
 }
 
 export const roundToDecimalPlaces = (num: number, place: number) => {

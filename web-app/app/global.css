@@ -19,6 +19,11 @@
   --color-background: #0B111D;
   --color-text: #ffffff;
   --color-text-light: #ffffff55;
+  --color-text-error: #FF8080;
+}
+
+.font-small {
+  font-size: 18px !important;
 }
 
 html,
@@ -27,47 +32,49 @@ body {
   background: #0B111D;
   color: white;
   font-weight: 200;
+  font-size: 16px;
 }
 
-.glassButton {
+.glass-button {
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
 
-  gap: 10px;
-  padding: 20px 30px;
+  gap: 15px;
+  padding: 14px 28px;
   background: var(--gradient-glass-stroke);
 
-  border-radius: 14px;
+  font-size: 20px;
+  border-radius: 10px;
   background-image: var(--gradient-glass-stroke);
   background-origin: border-box;
   background-clip: padding-box, border-box;
 }
 
-.glassButton:hover {
+.glass-button:hover {
   background-image: 
     var(--overlay), 
     var(--gradient-glass-stroke);
 }
 
-.glassButton:active {
+.glass-button:active {
   background-image: 
     var(--overlay), 
     var(--overlay), 
     var(--gradient-glass-stroke);
 }
 
-.glassButton.ghost {
+.glass-button.ghost {
   background: transparent;
-  border: double 1px var(--placeholder-glass-stroke);
+  border: 1.5px solid var(--placeholder-glass-stroke);
 }
 
-.glassButton.ghost:hover {
+.glass-button.ghost:hover {
   background: var(--overlay);
 }
 
-.glassButton.ghost:active {
+.glass-button.ghost:active {
   background: var(--overlay), var(--overlay);
 }
 
@@ -89,9 +96,9 @@ body {
     url("/noise.png"),
     radial-gradient(circle at 80% 20%, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%),
     linear-gradient(#ffffff03, #ffffff03),
-    linear-gradient(#0B111D50, #0B111D50);
+    linear-gradient(#0B111D99, #0B111D99);
   background-size: 17% auto, auto, auto, auto;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(22px);
 
   /* Border */
   border: var(--glass-border);
@@ -108,10 +115,21 @@ body {
   font-family: inherit !important;
 }
 
-.container {
+.two-col-grid {
   margin: 0px auto;
-  width: 100%;
+  height: 100%;
+  width: 65VW;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  justify-items: center;
+  align-itmes: center;
+  gap: 100px;
+}
+
+.two-col-grid > * {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
+  width: 100%;
 }
