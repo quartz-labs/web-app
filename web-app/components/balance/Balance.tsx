@@ -37,9 +37,9 @@ export default function Balance() {
     }
 
 
-    const fetchDriftData = async (vaultAddress: PublicKey) => {
+    const fetchDriftData = async (vaultAddress: PublicKey, token: string) => {
         try {
-            const response = await fetch('/api/drift-data?address=' + vaultAddress.toBase58());
+            const response = await fetch('/api/drift-data?address=' + vaultAddress.toBase58() + "&token=" + token);
 
             const data = await response.json();
             console.log("Data from drift api call: ", data);
@@ -75,11 +75,15 @@ export default function Balance() {
                     const requiredRent = await connection.getMinimumBalanceForRentExemption(vaultAccount.data.length);
                     setRentExemptionThreshold(requiredRent);
 
-                    const driftBalance = await fetchDriftData(vault)
-                    console.log("Drift account balance: ", driftBalance);
+                    const driftSolBalance = await fetchDriftData(vault, "SOL");
+                    console.log("Drift account balance: ", driftSolBalance);
+
+                    const driftLoanAmount = await fetchDriftData(vault, "USDC");
+                    console.log("Drift loan amount: ", driftLoanAmount);
 
                     const vaultBalance = vaultAccount.lamports - requiredRent;
-                    setSolBalance((vaultBalance / LAMPORTS_PER_SOL) + driftBalance);
+                    setSolBalance((vaultBalance / LAMPORTS_PER_SOL) + driftSolBalance);
+                    setUsdcLoanBalance(-driftLoanAmount);
                     updateFinancialData();
                 }
 

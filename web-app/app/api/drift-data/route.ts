@@ -44,10 +44,17 @@ export async function GET(request: Request) {
     // Get address from GET params
     const { searchParams } = new URL(request.url);
     const address = searchParams.get('address');
+    const token = searchParams.get('token');
+
     if (!address) {
       return NextResponse.json({ error: 'Address parameter is required' }, { status: 400 });
     }
+    if (!token) {
+      return NextResponse.json({ error: 'Token parameter is required' }, { status: 400 });
+    }
     console.log('Address from params:', address);
+    console.log('Token from params:', token);
+
 
     const emulationStatus = await client.emulateAccount(new PublicKey(address));
 
@@ -59,17 +66,23 @@ export async function GET(request: Request) {
 
     const user = client.getUser();
 
-    const marketIndex = 1
+    // Default = SOL
+    let marketIndex = 1;
+    let decimalPlaces = LAMPORTS_PER_SOL;
+    if (token === 'USDC') {
+      marketIndex = 0;
+      decimalPlaces = 1000000;
+    }
 
     const tokenAmount = user.getTokenAmount(
       marketIndex,
     );
 
-    const solBalance = Number(tokenAmount.toString(10)) / LAMPORTS_PER_SOL;
+    const tokenBalance = Number(tokenAmount.toString(10)) / decimalPlaces;
 
-    console.log('Sol balance:', solBalance);
+    console.log(`${token} balance:`, tokenBalance);
 
-    return NextResponse.json({ tokenAmount: solBalance });
+    return NextResponse.json({ tokenAmount: tokenBalance });
   } catch (error) {
     console.error('Error fetching Drift data:', error);
     return NextResponse.json({ error: 'Failed to fetch Drift data' }, { status: 500 });
