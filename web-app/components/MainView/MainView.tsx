@@ -1,12 +1,11 @@
 import { ViewProps } from "@/app/dashboard/page";
 import { MICRO_CENTS_PER_USDC } from "@/utils/constants";
-import { depositLamports, withdrawLamports, withdrawUsdc } from "@/utils/instructions";
+import { depositLamports, withdrawLamports, withdrawUsdt } from "@/utils/instructions";
 import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import Image from "next/image";
 import styles from "./MainView.module.css";
 import { getSign, roundToDecimalPlaces, roundToDecimalPlacesAbsolute } from "@/utils/utils";
-import { buildAndSignTransaction, getJupiterSwapIx } from "@/utils/jup";
 
 export default function MainView(
     { solPrice, totalSolBalance, usdcLoanBalance, solDailyRate, usdcDailyRate, swapView, enableModal, disableModal, enableOfframpModal }: ViewProps
@@ -55,16 +54,7 @@ export default function MainView(
             onConfirm: async (amount: number) => {
                 if (!wallet) return;
 
-                const withdrawUsdcIx = await withdrawUsdc(wallet, connection, amount * MICRO_CENTS_PER_USDC);
-
-                // Start of Selection
-                //get Jupiter quote
-                const { instructions, addressLookupTableAddresses } = await getJupiterSwapIx(wallet.publicKey, amount, "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB")
-                //Create a transaction
-                const transaction = await buildAndSignTransaction(connection, wallet.publicKey, instructions, addressLookupTableAddresses, withdrawUsdcIx);
-                //send transaction and get the signature
-                const signature = await connection.sendRawTransaction(transaction.serialize());
-
+                const signature = await withdrawUsdt(wallet, connection, amount * MICRO_CENTS_PER_USDC);
                 if (!signature) return;
 
                 const amountTrunc = amount.toFixed(2);

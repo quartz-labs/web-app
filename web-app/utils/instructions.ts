@@ -1,6 +1,6 @@
 import { AnchorProvider, BN, Idl, Program, setProvider, web3 } from "@coral-xyz/anchor";
 import { AnchorWallet } from "@solana/wallet-adapter-react";
-import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC, DRIFT_PROGRAM_ID, DRIFT_SPOT_MARKET_SOL, DRIFT_SPOT_MARKET_USDC, DRIFT_SIGNER, USDC_MINT, WSOL_MINT, DRIFT_ADDITIONAL_ACCOUNT_1, DRIFT_ADDITIONAL_ACCOUNT_2 } from "./constants";
+import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC, DRIFT_PROGRAM_ID, DRIFT_SPOT_MARKET_SOL, DRIFT_SPOT_MARKET_USDC, DRIFT_SIGNER, USDC_MINT, WSOL_MINT, DRIFT_ADDITIONAL_ACCOUNT_1, DRIFT_ADDITIONAL_ACCOUNT_2, USDT_MINT } from "./constants";
 import idl from "../idl/funds_program.json";
 import { FundsProgram } from "@/types/funds_program";
 import { ASSOCIATED_PROGRAM_ID, TOKEN_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/utils/token";
@@ -9,6 +9,9 @@ import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
 import { getDriftSpotMarketVault, getDriftState, getDriftUser, getDriftUserStats, getVault, getVaultUsdc, getVaultWsol } from "./getPDAs";
 import { getAssociatedTokenAddress } from "@solana/spl-token";
 import { getOrCreateAssociatedTokenAccountAnchor } from "./utils";
+import { getJupiterSwapIx } from "./jup";
+import { TransactionMessage } from "@solana/web3.js";
+import { PublicKey } from "@solana/web3.js";
 
 export const initAccount = async (wallet: AnchorWallet, connection: web3.Connection) => {
     const provider = new AnchorProvider(connection, wallet, {commitment: "confirmed"}); 
@@ -269,7 +272,7 @@ export const depositUsdc = async(wallet: AnchorWallet, connection: web3.Connecti
     }
 }
 
-export const withdrawUsdc = async(wallet: AnchorWallet, connection: web3.Connection, amountMicroCents: number) => {
+export const withdrawUsdt = async(wallet: AnchorWallet, connection: web3.Connection, amountMicroCents: number) => {
     const provider = new AnchorProvider(connection, wallet, {commitment: "confirmed"}); 
     setProvider(provider);
     const program = new Program(idl as Idl, provider) as unknown as Program<FundsProgram>;
@@ -277,7 +280,7 @@ export const withdrawUsdc = async(wallet: AnchorWallet, connection: web3.Connect
     const walletUsdc = await getOrCreateAssociatedTokenAccountAnchor(wallet, connection, provider, USDC_MINT);
 
     try {
-        const ix = await program.methods
+        const ix_withdrawUsdc = await program.methods
             .withdrawUsdc(new BN(amountMicroCents), false)
             .accounts({
                 // @ts-ignore - Causing an issue in Cursor IDE
@@ -301,7 +304,19 @@ export const withdrawUsdc = async(wallet: AnchorWallet, connection: web3.Connect
                 systemProgram: SystemProgram.programId,
             })
             .instruction();
-        return ix;
+
+        const { instructions, addressLookupTableAccounts } = await getJupiterSwapIx(wallet.publicKey, connection, amountMicroCents, USDC_MINT, USDT_MINT);
+
+        const latestBlockhash = await connection.getLatestBlockhash();
+        const messageV0 = new TransactionMessage({
+            payerKey: wallet.publicKey,
+            recentBlockhash: latestBlockhash.blockhash,
+            instructions: [ix_withdrawUsdc, ...instructions],
+        }).compileToV0Message(addressLookupTableAccounts);
+        const tx = new VersionedTransaction(messageV0);
+
+        const signature = await provider.sendAndConfirm(tx);
+        return signature;
     } catch (err) {
         if (err instanceof WalletSignTransactionError) {
             return null;

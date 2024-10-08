@@ -1,18 +1,13 @@
 import { AddressLookupTableAccount, Connection, PublicKey, TransactionInstruction, TransactionMessage, VersionedTransaction } from '@solana/web3.js';
+import { web3 } from "@coral-xyz/anchor";
 
-export async function getJupiterSwapIx(walletPubkey: PublicKey, amount: number, inputMint: string, outputMint: string) {
-
-    if (inputMint === "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v") {
-        amount = amount * 1000000;
-    }
-
+export async function getJupiterSwapIx(walletPubkey: PublicKey, connection: web3.Connection, amount: number, inputMint: PublicKey, outputMint: PublicKey) {
     const quoteResponse = await (
-        await fetch(`https://quote-api.jup.ag/v6/quote?inputMint=${inputMint}\
-      &outputMint=${outputMint}\
-      &amount=${amount}\
-      &slippageBps=50`
+        await fetch(
+            `https://quote-api.jup.ag/v6/quote?inputMint=${inputMint.toBase58()}&outputMint=${outputMint.toBase58()}&amount=${amount}&slippageBps=50&maxAccounts=40`
         )
-    ).json();
+      ).json();
+    console.log(quoteResponse);
 
     const instructions = await (
         await fetch('https://quote-api.jup.ag/v6/swap-instructions', {
@@ -41,73 +36,51 @@ export async function getJupiterSwapIx(walletPubkey: PublicKey, amount: number, 
         addressLookupTableAddresses, // The lookup table addresses that you can use if you are using versioned transaction.
     } = instructions;
 
-    return {
-        instructions: [
-            ...setupInstructions.map(deserializeInstruction),
-            deserializeInstruction(swapInstructionPayload),
-            // deserializeInstruction(cleanupInstruction),
-        ],
-        addressLookupTableAddresses,
-    };
-}
-
-const deserializeInstruction = (instruction: any) => {
-    return new TransactionInstruction({
-        programId: new PublicKey(instruction.programId),
-        keys: instruction.accounts.map((key: any) => ({
+    const deserializeInstruction = (instruction: any) => {
+        return new TransactionInstruction({
+          programId: new PublicKey(instruction.programId),
+          keys: instruction.accounts.map((key: any) => ({
             pubkey: new PublicKey(key.pubkey),
             isSigner: key.isSigner,
             isWritable: key.isWritable,
-        })),
-        data: Buffer.from(instruction.data, "base64"),
-    });
-};
+          })),
+          data: Buffer.from(instruction.data, "base64"),
+        });
+    };
 
-
-
-const getAddressLookupTableAccounts = async (
-    connection: Connection,
-    keys: string[]
-): Promise<AddressLookupTableAccount[]> => {
-    const addressLookupTableAccountInfos =
-        await connection.getMultipleAccountsInfo(
+    const getAddressLookupTableAccounts = async (
+        keys: string[]
+      ): Promise<AddressLookupTableAccount[]> => {
+        const addressLookupTableAccountInfos =
+          await connection.getMultipleAccountsInfo(
             keys.map((key) => new PublicKey(key))
-        );
-
-    return addressLookupTableAccountInfos.reduce((acc, accountInfo, index) => {
-        const addressLookupTableAddress = keys[index];
-        if (accountInfo) {
+          );
+      
+        return addressLookupTableAccountInfos.reduce((acc: any, accountInfo: any, index: any) => {
+          const addressLookupTableAddress = keys[index];
+          if (accountInfo) {
             const addressLookupTableAccount = new AddressLookupTableAccount({
-                key: new PublicKey(addressLookupTableAddress),
-                state: AddressLookupTableAccount.deserialize(accountInfo.data),
+              key: new PublicKey(addressLookupTableAddress),
+              state: AddressLookupTableAccount.deserialize(accountInfo.data),
             });
             acc.push(addressLookupTableAccount);
-        }
-
-        return acc;
-    }, new Array<AddressLookupTableAccount>());
-};
-
-export async function buildAndSignTransaction(connection: Connection, walletPubkey: PublicKey, jupiterSwapIx: any, addressLookupTableAddresses: string[], withdrawUsdcIx: any) {
+          }
+      
+          return acc;
+        }, new Array<AddressLookupTableAccount>());
+    };
 
     const addressLookupTableAccounts: AddressLookupTableAccount[] = [];
 
     addressLookupTableAccounts.push(
-        ...(await getAddressLookupTableAccounts(connection, addressLookupTableAddresses))
+        ...(await getAddressLookupTableAccounts(addressLookupTableAddresses))
     );
 
-    const blockhash = (await connection.getLatestBlockhash()).blockhash;
-    const messageV0 = new TransactionMessage({
-        payerKey: walletPubkey,
-        recentBlockhash: blockhash,
+    return {
         instructions: [
-            withdrawUsdcIx,
-            ...jupiterSwapIx
-        ]
-    }).compileToV0Message(addressLookupTableAccounts);
-    const transaction = new VersionedTransaction(messageV0);
-
-    return transaction;
+            ...setupInstructions.map(deserializeInstruction),
+            deserializeInstruction(swapInstructionPayload),
+        ],
+        addressLookupTableAccounts,
+    };
 }
-
-
