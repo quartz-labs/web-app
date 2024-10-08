@@ -43,7 +43,7 @@ export default function Dashboard() {
         onCancel: () => {}
     });
 
-    const [offrampModalEnabled, setOfframpModalEnabled] = useState(true);
+    const [offrampModalEnabled, setOfframpModalEnabled] = useState(false);
     const [offrampUrl, setOfframpUrl] = useState("");
 
     const enableModal = (data: ModalProps) => {
