@@ -5,8 +5,11 @@ import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import Image from "next/image";
 import styles from "./MainView.module.css";
+import { getSign, roundToDecimalPlaces, roundToDecimalPlacesAbsolute } from "@/utils/utils";
 
-export default function MainView({swapView, enableModal, disableModal, enableOfframpModal} : ViewProps) {
+export default function MainView (
+    {solPrice, totalSolBalance, usdcLoanBalance, solDailyRate, usdcDailyRate, swapView, enableModal, disableModal, enableOfframpModal} : ViewProps
+) {
     const { connection } = useConnection();
     const wallet = useAnchorWallet();
 
@@ -64,13 +67,24 @@ export default function MainView({swapView, enableModal, disableModal, enableOff
         })
     }
 
+    const netSolBalance = ((totalSolBalance * solPrice) - usdcLoanBalance) / solPrice;
+    const dailySolChange = totalSolBalance * solDailyRate * solPrice;
+    const dailyUsdcChange = usdcLoanBalance * usdcDailyRate;
+    const dailyNetChange = dailySolChange - dailyUsdcChange;
+
     return (
         <div>
             <div className={styles.balanceWrapper}>
-                <p className={styles.title}>0 SOL</p>
+                <p className={styles.title}>
+                    {roundToDecimalPlaces(netSolBalance, 4)} SOL
+                </p>
                 <div className={styles.mainBalance}>
-                    <p className={styles.fiatAmount}>$0</p>
-                    <p className={styles.subBalance}>+$0 /day</p>
+                    <p className={styles.fiatAmount}>
+                        ${(netSolBalance * solPrice).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </p>
+                    <p className={styles.subBalance}>
+                        {getSign(dailyNetChange)}${roundToDecimalPlacesAbsolute(dailyNetChange, 4)} /day
+                    </p>
                 </div>
             </div>
 

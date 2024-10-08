@@ -2,42 +2,33 @@
 import { NextResponse } from 'next/server';
 import { Connection, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js'
 import { DriftClient, Wallet, loadKeypair, PerpMarkets, PerpMarketConfig, BN } from '@drift-labs/sdk';
+import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC, MICRO_CENTS_PER_USDC } from '@/utils/constants';
 
 let driftClient: DriftClient | null = null;
 
 async function initializeDriftClient() {
   if (driftClient) return driftClient;
 
-  const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL || 'https://api.mainnet.solana.com';
-  console.log('RPC URL:', rpcUrl);
+  const rpcUrl = "https://janella-g42vor-fast-mainnet.helius-rpc.com";
   const connection = new Connection(rpcUrl);
 
-  const keypairFile = process.env.NEXT_PUBLIC_KEYPAIR_FILE || "~/.config/solana/id.json";
-  console.log('Keypair file path:', keypairFile);
+  const keypairFile = process.env.NEXT_PUBLIC_DRIFT_KEYPAIR;
   if (!keypairFile) {
     throw new Error('Keypair path not found in environment variables');
   }
 
-  console.log('Loading keypair...');
-  const wallet = new Wallet(loadKeypair(keypairFile));
-  console.log('Wallet created successfully with public key:', wallet.publicKey.toString());
-
-  console.log('Initializing Drift client...');
+  const driftWallet = new Wallet(loadKeypair(keypairFile));
   driftClient = new DriftClient({
     connection,
-    wallet,
-    env: 'devnet',
+    wallet: driftWallet,
+    env: 'mainnet-beta',
   });
 
-  console.log('Subscribing to Drift client...');
   await driftClient.subscribe();
-  console.log('Drift client subscribed successfully');
-
   return driftClient;
 }
 
 export async function GET(request: Request) {
-  console.log('Starting GET request to /api/drift-data');
   try {
     const client = await initializeDriftClient();
 
@@ -52,9 +43,6 @@ export async function GET(request: Request) {
     if (!token) {
       return NextResponse.json({ error: 'Token parameter is required' }, { status: 400 });
     }
-    console.log('Address from params:', address);
-    console.log('Token from params:', token);
-
 
     const emulationStatus = await client.emulateAccount(new PublicKey(address));
 
@@ -62,26 +50,18 @@ export async function GET(request: Request) {
       throw new Error('Failed to emulate account');
     }
 
-    console.log('Getting drift user..');
 
     const user = client.getUser();
 
-    // Default = SOL
-    let marketIndex = 1;
+    let marketIndex = DRIFT_MARKET_INDEX_SOL;
     let decimalPlaces = LAMPORTS_PER_SOL;
     if (token === 'USDC') {
-      marketIndex = 0;
-      decimalPlaces = 1000000;
+      marketIndex = DRIFT_MARKET_INDEX_USDC;
+      decimalPlaces = MICRO_CENTS_PER_USDC;
     }
 
-    const tokenAmount = user.getTokenAmount(
-      marketIndex,
-    );
-
+    const tokenAmount = user.getTokenAmount(marketIndex);
     const tokenBalance = Number(tokenAmount.toString(10)) / decimalPlaces;
-
-    console.log(`${token} balance:`, tokenBalance);
-
     return NextResponse.json({ tokenAmount: tokenBalance });
   } catch (error) {
     console.error('Error fetching Drift data:', error);

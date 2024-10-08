@@ -10,8 +10,15 @@ import MainView from '@/components/MainView/MainView';
 import LoanView from '@/components/LoanView/LoanView';
 import styles from "./page.module.css";
 import OfframpModal from '@/components/Modal/OfframpModal';
+import { fetchDriftData, getSolDailyEarnRate, getUsdcDailyBorrowRate } from '@/utils/balance';
+import { getVault } from '@/utils/getPDAs';
 
 export interface ViewProps {
+    solPrice: number;
+    totalSolBalance: number;
+    usdcLoanBalance: number;
+    solDailyRate: number;
+    usdcDailyRate: number;
     swapView: () => void;
     enableModal: (data: ModalProps) => void;
     disableModal: () => void;
@@ -46,17 +53,56 @@ export default function Dashboard() {
     const [offrampModalEnabled, setOfframpModalEnabled] = useState(false);
     const [offrampUrl, setOfframpUrl] = useState("");
 
+    const [solPrice, setSolPrice] = useState(0);
+    const [totalSolBalance, setTotalSolBalance] = useState(0);
+    const [usdcLoanBalance, setUsdcLoanBalance] = useState(0);
+    const [solDailyRate, setSolDailyRate] = useState(0);
+    const [usdcDailyRate, setUsdcDailyRate] = useState(0);
+
     const enableModal = (data: ModalProps) => {
         setModalData(data);
         setModalEnabled(true);
     }
-    const disableModal = () => setModalEnabled(false);
+    const disableModal = () => {
+        updateBalance();
+        setModalEnabled(false);
+    }
 
     const enableOfframpModal = (url: string) => {
+        updateBalance();
         setOfframpUrl(url);
         setOfframpModalEnabled(true);
         setModalEnabled(false);
     }
+
+    const updateFinancialData = async () => {
+        try {
+            const response = await fetch('/api/solana-price');
+            const data = await response.json();
+            setSolPrice(data.solana.usd);
+
+            setSolDailyRate(await getSolDailyEarnRate());
+            setUsdcDailyRate(await getUsdcDailyBorrowRate());
+        } catch {
+            console.error("Error: Unable to reach CoinGecko for price data");
+        }
+    }
+
+    const updateBalance = async () => {
+        if (!connection || !wallet || !await isVaultInitialized(wallet, connection)) return;
+
+        const vault = getVault(wallet.publicKey);
+        setTotalSolBalance(await fetchDriftData(vault, "SOL"));
+        setUsdcLoanBalance(-await fetchDriftData(vault, "USDC"));
+        updateFinancialData();
+    }
+
+    useEffect(() => {
+        updateBalance();
+
+        const interval = setInterval(updateFinancialData, 10000);
+        return () => clearInterval(interval);
+    }, []);
 
     return (
         <main className={styles.maxHeight}>
@@ -73,6 +119,11 @@ export default function Dashboard() {
                 
                 {mainView &&
                     <MainView 
+                        solPrice={solPrice}
+                        totalSolBalance={totalSolBalance}
+                        usdcLoanBalance={usdcLoanBalance}
+                        solDailyRate={solDailyRate}
+                        usdcDailyRate={usdcDailyRate}
                         swapView={() => setMainView(false)}
                         enableModal={enableModal}
                         disableModal={disableModal}
@@ -81,7 +132,12 @@ export default function Dashboard() {
                 }
 
                 {!mainView &&
-                    <LoanView 
+                    <LoanView
+                        solPrice={solPrice}
+                        totalSolBalance={totalSolBalance}
+                        usdcLoanBalance={usdcLoanBalance}
+                        solDailyRate={solDailyRate}
+                        usdcDailyRate={usdcDailyRate} 
                         swapView={() => setMainView(true)}
                         enableModal={enableModal}
                         disableModal={disableModal}

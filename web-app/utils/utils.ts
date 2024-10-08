@@ -15,6 +15,16 @@ export const roundToDecimalPlaces = (num: number, place: number) => {
     return Math.round((num * multiplier + Number.EPSILON)) / multiplier;
 }
 
+export const roundToDecimalPlacesAbsolute = (num: number, place: number) => {
+    const rounded = roundToDecimalPlaces(num, place);
+    return Math.abs(rounded);
+}
+
+export const getSign = (num: number) => {
+    if (num < 0) return "-";
+    else return "+"
+}
+
 export const getOrCreateAssociatedTokenAccountAnchor = async (wallet: AnchorWallet, connection: Connection, provider: AnchorProvider, mint: PublicKey) => {
     const associatedTokenAddress = await getAssociatedTokenAddress(
         mint,
