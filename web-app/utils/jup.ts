@@ -4,10 +4,9 @@ import { web3 } from "@coral-xyz/anchor";
 export async function getJupiterSwapIx(walletPubkey: PublicKey, connection: web3.Connection, amount: number, inputMint: PublicKey, outputMint: PublicKey) {
     const quoteResponse = await (
         await fetch(
-            `https://quote-api.jup.ag/v6/quote?inputMint=${inputMint.toBase58()}&outputMint=${outputMint.toBase58()}&amount=${amount}&slippageBps=50&maxAccounts=40`
+            `https://quote-api.jup.ag/v6/quote?inputMint=${inputMint.toBase58()}&outputMint=${outputMint.toBase58()}&amount=${amount}&slippageBps=50&maxAccounts=26`
         )
       ).json();
-    console.log(quoteResponse);
 
     const instructions = await (
         await fetch('https://quote-api.jup.ag/v6/swap-instructions', {
@@ -19,6 +18,7 @@ export async function getJupiterSwapIx(walletPubkey: PublicKey, connection: web3
                 // quoteResponse from /quote api
                 quoteResponse,
                 userPublicKey: walletPubkey.toBase58(),
+                useCompression: true,
             })
         })
     ).json();

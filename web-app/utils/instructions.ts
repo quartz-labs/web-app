@@ -212,8 +212,8 @@ export const depositLamports = async(wallet: AnchorWallet, connection: web3.Conn
     //     const versionedTx = new VersionedTransaction(tx.compileMessage());
     //     const signedTx = await wallet.signTransaction(versionedTx);
 
-    //     const simulation = await connection.simulateTransaction(signedTx);
-    //     console.log("Simulation result:", simulation);
+        // const simulation = await connection.simulateTransaction(signedTx);
+        // console.log("Simulation result:", simulation);
 
     //     const signature = await provider.connection.sendRawTransaction(signedTx.serialize(), {skipPreflight: true});
         
@@ -231,7 +231,7 @@ export const depositLamports = async(wallet: AnchorWallet, connection: web3.Conn
 //     }
 // }
 
-export const depositUsdc = async(wallet: AnchorWallet, connection: web3.Connection, amountMicroCents: number) => {
+export const depositUsdt = async(wallet: AnchorWallet, connection: web3.Connection, amountMicroCents: number) => {
     const provider = new AnchorProvider(connection, wallet, {commitment: "confirmed"}); 
     setProvider(provider);
     const program = new Program(idl as Idl, provider) as unknown as Program<FundsProgram>;
@@ -264,6 +264,18 @@ export const depositUsdc = async(wallet: AnchorWallet, connection: web3.Connecti
                 systemProgram: SystemProgram.programId,
             })
             .rpc();
+        
+        // const { instructions, addressLookupTableAccounts } = await getJupiterSwapIx(wallet.publicKey, connection, amountMicroCents, USDT_MINT, USDC_MINT);
+
+        // const latestBlockhash = await connection.getLatestBlockhash();
+        // const messageV0 = new TransactionMessage({
+        //     payerKey: wallet.publicKey,
+        //     recentBlockhash: latestBlockhash.blockhash,
+        //     instructions: [...instructions, ix_depositUsdt],
+        // }).compileToV0Message(addressLookupTableAccounts);
+        // const tx = new VersionedTransaction(messageV0);
+
+        // const signature = await provider.sendAndConfirm(tx);
         return signature;
     } catch (err) {
         if (err instanceof WalletSignTransactionError) {
