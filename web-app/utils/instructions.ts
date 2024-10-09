@@ -240,8 +240,34 @@ export const depositUsdt = async(wallet: AnchorWallet, connection: web3.Connecti
     const walletUsdc = await getAssociatedTokenAddress(USDC_MINT, wallet.publicKey);
     if (!walletUsdc) throw new Error("No USDC account found on connected wallet");
 
-    try {
-        const signature = await program.methods
+    try {       
+        const quoteEndpoint = `https://quote-api.jup.ag/v6/quote?inputMint=${USDT_MINT.toBase58()}&outputMint=${USDC_MINT.toBase58()}&amount=${amountMicroCents}&slippageBps=50&swapMode=ExactOut`;
+        const quoteResponse = await (await fetch(quoteEndpoint)).json();
+        const { swapTransaction } = await (
+            await fetch('https://quote-api.jup.ag/v6/swap', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                // quoteResponse from /quote api
+                quoteResponse,
+                // user public key to be used for the swap
+                userPublicKey: wallet.publicKey.toString(),
+                // auto wrap and unwrap SOL. default is true
+                wrapAndUnwrapSol: true,
+                // feeAccount is optional. Use if you want to charge a fee.  feeBps must have been passed in /quote API.
+                // feeAccount: "fee_account_public_key"
+              })
+            })
+          ).json();
+        
+        const swapTransactionBuf = Buffer.from(swapTransaction, 'base64');
+        var tx_jupiter = VersionedTransaction.deserialize(swapTransactionBuf);
+        const sx_jupiter = await provider.sendAndConfirm(tx_jupiter);
+        if (!sx_jupiter) return;
+
+        const sx_depositUsdt = await program.methods
             .depositUsdc(new BN(amountMicroCents), false)
             .accounts({
                 // @ts-ignore - Causing an issue in Cursor IDE
@@ -264,19 +290,8 @@ export const depositUsdt = async(wallet: AnchorWallet, connection: web3.Connecti
                 systemProgram: SystemProgram.programId,
             })
             .rpc();
-        
-        // const { instructions, addressLookupTableAccounts } = await getJupiterSwapIx(wallet.publicKey, connection, amountMicroCents, USDT_MINT, USDC_MINT);
 
-        // const latestBlockhash = await connection.getLatestBlockhash();
-        // const messageV0 = new TransactionMessage({
-        //     payerKey: wallet.publicKey,
-        //     recentBlockhash: latestBlockhash.blockhash,
-        //     instructions: [...instructions, ix_depositUsdt],
-        // }).compileToV0Message(addressLookupTableAccounts);
-        // const tx = new VersionedTransaction(messageV0);
-
-        // const signature = await provider.sendAndConfirm(tx);
-        return signature;
+        return sx_depositUsdt;
     } catch (err) {
         if (err instanceof WalletSignTransactionError) {
             return null;
@@ -317,7 +332,7 @@ export const withdrawUsdt = async(wallet: AnchorWallet, connection: web3.Connect
             })
             .instruction();
 
-        const { instructions, addressLookupTableAccounts } = await getJupiterSwapIx(wallet.publicKey, connection, amountMicroCents, USDC_MINT, USDT_MINT);
+        const { instructions, addressLookupTableAccounts } = await getJupiterSwapIx(wallet.publicKey, connection, amountMicroCents, USDC_MINT, USDT_MINT, false);
 
         const latestBlockhash = await connection.getLatestBlockhash();
         const messageV0 = new TransactionMessage({

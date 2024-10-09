@@ -93,10 +93,15 @@ export default function Dashboard() {
     const updateBalance = async () => {
         if (!connection || !wallet || !await isVaultInitialized(wallet, connection)) return;
 
+        setBalanceLoaded(false);
+
         const vault = getVault(wallet.publicKey);
         const totalSolBalance = await fetchDriftData(vault, "SOL");
         const usdcLoanBalance = await fetchDriftData(vault, "USDC");
 
+        if (isNaN(totalSolBalance) || isNaN(usdcLoanBalance)) {
+            return;
+        }
         setTotalSolBalance(totalSolBalance);
         setUsdcLoanBalance(-usdcLoanBalance);
         setBalanceLoaded(true);
