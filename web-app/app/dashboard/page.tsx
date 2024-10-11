@@ -97,11 +97,11 @@ export default function Dashboard() {
         setBalanceLoaded(false);
 
         const vault = getVault(wallet.publicKey);
-        const [totalSolBalance, usdcLoanBalance] = await Promise.all([
-            fetchDriftData(vault, DRIFT_MARKET_INDEX_SOL),
-            fetchDriftData(vault, DRIFT_MARKET_INDEX_USDC),
-        ])
-
+        const [totalSolBalance, usdcLoanBalance] = await fetchDriftData(vault, [
+            DRIFT_MARKET_INDEX_SOL,
+            DRIFT_MARKET_INDEX_USDC
+        ]);
+        
         if (isNaN(Number(totalSolBalance)) || isNaN(Number(usdcLoanBalance))) return;
 
         setTotalSolBalance(Math.abs(totalSolBalance));

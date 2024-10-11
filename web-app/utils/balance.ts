@@ -12,14 +12,16 @@ export const getSolDailyEarnRate = async () => {
     return 0.012636 / 365;
 }
 
-export const fetchDriftData = async (vaultAddress: PublicKey, marketIndex: number) => {
+export const fetchDriftData = async (vaultAddress: PublicKey, marketIndices: number[]) => {
     try {
-        const response = await fetch('/api/drift-data?address=' + vaultAddress.toBase58() + "&marketIndex=" + marketIndex.toString());
-        const data = await response.json();
-        
+        const response = await fetch(`/api/drift-data?address=${vaultAddress.toBase58()}&marketIndices=${marketIndices}`);
         if (!response.ok) throw new Error('Failed to fetch Drift data');
-        return data.tokenAmount;
+
+        const data = await response.json();
+        const balances = marketIndices.map(index => data[index] || NaN);
+        return balances;
     } catch (error) {
         console.error('Error fetching Drift data:', error);
+        return marketIndices.map(() => NaN);
     }
 };
