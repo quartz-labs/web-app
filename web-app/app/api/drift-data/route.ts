@@ -1,8 +1,8 @@
 // /app/api/drift-data/route.ts
 import { NextResponse } from 'next/server';
 import { Connection, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js'
-import { DriftClient, Wallet, loadKeypair, PerpMarkets, PerpMarketConfig, BN } from '@drift-labs/sdk';
-import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC, MICRO_CENTS_PER_USDC } from '@/utils/constants';
+import { DriftClient, Wallet } from '@drift-labs/sdk';
+import { DRIFT_MARKET_INDEX_SOL, MICRO_CENTS_PER_USDC } from '@/utils/constants';
 import { Keypair } from '@solana/web3.js';
 
 let driftClient: DriftClient | null = null;
@@ -37,36 +37,29 @@ export async function GET(request: Request) {
     // Get address from GET params
     const { searchParams } = new URL(request.url);
     const address = searchParams.get('address');
-    const token = searchParams.get('token');
+    const marketIndexStr = searchParams.get('marketIndex');
+    const marketIndex = Number(marketIndexStr);
 
-    if (!address) {
-      return NextResponse.json({ error: 'Address parameter is required' }, { status: 400 });
+    if (!address || !marketIndexStr) {
+      return NextResponse.json({ error: 'Missing parameter' }, { status: 400 });
     }
-    if (!token) {
-      return NextResponse.json({ error: 'Token parameter is required' }, { status: 400 });
+    if (isNaN(marketIndex)) {
+      return NextResponse.json({ error: 'Invalid market index' }, { status: 400 });
     }
 
     const emulationStatus = await client.emulateAccount(new PublicKey(address));
-
-    if (!emulationStatus) {
-      throw new Error('Failed to emulate account');
-    }
-
-
+    if (!emulationStatus) throw new Error('Failed to emulate account');
     const user = client.getUser();
 
-    let marketIndex = DRIFT_MARKET_INDEX_SOL;
-    let decimalPlaces = LAMPORTS_PER_SOL;
-    if (token === 'USDC') {
-      marketIndex = DRIFT_MARKET_INDEX_USDC;
-      decimalPlaces = MICRO_CENTS_PER_USDC;
-    }
+    const decimalPlaces = (marketIndex == DRIFT_MARKET_INDEX_SOL)
+      ? LAMPORTS_PER_SOL
+      : MICRO_CENTS_PER_USDC;
 
     const tokenAmount = user.getTokenAmount(marketIndex);
     const tokenBalance = Number(tokenAmount.toString(10)) / decimalPlaces;
     return NextResponse.json({ tokenAmount: tokenBalance });
   } catch (error) {
-    console.error('Error fetching Drift data:', error);
-    return NextResponse.json({ error: 'Failed to fetch Drift data' }, { status: 500 });
+    console.error('Error fetching Drift balance:', error);
+    return NextResponse.json({ error: 'Failed to fetch Drift balance' }, { status: 500 });
   }
 }

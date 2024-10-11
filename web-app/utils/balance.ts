@@ -12,9 +12,9 @@ export const getSolDailyEarnRate = async () => {
     return 0.012636 / 365;
 }
 
-export const fetchDriftData = async (vaultAddress: PublicKey, token: string) => {
+export const fetchDriftData = async (vaultAddress: PublicKey, marketIndex: number) => {
     try {
-        const response = await fetch('/api/drift-data?address=' + vaultAddress.toBase58() + "&token=" + token);
+        const response = await fetch('/api/drift-data?address=' + vaultAddress.toBase58() + "&marketIndex=" + marketIndex.toString());
         const data = await response.json();
         
         if (!response.ok) throw new Error('Failed to fetch Drift data');

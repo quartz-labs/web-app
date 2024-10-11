@@ -12,6 +12,7 @@ import styles from "./page.module.css";
 import OfframpModal from '@/components/Modal/OfframpModal';
 import { fetchDriftData, getSolDailyEarnRate, getUsdcDailyBorrowRate } from '@/utils/balance';
 import { getVault } from '@/utils/getPDAs';
+import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC } from '@/utils/constants';
 
 export interface ViewProps {
     solPrice: number;
@@ -96,17 +97,18 @@ export default function Dashboard() {
         setBalanceLoaded(false);
 
         const vault = getVault(wallet.publicKey);
-        const totalSolBalance = await fetchDriftData(vault, "SOL");
-        const usdcLoanBalance = await fetchDriftData(vault, "USDC");
+        const [totalSolBalance, usdcLoanBalance] = await Promise.all([
+            fetchDriftData(vault, DRIFT_MARKET_INDEX_SOL),
+            fetchDriftData(vault, DRIFT_MARKET_INDEX_USDC),
+        ])
 
-        if (isNaN(totalSolBalance) || isNaN(usdcLoanBalance)) {
-            return;
-        }
-        setTotalSolBalance(totalSolBalance);
-        setUsdcLoanBalance(-usdcLoanBalance);
-        setBalanceLoaded(true);
+        if (isNaN(Number(totalSolBalance)) || isNaN(Number(usdcLoanBalance))) return;
 
+        setTotalSolBalance(Math.abs(totalSolBalance));
+        setUsdcLoanBalance(Math.abs(usdcLoanBalance));
         updateFinancialData();
+
+        setBalanceLoaded(true);
     }
 
     useEffect(() => {
