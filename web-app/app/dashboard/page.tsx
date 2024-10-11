@@ -2,7 +2,7 @@
 
 import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { isVaultInitialized } from '@/utils/utils';
 import Modal, { ModalProps } from '@/components/Modal/Modal';
 import Account from '@/components/Account/Account';
@@ -38,7 +38,7 @@ export default function Dashboard() {
             else if (!await isVaultInitialized(wallet, connection)) router.push("/onboarding");
         }
         isLoggedIn();
-    }, [wallet]);
+    }, [wallet, connection, router]);
 
     const [mainView, setMainView] = useState(true);
 
@@ -91,7 +91,7 @@ export default function Dashboard() {
         }
     }
 
-    const updateBalance = async () => {
+    const updateBalance = useCallback(async () => {
         if (!connection || !wallet || !await isVaultInitialized(wallet, connection)) return;
 
         setBalanceLoaded(false);
@@ -101,7 +101,7 @@ export default function Dashboard() {
             DRIFT_MARKET_INDEX_SOL,
             DRIFT_MARKET_INDEX_USDC
         ]);
-        
+
         if (isNaN(Number(totalSolBalance)) || isNaN(Number(usdcLoanBalance))) return;
 
         setTotalSolBalance(Math.abs(totalSolBalance));
@@ -109,14 +109,14 @@ export default function Dashboard() {
         updateFinancialData();
 
         setBalanceLoaded(true);
-    }
+    }, [connection, wallet]);
 
     useEffect(() => {
         updateBalance();
 
         const interval = setInterval(updateFinancialData, 10000);
         return () => clearInterval(interval);
-    }, []);
+    }, [updateBalance]);
 
     return (
         <main className={styles.maxHeight}>

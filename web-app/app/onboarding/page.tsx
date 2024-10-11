@@ -7,7 +7,6 @@ import { initAccount } from '@/utils/instructions';
 import { useEffect, useState } from 'react';
 import { isVaultInitialized } from '@/utils/utils';
 import Account from '@/components/Account/Account';
-import Link from 'next/link';
 import { PuffLoader } from 'react-spinners';
 
 export default function Onboarding() {
@@ -21,7 +20,7 @@ export default function Onboarding() {
           else if (await isVaultInitialized(wallet, connection)) router.push("/dashboard");
         }
         isLoggedIn();
-    }, [wallet]);
+    }, [wallet, connection, router]);
 
     const [awaitingSign, setAwaitingSign] = useState(false);
     const [checkboxes, setCheckboxes] = useState([false, false, false, false]);
@@ -60,7 +59,7 @@ export default function Onboarding() {
 
             <div>
                 <h1 className={styles.heading}>Acknowledge Terms</h1>
-                <p className={styles.subheading}>We use Drift's lending protocol for yield and borrowing</p>
+                <p className={styles.subheading}>We use Drift&apos;s lending protocol for yield and borrowing</p>
 
                 <ul className={styles.checkboxes}>
                     <li>
@@ -71,7 +70,7 @@ export default function Onboarding() {
                                 onChange={() => handleCheckboxChange(0)} 
                             />
                             <span className={styles.checkboxText}>
-                                I agree to <a href="https://docs.drift.trade/legal-and-regulations/terms-of-use" target="_blank">Drift's terms and conditions</a>
+                                I agree to <a href="https://docs.drift.trade/legal-and-regulations/terms-of-use" target="_blank">Drift&apos;s terms and conditions</a>
                             </span>
                         </label>
                     </li>
@@ -84,7 +83,7 @@ export default function Onboarding() {
                                 onChange={() => handleCheckboxChange(1)} 
                             />
                             <span className={styles.checkboxText}>
-                                I have read and understood <a href="https://docs.drift.trade/legal-and-regulations/disclaimer" target="_blank">Drift's protocol disclaimer</a>
+                                I have read and understood <a href="https://docs.drift.trade/legal-and-regulations/disclaimer" target="_blank">Drift&apos;s protocol disclaimer</a>
                             </span>
                         </label>
                     </li>

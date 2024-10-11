@@ -21,7 +21,7 @@ export default function Page() {
       }
     }
     isLoggedIn();
-  }, [wallet]);
+  }, [wallet, connection, router]);
 
   return (
     <main className={"two-col-grid"}>
