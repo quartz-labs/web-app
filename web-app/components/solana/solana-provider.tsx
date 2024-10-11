@@ -7,15 +7,15 @@ import {
   ConnectionProvider,
   WalletProvider,
 } from '@solana/wallet-adapter-react';
-import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
+import { WalletModalProvider } from './wallet-adapter-react-ui';
 import { ReactNode, useCallback, useMemo } from 'react';
 import { useCluster } from './cluster-data-access';
 
-require('@solana/wallet-adapter-react-ui/styles.css');
+import './wallet-adapter-react-ui/styles.css';
 
 export const WalletButton = dynamic(
   async () =>
-    (await import('@solana/wallet-adapter-react-ui')).WalletMultiButton,
+    (await import('./wallet-adapter-react-ui')).WalletMultiButton,
   { ssr: false }
 );
 
@@ -23,6 +23,7 @@ export function SolanaProvider({ children }: { children: ReactNode }) {
   const { cluster } = useCluster();
   const endpoint = useMemo(() => cluster.endpoint, [cluster]);
   const onError = useCallback((error: WalletError) => {
+    // TODO: Handle user not signing transaction
     console.error(error);
   }, []);
 

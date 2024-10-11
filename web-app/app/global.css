@@ -10,9 +10,14 @@
     linear-gradient(65deg, rgba(41,135,200,0.02) 0%, rgba(41,135,200,0.22) 100%),
     linear-gradient(65deg, rgba(188,188,188,0.12) 0%, rgba(235,235,235,0.25) 100%);
   
-  --placeholder-glass-stroke: #4E677D;
+  --placeholder-glass-stroke: #2B3A4A;
   --placeholder-glass-stroke-accent: #5A355A;
-  --glass-border: 1.5px solid var(--placeholder-glass-stroke); /* TODO: Make gradient */
+  --glass-border: 2px solid var(--placeholder-glass-stroke); /* TODO: Make gradient */
+  --glass-background: 
+    url("/noise.png"),
+    radial-gradient(circle at 80% 20%, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%),
+    linear-gradient(#ffffff03, #ffffff03),
+    linear-gradient(#0B111D99, #0B111D99);
 
   --background-linear-gradient: linear-gradient(var(--color-background), var(--color-background));
 
@@ -92,11 +97,7 @@ body {
   box-shadow: -10px 10px 24px 0px rgba(41,135,200,0.12);
 
   /* Background */
-  background-image: 
-    url("/noise.png"),
-    radial-gradient(circle at 80% 20%, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%),
-    linear-gradient(#ffffff03, #ffffff03),
-    linear-gradient(#0B111D99, #0B111D99);
+  background-image: var(--glass-background);
   background-size: 17% auto, auto, auto, auto;
   backdrop-filter: blur(22px);
 

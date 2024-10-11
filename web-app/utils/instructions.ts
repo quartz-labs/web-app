@@ -217,7 +217,7 @@ export const depositLamports = async(wallet: AnchorWallet, connection: web3.Conn
 
     //     const signature = await provider.connection.sendRawTransaction(signedTx.serialize(), {skipPreflight: true});
         
-    //     await connection.confirmTransaction({
+    //     await connection.getSignatureStatuses({
     //         signature,
     //         blockhash: latestBlockhash.blockhash,
     //         lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,

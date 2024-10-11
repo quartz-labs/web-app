@@ -1,13 +1,16 @@
 import './global.css';
 import { ClusterProvider } from '@/components/solana/cluster-data-access';
-import { SolanaProvider, WalletButton } from '@/components/solana/solana-provider';
+import { SolanaProvider } from '@/components/solana/solana-provider';
 import { ReactQueryProvider } from './react-query-provider';
-import Image from 'next/image';
 
 export const metadata = {
   title: 'Quartz',
   description: 'Quartz MVP built for the Colosseum Radar hackathon',
 };
+
+import { Inter } from 'next/font/google';
+
+const inter = Inter({ subsets: ['latin'] });
 
 export default function RootLayout({
   children,
@@ -15,8 +18,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+    <html lang="en" className={inter.className}>
+      <body>
         <ReactQueryProvider>
           <ClusterProvider>
             <SolanaProvider>
