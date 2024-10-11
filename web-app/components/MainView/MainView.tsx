@@ -7,6 +7,7 @@ import Image from "next/image";
 import styles from "./MainView.module.css";
 import { getSign, roundToDecimalPlaces, roundToDecimalPlacesAbsolute } from "@/utils/utils";
 import { PuffLoader } from "react-spinners";
+import React from "react";
 
 export default function MainView({ 
     solPrice, 

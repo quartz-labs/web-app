@@ -16,7 +16,7 @@ export default function OfframpModal(
         : "";
 
     return (
-        <ModalWrapper>
+        <ModalWrapper onClose={closeModal}>
             <div className={styles.contentWrapper}>
                 <h2 className={styles.offrampTitle}>You will be redirected to Mercuryo to complete your off-ramp</h2>
                 <p className={styles.offrampRedirect}>If you are not redirected <a href={url} target="_blank">click here</a></p>
