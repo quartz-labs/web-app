@@ -25,19 +25,23 @@
   --color-text: #ffffff;
   --color-text-light: #ffffffA5;
   --color-text-error: #FF8080;
-}
 
-.font-small {
-  font-size: 18px !important;
+  --text-size-h1: 56px;
+  --text-size-h2: 41.8px;
+  --text-size-h3: 29.03px;
+  --text-size-h4: 24.19px;
+  --text-size-large: 20px;
+  --text-size-p: 16.8px;
+  --text-size-small: 14px
 }
 
 html,
 body {
   height: 100%;
-  background: #0B111D;
-  color: white;
+  background: var(--color-background);
+  color: var(--color-text);
   font-weight: 200;
-  font-size: 16px;
+  font-size: var(--text-size-p);
 }
 
 .glass-button {
@@ -50,7 +54,7 @@ body {
   padding: 14px 28px;
   background: var(--gradient-glass-stroke);
 
-  font-size: 20px;
+  font-size: var(--text-size-large);
   border-radius: 10px;
   background-image: var(--gradient-glass-stroke);
   background-origin: border-box;
