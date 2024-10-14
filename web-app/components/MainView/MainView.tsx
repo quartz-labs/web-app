@@ -61,7 +61,7 @@ export default function MainView({
             title: "Off-ramp to USD",
             denomination: "USD",
             buttonText: "Off-ramp",
-            minAmount: 31,
+            minAmount: 0,
             onConfirm: async (amount: number) => {
                 if (!wallet) return;
 

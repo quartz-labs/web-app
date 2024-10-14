@@ -25,14 +25,15 @@
   --color-text: #ffffff;
   --color-text-light: #ffffffA5;
   --color-text-error: #FF8080;
+  --color-link-hover: #d8f3ff;
 
-  --text-size-h1: 56px;
-  --text-size-h2: 41.8px;
-  --text-size-h3: 29.03px;
-  --text-size-h4: 24.19px;
-  --text-size-large: 20px;
   --text-size-p: 16.8px;
-  --text-size-small: 14px
+  --text-size-h1: 2.986rem;
+  --text-size-h2: 2.488rem;
+  --text-size-h3: 1.728rem;
+  --text-size-h4: 1.44rem;
+  --text-size-large: 1.2rem;
+  --text-size-small: 0.833rem;
 }
 
 html,
@@ -42,6 +43,14 @@ body {
   color: var(--color-text);
   font-weight: 200;
   font-size: var(--text-size-p);
+}
+
+a {
+  text-decoration: underline;
+}
+
+a:hover {
+  color: var(--color-link-hover);
 }
 
 .glass-button {
@@ -107,17 +116,6 @@ body {
 
   /* Border */
   border: var(--glass-border);
-}
-
-.wallet-adapter-button-trigger {
-  background: rgb(100, 26, 230) !important;
-  border-radius: 8px !important;
-  padding-left: 16px !important;
-  padding-right: 16px !important;
-}
-.wallet-adapter-dropdown-list,
-.wallet-adapter-button {
-  font-family: inherit !important;
 }
 
 .two-col-grid {
