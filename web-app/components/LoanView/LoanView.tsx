@@ -15,7 +15,8 @@ export default function LoanView ({
     balanceLoaded,
     swapView, 
     enableModal, 
-    disableModal
+    disableModal,
+    updateBalance
 } : ViewProps) {
     const { connection } = useConnection();
     const wallet = useAnchorWallet();
@@ -30,7 +31,10 @@ export default function LoanView ({
                 if (!wallet) return;
 
                 const signature = await depositUsdt(wallet, connection, amount * MICRO_CENTS_PER_USDC);
-                if (signature) disableModal();
+                if (signature) {
+                    updateBalance();
+                    disableModal();
+                }
             },
             onCancel: () => { disableModal(); }
         })

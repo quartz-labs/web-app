@@ -19,6 +19,7 @@ export default function MainView({
     swapView, 
     enableModal, 
     disableModal, 
+    updateBalance,
     enableOfframpModal 
 }: ViewProps) {
     const { connection } = useConnection();
@@ -34,7 +35,10 @@ export default function MainView({
                 if (!wallet) return;
 
                 const signature = await depositLamports(wallet, connection, amount * LAMPORTS_PER_SOL);
-                if (signature) disableModal();
+                if (signature) {
+                    updateBalance();
+                    disableModal();
+                }
             },
             onCancel: () => { disableModal(); }
         })
@@ -50,7 +54,10 @@ export default function MainView({
                 if (!wallet) return;
 
                 const signature = await withdrawLamports(wallet, connection, amount * LAMPORTS_PER_SOL);
-                if (signature) disableModal();
+                if (signature) {
+                    updateBalance();
+                    disableModal();
+                }
             },
             onCancel: () => { disableModal(); }
         })
@@ -68,6 +75,7 @@ export default function MainView({
                 const signature = await withdrawUsdt(wallet, connection, amount * MICRO_CENTS_PER_USDC);
                 if (!signature) return;
 
+                updateBalance();
                 const amountTrunc = amount.toFixed(2);
                 const url = `https://exchange.mercuryo.io/?widget_id=52148ead-2e7d-4f05-8f98-426f20ab2e74&fiat_currency=USD&currency=USDT&network=SOLANA&amount=${amountTrunc}&type=sell`;
                 enableOfframpModal(url);

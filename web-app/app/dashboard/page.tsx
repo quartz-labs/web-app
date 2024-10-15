@@ -24,6 +24,7 @@ export interface ViewProps {
     swapView: () => void;
     enableModal: (data: DefaultModalProps) => void;
     disableModal: () => void;
+    updateBalance: () => void;
     enableOfframpModal: (url: string) => void;
 }
 
@@ -66,13 +67,9 @@ export default function Dashboard() {
         setModalData(data);
         setModalEnabled(true);
     }
-    const disableModal = () => {
-        updateBalance();
-        setModalEnabled(false);
-    }
+    const disableModal = () => setModalEnabled(false);
 
     const enableOfframpModal = (url: string) => {
-        updateBalance();
         setOfframpUrl(url);
         setOfframpModalEnabled(true);
         setModalEnabled(false);
@@ -142,6 +139,7 @@ export default function Dashboard() {
                         swapView={() => setMainView(false)}
                         enableModal={enableModal}
                         disableModal={disableModal}
+                        updateBalance={updateBalance}
                         enableOfframpModal={enableOfframpModal}
                     />
                 }
@@ -157,6 +155,7 @@ export default function Dashboard() {
                         swapView={() => setMainView(true)}
                         enableModal={enableModal}
                         disableModal={disableModal}
+                        updateBalance={updateBalance}
                         enableOfframpModal={() => {}}
                     />
                 }
