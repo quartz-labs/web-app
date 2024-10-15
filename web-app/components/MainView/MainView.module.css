@@ -5,22 +5,22 @@
 
 .title {
     color: var(--color-text-light);
-    font-size: 26px;
+    font-size: var(--text-size-h4);
 }
 
 .fiatAmount {
-    font-size: 60px;
-    margin-right: 18px;
+    font-size: var(--text-size-h1);
+    margin-right: 1.07rem;
 }
 
 .subBalance {
     color: var(--color-text-light);
-    font-size: 22px;
+    font-size: var(--text-size-large);
 }
 
 .buttons {
     width: 100%;
-    font-size: 20px;
+    font-size: var(--text-size-large);
     display: flex;
     flex-direction: column;
     gap: 22px;
@@ -36,6 +36,12 @@
     gap: 22px;
 }
 
+@media only screen and (max-width: 428px) {
+    .buttonsRow{
+        flex-direction: column;
+    }
+}
+
 .mainBalance {
     display: flex;
     align-items: baseline;
@@ -48,7 +54,7 @@
 }
 
 .smallMargin {
-    margin-right: 6px;
+    margin-right: 0.36rem;
 }
 
 .loader {

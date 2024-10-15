@@ -1,14 +1,15 @@
 import Image from "next/image";
+import styles from "./Logo.module.css";
 
 export default function Logo() {
     return(
-        <a href="https://quartzpay.io/" >
+        <a href="https://quartzpay.io/" className={styles.logoContainer}>
             <Image 
-                className={"main-logo"}
+                className={styles.logo}
                 src="/logo.svg" 
                 alt="Quartz" 
-                width={360} 
-                height={125}
+                fill
+                style={{ objectFit: 'contain' }}
             />
         </a>
     )

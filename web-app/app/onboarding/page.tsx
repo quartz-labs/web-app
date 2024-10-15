@@ -115,7 +115,7 @@ export default function Onboarding() {
                     </li>
                 </ul>
 
-                <button onClick={handleCreateAccount} className={`glass-button font-small ${styles.mainButton}`}>
+                <button onClick={handleCreateAccount} className={`glass-button ${styles.mainButton}`}>
                     {awaitingSign &&
                         <PuffLoader
                             color={"#ffffff"}

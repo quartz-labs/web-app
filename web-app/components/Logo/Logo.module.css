@@ -1,0 +1,10 @@
+.logoContainer {
+    height: calc(var(--logo-width) / 2.88);
+    width: var(--logo-width);
+    position: relative;
+}
+
+.logo {
+    max-width: 100%;
+    height: auto;
+}

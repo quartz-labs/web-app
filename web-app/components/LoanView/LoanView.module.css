@@ -8,21 +8,21 @@
 
 .title {
     color: var(--color-text-light);
-    font-size: 23.4px;
+    font-size: var(--text-size-h4);
 }
 
 .fiatAmount {
-    font-size: 54px;
+    font-size: var(--text-size-h1);
 }
 
 .subBalance {
     color: var(--color-text-light);
-    font-size: 19.8px;
+    font-size: var(--text-size-large);
 }
 
 .buttons {
     width: 100%;
-    font-size: 20px;
+    font-size: var(--text-size-large);
     display: flex;
     flex-direction: column;
     gap: 22px;
