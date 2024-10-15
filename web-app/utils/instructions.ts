@@ -11,7 +11,6 @@ import { getAssociatedTokenAddress } from "@solana/spl-token";
 import { getOrCreateAssociatedTokenAccountAnchor } from "./utils";
 import { getJupiterSwapIx } from "./jup";
 import { TransactionMessage } from "@solana/web3.js";
-import { PublicKey } from "@solana/web3.js";
 
 export const initAccount = async (wallet: AnchorWallet, connection: web3.Connection) => {
     const provider = new AnchorProvider(connection, wallet, {commitment: "confirmed"}); 
@@ -23,7 +22,7 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
         const ix_initUser = await program.methods
             .initUser()
             .accounts({
-                // @ts-ignore - Causing an issue in Cursor IDE
+                // @ts-expect-error - IDL issue
                 vault: vaultPda,
                 owner: wallet.publicKey,
                 systemProgram: SystemProgram.programId,
@@ -33,7 +32,7 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
         const ix_initDriftAccount = await program.methods
             .initDriftAccount()
             .accounts({
-                // @ts-ignore - Causing an issue in Cursor IDE
+                // @ts-expect-error - IDL issue
                 vault: vaultPda,
                 owner: wallet.publicKey,
                 driftUser: getDriftUser(vaultPda),
@@ -49,9 +48,8 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
         const signature = await provider.sendAndConfirm(tx);
         return signature;
     } catch (err) {
-        if (err instanceof WalletSignTransactionError) {
-            return null;
-        } else throw err;
+        if (!(err instanceof WalletSignTransactionError)) console.error(err);
+        return null;
     }
 }
 
@@ -65,7 +63,7 @@ export const withdrawLamports = async(wallet: AnchorWallet, connection: web3.Con
         const signature = await program.methods
             .withdrawLamports(new BN(amountLamports), true)
             .accounts({
-                // @ts-ignore - Causing an issue in Cursor IDE
+                // @ts-expect-error - IDL issue
                 vault: vaultPda,
                 vaultWsol: getVaultWsol(vaultPda),
                 owner: wallet.publicKey,    
@@ -86,9 +84,8 @@ export const withdrawLamports = async(wallet: AnchorWallet, connection: web3.Con
             .rpc();
         return signature;
     } catch (err) {
-        if (err instanceof WalletSignTransactionError) {
-            return null;
-        } else throw err;
+        if (!(err instanceof WalletSignTransactionError)) console.error(err);
+        return null;
     }
 }
 
@@ -102,7 +99,7 @@ export const depositLamports = async(wallet: AnchorWallet, connection: web3.Conn
         const signature = await program.methods
             .depositLamports(new BN(amountLamports), false)
             .accounts({
-                // @ts-ignore - Causing an issue in Cursor IDE
+                // @ts-expect-error - IDL issue
                 vault: vaultPda,
                 vaultWsol: getVaultWsol(vaultPda),
                 owner: wallet.publicKey,    
@@ -120,9 +117,8 @@ export const depositLamports = async(wallet: AnchorWallet, connection: web3.Conn
             .rpc();
         return signature;
     } catch (err) {
-        if (err instanceof WalletSignTransactionError) {
-            return null;
-        } else throw err;
+        if (!(err instanceof WalletSignTransactionError)) console.error(err);
+        return null;
     }
 }
 
@@ -137,7 +133,7 @@ export const depositLamports = async(wallet: AnchorWallet, connection: web3.Conn
 //         const ix_initSwapAccounts = await program.methods
 //             .initSwapAccounts()
 //             .accounts({
-//                 // @ts-ignore - Causing an issue in Cursor IDE
+//                 // @ts-expect-error - IDL issue
 //                 vault: vaultPda,
 //                 vaultWsol: getVaultWsol(vaultPda),
 //                 vaultUsdc: getVaultUsdc(vaultPda),
@@ -152,7 +148,7 @@ export const depositLamports = async(wallet: AnchorWallet, connection: web3.Conn
 //         const ix_beginSwap = await program.methods
 //             .beginSwap(new BN(amountLamports))
 //             .accounts({
-//                 // @ts-ignore - Causing an issue in Cursor IDE
+//                 // @ts-expect-error - IDL issue
 //                 vault: vaultPda,
 //                 vaultWsol: getVaultWsol(vaultPda),
 //                 vaultUsdc: getVaultUsdc(vaultPda),
@@ -178,7 +174,7 @@ export const depositLamports = async(wallet: AnchorWallet, connection: web3.Conn
 //         const ix_endSwap = await program.methods
 //             .endSwap()
 //             .accounts({
-//                 // @ts-ignore - Causing an issue in Cursor IDE
+//                 // @ts-expect-error - IDL issue
 //                 vault: vaultPda,
 //                 vaultWsol: getVaultWsol(vaultPda),
 //                 vaultUsdc: getVaultUsdc(vaultPda),
@@ -250,27 +246,22 @@ export const depositUsdt = async(wallet: AnchorWallet, connection: web3.Connecti
                 'Content-Type': 'application/json'
               },
               body: JSON.stringify({
-                // quoteResponse from /quote api
                 quoteResponse,
-                // user public key to be used for the swap
                 userPublicKey: wallet.publicKey.toString(),
-                // auto wrap and unwrap SOL. default is true
                 wrapAndUnwrapSol: true,
-                // feeAccount is optional. Use if you want to charge a fee.  feeBps must have been passed in /quote API.
-                // feeAccount: "fee_account_public_key"
               })
             })
           ).json();
         
         const swapTransactionBuf = Buffer.from(swapTransaction, 'base64');
-        var tx_jupiter = VersionedTransaction.deserialize(swapTransactionBuf);
+        const tx_jupiter = VersionedTransaction.deserialize(swapTransactionBuf);
         const sx_jupiter = await provider.sendAndConfirm(tx_jupiter);
         if (!sx_jupiter) return;
 
         const sx_depositUsdt = await program.methods
             .depositUsdc(new BN(amountMicroCents), false)
             .accounts({
-                // @ts-ignore - Causing an issue in Cursor IDE
+                // @ts-expect-error - IDL issue
                 vault: vaultPda,
                 vaultUsdc: getVaultUsdc(vaultPda),
                 owner: wallet.publicKey,    
@@ -293,9 +284,8 @@ export const depositUsdt = async(wallet: AnchorWallet, connection: web3.Connecti
 
         return sx_depositUsdt;
     } catch (err) {
-        if (err instanceof WalletSignTransactionError) {
-            return null;
-        } else throw err;
+        if (!(err instanceof WalletSignTransactionError)) console.error(err);
+        return null;
     }
 }
 
@@ -310,7 +300,7 @@ export const withdrawUsdt = async(wallet: AnchorWallet, connection: web3.Connect
         const ix_withdrawUsdc = await program.methods
             .withdrawUsdc(new BN(amountMicroCents), false)
             .accounts({
-                // @ts-ignore - Causing an issue in Cursor IDE
+                // @ts-expect-error - IDL issue
                 vault: vaultPda,
                 vaultUsdc: getVaultUsdc(vaultPda),
                 owner: wallet.publicKey,    
@@ -345,8 +335,7 @@ export const withdrawUsdt = async(wallet: AnchorWallet, connection: web3.Connect
         const signature = await provider.sendAndConfirm(tx);
         return signature;
     } catch (err) {
-        if (err instanceof WalletSignTransactionError) {
-            return null;
-        } else throw err;
+        if (!(err instanceof WalletSignTransactionError)) console.error(err);
+        return null;
     }
 }
