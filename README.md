@@ -1,8 +1,17 @@
-# Quartz Radar Submission
+<div align="center">
+  <img width="2500" alt="Quartz" src="https://cdn.prod.website-files.com/65707af0f4af991289bbd432/670e37661cdb2314fe8ba469_logo-glow-banner.jpg" />
 
-Blowfish Ticket №: 3568 
+  <h1 style="margin-top:20px;">Quartz Prototype</h1>
+</div>
 
-Domains:
-* quartzpay.io
-* quartzapp.io
+This repository provides a source-available view of Quartz's Solana programs, web app, mobile app, SDKs and more.
 
+Development started for the Colosseum Radar hackathon and is still in early stages. Docs will be available soon.
+
+## Links
+
+Website and waitlist: [quartzpay.io](https://quartzpay.io/)
+
+X: [@quartzpay](https://x.com/quartzpay)
+
+Contact: [diego@quartzpay.io](mailto:diego@quartzpay.io)
