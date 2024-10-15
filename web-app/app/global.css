@@ -137,6 +137,7 @@ a:hover {
   --logo-margin: 80px;
   --modal-width: 600px;
   --modal-content-width: 60%;
+  --input-field-height: 80px;
 
   --text-size-h1-base: 50.16px;
   --text-size-h2-base: 41.8px;
@@ -161,7 +162,6 @@ a:hover {
     --logo-margin: 45px;
     --modal-width: 90%;
     --modal-content-width: 75%;
-    
 
     --text-size-h1: calc(0.9 * var(--text-size-h1-base));
     --text-size-h2: calc(0.9 * var(--text-size-h2-base));
@@ -198,6 +198,7 @@ a:hover {
     --logo-width: 245px;
     --logo-margin: 40px;
     --modal-content-width: 90%;
+    --input-field-height: 75px;
 
     --text-size-h1: calc(0.8 * var(--text-size-h1-base));
     --text-size-h2: calc(0.8 * var(--text-size-h2-base));
@@ -221,6 +222,7 @@ a:hover {
   :root {
     --logo-width: 208px;
     --logo-margin: 30px;
+    --input-field-height: 65px;
   }
 
   .two-col-grid {

@@ -3,15 +3,27 @@
     margin-bottom: 55px;
 }
 
-.inputFieldWrapper {
+.inputSection {
     width: var(--modal-content-width);
     margin-bottom: 55px;
 }
 
-.inputField {
+.inputFieldWrapper {
+    display: flex;
+    gap: 10px;
     margin-top: 8px;
+    min-height: var(--input-field-height);
+}
+
+.maxButton {
+    border: 1px solid var(--placeholder-glass-stroke);
+    background: var(--color-background);
+    border-radius: 14px;
+    padding: 15px;
+}
+
+.inputField {
     width: 100%;
-    min-height: 80px;
     background: var(--color-background);
     padding: 12px;
     border-radius: 14px;

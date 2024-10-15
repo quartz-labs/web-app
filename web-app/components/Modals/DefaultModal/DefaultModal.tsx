@@ -10,10 +10,11 @@ export interface DefaultModalProps {
     minAmount: number;
     onConfirm: (amount: number) => void;
     onCancel: () => void;
+    onSetMax?: () => string;
 }
 
 export default function DefaultModal(
-    { title, denomination, buttonText, minAmount, onConfirm, onCancel }: DefaultModalProps
+    { title, denomination, buttonText, minAmount, onConfirm, onCancel, onSetMax }: DefaultModalProps
 ) {
     const [awaitingSign, setAwaitingSign] = useState(false);
     const [amount, setAmount] = useState(""); 
@@ -42,17 +43,27 @@ export default function DefaultModal(
     return (
         <ModalWrapper onClose={onCancel}>
             <h2 className={styles.heading}>{title}</h2>
-            <div className={styles.inputFieldWrapper}>
+            <div className={styles.inputSection}>
                 <p>Amount ({denomination})</p>
-                <input 
-                    className={styles.inputField}
-                    type="text" 
-                    placeholder={"0.0"} 
-                    value={amount} 
-                    onChange={(e) => 
-                        setAmount(e.target.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1'))
+                <div className={styles.inputFieldWrapper}>
+                    <input 
+                        className={styles.inputField}
+                        type="text" 
+                        placeholder={"0.0"} 
+                        value={amount} 
+                        onChange={(e) => 
+                            setAmount(e.target.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1'))
+                        }
+                    />
+                    {onSetMax &&
+                        <button 
+                            className={styles.maxButton} 
+                            onClick={() => setAmount(onSetMax())}
+                        >
+                            Max
+                        </button>
                     }
-                />
+                </div>
                 {errorText &&
                     <p className={styles.error}>{errorText}</p>
                 }  

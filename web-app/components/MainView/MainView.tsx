@@ -25,6 +25,11 @@ export default function MainView({
     const { connection } = useConnection();
     const wallet = useAnchorWallet();
 
+    const netSolBalance = ((totalSolBalance * solPrice) - usdcLoanBalance) / solPrice;
+    const dailySolChange = totalSolBalance * solDailyRate * solPrice;
+    const dailyUsdcChange = usdcLoanBalance * usdcDailyRate;
+    const dailyNetChange = dailySolChange - dailyUsdcChange;
+
     const handleDeposit = () => {
         enableModal({
             title: "Deposit SOL",
@@ -59,7 +64,8 @@ export default function MainView({
                     disableModal();
                 }
             },
-            onCancel: () => { disableModal(); }
+            onCancel: () => { disableModal(); },
+            onSetMax: () => {return netSolBalance.toString()}
         })
     }
 
@@ -85,11 +91,6 @@ export default function MainView({
         })
     }
 
-    const netSolBalance = ((totalSolBalance * solPrice) - usdcLoanBalance) / solPrice;
-    const dailySolChange = totalSolBalance * solDailyRate * solPrice;
-    const dailyUsdcChange = usdcLoanBalance * usdcDailyRate;
-    const dailyNetChange = dailySolChange - dailyUsdcChange;
-
     return (
         <div className="dashboard-wrapper">
             {!balanceLoaded &&
@@ -101,7 +102,6 @@ export default function MainView({
                             size={50}
                             aria-label="Loading"
                             data-testid="loader"
-                            className={styles.loader}
                         />
                     </div>
                 </div>
