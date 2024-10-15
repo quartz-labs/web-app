@@ -6,13 +6,14 @@
 .subheading {
     color: var(--color-text-light);
     margin-bottom: 80px;
+    text-align: center;
 }
 
 .checkboxes {
     padding: 0;
     margin: 0;
     list-style: none;
-    margin-bottom: 80px;
+    margin-bottom: var(--logo-margin);
 }
 
 .checkboxes li {

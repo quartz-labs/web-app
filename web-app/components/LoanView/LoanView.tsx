@@ -42,7 +42,7 @@ export default function LoanView ({
     const dailyNetChange = dailySolChange - dailyUsdcChange;
 
     return (
-        <div>
+        <div className="dashboard-wrapper">
             <div className={styles.balanceWrapper}>
                 <div>
                     <p className={styles.title}>Total Assets</p>

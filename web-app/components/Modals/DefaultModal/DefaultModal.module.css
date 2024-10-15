@@ -4,7 +4,7 @@
 }
 
 .inputFieldWrapper {
-    width: 60%;
+    width: var(--modal-content-width);
     margin-bottom: 55px;
 }
 
@@ -21,8 +21,14 @@
 
 .buttons {
     display: flex;
-    width: 60%;
+    width: var(--modal-content-width);
     gap: 25px;
+}
+
+@media only screen and (max-width: 428px) {
+    .buttons {
+        flex-direction: column;
+    }
 }
 
 .modalButton {
@@ -46,7 +52,7 @@
 }
 
 .offrampTitle {
-    font-size: var(--text-size-h2);
+    font-size: var(--text-size-h3);
     margin-bottom: 20px;
 }
 

@@ -36,6 +36,12 @@
     gap: 22px;
 }
 
+@media only screen and (max-width: 428px) {
+    .buttonsRow{
+        flex-direction: column;
+    }
+}
+
 .mainBalance {
     display: flex;
     align-items: baseline;

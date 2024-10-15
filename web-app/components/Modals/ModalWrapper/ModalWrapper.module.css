@@ -13,7 +13,7 @@
 }
 
 .modal {
-    width: 600px;
+    width: var(--modal-width);
     padding: 80px 0px;
     border-radius: 24px;
     display: flex;

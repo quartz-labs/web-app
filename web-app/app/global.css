@@ -2,40 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --overlay-color: rgba(255, 255, 255, 0.03);
-  --overlay: linear-gradient(var(--overlay-color), var(--overlay-color));
-
-  --gradient-glass-stroke:
-    linear-gradient(65deg, rgba(41,135,200,0.02) 0%, rgba(41,135,200,0.22) 100%),
-    linear-gradient(65deg, rgba(188,188,188,0.12) 0%, rgba(235,235,235,0.25) 100%);
-  
-  --placeholder-glass-stroke: #2B3A4A;
-  --placeholder-glass-stroke-accent: #5A355A;
-  --glass-border: 2px solid var(--placeholder-glass-stroke); /* TODO: Make gradient */
-  --glass-background: 
-    url("/noise.png"),
-    radial-gradient(circle at 80% 20%, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%),
-    linear-gradient(#ffffff03, #ffffff03),
-    linear-gradient(#0B111D99, #0B111D99);
-
-  --background-linear-gradient: linear-gradient(var(--color-background), var(--color-background));
-
-  --color-background: #0B111D;
-  --color-text: #ffffff;
-  --color-text-light: #ffffffA5;
-  --color-text-error: #FF8080;
-  --color-link-hover: #d8f3ff;
-
-  --text-size-p: 16.8px;
-  --text-size-h1: 2.986rem;
-  --text-size-h2: 2.488rem;
-  --text-size-h3: 1.728rem;
-  --text-size-h4: 1.44rem;
-  --text-size-large: 1.2rem;
-  --text-size-small: 0.833rem;
-}
-
 html,
 body {
   height: 100%;
@@ -53,6 +19,10 @@ a:hover {
   color: var(--color-link-hover);
 }
 
+.no-wrap {
+  white-space: nowrap;
+}
+
 .glass-button {
   display: flex;
   flex-direction: row;
@@ -60,10 +30,10 @@ a:hover {
   align-items: center;
 
   gap: 15px;
-  padding: 14px 28px;
+  padding: 14px 26px;
   background: var(--gradient-glass-stroke);
 
-  font-size: var(--text-size-large);
+  font-size: var(--text-size-p);
   border-radius: 10px;
   background-image: var(--gradient-glass-stroke);
   background-origin: border-box;
@@ -120,13 +90,14 @@ a:hover {
 
 .two-col-grid {
   margin: 0px auto;
+  padding: 0px 20px;
   height: 100%;
-  width: 65VW;
+  max-width: 1080px;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   justify-items: center;
   align-itmes: center;
-  gap: 100px;
+  gap: 50px;
 }
 
 .two-col-grid > * {
@@ -135,4 +106,128 @@ a:hover {
   justify-content: center;
   align-items: center;
   width: 100%;
+}
+
+:root {
+  --overlay-color: rgba(255, 255, 255, 0.03);
+  --overlay: linear-gradient(var(--overlay-color), var(--overlay-color));
+
+  --gradient-glass-stroke:
+    linear-gradient(65deg, rgba(41,135,200,0.02) 0%, rgba(41,135,200,0.22) 100%),
+    linear-gradient(65deg, rgba(188,188,188,0.12) 0%, rgba(235,235,235,0.25) 100%);
+  
+  --placeholder-glass-stroke: #2B3A4A;
+  --placeholder-glass-stroke-accent: #5A355A;
+  --glass-border: 2px solid var(--placeholder-glass-stroke); /* TODO: Make gradient */
+  --glass-background: 
+    url("/noise.png"),
+    radial-gradient(circle at 80% 20%, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%),
+    linear-gradient(#ffffff03, #ffffff03),
+    linear-gradient(#0B111D99, #0B111D99);
+
+  --background-linear-gradient: linear-gradient(var(--color-background), var(--color-background));
+
+  --color-background: #0B111D;
+  --color-text: #ffffff;
+  --color-text-light: #ffffffA5;
+  --color-text-error: #FF8080;
+  --color-link-hover: #d8f3ff;
+
+  --logo-width: 360px;
+  --logo-margin: 80px;
+  --modal-width: 600px;
+  --modal-content-width: 60%;
+
+  --text-size-h1-base: 50.16px;
+  --text-size-h2-base: 41.8px;
+  --text-size-h3-base: 29.03px;
+  --text-size-h4-base: 24.19px;
+  --text-size-large-base: 20.16px;
+  --text-size-p-base: 16.8px;
+  --text-size-small-base: 14px;
+
+  --text-size-h1: var(--text-size-h1-base);
+  --text-size-h2: var(--text-size-h2-base);
+  --text-size-h3: var(--text-size-h3-base);
+  --text-size-h4: var(--text-size-h4-base);
+  --text-size-large: var(--text-size-large-base);
+  --text-size-p: var(--text-size-p-base);
+  --text-size-small: var(--text-size-small-base);
+}
+
+@media only screen and (max-width: 800px) {
+  :root {
+    --logo-width: 288px;
+    --logo-margin: 45px;
+    --modal-width: 90%;
+    --modal-content-width: 75%;
+    
+
+    --text-size-h1: calc(0.9 * var(--text-size-h1-base));
+    --text-size-h2: calc(0.9 * var(--text-size-h2-base));
+    --text-size-h3: calc(0.9 * var(--text-size-h3-base));
+    --text-size-h4: calc(0.9 * var(--text-size-h4-base));
+    --text-size-large: calc(0.9 * var(--text-size-large-base));
+    --text-size-p: calc(0.9 * var(--text-size-p-base));
+    --text-size-small: calc(0.9 * var(--text-size-small-base));
+  }
+
+  .two-col-grid {
+    grid-template-columns: 1fr;
+    height: auto;
+    margin-top: 80px;
+    padding-bottom: 100px;
+    max-width: 90%;
+    gap: 80px;
+  }
+
+  .login-grid {
+    height: 100%;
+    margin-top: 0px;
+    padding: 80px 0px;
+    gap: 0px;
+  }
+
+  .dashboard-wrapper {
+    max-width: 80%;
+  }
+}
+
+@media only screen and (max-width: 568px) {
+  :root {
+    --logo-width: 245px;
+    --logo-margin: 40px;
+    --modal-content-width: 90%;
+
+    --text-size-h1: calc(0.8 * var(--text-size-h1-base));
+    --text-size-h2: calc(0.8 * var(--text-size-h2-base));
+    --text-size-h3: calc(0.8 * var(--text-size-h3-base));
+    --text-size-h4: calc(0.8 * var(--text-size-h4-base));
+    --text-size-large: calc(0.8 * var(--text-size-large-base));
+    --text-size-p: calc(0.8 * var(--text-size-p-base));
+    --text-size-small: calc(0.8 * var(--text-size-small-base));
+  }
+
+  .two-col-grid {
+    gap: 60px;
+  }
+
+  .dashboard-wrapper {
+    max-width: 90%;
+  }
+}
+
+@media only screen and (max-width: 428px) {
+  :root {
+    --logo-width: 208px;
+    --logo-margin: 30px;
+  }
+
+  .two-col-grid {
+    gap: 40px;
+  }
+
+  .dashboard-wrapper {
+    max-width: 100%;
+  }
 }

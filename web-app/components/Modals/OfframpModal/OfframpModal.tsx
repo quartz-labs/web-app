@@ -18,7 +18,7 @@ export default function OfframpModal(
     return (
         <ModalWrapper onClose={closeModal}>
             <div className={styles.contentWrapper}>
-                <h2 className={styles.offrampTitle}>You will be redirected to Mercuryo to complete your off-ramp</h2>
+                <h2 className={styles.offrampTitle}>You will be redirected to Mercuryo to complete <span className="no-wrap">your off-ramp</span></h2>
                 <p className={styles.offrampRedirect}>If you are not redirected <a href={url} target="_blank">click here</a></p>
                 <p>Your SOL has been exchanged for USDT.</p>
                 <p className={styles.offrampBody}>If you do not complete the off-ramp, the USDT will remain in your connected wallet{walletkey}.</p>

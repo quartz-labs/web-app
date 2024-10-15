@@ -83,7 +83,7 @@ export default function MainView({
     const dailyNetChange = dailySolChange - dailyUsdcChange;
 
     return (
-        <div>
+        <div className="dashboard-wrapper">
             {!balanceLoaded &&
                 <div className={styles.balanceWrapper}>
                     <div className={styles.loadingBalance}>
