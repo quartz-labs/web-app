@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use solana_security_txt::security_txt;
 
 mod state;
 mod errors;
@@ -7,6 +8,14 @@ mod instructions;
 use instructions::*;
 
 declare_id!("6JjHXLheGSNvvexgzMthEcgjkcirDrGduc3HAKB2P1v2");
+
+#[cfg(not(feature = "no-entrypoint"))]
+security_txt! {
+    name: "Quartz",
+    project_url: "https://quartzpay.io/",
+    contacts: "email:iarla@quartzpay.io",
+    policy: "https://github.com/quartz-labs/quartz-app/blob/main/SECURITY.md"
+}
 
 #[program]
 pub mod funds_program {
