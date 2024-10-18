@@ -38,6 +38,10 @@ pub mod funds_program {
         init_drift_account_handler(ctx)
     }
 
+    pub fn close_drift_account(ctx: Context<CloseDriftAccount>) -> Result<()> {
+        close_drift_account_handler(ctx)
+    }
+
     // Balance
 
     pub fn withdraw_lamports(ctx: Context<WithdrawLamports>, amount: u64, reduce_only: bool) -> Result<()> {
