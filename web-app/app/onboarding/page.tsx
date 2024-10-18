@@ -96,7 +96,7 @@ export default function Onboarding() {
                                 onChange={() => handleCheckboxChange(2)} 
                             />
                             <span className={styles.checkboxText}>
-                                I understand that my SOL deposits will liquidate for USDT if their value drops below the 80% margin requirement on loans
+                                I understand that my SOL deposits will liquidate for USDT if their value drops below 80% of the loan value
                             </span>
                         </label>
                     </li>

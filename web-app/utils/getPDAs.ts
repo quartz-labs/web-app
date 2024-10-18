@@ -27,11 +27,11 @@ export const getVaultWsol = (vaultPda: PublicKey) => {
     return vaultWSol;
 }
 
-export const getDriftUser = (vaultPda: PublicKey) => {
+export const getDriftUser = (authority: PublicKey) => {
     const [userPda] = web3.PublicKey.findProgramAddressSync(
         [
 			Buffer.from("user"),
-			vaultPda.toBuffer(),
+			authority.toBuffer(),
 			new BN(0).toArrayLike(Buffer, 'le', 2),
 		],
 		DRIFT_PROGRAM_ID
@@ -39,9 +39,9 @@ export const getDriftUser = (vaultPda: PublicKey) => {
     return userPda;
 }
 
-export const getDriftUserStats = (vaultPda: PublicKey) => {
+export const getDriftUserStats = (authority: PublicKey) => {
     const [userStatsPda] = web3.PublicKey.findProgramAddressSync(
-        [Buffer.from("user_stats"), vaultPda.toBuffer()],
+        [Buffer.from("user_stats"), authority.toBuffer()],
         DRIFT_PROGRAM_ID
     );
     return userStatsPda;
