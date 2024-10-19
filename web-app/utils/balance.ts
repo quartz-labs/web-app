@@ -19,7 +19,10 @@ export const fetchDriftData = async (vaultAddress: PublicKey, marketIndices: num
         if (!response.ok) throw new Error('Failed to fetch Drift data');
 
         const data = await response.json();
-        const balances = marketIndices.map(index => data[index] || NaN);
+        const balances = marketIndices.map(index => {
+            const value = Number(data[index]);
+            return isNaN(value) ? NaN : value;
+        });
         return balances;
     } catch (error) {
         console.error('Error fetching Drift data:', error);
