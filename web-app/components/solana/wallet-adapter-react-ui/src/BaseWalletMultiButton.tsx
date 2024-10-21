@@ -14,9 +14,10 @@ type Props = ButtonProps & {
         'change-wallet': string;
         disconnect: string;
     };
+    onCloseAccount: () => void;
 };
 
-export function BaseWalletMultiButton({ children, labels, ...props }: Props) {
+export function BaseWalletMultiButton({ children, labels, onCloseAccount, ...props }: Props) {
     const { setVisible: setModalVisible } = useWalletModal();
     const { buttonState, onConnect, onDisconnect, publicKey, walletIcon, walletName } = useWalletMultiButton({
         onSelectWallet() {
@@ -104,8 +105,8 @@ export function BaseWalletMultiButton({ children, labels, ...props }: Props) {
                 <li
                     className="wallet-adapter-dropdown-list-item"
                     onClick={() => {
-                        setModalVisible(true);
                         setMenuOpen(false);
+                        onCloseAccount();
                     }}
                     role="menuitem"
                 >

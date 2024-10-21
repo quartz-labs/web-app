@@ -7,15 +7,25 @@ import {
   ConnectionProvider,
   WalletProvider,
 } from '@solana/wallet-adapter-react';
-import { WalletModalProvider } from './wallet-adapter-react-ui';
+import { WalletModalProvider, WalletMultiButton } from './wallet-adapter-react-ui';
 import { ReactNode, useCallback, useMemo } from 'react';
 import { useCluster } from './cluster-data-access';
 
 import './wallet-adapter-react-ui/styles.css';
 
+type WalletButtonProps = React.ComponentProps<typeof WalletMultiButton> & {
+  onCloseAccount?: () => void;
+};
+
 export const WalletButton = dynamic(
-  async () =>
-    (await import('./wallet-adapter-react-ui')).WalletMultiButton,
+  async () => {
+    const { WalletMultiButton } = await import('./wallet-adapter-react-ui');
+    const WalletButtonWrapper = (props: WalletButtonProps) => (
+      <WalletMultiButton {...props} />
+    );
+    WalletButtonWrapper.displayName = 'WalletButton';
+    return WalletButtonWrapper;
+  },
   { ssr: false }
 );
 

@@ -5,7 +5,7 @@ import { AnchorProvider, BN, Idl, Program, setProvider, web3 } from "@coral-xyz/
 import { AnchorWallet } from "@solana/wallet-adapter-react";
 import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC, DRIFT_PROGRAM_ID, DRIFT_SPOT_MARKET_SOL, DRIFT_SPOT_MARKET_USDC, DRIFT_SIGNER, USDC_MINT, WSOL_MINT, DRIFT_ADDITIONAL_ACCOUNT_1, DRIFT_ADDITIONAL_ACCOUNT_2, USDT_MINT } from "./constants";
 import { ASSOCIATED_PROGRAM_ID, TOKEN_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/utils/token";
-import { SystemProgram, Transaction, VersionedTransaction, TransactionMessage, MessageCompiledInstruction } from "@solana/web3.js";
+import { SystemProgram, Transaction, VersionedTransaction, TransactionMessage } from "@solana/web3.js";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
 import { getDriftSpotMarketVault, getDriftState, getDriftUser, getDriftUserStats, getVault, getVaultUsdc, getVaultWsol } from "./getPDAs";
 import { getAssociatedTokenAddress } from "@solana/spl-token";
@@ -44,42 +44,17 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
             })
             .instruction();
 
-        // const ix_initWalletDriftUserStats = await driftProgram.methods
-        //     .initializeUserStats()
-        //     .accounts({
-        //         userStats: getDriftUserStats(wallet.publicKey),
-        //         state: getDriftState(),
-        //         authority: wallet.publicKey,
-        //         payer: wallet.publicKey,
-        //         rent: web3.SYSVAR_RENT_PUBKEY,
-        //         systemProgram: SystemProgram.programId,
-        //     })
-        //     .instruction();
-
-        // const ix_initWalletDriftUser = await driftProgram.methods
-        //     .initializeUser(0, Array.from(new Uint8Array(32)))
-        //     .accounts({
-        //         user: getDriftUser(wallet.publicKey),
-        //         userStats: getDriftUserStats(wallet.publicKey),
-        //         state: getDriftState(),
-        //         authority: wallet.publicKey,
-        //         payer: wallet.publicKey,
-        //         rent: web3.SYSVAR_RENT_PUBKEY,
-        //         systemProgram: SystemProgram.programId,
-        //     })
-        //     .instruction();
-
         const tx = new Transaction().add(ix_initUser, ix_initVaultDriftAccount);
 
-        const latestBlockhash = await connection.getLatestBlockhash();
-        tx.recentBlockhash = latestBlockhash.blockhash;
-        tx.feePayer = wallet.publicKey;
+        // const latestBlockhash = await connection.getLatestBlockhash();
+        // tx.recentBlockhash = latestBlockhash.blockhash;
+        // tx.feePayer = wallet.publicKey;
 
-        const versionedTx = new VersionedTransaction(tx.compileMessage());
-        const signedTx = await wallet.signTransaction(versionedTx);
+        // const versionedTx = new VersionedTransaction(tx.compileMessage());
+        // const signedTx = await wallet.signTransaction(versionedTx);
 
-        const simulation = await connection.simulateTransaction(signedTx);
-        console.log("Simulation result:", simulation);
+        // const simulation = await connection.simulateTransaction(signedTx);
+        // console.log("Simulation result:", simulation);
 
         const signature = await provider.sendAndConfirm(tx);
         return signature;

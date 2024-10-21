@@ -43,14 +43,14 @@ var __rest = (this && this.__rest) || function (s, e) {
     return t;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.BaseWalletMultiButton = void 0;
+exports.BaseWalletMultiButton = BaseWalletMultiButton;
 const wallet_adapter_base_ui_1 = require("@solana/wallet-adapter-base-ui");
 const react_1 = __importStar(require("react"));
-const BaseWalletConnectionButton_js_1 = require("./BaseWalletConnectionButton.js");
-const useWalletModal_js_1 = require("./useWalletModal.js");
+const BaseWalletConnectionButton_1 = require("./BaseWalletConnectionButton");
+const useWalletModal_1 = require("./useWalletModal");
 function BaseWalletMultiButton(_a) {
-    var { children, labels, onCloseAccount } = _a, props = __rest(_a, ["children", "labels", "onCloseAccount"]);
-    const { setVisible: setModalVisible } = (0, useWalletModal_js_1.useWalletModal)();
+    var { children, labels } = _a, props = __rest(_a, ["children", "labels"]);
+    const { setVisible: setModalVisible } = (0, useWalletModal_1.useWalletModal)();
     const { buttonState, onConnect, onDisconnect, publicKey, walletIcon, walletName } = (0, wallet_adapter_base_ui_1.useWalletMultiButton)({
         onSelectWallet() {
             setModalVisible(true);
@@ -90,7 +90,7 @@ function BaseWalletMultiButton(_a) {
         }
     }, [buttonState, children, labels, publicKey]);
     return (react_1.default.createElement("div", { className: "wallet-adapter-dropdown" },
-        react_1.default.createElement(BaseWalletConnectionButton_js_1.BaseWalletConnectionButton, Object.assign({}, props, { "aria-expanded": menuOpen, style: Object.assign({ pointerEvents: menuOpen ? 'none' : 'auto' }, props.style), onClick: () => {
+        react_1.default.createElement(BaseWalletConnectionButton_1.BaseWalletConnectionButton, Object.assign({}, props, { "aria-expanded": menuOpen, style: Object.assign({ pointerEvents: menuOpen ? 'none' : 'auto' }, props.style), onClick: () => {
                 switch (buttonState) {
                     case 'no-wallet':
                         setModalVisible(true);
@@ -113,12 +113,10 @@ function BaseWalletMultiButton(_a) {
                 }), role: "menuitem" }, copied ? labels['copied'] : labels['copy-address'])) : null,
             react_1.default.createElement("li", { className: "wallet-adapter-dropdown-list-item", onClick: () => {
                     setMenuOpen(false);
-                    onCloseAccount();
-                }, role: "menuitem" }, labels['change-wallet']),
+                }, role: "menuitem" }, "Close account"),
             onDisconnect ? (react_1.default.createElement("li", { className: "wallet-adapter-dropdown-list-item", onClick: () => {
                     onDisconnect();
                     setMenuOpen(false);
                 }, role: "menuitem" }, labels['disconnect'])) : null)));
 }
-exports.BaseWalletMultiButton = BaseWalletMultiButton;
 //# sourceMappingURL=BaseWalletMultiButton.js.map

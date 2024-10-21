@@ -1,8 +1,8 @@
 import { useWalletMultiButton } from '@solana/wallet-adapter-base-ui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { BaseWalletConnectionButton } from './BaseWalletConnectionButton.js';
-import { useWalletModal } from './useWalletModal.js';
-export function BaseWalletMultiButton({ children, labels, onCloseAccount, ...props }) {
+import { BaseWalletConnectionButton } from './BaseWalletConnectionButton';
+import { useWalletModal } from './useWalletModal';
+export function BaseWalletMultiButton({ children, labels, ...props }) {
     const { setVisible: setModalVisible } = useWalletModal();
     const { buttonState, onConnect, onDisconnect, publicKey, walletIcon, walletName } = useWalletMultiButton({
         onSelectWallet() {
@@ -66,8 +66,7 @@ export function BaseWalletMultiButton({ children, labels, onCloseAccount, ...pro
                 }, role: "menuitem" }, copied ? labels['copied'] : labels['copy-address'])) : null,
             React.createElement("li", { className: "wallet-adapter-dropdown-list-item", onClick: () => {
                     setMenuOpen(false);
-                    onCloseAccount();
-                }, role: "menuitem" }, labels['change-wallet']),
+                }, role: "menuitem" }, "Close account"),
             onDisconnect ? (React.createElement("li", { className: "wallet-adapter-dropdown-list-item", onClick: () => {
                     onDisconnect();
                     setMenuOpen(false);

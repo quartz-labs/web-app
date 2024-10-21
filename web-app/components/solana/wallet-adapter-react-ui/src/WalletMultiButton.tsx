@@ -12,6 +12,10 @@ const LABELS = {
     'no-wallet': 'Select Wallet',
 } as const;
 
-export function WalletMultiButton(props: ButtonProps) {
-    return <BaseWalletMultiButton {...props} labels={LABELS} />;
+interface WalletMultiButtonProps extends ButtonProps {
+    onCloseAccount: () => void;
+}
+
+export function WalletMultiButton({ onCloseAccount, ...props }: WalletMultiButtonProps) {
+    return <BaseWalletMultiButton {...props} labels={LABELS} onCloseAccount={onCloseAccount} />;
 }
