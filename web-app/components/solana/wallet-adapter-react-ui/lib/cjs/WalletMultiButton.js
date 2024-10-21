@@ -7,7 +7,7 @@ exports.WalletMultiButton = void 0;
 const react_1 = __importDefault(require("react"));
 const BaseWalletMultiButton_js_1 = require("./BaseWalletMultiButton.js");
 const LABELS = {
-    'change-wallet': 'Change wallet',
+    'change-wallet': 'Close account',
     connecting: 'Connecting ...',
     'copy-address': 'Copy address',
     copied: 'Copied',

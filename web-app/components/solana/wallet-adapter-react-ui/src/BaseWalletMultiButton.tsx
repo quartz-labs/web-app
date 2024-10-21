@@ -109,7 +109,7 @@ export function BaseWalletMultiButton({ children, labels, ...props }: Props) {
                     }}
                     role="menuitem"
                 >
-                    {labels['change-wallet']}
+                    Close account
                 </li>
                 {onDisconnect ? (
                     <li

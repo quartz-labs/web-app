@@ -68,8 +68,6 @@ pub fn close_drift_account_handler(
     ];
     let signer_seeds = &[&seeds[..]];
 
-    // Initialize user stats account
-
     let delete_user_cpi_context = CpiContext::new_with_signer(
         ctx.accounts.drift_program.to_account_info(),
         DeleteUser {

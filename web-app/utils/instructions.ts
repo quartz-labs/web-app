@@ -96,18 +96,18 @@ export const closeAccount = async(wallet: AnchorWallet, connection: web3.Connect
     const vaultPda = getVault(wallet.publicKey);
 
     try {
-    const ix_closeDriftAccount = await program.methods
-        .closeDriftAccount()
-        .accounts({
-            // @ts-expect-error - IDL issue
-            vault: vaultPda,
-            owner: wallet.publicKey,
-            driftUser: getDriftUser(vaultPda),
-            driftUserStats: getDriftUserStats(vaultPda),
-            driftState: getDriftState(),
-            driftProgram: DRIFT_PROGRAM_ID
-        })
-        .instruction();
+        const ix_closeDriftAccount = await program.methods
+            .closeDriftAccount()
+            .accounts({
+                // @ts-expect-error - IDL issue
+                vault: vaultPda,
+                owner: wallet.publicKey,
+                driftUser: getDriftUser(vaultPda),
+                driftUserStats: getDriftUserStats(vaultPda),
+                driftState: getDriftState(),
+                driftProgram: DRIFT_PROGRAM_ID
+            })
+            .instruction();
 
         const ix_closeVault = await program.methods
             .closeUser()
@@ -230,7 +230,7 @@ export const liquidateSol = async(wallet: AnchorWallet, connection: web3.Connect
     //     );
     // }
     
-    const ix_beginFlashLoan = ;
+    // const ix_beginFlashLoan = ;
 
     const ix_depositUsdt = await quartzProgram.methods
             .depositUsdc(new BN(amountMicroCents), false)
@@ -285,14 +285,14 @@ export const liquidateSol = async(wallet: AnchorWallet, connection: web3.Connect
         lamports: amountLamports,
     });
 
-    const ix_endFlashLoan = ;
+    // const ix_endFlashLoan = ;
 
     const tx = new Transaction().add(
-        ix_beginFlashLoan,
+        // ix_beginFlashLoan,
         ix_depositUsdt,
         ix_withdrawLamports,
         ix_wrapSol,
-        ix_endFlashLoan
+        // ix_endFlashLoan
     );
 
     const latestBlockhash = await connection.getLatestBlockhash();

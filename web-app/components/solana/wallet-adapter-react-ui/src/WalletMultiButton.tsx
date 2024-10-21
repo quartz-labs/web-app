@@ -3,7 +3,7 @@ import { BaseWalletMultiButton } from './BaseWalletMultiButton.js';
 import type { ButtonProps } from './Button.js';
 
 const LABELS = {
-    'change-wallet': 'Change wallet',
+    'change-wallet': 'Close account',
     connecting: 'Connecting ...',
     'copy-address': 'Copy address',
     copied: 'Copied',
