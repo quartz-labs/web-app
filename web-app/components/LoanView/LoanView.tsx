@@ -30,10 +30,10 @@ export default function LoanView ({
             onConfirm: async (amount: number) => {
                 if (!wallet) return;
 
-                // const signature = await depositUsdt(wallet, connection, amount * MICRO_CENTS_PER_USDC);
-                const amountLamports = 0;
-                const amountMicroCents = 0;
-                const signature = await liquidateSol(wallet, connection, amountLamports, amountMicroCents);
+                const signature = await depositUsdt(wallet, connection, amount * MICRO_CENTS_PER_USDC);
+                // const amountLamports = 0;
+                // const amountMicroCents = 0;
+                // const signature = await liquidateSol(wallet, connection, amountLamports, amountMicroCents);
                 if (signature) {
                     updateBalance();
                     disableModal();
