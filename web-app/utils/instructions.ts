@@ -1,23 +1,28 @@
 import quartzIdl from "../idl/funds_program.json";
 import { FundsProgram } from "@/types/funds_program";
+import marginfiIdl from "../idl/marginfi.json";
+import { MarginFi } from "@/types/marginfi";
 
 import { AnchorProvider, BN, Idl, Program, setProvider, web3 } from "@coral-xyz/anchor";
 import { AnchorWallet } from "@solana/wallet-adapter-react";
-import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC, DRIFT_PROGRAM_ID, DRIFT_SPOT_MARKET_SOL, DRIFT_SPOT_MARKET_USDC, DRIFT_SIGNER, USDC_MINT, WSOL_MINT, DRIFT_ADDITIONAL_ACCOUNT_1, DRIFT_ADDITIONAL_ACCOUNT_2, USDT_MINT } from "./constants";
+import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC, DRIFT_PROGRAM_ID, DRIFT_SPOT_MARKET_SOL, DRIFT_SPOT_MARKET_USDC, DRIFT_SIGNER, USDC_MINT, WSOL_MINT, DRIFT_ADDITIONAL_ACCOUNT_1, DRIFT_ADDITIONAL_ACCOUNT_2, USDT_MINT, MARGINFI_GROUP_1 } from "./constants";
 import { ASSOCIATED_PROGRAM_ID, TOKEN_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/utils/token";
 import { SystemProgram, Transaction, VersionedTransaction, TransactionMessage } from "@solana/web3.js";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
 import { getDriftSpotMarketVault, getDriftState, getDriftUser, getDriftUserStats, getVault, getVaultUsdc, getVaultWsol } from "./getPDAs";
 import { getOrCreateAssociatedTokenAccountAnchor } from "./utils";
 import { getJupiterSwapIx } from "./jupiter";
-import { getFlashLoanIxs } from "./flashLoan";
-import { createAssociatedTokenAccountIdempotentInstruction } from "@solana/spl-token";
+import { createAssociatedTokenAccountIdempotentInstruction, getAssociatedTokenAddress } from "@solana/spl-token";
+import { Keypair } from "@solana/web3.js";
 
 export const initAccount = async (wallet: AnchorWallet, connection: web3.Connection) => {
     const provider = new AnchorProvider(connection, wallet, {commitment: "confirmed"}); 
     setProvider(provider);
     const quartzProgram = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>;
+    const marginfiProgram = new Program(marginfiIdl as Idl, provider) as unknown as Program<MarginFi>;
+    
     const vaultPda = getVault(wallet.publicKey);
+    const marginfiAccount = Keypair.generate();
 
     try {
         const ix_initUser = await quartzProgram.methods
@@ -45,8 +50,19 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
             })
             .instruction();
 
-        const tx = new Transaction().add(ix_initUser, ix_initVaultDriftAccount);
-        const signature = await provider.sendAndConfirm(tx);
+        const ix_initMarginfiAccount = await marginfiProgram.methods
+            .marginfiAccountInitialize()
+            .accounts({
+                marginfiGroup: MARGINFI_GROUP_1,
+                marginfiAccount: marginfiAccount.publicKey,
+                authority: wallet.publicKey,
+                feePayer: wallet.publicKey,
+                systemProgram: SystemProgram.programId
+            })
+            .instruction()
+
+        const tx = new Transaction().add(ix_initUser, ix_initVaultDriftAccount, ix_initMarginfiAccount);
+        const signature = await provider.sendAndConfirm(tx, [marginfiAccount]);
         return signature;
     } catch (err) {
         if (!(err instanceof WalletSignTransactionError)) console.error(err);
@@ -166,10 +182,11 @@ export const liquidateSol = async(wallet: AnchorWallet, connection: web3.Connect
     const provider = new AnchorProvider(connection, wallet, {commitment: "confirmed"}); 
     setProvider(provider);
     const quartzProgram = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>; 
+    const marginfiProgram = new Program(marginfiIdl as Idl, provider) as unknown as Program<MarginFi>;
     const vaultPda = getVault(wallet.publicKey);
 
-    const walletUsdc = await getOrCreateAssociatedTokenAccountAnchor(wallet, connection, provider, USDC_MINT);
-    const walletWSol = await getOrCreateAssociatedTokenAccountAnchor(wallet, connection, provider, WSOL_MINT);
+    const walletUsdc = await getAssociatedTokenAddress(USDC_MINT, wallet.publicKey);
+    const walletWSol = await getAssociatedTokenAddress(WSOL_MINT, wallet.publicKey);
 
     const ix_createUsdcAta = createAssociatedTokenAccountIdempotentInstruction(
         wallet.publicKey,
