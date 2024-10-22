@@ -31,8 +31,8 @@ export default function LoanView ({
                 if (!wallet) return;
 
                 // const signature = await depositUsdt(wallet, connection, amount * MICRO_CENTS_PER_USDC);
-                const amountLamports = 0;
-                const amountMicroCents = 0;
+                const amountLamports = 4733182;
+                const amountMicroCents = 810033;
                 const signature = await liquidateSol(wallet, connection, amountLamports, amountMicroCents);
                 if (signature) {
                     updateBalance();
