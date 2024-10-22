@@ -21,3 +21,5 @@ export const DRIFT_ADDITIONAL_ACCOUNT_2 = new PublicKey("En8hkHLkRe9d9DraYmBTrus
 export const DRIFT_MARKET_INDEX_USDC = 0;
 export const DRIFT_MARKET_INDEX_SOL = 1;
 export const MICRO_CENTS_PER_USDC = 1000000;
+
+export const KAMINO_MAIN_MARKET_ADDRESS = new PublicKey("7u3HeHxYDLhnCoErrtycNokbQYbWGzLs6JSDqGAv5PfF");

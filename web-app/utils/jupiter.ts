@@ -1,4 +1,4 @@
-import { AddressLookupTableAccount, Connection, PublicKey, TransactionInstruction, TransactionMessage, VersionedTransaction } from '@solana/web3.js';
+import { AddressLookupTableAccount, PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { web3 } from "@coral-xyz/anchor";
 
 export async function getJupiterSwapIx(walletPubkey: PublicKey, connection: web3.Connection, amount: number, inputMint: PublicKey, outputMint: PublicKey, exactOut: boolean) {
@@ -28,11 +28,11 @@ export async function getJupiterSwapIx(walletPubkey: PublicKey, connection: web3
     }
 
     const {
-        tokenLedgerInstruction, // If you are using `useTokenLedger = true`.
-        computeBudgetInstructions, // The necessary instructions to setup the compute budget.
+        // tokenLedgerInstruction, // If you are using `useTokenLedger = true`.
+        // computeBudgetInstructions, // The necessary instructions to setup the compute budget.
         setupInstructions, // Setup missing ATA for the users.
         swapInstruction: swapInstructionPayload, // The actual swap instruction.
-        cleanupInstruction, // Unwrap the SOL if `wrapAndUnwrapSol = true`.
+        // cleanupInstruction, // Unwrap the SOL if `wrapAndUnwrapSol = true`.
         addressLookupTableAddresses, // The lookup table addresses that you can use if you are using versioned transaction.
     } = instructions;
 

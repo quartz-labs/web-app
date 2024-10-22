@@ -8,9 +8,10 @@ import { ASSOCIATED_PROGRAM_ID, TOKEN_PROGRAM_ID } from "@coral-xyz/anchor/dist/
 import { SystemProgram, Transaction, VersionedTransaction, TransactionMessage } from "@solana/web3.js";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
 import { getDriftSpotMarketVault, getDriftState, getDriftUser, getDriftUserStats, getVault, getVaultUsdc, getVaultWsol } from "./getPDAs";
-import { getAssociatedTokenAddress } from "@solana/spl-token";
 import { getOrCreateAssociatedTokenAccountAnchor } from "./utils";
-import { getJupiterSwapIx } from "./jup";
+import { getJupiterSwapIx } from "./jupiter";
+import { getFlashLoanIxs } from "./flashLoan";
+import { createAssociatedTokenAccountIdempotentInstruction } from "@solana/spl-token";
 
 export const initAccount = async (wallet: AnchorWallet, connection: web3.Connection) => {
     const provider = new AnchorProvider(connection, wallet, {commitment: "confirmed"}); 
@@ -45,17 +46,6 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
             .instruction();
 
         const tx = new Transaction().add(ix_initUser, ix_initVaultDriftAccount);
-
-        // const latestBlockhash = await connection.getLatestBlockhash();
-        // tx.recentBlockhash = latestBlockhash.blockhash;
-        // tx.feePayer = wallet.publicKey;
-
-        // const versionedTx = new VersionedTransaction(tx.compileMessage());
-        // const signedTx = await wallet.signTransaction(versionedTx);
-
-        // const simulation = await connection.simulateTransaction(signedTx);
-        // console.log("Simulation result:", simulation);
-
         const signature = await provider.sendAndConfirm(tx);
         return signature;
     } catch (err) {
@@ -181,31 +171,21 @@ export const liquidateSol = async(wallet: AnchorWallet, connection: web3.Connect
     const walletUsdc = await getOrCreateAssociatedTokenAccountAnchor(wallet, connection, provider, USDC_MINT);
     const walletWSol = await getOrCreateAssociatedTokenAccountAnchor(wallet, connection, provider, WSOL_MINT);
 
-    // const ixs_initATAs: web3.TransactionInstruction[] = [];
+    const ix_createUsdcAta = createAssociatedTokenAccountIdempotentInstruction(
+        wallet.publicKey,
+        walletUsdc,
+        wallet.publicKey,
+        USDC_MINT
+    );
 
-    // if (!(await connection.getAccountInfo(walletUsdc))) {
-    //     ixs_initATAs.push(
-    //         createAssociatedTokenAccountInstruction(
-    //             wallet.publicKey,
-    //             walletUsdc,
-    //             wallet.publicKey,
-    //             USDC_MINT
-    //         )
-    //     );
-    // }
-
-    // if (!(await connection.getAccountInfo(walletWSol))) {
-    //     ixs_initATAs.push(
-    //         createAssociatedTokenAccountInstruction(
-    //             wallet.publicKey,
-    //             walletWSol,
-    //             wallet.publicKey,
-    //             WSOL_MINT
-    //         )
-    //     );
-    // }
+    const ix_createWSolAta = createAssociatedTokenAccountIdempotentInstruction(
+        wallet.publicKey,
+        walletWSol,
+        wallet.publicKey,
+        WSOL_MINT
+    );
     
-    // const ix_beginFlashLoan = ;
+    const { ix_beginFlashLoan, ix_endFlashLoan } = await getFlashLoanIxs();
 
     const ix_depositUsdt = await quartzProgram.methods
             .depositUsdc(new BN(amountMicroCents), false)
@@ -260,14 +240,14 @@ export const liquidateSol = async(wallet: AnchorWallet, connection: web3.Connect
         lamports: amountLamports,
     });
 
-    // const ix_endFlashLoan = ;
-
     const tx = new Transaction().add(
-        // ix_beginFlashLoan,
+        ix_createUsdcAta,
+        ix_createWSolAta,
+        ix_beginFlashLoan,
         ix_depositUsdt,
         ix_withdrawLamports,
         ix_wrapSol,
-        // ix_endFlashLoan
+        ix_endFlashLoan
     );
 
     const latestBlockhash = await connection.getLatestBlockhash();
