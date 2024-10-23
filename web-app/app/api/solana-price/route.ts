@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
+    const response = await fetch('https://quartz-server-puoxw.ondigitalocean.app/get-price?asset=solana');
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
