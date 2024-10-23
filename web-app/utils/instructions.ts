@@ -15,6 +15,7 @@ import { getJupiterSwapIx } from "./jupiter";
 import { createAssociatedTokenAccountIdempotentInstruction, getAssociatedTokenAddress } from "@solana/spl-token";
 import { Keypair } from "@solana/web3.js";
 import { MarginfiClient, getConfig } from '@mrgnlabs/marginfi-client-v2';
+import BigNumber from "bignumber.js";
 
 export const initAccount = async (wallet: AnchorWallet, connection: web3.Connection) => {
     const provider = new AnchorProvider(connection, wallet, {commitment: "confirmed"}); 
@@ -56,7 +57,7 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
 
         // Create MarginFi account if use doesn't have one already
         const marginfiAccounts = await marginfiClient.getMarginfiAccountsForAuthority(wallet.publicKey);
-        if (marginfiAccounts.length == 0) {
+        if (marginfiAccounts.length === 0) {
             const ix_initMarginfiAccount = await marginfiProgram.methods
                 .marginfiAccountInitialize()
                 .accounts({
@@ -199,7 +200,7 @@ export const liquidateSol = async(wallet: AnchorWallet, connection: web3.Connect
     const marginfiClient = await MarginfiClient.fetch(getConfig(), wallet, connection);
 
     let marginfiAccounts = await marginfiClient.getMarginfiAccountsForAuthority(wallet.publicKey);
-    if (marginfiAccounts.length == 0) {
+    if (marginfiAccounts.length === 0) {
         const newAccount = Keypair.generate();
         const tx_initMarginFiAccount = await marginfiProgram.methods
             .marginfiAccountInitialize()
@@ -219,17 +220,19 @@ export const liquidateSol = async(wallet: AnchorWallet, connection: web3.Connect
 
     const marginfiAccount = marginfiAccounts[0];
     const solBank = marginfiClient.getBankByTokenSymbol("SOL");
+    if (!solBank) throw Error(`${"SOL"} bank not found`);
     const usdcBank = marginfiClient.getBankByTokenSymbol("USDC");
-    if (!solBank || !usdcBank) return;
+    if (!usdcBank) throw Error(`${"USDC"} bank not found`);
 
-    const priceSol = marginfiClient.getOraclePriceByBank(solBank.address)?.priceRealtime.price.toNumber();
-    const priceUsdc = marginfiClient.getOraclePriceByBank(usdcBank.address)?.priceRealtime.price.toNumber();
-    if (!priceSol || !priceUsdc) return;
+    const oracleSol = marginfiClient.getOraclePriceByBank(solBank.address);
+    const oracleUsdc = marginfiClient.getOraclePriceByBank(usdcBank.address);
+    if (!oracleSol || !oracleUsdc) return;
 
-    const amountUsdc = new BN(baseUnitToToken(amountMicroCents, DECIMAL_PLACES_USDC));
-    const usdcValue = amountUsdc.mul(new BN(priceUsdc));
-    const amountSol = divideBN(usdcValue, new BN(priceSol));
-    const amountLamports = amountSol * LAMPORTS_PER_SOL;
+    const amountUsdc = new BigNumber(baseUnitToToken(amountMicroCents, DECIMAL_PLACES_USDC));
+    const amountSol = amountUsdc
+        .times(oracleUsdc.priceWeighted.lowestPrice)
+        .div(oracleSol.priceWeighted.highestPrice);
+    const amountLamports = new BN(amountSol.times(LAMPORTS_PER_SOL).integerValue().toString());
 
     const ix_createUsdcAta = createAssociatedTokenAccountIdempotentInstruction(
         wallet.publicKey,
@@ -270,7 +273,7 @@ export const liquidateSol = async(wallet: AnchorWallet, connection: web3.Connect
             .instruction();
 
     const ix_withdrawLamports = await quartzProgram.methods
-        .withdrawLamports(new BN(amountLamports), true)
+        .withdrawLamports(amountLamports, true)
         .accounts({
             // @ts-expect-error - IDL issue
             vault: vaultPda,
@@ -295,15 +298,15 @@ export const liquidateSol = async(wallet: AnchorWallet, connection: web3.Connect
     const ix_wrapSol = web3.SystemProgram.transfer({
         fromPubkey: wallet.publicKey,
         toPubkey: walletWSol,
-        lamports: amountLamports,
+        lamports: amountLamports.toNumber(),
     });
 
     const { flashloanTx } = await marginfiAccount.makeLoopTx(
         amountSol,
-        baseUnitToToken(amountMicroCents, DECIMAL_PLACES_USDC), // MarginFi expects in token with decimals
+        amountUsdc,
         solBank.address,
         usdcBank.address,
-        [ix_createWSolAta, ix_createUsdcAta, ix_depositUsdc, ix_withdrawLamports, ix_wrapSol],
+        [ix_depositUsdc, ix_withdrawLamports, ix_wrapSol],
         []
     );
 
@@ -312,7 +315,9 @@ export const liquidateSol = async(wallet: AnchorWallet, connection: web3.Connect
     console.log("Simulation result:", simulation);
 
     const signature = await connection.sendRawTransaction(signedTx.serialize(), {
-        skipPreflight: true
+        skipPreflight: true,
+        maxRetries: 5,
+        preflightCommitment: 'processed',
     });
     console.log(signature);
     return signature;

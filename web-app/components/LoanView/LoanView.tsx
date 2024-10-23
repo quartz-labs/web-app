@@ -23,8 +23,8 @@ export default function LoanView ({
 
     const handleRepayUsdc = () => {
         enableModal({
-            title: "Repay USDT Loan",
-            denomination: "USDT",
+            title: "Repay USDC Loan with SOL Deposits",
+            denomination: "USDC",
             buttonText: "Repay",
             minAmount: 0,
             onConfirm: async (amount: number) => {
@@ -92,7 +92,7 @@ export default function LoanView ({
                                 ${usdcLoanBalance.toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </p>
                             <p className={styles.subBalance}>
-                                USDT ({getSign(dailyUsdcChange)}${roundToDecimalPlacesAbsolute(dailyUsdcChange, 4)} /day)
+                                USDC ({getSign(dailyUsdcChange)}${roundToDecimalPlacesAbsolute(dailyUsdcChange, 4)} /day)
                             </p>
                         </div>
                     }
@@ -125,7 +125,7 @@ export default function LoanView ({
             </div>
 
             <div className={styles.buttons}>
-                <button onClick={handleRepayUsdc} className={"glass-button"}>Repay Loans</button>
+                <button onClick={handleRepayUsdc} className={"glass-button"}>Repay Loan with Deposits</button>
                 <button onClick={swapView} className={"glass-button ghost"}>Back to Dashboard</button>
             </div>
         </div>
