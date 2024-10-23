@@ -24,5 +24,3 @@ export const DRIFT_MARKET_INDEX_SOL = 1;
 export const DECIMAL_PLACES_SOL = 9;
 export const DECIMAL_PLACES_USDC = 6;
 export const MICRO_CENTS_PER_USDC = 10 ** DECIMAL_PLACES_USDC;
-
-export const MARGINFI_GROUP_1 = new PublicKey("4qp6Fx6tnZkY5Wropq9wUYgtFxXKwE6viZxFHg3rdAG8");

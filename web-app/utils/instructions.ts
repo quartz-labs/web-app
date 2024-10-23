@@ -1,11 +1,8 @@
 import quartzIdl from "../idl/funds_program.json";
 import { FundsProgram } from "@/types/funds_program";
-import marginfiIdl from "../idl/marginfi.json";
-import { MarginFi } from "@/types/marginfi";
-
 import { AnchorProvider, BN, Idl, Program, setProvider, web3 } from "@coral-xyz/anchor";
 import { AnchorWallet } from "@solana/wallet-adapter-react";
-import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC, DRIFT_PROGRAM_ID, DRIFT_SPOT_MARKET_SOL, DRIFT_SPOT_MARKET_USDC, DRIFT_SIGNER, USDC_MINT, WSOL_MINT, DRIFT_ADDITIONAL_ACCOUNT_1, DRIFT_ADDITIONAL_ACCOUNT_2, USDT_MINT, MARGINFI_GROUP_1, DECIMAL_PLACES_SOL, DECIMAL_PLACES_USDC } from "./constants";
+import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC, DRIFT_PROGRAM_ID, DRIFT_SPOT_MARKET_SOL, DRIFT_SPOT_MARKET_USDC, DRIFT_SIGNER, USDC_MINT, WSOL_MINT, DRIFT_ADDITIONAL_ACCOUNT_1, DRIFT_ADDITIONAL_ACCOUNT_2, USDT_MINT, DECIMAL_PLACES_SOL, DECIMAL_PLACES_USDC } from "./constants";
 import { ASSOCIATED_PROGRAM_ID, TOKEN_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/utils/token";
 import { SystemProgram, Transaction, VersionedTransaction, TransactionMessage } from "@solana/web3.js";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
@@ -20,7 +17,9 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
     const provider = new AnchorProvider(connection, wallet, {commitment: "confirmed"}); 
     setProvider(provider);
     const quartzProgram = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>;
-    const marginfiProgram = new Program(marginfiIdl as Idl, provider) as unknown as Program<MarginFi>;
+    
+    const config = getConfig("production");
+    const marginfi = await MarginfiClient.fetch(config, wallet, connection);
     
     const vaultPda = getVault(wallet.publicKey);
     const marginfiAccount = Keypair.generate();
@@ -51,18 +50,15 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
             })
             .instruction();
 
-        const ix_initMarginfiAccount = await marginfiProgram.methods
-            .marginfiAccountInitialize()
-            .accounts({
-                marginfiGroup: MARGINFI_GROUP_1,
-                marginfiAccount: marginfiAccount.publicKey,
-                authority: wallet.publicKey,
-                feePayer: wallet.publicKey,
-                systemProgram: SystemProgram.programId
-            })
-            .instruction()
+        const tx = new Transaction().add(ix_initUser, ix_initVaultDriftAccount);
 
-        const tx = new Transaction().add(ix_initUser, ix_initVaultDriftAccount, ix_initMarginfiAccount);
+        // Create MarginFi account if use doesn't have one already
+        const marginfiAccounts = await marginfi.getMarginfiAccountsForAuthority(wallet.publicKey);
+        if (marginfiAccounts.length == 0) {
+            const { instructions } = await marginfi.makeCreateMarginfiAccountIx(marginfiAccount.publicKey);
+            tx.add(instructions[0]);
+        }
+
         const signature = await provider.sendAndConfirm(tx, [marginfiAccount]);
         return signature;
     } catch (err) {
@@ -185,6 +181,10 @@ export const liquidateSol = async(wallet: AnchorWallet, connection: web3.Connect
     const quartzProgram = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>; 
     const vaultPda = getVault(wallet.publicKey);
 
+    const config = getConfig("production");
+    const marginfi = await MarginfiClient.fetch(config, wallet, connection);
+    const [ marginfiAccount ] = await marginfi.getMarginfiAccountsForAuthority(wallet.publicKey);
+
     const walletUsdc = await getAssociatedTokenAddress(USDC_MINT, wallet.publicKey);
     const walletWSol = await getAssociatedTokenAddress(WSOL_MINT, wallet.publicKey);
 
@@ -255,14 +255,11 @@ export const liquidateSol = async(wallet: AnchorWallet, connection: web3.Connect
         lamports: amountLamports,
     });
 
-    const config = getConfig("production");
-    const client = await MarginfiClient.fetch(config, wallet, connection);
-    const solBank = client.getBankByTokenSymbol("SOL");
-    const usdcBank = client.getBankByTokenSymbol("USDC");
+    const solBank = marginfi.getBankByTokenSymbol("SOL");
+    const usdcBank = marginfi.getBankByTokenSymbol("USDC");
     if (!solBank || !usdcBank) return;
 
-    const [userAccount] = await client.getMarginfiAccountsForAuthority(wallet.publicKey);
-    const { flashloanTx } = await userAccount.makeLoopTx(
+    const { flashloanTx } = await marginfiAccount.makeLoopTx(
         baseUnitToToken(amountLamports, DECIMAL_PLACES_SOL), // MarginFi expects in decimals
         baseUnitToToken(amountMicroCents, DECIMAL_PLACES_USDC), // MarginFi expects in decimals
         solBank.address,
