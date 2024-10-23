@@ -15,6 +15,7 @@ import './wallet-adapter-react-ui/styles.css';
 
 type WalletButtonProps = React.ComponentProps<typeof WalletMultiButton> & {
   onCloseAccount?: () => void;
+  disableCloseAccount: boolean;
 };
 
 export const WalletButton = dynamic(

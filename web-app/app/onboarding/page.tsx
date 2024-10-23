@@ -55,7 +55,7 @@ export default function Onboarding() {
     
     return (
         <main className={"two-col-grid"}>
-            <Account />
+            <Account disableCloseAccount={true} />
 
             <div>
                 <h1 className={styles.heading}>Acknowledge Terms</h1>

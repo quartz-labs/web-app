@@ -15,9 +15,10 @@ type Props = ButtonProps & {
         disconnect: string;
     };
     onCloseAccount: () => void;
+    disableCloseAccount: boolean;
 };
 
-export function BaseWalletMultiButton({ children, labels, onCloseAccount, ...props }: Props) {
+export function BaseWalletMultiButton({ children, labels, onCloseAccount, disableCloseAccount, ...props }: Props) {
     const { setVisible: setModalVisible } = useWalletModal();
     const { buttonState, onConnect, onDisconnect, publicKey, walletIcon, walletName } = useWalletMultiButton({
         onSelectWallet() {
@@ -102,16 +103,18 @@ export function BaseWalletMultiButton({ children, labels, onCloseAccount, ...pro
                         {copied ? labels['copied'] : labels['copy-address']}
                     </li>
                 ) : null}
-                <li
-                    className="wallet-adapter-dropdown-list-item"
-                    onClick={() => {
-                        setMenuOpen(false);
-                        onCloseAccount();
-                    }}
-                    role="menuitem"
-                >
-                    Close account
-                </li>
+                {!disableCloseAccount ? (
+                    <li
+                        className="wallet-adapter-dropdown-list-item"
+                        onClick={() => {
+                            setMenuOpen(false);
+                            onCloseAccount();
+                        }}
+                        role="menuitem"
+                    >
+                        Close account
+                    </li>
+                ) : null}
                 {onDisconnect ? (
                     <li
                         className="wallet-adapter-dropdown-list-item"

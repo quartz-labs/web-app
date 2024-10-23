@@ -1,6 +1,5 @@
 import { ViewProps } from "@/app/dashboard/page";
-import { MICRO_CENTS_PER_USDC } from "@/utils/constants";
-import { depositUsdt, liquidateSol } from "@/utils/instructions";
+import { liquidateSol } from "@/utils/instructions";
 import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import styles from "./LoanView.module.css";
 import { getSign, roundToDecimalPlaces, roundToDecimalPlacesAbsolute } from "@/utils/utils";

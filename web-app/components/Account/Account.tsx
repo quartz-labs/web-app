@@ -4,7 +4,11 @@ import styles from "./Account.module.css";
 import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import { closeAccount } from "@/utils/instructions";
 
-export default function Account() {
+export interface AccountProps {
+    disableCloseAccount?: boolean
+}
+
+export default function Account({disableCloseAccount} : AccountProps) {
     const { connection } = useConnection();
     const wallet = useAnchorWallet();
 
@@ -16,7 +20,7 @@ export default function Account() {
     return (
         <div className={styles.accountWrapper}>
             <Logo />
-            <WalletButton onCloseAccount={onCloseAccount} />
+            <WalletButton onCloseAccount={onCloseAccount} disableCloseAccount={disableCloseAccount ?? false} />
       </div>
     )
 }

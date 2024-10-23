@@ -49,7 +49,7 @@ const react_1 = __importStar(require("react"));
 const BaseWalletConnectionButton_js_1 = require("./BaseWalletConnectionButton.js");
 const useWalletModal_js_1 = require("./useWalletModal.js");
 function BaseWalletMultiButton(_a) {
-    var { children, labels, onCloseAccount } = _a, props = __rest(_a, ["children", "labels", "onCloseAccount"]);
+    var { children, labels, onCloseAccount, disableCloseAccount } = _a, props = __rest(_a, ["children", "labels", "onCloseAccount", "disableCloseAccount"]);
     const { setVisible: setModalVisible } = (0, useWalletModal_js_1.useWalletModal)();
     const { buttonState, onConnect, onDisconnect, publicKey, walletIcon, walletName } = (0, wallet_adapter_base_ui_1.useWalletMultiButton)({
         onSelectWallet() {
@@ -111,10 +111,10 @@ function BaseWalletMultiButton(_a) {
                     setCopied(true);
                     setTimeout(() => setCopied(false), 400);
                 }), role: "menuitem" }, copied ? labels['copied'] : labels['copy-address'])) : null,
-            react_1.default.createElement("li", { className: "wallet-adapter-dropdown-list-item", onClick: () => {
+            !disableCloseAccount ? (react_1.default.createElement("li", { className: "wallet-adapter-dropdown-list-item", onClick: () => {
                     setMenuOpen(false);
                     onCloseAccount();
-                }, role: "menuitem" }, labels['change-wallet']),
+                }, role: "menuitem" }, labels['change-wallet'])) : null,
             onDisconnect ? (react_1.default.createElement("li", { className: "wallet-adapter-dropdown-list-item", onClick: () => {
                     onDisconnect();
                     setMenuOpen(false);
