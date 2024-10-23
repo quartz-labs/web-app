@@ -2,9 +2,10 @@ import express from 'express';
 import { json } from 'express';
 import { DriftClientManager } from './driftClientManager.js';
 import { setupRoutes } from './routes.js';
+import { PORT } from './config.js';
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = PORT;
 
 // Configure middleware
 app.use(json());
