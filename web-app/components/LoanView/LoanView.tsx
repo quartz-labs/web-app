@@ -1,4 +1,5 @@
 import { ViewProps } from "@/app/dashboard/page";
+import { MICRO_CENTS_PER_USDC } from "@/utils/constants";
 import { liquidateSol } from "@/utils/instructions";
 import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import styles from "./LoanView.module.css";
@@ -29,10 +30,7 @@ export default function LoanView ({
             onConfirm: async (amount: number) => {
                 if (!wallet) return;
 
-                // const signature = await depositUsdt(wallet, connection, amount * MICRO_CENTS_PER_USDC);
-                const amountLamports = 4733182;
-                const amountMicroCents = 810033;
-                const signature = await liquidateSol(wallet, connection, amountLamports, amountMicroCents);
+                const signature = await liquidateSol(wallet, connection, amount * MICRO_CENTS_PER_USDC);
                 if (signature) {
                     updateBalance();
                     disableModal();

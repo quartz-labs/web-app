@@ -1,13 +1,16 @@
 import quartzIdl from "../idl/funds_program.json";
 import { FundsProgram } from "@/types/funds_program";
+import marginfiIdl from "../idl/marginfi.json";
+import { MarginFi } from "@/types/marginfi";
+
 import { AnchorProvider, BN, Idl, Program, setProvider, web3 } from "@coral-xyz/anchor";
 import { AnchorWallet } from "@solana/wallet-adapter-react";
-import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC, DRIFT_PROGRAM_ID, DRIFT_SPOT_MARKET_SOL, DRIFT_SPOT_MARKET_USDC, DRIFT_SIGNER, USDC_MINT, WSOL_MINT, DRIFT_ADDITIONAL_ACCOUNT_1, DRIFT_ADDITIONAL_ACCOUNT_2, USDT_MINT, DECIMAL_PLACES_SOL, DECIMAL_PLACES_USDC } from "./constants";
+import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC, DRIFT_PROGRAM_ID, DRIFT_SPOT_MARKET_SOL, DRIFT_SPOT_MARKET_USDC, DRIFT_SIGNER, USDC_MINT, WSOL_MINT, DRIFT_ADDITIONAL_ACCOUNT_1, DRIFT_ADDITIONAL_ACCOUNT_2, USDT_MINT, DECIMAL_PLACES_USDC, MARGINFI_GROUP_1 } from "./constants";
 import { ASSOCIATED_PROGRAM_ID, TOKEN_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/utils/token";
-import { SystemProgram, Transaction, VersionedTransaction, TransactionMessage } from "@solana/web3.js";
+import { SystemProgram, Transaction, VersionedTransaction, TransactionMessage, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
 import { getDriftSpotMarketVault, getDriftState, getDriftUser, getDriftUserStats, getVault, getVaultUsdc, getVaultWsol } from "./getPDAs";
-import { baseUnitToToken, getOrCreateAssociatedTokenAccountAnchor } from "./utils";
+import { baseUnitToToken, divideBN, getOrCreateAssociatedTokenAccountAnchor } from "./utils";
 import { getJupiterSwapIx } from "./jupiter";
 import { createAssociatedTokenAccountIdempotentInstruction, getAssociatedTokenAddress } from "@solana/spl-token";
 import { Keypair } from "@solana/web3.js";
@@ -17,9 +20,8 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
     const provider = new AnchorProvider(connection, wallet, {commitment: "confirmed"}); 
     setProvider(provider);
     const quartzProgram = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>;
-    
-    const config = getConfig("production");
-    const marginfi = await MarginfiClient.fetch(config, wallet, connection);
+    const marginfiProgram = new Program(marginfiIdl as Idl, provider) as unknown as Program<MarginFi>;
+    const marginfiClient = await MarginfiClient.fetch(getConfig(), wallet, connection);
     
     const vaultPda = getVault(wallet.publicKey);
     const marginfiAccount = Keypair.generate();
@@ -53,10 +55,19 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
         const tx = new Transaction().add(ix_initUser, ix_initVaultDriftAccount);
 
         // Create MarginFi account if use doesn't have one already
-        const marginfiAccounts = await marginfi.getMarginfiAccountsForAuthority(wallet.publicKey);
+        const marginfiAccounts = await marginfiClient.getMarginfiAccountsForAuthority(wallet.publicKey);
         if (marginfiAccounts.length == 0) {
-            const { instructions } = await marginfi.makeCreateMarginfiAccountIx(marginfiAccount.publicKey);
-            tx.add(instructions[0]);
+            const ix_initMarginfiAccount = await marginfiProgram.methods
+                .marginfiAccountInitialize()
+                .accounts({
+                    marginfiGroup: MARGINFI_GROUP_1,
+                    marginfiAccount: marginfiAccount.publicKey,
+                    authority: wallet.publicKey,
+                    feePayer: wallet.publicKey,
+                    systemProgram: SystemProgram.programId
+                })
+                .instruction();
+            tx.add(ix_initMarginfiAccount);
         }
 
         const signature = await provider.sendAndConfirm(tx, [marginfiAccount]);
@@ -175,18 +186,50 @@ export const depositLamports = async(wallet: AnchorWallet, connection: web3.Conn
 }
 
 
-export const liquidateSol = async(wallet: AnchorWallet, connection: web3.Connection, amountLamports: number, amountMicroCents: number) => {
+export const liquidateSol = async(wallet: AnchorWallet, connection: web3.Connection, amountMicroCents: number) => {
     const provider = new AnchorProvider(connection, wallet, {commitment: "confirmed"}); 
     setProvider(provider);
     const quartzProgram = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>; 
+    const marginfiProgram = new Program(marginfiIdl as Idl, provider) as unknown as Program<MarginFi>;
     const vaultPda = getVault(wallet.publicKey);
-
-    const config = getConfig("production");
-    const marginfi = await MarginfiClient.fetch(config, wallet, connection);
-    const [ marginfiAccount ] = await marginfi.getMarginfiAccountsForAuthority(wallet.publicKey);
 
     const walletUsdc = await getAssociatedTokenAddress(USDC_MINT, wallet.publicKey);
     const walletWSol = await getAssociatedTokenAddress(WSOL_MINT, wallet.publicKey);
+
+    const marginfiClient = await MarginfiClient.fetch(getConfig(), wallet, connection);
+
+    let marginfiAccounts = await marginfiClient.getMarginfiAccountsForAuthority(wallet.publicKey);
+    if (marginfiAccounts.length == 0) {
+        const newAccount = Keypair.generate();
+        const tx_initMarginFiAccount = await marginfiProgram.methods
+            .marginfiAccountInitialize()
+            .accounts({
+                marginfiGroup: MARGINFI_GROUP_1,
+                marginfiAccount: newAccount.publicKey,
+                authority: wallet.publicKey,
+                feePayer: wallet.publicKey,
+                systemProgram: SystemProgram.programId
+            })
+            .transaction();
+        const signature = await provider.sendAndConfirm(tx_initMarginFiAccount, [newAccount]);
+
+        await connection.confirmTransaction({signature, ...(await connection.getLatestBlockhash())}, "finalized");
+        marginfiAccounts = await marginfiClient.getMarginfiAccountsForAuthority(wallet.publicKey);
+    }
+
+    const marginfiAccount = marginfiAccounts[0];
+    const solBank = marginfiClient.getBankByTokenSymbol("SOL");
+    const usdcBank = marginfiClient.getBankByTokenSymbol("USDC");
+    if (!solBank || !usdcBank) return;
+
+    const priceSol = marginfiClient.getOraclePriceByBank(solBank.address)?.priceRealtime.price.toNumber();
+    const priceUsdc = marginfiClient.getOraclePriceByBank(usdcBank.address)?.priceRealtime.price.toNumber();
+    if (!priceSol || !priceUsdc) return;
+
+    const amountUsdc = new BN(baseUnitToToken(amountMicroCents, DECIMAL_PLACES_USDC));
+    const usdcValue = amountUsdc.mul(new BN(priceUsdc));
+    const amountSol = divideBN(usdcValue, new BN(priceSol));
+    const amountLamports = amountSol * LAMPORTS_PER_SOL;
 
     const ix_createUsdcAta = createAssociatedTokenAccountIdempotentInstruction(
         wallet.publicKey,
@@ -202,7 +245,7 @@ export const liquidateSol = async(wallet: AnchorWallet, connection: web3.Connect
         WSOL_MINT
     );
 
-    const ix_depositUsdt = await quartzProgram.methods
+    const ix_depositUsdc = await quartzProgram.methods
             .depositUsdc(new BN(amountMicroCents), false)
             .accounts({
                 // @ts-expect-error - IDL issue
@@ -255,16 +298,12 @@ export const liquidateSol = async(wallet: AnchorWallet, connection: web3.Connect
         lamports: amountLamports,
     });
 
-    const solBank = marginfi.getBankByTokenSymbol("SOL");
-    const usdcBank = marginfi.getBankByTokenSymbol("USDC");
-    if (!solBank || !usdcBank) return;
-
     const { flashloanTx } = await marginfiAccount.makeLoopTx(
-        baseUnitToToken(amountLamports, DECIMAL_PLACES_SOL), // MarginFi expects in decimals
-        baseUnitToToken(amountMicroCents, DECIMAL_PLACES_USDC), // MarginFi expects in decimals
+        amountSol,
+        baseUnitToToken(amountMicroCents, DECIMAL_PLACES_USDC), // MarginFi expects in token with decimals
         solBank.address,
         usdcBank.address,
-        [ix_createWSolAta, ix_createUsdcAta, ix_depositUsdt, ix_withdrawLamports, ix_wrapSol],
+        [ix_createWSolAta, ix_createUsdcAta, ix_depositUsdc, ix_withdrawLamports, ix_wrapSol],
         []
     );
 

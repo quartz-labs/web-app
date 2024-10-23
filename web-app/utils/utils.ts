@@ -74,3 +74,7 @@ export const baseUnitToToken = (amountBase: number | BN, decimals: number): stri
     return trimmed === '' ? '0' : trimmed;
 }
 
+export const divideBN = (a: BN, b: BN) => {
+    return a.div(b).toNumber() + a.mod(b).toNumber();
+}
+
