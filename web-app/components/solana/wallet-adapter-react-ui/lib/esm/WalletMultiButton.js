@@ -1,7 +1,7 @@
 import React from 'react';
 import { BaseWalletMultiButton } from './BaseWalletMultiButton.js';
 const LABELS = {
-    'change-wallet': 'Change wallet',
+    'change-wallet': 'Close account',
     connecting: 'Connecting ...',
     'copy-address': 'Copy address',
     copied: 'Copied',

@@ -2,7 +2,7 @@ import { AnchorProvider, web3 } from "@coral-xyz/anchor";
 import { AnchorWallet } from "@solana/wallet-adapter-react";
 import { Connection, PublicKey, Transaction } from "@solana/web3.js";
 import { getVault } from "./getPDAs";
-import { createAssociatedTokenAccountInstruction, getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { createAssociatedTokenAccountInstruction, getAssociatedTokenAddress } from "@solana/spl-token";
 
 export const isVaultInitialized = async (wallet: AnchorWallet, connection: web3.Connection) => {
     const vaultPda = getVault(wallet.publicKey);

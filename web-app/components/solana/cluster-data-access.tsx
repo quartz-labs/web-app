@@ -26,7 +26,6 @@ export const defaultClusters: Cluster[] = [
   {
     name: 'mainnet-beta',
     endpoint: "https://janella-g42vor-fast-mainnet.helius-rpc.com",
-    // endpoint: clusterApiUrl('devnet'),
     network: ClusterNetwork.Mainnet,
   },
   // {

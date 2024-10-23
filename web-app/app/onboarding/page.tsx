@@ -55,7 +55,7 @@ export default function Onboarding() {
     
     return (
         <main className={"two-col-grid"}>
-            <Account />
+            <Account disableCloseAccount={true} />
 
             <div>
                 <h1 className={styles.heading}>Acknowledge Terms</h1>
@@ -96,7 +96,7 @@ export default function Onboarding() {
                                 onChange={() => handleCheckboxChange(2)} 
                             />
                             <span className={styles.checkboxText}>
-                                I understand that my SOL deposits will liquidate for USDT if their value drops below the 80% margin requirement on loans
+                                I understand that my SOL deposits will liquidate for USDT if their value drops below 80% of the loan value
                             </span>
                         </label>
                     </li>
@@ -115,7 +115,7 @@ export default function Onboarding() {
                     </li>
                 </ul>
 
-                <button onClick={handleCreateAccount} className={`glass-button font-small ${styles.mainButton}`}>
+                <button onClick={handleCreateAccount} className={`glass-button ${styles.mainButton}`}>
                     {awaitingSign &&
                         <PuffLoader
                             color={"#ffffff"}

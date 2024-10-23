@@ -7,12 +7,28 @@ import Image from "next/image";
 import styles from "./MainView.module.css";
 import { getSign, roundToDecimalPlaces, roundToDecimalPlacesAbsolute } from "@/utils/utils";
 import { PuffLoader } from "react-spinners";
+import React from "react";
 
-export default function MainView(
-    { solPrice, totalSolBalance, usdcLoanBalance, solDailyRate, usdcDailyRate, balanceLoaded, swapView, enableModal, disableModal, enableOfframpModal }: ViewProps
-) {
+export default function MainView({ 
+    solPrice, 
+    totalSolBalance, 
+    usdcLoanBalance, 
+    solDailyRate, 
+    usdcDailyRate, 
+    balanceLoaded,
+    swapView, 
+    enableModal, 
+    disableModal, 
+    updateBalance,
+    enableOfframpModal 
+}: ViewProps) {
     const { connection } = useConnection();
     const wallet = useAnchorWallet();
+
+    const netSolBalance = ((totalSolBalance * solPrice) - usdcLoanBalance) / solPrice;
+    const dailySolChange = totalSolBalance * solDailyRate * solPrice;
+    const dailyUsdcChange = usdcLoanBalance * usdcDailyRate;
+    const dailyNetChange = dailySolChange - dailyUsdcChange;
 
     const handleDeposit = () => {
         enableModal({
@@ -24,7 +40,10 @@ export default function MainView(
                 if (!wallet) return;
 
                 const signature = await depositLamports(wallet, connection, amount * LAMPORTS_PER_SOL);
-                if (signature) disableModal();
+                if (signature) {
+                    updateBalance();
+                    disableModal();
+                }
             },
             onCancel: () => { disableModal(); }
         })
@@ -40,9 +59,13 @@ export default function MainView(
                 if (!wallet) return;
 
                 const signature = await withdrawLamports(wallet, connection, amount * LAMPORTS_PER_SOL);
-                if (signature) disableModal();
+                if (signature) {
+                    updateBalance();
+                    disableModal();
+                }
             },
-            onCancel: () => { disableModal(); }
+            onCancel: () => { disableModal(); },
+            onSetMax: () => {return netSolBalance.toString()}
         })
     }
 
@@ -58,9 +81,9 @@ export default function MainView(
                 const signature = await withdrawUsdt(wallet, connection, amount * MICRO_CENTS_PER_USDC);
                 if (!signature) return;
 
+                updateBalance();
                 const amountTrunc = amount.toFixed(2);
                 const url = `https://exchange.mercuryo.io/?widget_id=52148ead-2e7d-4f05-8f98-426f20ab2e74&fiat_currency=USD&currency=USDT&network=SOLANA&amount=${amountTrunc}&type=sell`;
-
                 enableOfframpModal(url);
                 window.open(url, "_blank", "noopener,noreferrer");
             },
@@ -68,13 +91,8 @@ export default function MainView(
         })
     }
 
-    const netSolBalance = ((totalSolBalance * solPrice) - usdcLoanBalance) / solPrice;
-    const dailySolChange = totalSolBalance * solDailyRate * solPrice;
-    const dailyUsdcChange = usdcLoanBalance * usdcDailyRate;
-    const dailyNetChange = dailySolChange - dailyUsdcChange;
-
     return (
-        <div>
+        <div className="dashboard-wrapper">
             {!balanceLoaded &&
                 <div className={styles.balanceWrapper}>
                     <div className={styles.loadingBalance}>
@@ -84,7 +102,6 @@ export default function MainView(
                             size={50}
                             aria-label="Loading"
                             data-testid="loader"
-                            className={styles.loader}
                         />
                     </div>
                 </div>

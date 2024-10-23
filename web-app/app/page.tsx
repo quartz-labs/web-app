@@ -24,15 +24,15 @@ export default function Page() {
   }, [wallet, connection, router]);
 
   return (
-    <main className={"two-col-grid"}>
+    <main className={"two-col-grid login-grid"}>
       <div className={styles.title}>
         <Logo />
 
-        <h1 className={styles.subheading}>Off-ramp without selling your assets</h1>
+        <h1 className={styles.subheading}>Off-ramp without selling <span className="no-wrap">your assets</span></h1>
       </div>
       
       <div>
-        <WalletButton />
+        <WalletButton disableCloseAccount={true} />
       </div>
     </main>
   );

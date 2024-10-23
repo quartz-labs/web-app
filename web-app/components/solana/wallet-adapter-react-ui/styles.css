@@ -6,7 +6,7 @@
     display: flex;
     align-items: center;
     font-family: 'Inter', sans-serif;
-    font-size: 18px;
+    font-size: var(--text-size-p);
     font-weight: 300;
     height: 54px;
     line-height: 54px;
@@ -40,8 +40,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 22px;
-    height: 22px;
+    width: var(--text-size-large);
+    height: var(--text-size-large);
 }
 
 .wallet-adapter-button
@@ -145,8 +145,8 @@
     align-items: center;
     justify-content: center;
     position: absolute;
-    top: 18px;
-    right: 18px;
+    top: var(--text-size-p);
+    right: var(--text-size-p);
     padding: 12px;
     cursor: pointer;
     background: #1a1f2e;
@@ -222,7 +222,7 @@
 
 @media (max-width: 374px) {
     .wallet-adapter-modal-title {
-        font-size: 18px;
+        font-size: var(--text-size-p);
     }
 }
 
@@ -236,7 +236,7 @@
 .wallet-adapter-modal-list .wallet-adapter-button {
     font-weight: 400;
     border-radius: 0;
-    font-size: 18px;
+    font-size: var(--text-size-p);
 }
 
 .wallet-adapter-modal-list .wallet-adapter-button-end-icon,
@@ -290,7 +290,7 @@
     width: 100%;
     background-color: #512da8;
     padding: 12px;
-    font-size: 18px;
+    font-size: var(--text-size-p);
     border: none;
     border-radius: 8px;
     color: #fff;

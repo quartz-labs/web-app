@@ -3,7 +3,7 @@ import { BaseWalletMultiButton } from './BaseWalletMultiButton.js';
 import type { ButtonProps } from './Button.js';
 
 const LABELS = {
-    'change-wallet': 'Change wallet',
+    'change-wallet': 'Close account',
     connecting: 'Connecting ...',
     'copy-address': 'Copy address',
     copied: 'Copied',
@@ -12,6 +12,11 @@ const LABELS = {
     'no-wallet': 'Select Wallet',
 } as const;
 
-export function WalletMultiButton(props: ButtonProps) {
-    return <BaseWalletMultiButton {...props} labels={LABELS} />;
+interface WalletMultiButtonProps extends ButtonProps {
+    onCloseAccount: () => void;
+    disableCloseAccount: boolean;
+}
+
+export function WalletMultiButton({ onCloseAccount, disableCloseAccount, ...props }: WalletMultiButtonProps) {
+    return <BaseWalletMultiButton {...props} labels={LABELS} onCloseAccount={onCloseAccount} disableCloseAccount={disableCloseAccount} />;
 }

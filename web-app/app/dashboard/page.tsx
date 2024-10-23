@@ -4,15 +4,15 @@ import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
 import { isVaultInitialized } from '@/utils/utils';
-import Modal, { ModalProps } from '@/components/Modal/Modal';
 import Account from '@/components/Account/Account';
 import MainView from '@/components/MainView/MainView';
 import LoanView from '@/components/LoanView/LoanView';
 import styles from "./page.module.css";
-import OfframpModal from '@/components/Modal/OfframpModal';
 import { fetchDriftData, getSolDailyEarnRate, getUsdcDailyBorrowRate } from '@/utils/balance';
 import { getVault } from '@/utils/getPDAs';
 import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC } from '@/utils/constants';
+import DefaultModal, { DefaultModalProps } from '@/components/Modals/DefaultModal/DefaultModal';
+import OfframpModal from '@/components/Modals/OfframpModal/OfframpModal';
 
 export interface ViewProps {
     solPrice: number;
@@ -22,8 +22,9 @@ export interface ViewProps {
     usdcDailyRate: number;
     balanceLoaded: boolean;
     swapView: () => void;
-    enableModal: (data: ModalProps) => void;
+    enableModal: (data: DefaultModalProps) => void;
     disableModal: () => void;
+    updateBalance: () => void;
     enableOfframpModal: (url: string) => void;
 }
 
@@ -43,7 +44,7 @@ export default function Dashboard() {
     const [mainView, setMainView] = useState(true);
 
     const [modalEnabled, setModalEnabled] = useState(false);
-    const [modalData, setModalData] = useState<ModalProps>({
+    const [modalData, setModalData] = useState<DefaultModalProps>({
         title: "",
         denomination: "",
         buttonText: "",
@@ -62,17 +63,13 @@ export default function Dashboard() {
     const [usdcDailyRate, setUsdcDailyRate] = useState(0);
     const [balanceLoaded, setBalanceLoaded] = useState(false);
 
-    const enableModal = (data: ModalProps) => {
+    const enableModal = (data: DefaultModalProps) => {
         setModalData(data);
         setModalEnabled(true);
     }
-    const disableModal = () => {
-        updateBalance();
-        setModalEnabled(false);
-    }
+    const disableModal = () => setModalEnabled(false);
 
     const enableOfframpModal = (url: string) => {
-        updateBalance();
         setOfframpUrl(url);
         setOfframpModalEnabled(true);
         setModalEnabled(false);
@@ -121,7 +118,7 @@ export default function Dashboard() {
     return (
         <main className={styles.maxHeight}>
             {modalEnabled && 
-                <Modal {...modalData} />
+                <DefaultModal {...modalData} />
             }
 
             {offrampModalEnabled &&
@@ -142,6 +139,7 @@ export default function Dashboard() {
                         swapView={() => setMainView(false)}
                         enableModal={enableModal}
                         disableModal={disableModal}
+                        updateBalance={updateBalance}
                         enableOfframpModal={enableOfframpModal}
                     />
                 }
@@ -157,6 +155,7 @@ export default function Dashboard() {
                         swapView={() => setMainView(true)}
                         enableModal={enableModal}
                         disableModal={disableModal}
+                        updateBalance={updateBalance}
                         enableOfframpModal={() => {}}
                     />
                 }

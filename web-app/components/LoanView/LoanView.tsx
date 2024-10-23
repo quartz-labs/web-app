@@ -6,9 +6,18 @@ import styles from "./LoanView.module.css";
 import { getSign, roundToDecimalPlaces, roundToDecimalPlacesAbsolute } from "@/utils/utils";
 import { PuffLoader } from "react-spinners";
 
-export default function LoanView (
-    {solPrice, totalSolBalance, usdcLoanBalance, solDailyRate, usdcDailyRate, balanceLoaded, swapView, enableModal, disableModal} : ViewProps
-) {
+export default function LoanView ({
+    solPrice, 
+    totalSolBalance, 
+    usdcLoanBalance, 
+    solDailyRate, 
+    usdcDailyRate, 
+    balanceLoaded,
+    swapView, 
+    enableModal, 
+    disableModal,
+    updateBalance
+} : ViewProps) {
     const { connection } = useConnection();
     const wallet = useAnchorWallet();
 
@@ -22,7 +31,13 @@ export default function LoanView (
                 if (!wallet) return;
 
                 const signature = await depositUsdt(wallet, connection, amount * MICRO_CENTS_PER_USDC);
-                if (signature) disableModal();
+                // const amountLamports = 0;
+                // const amountMicroCents = 0;
+                // const signature = await liquidateSol(wallet, connection, amountLamports, amountMicroCents);
+                if (signature) {
+                    updateBalance();
+                    disableModal();
+                }
             },
             onCancel: () => { disableModal(); }
         })
@@ -34,7 +49,7 @@ export default function LoanView (
     const dailyNetChange = dailySolChange - dailyUsdcChange;
 
     return (
-        <div>
+        <div className="dashboard-wrapper">
             <div className={styles.balanceWrapper}>
                 <div>
                     <p className={styles.title}>Total Assets</p>
