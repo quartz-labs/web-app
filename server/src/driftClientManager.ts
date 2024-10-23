@@ -33,8 +33,6 @@ export class DriftClientManager {
                 env: 'mainnet-beta',
             });
 
-            console.log("Drift client initialized with keypair:", keypair.publicKey.toBase58());
-
             await this.driftClient.subscribe();
             console.log('DriftClient initialized and subscribed successfully');
             this.reconnectAttempts = 0; // Reset reconnect attempts on successful connection
