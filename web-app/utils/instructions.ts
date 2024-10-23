@@ -230,8 +230,8 @@ export const liquidateSol = async(wallet: AnchorWallet, connection: web3.Connect
 
     const amountUsdc = new BigNumber(baseUnitToToken(amountMicroCents, DECIMAL_PLACES_USDC));
     const amountSol = amountUsdc
-        .times(oracleUsdc.priceWeighted.lowestPrice)
-        .div(oracleSol.priceWeighted.highestPrice);
+        .times(oracleUsdc.priceWeighted.highestPrice)
+        .div(oracleSol.priceWeighted.lowestPrice);
     const amountLamports = new BN(amountSol.times(LAMPORTS_PER_SOL).integerValue().toString());
 
     const ix_createUsdcAta = createAssociatedTokenAccountIdempotentInstruction(
