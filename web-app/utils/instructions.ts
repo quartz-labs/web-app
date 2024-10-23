@@ -5,17 +5,16 @@ import { MarginFi } from "@/types/marginfi";
 
 import { AnchorProvider, BN, Idl, Program, setProvider, web3 } from "@coral-xyz/anchor";
 import { AnchorWallet } from "@solana/wallet-adapter-react";
-import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC, DRIFT_PROGRAM_ID, DRIFT_SPOT_MARKET_SOL, DRIFT_SPOT_MARKET_USDC, DRIFT_SIGNER, USDC_MINT, WSOL_MINT, DRIFT_ADDITIONAL_ACCOUNT_1, DRIFT_ADDITIONAL_ACCOUNT_2, USDT_MINT, MARGINFI_GROUP_1 } from "./constants";
+import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC, DRIFT_PROGRAM_ID, DRIFT_SPOT_MARKET_SOL, DRIFT_SPOT_MARKET_USDC, DRIFT_SIGNER, USDC_MINT, WSOL_MINT, DRIFT_ADDITIONAL_ACCOUNT_1, DRIFT_ADDITIONAL_ACCOUNT_2, USDT_MINT, MARGINFI_GROUP_1, DECIMAL_PLACES_SOL, DECIMAL_PLACES_USDC } from "./constants";
 import { ASSOCIATED_PROGRAM_ID, TOKEN_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/utils/token";
 import { SystemProgram, Transaction, VersionedTransaction, TransactionMessage } from "@solana/web3.js";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
 import { getDriftSpotMarketVault, getDriftState, getDriftUser, getDriftUserStats, getVault, getVaultUsdc, getVaultWsol } from "./getPDAs";
-import { getOrCreateAssociatedTokenAccountAnchor } from "./utils";
+import { baseUnitToToken, getOrCreateAssociatedTokenAccountAnchor } from "./utils";
 import { getJupiterSwapIx } from "./jupiter";
 import { createAssociatedTokenAccountIdempotentInstruction, getAssociatedTokenAddress } from "@solana/spl-token";
 import { Keypair } from "@solana/web3.js";
-import { buildFlashLoanIxs } from "./marginfi";
-import { PublicKey } from "@solana/web3.js";
+import { MarginfiClient, getConfig } from '@mrgnlabs/marginfi-client-v2';
 
 export const initAccount = async (wallet: AnchorWallet, connection: web3.Connection) => {
     const provider = new AnchorProvider(connection, wallet, {commitment: "confirmed"}); 
@@ -256,48 +255,30 @@ export const liquidateSol = async(wallet: AnchorWallet, connection: web3.Connect
         lamports: amountLamports,
     });
 
-    const flashLoanIxs = await buildFlashLoanIxs(
-        provider,
-        amountMicroCents,
-        amountLamports,
-        0,
-        // [ix_createUsdcAta, ix_createWSolAta, ix_depositUsdt, ix_withdrawLamports, ix_wrapSol],
-        [],
-        {
-            authority: wallet.publicKey,
-            // marginfiAccount: new PublicKey("6Hy3EZcjKozKXvm1dYirSmRuDNUz3uFD6RfU4W7hqHSX"), // TODO - Use stored account
-            marginfiAccount: new PublicKey("8YWZ7Qbu658gYg4JDfUzvVYNWQmNgDLdRSwAspqB1xwf"), // TODO - Use stored account
-            borrowAta: walletUsdc,
-            repayAta: walletWSol,
-            borrowBank: new PublicKey("2s37akK2eyBbp8DZgCm7RtsaEz8eJP3Nxd4urLHQv7yB"), // USDC Bank
-            repayBank: new PublicKey("CCKtUs6Cgwo4aaQUmBPmyoApH2gUDErxNZCAntD6LYGh"), // SOL Bank
-            borrowLiquidityAuthority: new PublicKey("3uxNepDbmkDNq6JhRja5Z8QwbTrfmkKP8AKZV5chYDGG"), // USDC Liquidity Authority
-            borrowLiquidity: new PublicKey("7jaiZR5Sk8hdYN9MxTpczTcwbWpb5WEoxSANuUwveuat"), // USDC Liquidity
-            repayLiquidity: new PublicKey("2eicbpitfJXDwqCuFAmPgDP7t2oUotnAzbGzRKLMgSLe"), // SOL Liquidity
-            borrowOracle: new PublicKey("Dpw1EAVrSB1ibxiDQyTAW6Zip3J4Btk2x4SgApQCeFbX"), // USDC Pyth
-            repayOracle: new PublicKey("7UVimffxr9ow1uXYxsr4LHAcV58mLzhmwaeKvJ1pjLiE") // SOL Pyth
-        }
+    const config = getConfig("production");
+    const client = await MarginfiClient.fetch(config, wallet, connection);
+    const solBank = client.getBankByTokenSymbol("SOL");
+    const usdcBank = client.getBankByTokenSymbol("USDC");
+    if (!solBank || !usdcBank) return;
+
+    const [userAccount] = await client.getMarginfiAccountsForAuthority(wallet.publicKey);
+    const { flashloanTx } = await userAccount.makeLoopTx(
+        baseUnitToToken(amountLamports, DECIMAL_PLACES_SOL), // MarginFi expects in decimals
+        baseUnitToToken(amountMicroCents, DECIMAL_PLACES_USDC), // MarginFi expects in decimals
+        solBank.address,
+        usdcBank.address,
+        [ix_createWSolAta, ix_createUsdcAta, ix_depositUsdt, ix_withdrawLamports, ix_wrapSol],
+        []
     );
 
-    const tx = new Transaction().add(...flashLoanIxs);
-    const latestBlockhash = await connection.getLatestBlockhash();
-    tx.recentBlockhash = latestBlockhash.blockhash;
-    tx.feePayer = wallet.publicKey;
-
-    const message = new TransactionMessage({
-        payerKey: wallet.publicKey,
-        recentBlockhash: latestBlockhash.blockhash,
-        instructions: tx.instructions,
-    }).compileToV0Message();
-
-    const versionedTx = new VersionedTransaction(message);
-    const signedTx = await wallet.signTransaction(versionedTx);
+    const signedTx = await wallet.signTransaction(flashloanTx);
     const simulation = await connection.simulateTransaction(signedTx);
     console.log("Simulation result:", simulation);
 
     const signature = await connection.sendRawTransaction(signedTx.serialize(), {
         skipPreflight: true
     });
+    console.log(signature);
     return signature;
 }
 
