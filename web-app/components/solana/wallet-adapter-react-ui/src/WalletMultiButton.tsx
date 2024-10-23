@@ -14,8 +14,9 @@ const LABELS = {
 
 interface WalletMultiButtonProps extends ButtonProps {
     onCloseAccount: () => void;
+    disableCloseAccount: boolean;
 }
 
-export function WalletMultiButton({ onCloseAccount, ...props }: WalletMultiButtonProps) {
-    return <BaseWalletMultiButton {...props} labels={LABELS} onCloseAccount={onCloseAccount} />;
+export function WalletMultiButton({ onCloseAccount, disableCloseAccount, ...props }: WalletMultiButtonProps) {
+    return <BaseWalletMultiButton {...props} labels={LABELS} onCloseAccount={onCloseAccount} disableCloseAccount={disableCloseAccount} />;
 }

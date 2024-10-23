@@ -32,7 +32,7 @@ export default function Page() {
       </div>
       
       <div>
-        <WalletButton />
+        <WalletButton disableCloseAccount={true} />
       </div>
     </main>
   );
