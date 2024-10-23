@@ -15,7 +15,7 @@ export const getSolDailyEarnRate = async () => await getSolAPR() / 365;
 
 export const fetchDriftData = async (vaultAddress: PublicKey, marketIndices: number[]) => {
     try {
-        const response = await fetch(`/api/drift-data?address=${vaultAddress.toBase58()}&marketIndices=${marketIndices}`);
+        const response = await fetch(`/api/drift-balance?address=${vaultAddress.toBase58()}&marketIndices=${marketIndices}`);
         if (!response.ok) throw new Error('Failed to fetch Drift data');
 
         const data = await response.json();
