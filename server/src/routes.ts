@@ -10,22 +10,15 @@ export function setupRoutes(app: Express, driftClientManager: DriftClientManager
   // Get drift balance for a specific address and market indices
   //@ts-ignore
   app.get('/drift-balance', async (req: Request, res: Response) => {
-    console.log("req.query:", req.query);
-
     const address = req.query.address as string;
     const marketIndicesParam = req.query.marketIndices as string;
 
-    console.log("address:", address);
-    console.log("marketIndicesParam:", marketIndicesParam);
+    console.log("drift-balance for: ", address, " called by:", req.ip);
 
     if (!address || !marketIndicesParam) {
       return res.status(400).json({ error: 'Missing address or marketIndices parameter' });
     }
-
     const marketIndices = marketIndicesParam.split(',').map(Number).filter(n => !isNaN(n));
-
-    console.log('address', address);
-    console.log('marketIndices', marketIndices);
 
     try {
       const balances = await driftClientManager.getUserBalances(address, marketIndices);
