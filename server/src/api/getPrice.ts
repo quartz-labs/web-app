@@ -1,4 +1,4 @@
-import { cache } from "..";
+import { cache } from "../index.js";
 
 export async function getPriceData(asset: string): Promise<any> {
     const cacheKey = `price_${asset}`;
