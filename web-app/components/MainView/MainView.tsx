@@ -1,6 +1,6 @@
 import { ViewProps } from "@/app/dashboard/page";
 import { MICRO_CENTS_PER_USDC } from "@/utils/constants";
-import { depositLamports, withdrawLamports, withdrawUsdt } from "@/utils/instructions";
+import { depositLamports, withdrawLamports, withdrawUsdc } from "@/utils/instructions";
 import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import Image from "next/image";
@@ -20,7 +20,7 @@ export default function MainView({
     enableModal, 
     disableModal, 
     updateBalance,
-    enableOfframpModal 
+    //enableOfframpModal 
 }: ViewProps) {
     const { connection } = useConnection();
     const wallet = useAnchorWallet();
@@ -71,21 +71,17 @@ export default function MainView({
 
     const handleOfframp = () => {
         enableModal({
-            title: "Off-ramp to USD",
-            denomination: "USD",
-            buttonText: "Off-ramp",
-            minAmount: 31,
+            title: "Withdraw USDC",
+            denomination: "USDC",
+            buttonText: "Withdraw",
+            minAmount: 0,
             onConfirm: async (amount: number) => {
                 if (!wallet) return;
 
-                const signature = await withdrawUsdt(wallet, connection, amount * MICRO_CENTS_PER_USDC);
+                const signature = await withdrawUsdc(wallet, connection, amount * MICRO_CENTS_PER_USDC);
                 if (!signature) return;
 
                 updateBalance();
-                const amountTrunc = amount.toFixed(2);
-                const url = `https://exchange.mercuryo.io/?widget_id=52148ead-2e7d-4f05-8f98-426f20ab2e74&fiat_currency=USD&currency=USDT&network=SOLANA&amount=${amountTrunc}&type=sell`;
-                enableOfframpModal(url);
-                window.open(url, "_blank", "noopener,noreferrer");
             },
             onCancel: () => { disableModal(); }
         })
@@ -129,7 +125,7 @@ export default function MainView({
                     <button onClick={handleWithdraw} className={"glass-button"}>Withdraw SOL</button>
                 </div>
                 <button onClick={handleOfframp} className={"glass-button"}>
-                    Off-ramp to USD
+                    Withdraw USD
                     <Image
                         src="/arrow.svg"
                         alt=""
