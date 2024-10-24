@@ -49,8 +49,8 @@ export default function Dashboard() {
         denomination: "",
         buttonText: "",
         minAmount: 0,
-        onConfirm: () => {},
-        onCancel: () => {}
+        onConfirm: () => { },
+        onCancel: () => { }
     });
 
     const [offrampModalEnabled, setOfframpModalEnabled] = useState(false);
@@ -83,8 +83,8 @@ export default function Dashboard() {
 
             setSolDailyRate(await getSolDailyEarnRate());
             setUsdcDailyRate(await getUsdcDailyBorrowRate());
-        } catch {
-            console.error("Error: Unable to reach CoinGecko for price data");
+        } catch (error) {
+            console.error("Error: Unable to reach CoinGecko for price data", error);
         }
     }
 
@@ -117,7 +117,7 @@ export default function Dashboard() {
 
     return (
         <main className={styles.maxHeight}>
-            {modalEnabled && 
+            {modalEnabled &&
                 <DefaultModal {...modalData} />
             }
 
@@ -127,9 +127,9 @@ export default function Dashboard() {
 
             <div className="two-col-grid">
                 <Account />
-                
+
                 {mainView &&
-                    <MainView 
+                    <MainView
                         solPrice={solPrice}
                         totalSolBalance={totalSolBalance}
                         usdcLoanBalance={usdcLoanBalance}
@@ -150,13 +150,13 @@ export default function Dashboard() {
                         totalSolBalance={totalSolBalance}
                         usdcLoanBalance={usdcLoanBalance}
                         solDailyRate={solDailyRate}
-                        usdcDailyRate={usdcDailyRate} 
+                        usdcDailyRate={usdcDailyRate}
                         balanceLoaded={balanceLoaded}
                         swapView={() => setMainView(true)}
                         enableModal={enableModal}
                         disableModal={disableModal}
                         updateBalance={updateBalance}
-                        enableOfframpModal={() => {}}
+                        enableOfframpModal={() => { }}
                     />
                 }
             </div>
