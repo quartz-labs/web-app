@@ -40,10 +40,10 @@ export default function MainView({
 
                 const baseUnits = uiToBaseUnit(amount, DECIMALS_SOL).toNumber();
                 const signature = await depositLamports(wallet, connection, baseUnits);
-                if (signature) {
-                    updateBalance();
-                    disableModal();
-                }
+                if (!signature) return;
+
+                updateBalance();
+                disableModal();
             },
             onCancel: () => { disableModal(); }
         })
@@ -60,17 +60,17 @@ export default function MainView({
 
                 const baseUnits = uiToBaseUnit(amount, DECIMALS_SOL).toNumber();
                 const signature = await withdrawLamports(wallet, connection, baseUnits);
-                if (signature) {
-                    updateBalance();
-                    disableModal();
-                }
+                if (!signature) return;
+                
+                updateBalance();
+                disableModal();
             },
             onCancel: () => { disableModal(); },
             onSetMax: () => {return netSolBalance.toString()}
         })
     }
 
-    const handleOfframp = () => {
+    const handleWithdrawUSDC = () => {
         enableModal({
             title: "Withdraw USDC",
             denomination: "USDC",
@@ -84,6 +84,7 @@ export default function MainView({
                 if (!signature) return;
 
                 updateBalance();
+                disableModal();
             },
             onCancel: () => { disableModal(); }
         })
@@ -126,8 +127,8 @@ export default function MainView({
                     <button onClick={handleDeposit} className={"glass-button"}>Deposit SOL</button>
                     <button onClick={handleWithdraw} className={"glass-button"}>Withdraw SOL</button>
                 </div>
-                <button onClick={handleOfframp} className={"glass-button"}>
-                    Withdraw USD
+                <button onClick={handleWithdrawUSDC} className={"glass-button"}>
+                    Withdraw USDC
                     <Image
                         src="/arrow.svg"
                         alt=""

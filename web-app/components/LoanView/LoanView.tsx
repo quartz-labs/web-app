@@ -31,11 +31,11 @@ export default function LoanView({
                 if (!wallet) return;
 
                 const baseUnits = uiToBaseUnit(amount, DECIMALS_USDC).toNumber();
-                const signature = await depositUsdc(wallet, connection, amount * baseUnits);
-                if (signature) {
-                    updateBalance();
-                    disableModal();
-                }
+                const signature = await depositUsdc(wallet, connection, baseUnits);
+                if (!signature) return;
+
+                updateBalance();
+                disableModal();
             },
             onCancel: () => { disableModal(); }
         })
@@ -52,10 +52,10 @@ export default function LoanView({
 
                 const baseUnits = uiToBaseUnit(amount, DECIMALS_USDC).toNumber();
                 const signature = await liquidateSol(wallet, connection, baseUnits);
-                if (signature) {
-                    updateBalance();
-                    disableModal();
-                }
+                if (!signature) return;
+
+                updateBalance();
+                disableModal();
             },
             onCancel: () => { disableModal(); }
         })
@@ -147,7 +147,7 @@ export default function LoanView({
 
             <div className={styles.buttons}>
                 <button onClick={handleLiquidateForUsdc} className={"glass-button"}>Repay Loan with Collateral</button>
-                <button onClick={handleRepayUsdc} className={"glass-button ghost"}>Repay Loan with USDC</button>
+                <button onClick={handleRepayUsdc} className={"glass-button"}>Repay Loan with USDC</button>
                 <button onClick={swapView} className={"glass-button ghost"}>Back to Dashboard</button>
             </div>
         </div>
