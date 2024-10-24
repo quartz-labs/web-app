@@ -6,6 +6,7 @@ export async function GET() {
     const { data } = await response.json();
     return NextResponse.json(data);
   } catch (error) {
+    console.error(error);
     return NextResponse.json({ error: `Unable to fetch Solana price: ${error}` }, { status: 500 });
   }
 }

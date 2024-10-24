@@ -1,9 +1,9 @@
 import { ViewProps } from "@/app/dashboard/page";
-import { MICRO_CENTS_PER_USDC } from "@/utils/constants";
-import { depositUsdc } from "@/utils/instructions";
+import { DECIMALS_USDC } from "@/utils/constants";
+import { depositUsdc, liquidateSol } from "@/utils/instructions";
 import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import styles from "./LoanView.module.css";
-import { getSign, roundToDecimalPlaces, roundToDecimalPlacesAbsolute } from "@/utils/utils";
+import { getSign, roundToDecimalPlaces, roundToDecimalPlacesAbsolute, uiToBaseUnit } from "@/utils/helpers";
 import { PuffLoader } from "react-spinners";
 
 export default function LoanView({
@@ -30,14 +30,32 @@ export default function LoanView({
             onConfirm: async (amount: number) => {
                 if (!wallet) return;
 
-                const signature = await depositUsdc(wallet, connection, amount * MICRO_CENTS_PER_USDC);
-                // const amountLamports = 0;
-                // const amountMicroCents = 0;
-                // const signature = await liquidateSol(wallet, connection, amountLamports, amountMicroCents);
-                if (signature) {
-                    updateBalance();
-                    disableModal();
-                }
+                const baseUnits = uiToBaseUnit(amount, DECIMALS_USDC).toNumber();
+                const signature = await depositUsdc(wallet, connection, baseUnits);
+                if (!signature) return;
+
+                updateBalance();
+                disableModal();
+            },
+            onCancel: () => { disableModal(); }
+        })
+    }
+
+    const handleLiquidateForUsdc = () => {
+        enableModal({
+            title: "Repay USDC Loan with SOL Deposits",
+            denomination: "USDC",
+            buttonText: "Repay",
+            minAmount: 0,
+            onConfirm: async (amount: number) => {
+                if (!wallet) return;
+
+                const baseUnits = uiToBaseUnit(amount, DECIMALS_USDC).toNumber();
+                const signature = await liquidateSol(wallet, connection, baseUnits);
+                if (!signature) return;
+
+                updateBalance();
+                disableModal();
             },
             onCancel: () => { disableModal(); }
         })
@@ -128,7 +146,8 @@ export default function LoanView({
             </div>
 
             <div className={styles.buttons}>
-                <button onClick={handleRepayUsdc} className={"glass-button"}>Repay Loans</button>
+                <button onClick={handleLiquidateForUsdc} className={"glass-button"}>Repay Loan with Collateral</button>
+                <button onClick={handleRepayUsdc} className={"glass-button"}>Repay Loan with USDC</button>
                 <button onClick={swapView} className={"glass-button ghost"}>Back to Dashboard</button>
             </div>
         </div>

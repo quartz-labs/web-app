@@ -4,7 +4,7 @@ import styles from './page.module.css';
 import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { isVaultInitialized } from "@/utils/utils";
+import { isVaultInitialized } from "@/utils/helpers";
 import { WalletButton } from "@/components/solana/solana-provider";
 import Logo from "@/components/Logo/Logo";
 

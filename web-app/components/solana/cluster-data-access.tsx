@@ -1,5 +1,6 @@
 'use client';
 
+import { RPC_URL } from '@/utils/constants';
 import { Connection } from '@solana/web3.js';
 import { atom, useAtomValue, useSetAtom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
@@ -25,7 +26,7 @@ export enum ClusterNetwork {
 export const defaultClusters: Cluster[] = [
   {
     name: 'mainnet-beta',
-    endpoint: "https://janella-g42vor-fast-mainnet.helius-rpc.com",
+    endpoint: RPC_URL,
     network: ClusterNetwork.Mainnet,
   },
   // {

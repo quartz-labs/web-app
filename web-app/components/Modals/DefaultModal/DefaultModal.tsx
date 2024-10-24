@@ -42,7 +42,10 @@ export default function DefaultModal(
 
     return (
         <ModalWrapper onClose={onCancel}>
-            <h2 className={styles.heading}>{title}</h2>
+            <div className={styles.contentWrapper}>
+                <h2 className={styles.heading}>{title}</h2>
+            </div>
+            
             <div className={styles.inputSection}>
                 <p>Amount ({denomination})</p>
                 <div className={styles.inputFieldWrapper}>

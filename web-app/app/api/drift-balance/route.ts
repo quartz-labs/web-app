@@ -20,10 +20,11 @@ export async function GET(request: Request) {
   }
 
   try {
-    const response = await fetch(`https://quartz-server-puoxw.ondigitalocean.app/drift-balance?address=${address  }&marketIndices=${marketIndices}`)
+    const response = await fetch(`https://quartz-server-puoxw.ondigitalocean.app/drift-balance?address=${address}&marketIndices=${marketIndices}`);
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
+    console.error(error);
     return NextResponse.json({ error: `Unable to fetch Solana price: ${error}` }, { status: 500 });
   }
 }

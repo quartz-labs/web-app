@@ -5,7 +5,7 @@ import styles from './page.module.css';
 import { useRouter } from 'next/navigation';
 import { initAccount } from '@/utils/instructions';
 import { useEffect, useState } from 'react';
-import { isVaultInitialized } from '@/utils/utils';
+import { isVaultInitialized } from '@/utils/helpers';
 import Account from '@/components/Account/Account';
 import { PuffLoader } from 'react-spinners';
 
