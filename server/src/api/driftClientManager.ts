@@ -1,6 +1,15 @@
 import { Connection, Keypair, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { Wallet, DriftClient, User as DriftUser } from "@drift-labs/sdk";
-import { DRIFT_MARKET_INDEX_SOL, HELIUS_RPC_URL, LOCAL_SECRET, MICRO_CENTS_PER_USDC } from "./config.js";
+import { DRIFT_MARKET_INDEX_SOL, HELIUS_RPC_URL, LOCAL_SECRET, MICRO_CENTS_PER_USDC } from "../config.js";
+
+export async function getDriftBalances(address: string, marketIndicesParam: string, driftClientManager: DriftClientManager) {
+    if (!address || !marketIndicesParam) {
+      throw new Error('Missing address or marketIndices parameter');
+    }
+    const marketIndices = marketIndicesParam.split(',').map(Number).filter(n => !isNaN(n));
+    return await driftClientManager.getUserBalances(address, marketIndices);
+  }
+  
 
 export class DriftClientManager {
     private driftClient!: DriftClient;
