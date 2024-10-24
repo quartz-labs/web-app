@@ -86,6 +86,7 @@ export function getFlashLoanRepayAmount(
     amountBorrowUi: BigNumber | number,
     borrowBank: Bank,
     repayBank: Bank,
+    slippage: number,
     marginfiClient: MarginfiClient,
 ) {
     const oracleBorrow = marginfiClient.getOraclePriceByBank(borrowBank.address);
@@ -95,7 +96,8 @@ export function getFlashLoanRepayAmount(
 
     const amountBorrow = new BigNumber(amountBorrowUi);
     const amountRepay = amountBorrow
-        .times(oracleBorrow.priceWeighted.lowestPrice)
-        .div(oracleRepay.priceWeighted.highestPrice);
+        .times(oracleBorrow.priceWeighted.highestPrice)
+        .div(oracleRepay.priceWeighted.lowestPrice)
+        .times(1 + slippage);
     return amountRepay;
 }

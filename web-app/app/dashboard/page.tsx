@@ -78,7 +78,7 @@ export default function Dashboard() {
     const updateFinancialData = async () => {
         try {
             const response = await fetch('/api/solana-price');
-            const { data } = await response.json();
+            const data = await response.json();
             const solPrice = data.solana.usd;
             if (isNaN(solPrice)) throw new Error("Sol price is NaN");
 

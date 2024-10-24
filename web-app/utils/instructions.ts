@@ -234,8 +234,9 @@ export const liquidateSol = async(wallet: AnchorWallet, connection: web3.Connect
     const usdcBank = marginfiClient.getBankByTokenSymbol("USDC");
     if (!usdcBank) throw Error(`${"USDC"} bank not found`);
 
+    const slippage = 1;
     const amountUsdc = new BigNumber(baseUnitToToken(amountMicroCents, DECIMAL_PLACES_USDC));
-    const amountSol = getFlashLoanRepayAmount(amountUsdc, usdcBank, solBank, marginfiClient)
+    const amountSol = getFlashLoanRepayAmount(amountUsdc, usdcBank, solBank, slippage, marginfiClient)
     const amountLamports = new BN(amountSol.times(LAMPORTS_PER_SOL).integerValue().toString());
 
     // ATA instructions
@@ -319,7 +320,7 @@ export const liquidateSol = async(wallet: AnchorWallet, connection: web3.Connect
         // [ix_createUsdcAta, ix_createWSolAta, ix_depositUsdc, ix_withdrawLamports, ix_wrapSol],
         [ix_depositUsdc, ix_withdrawLamports, ix_wrapSol],
         [],
-        0.000001
+        0.00001
     );
 
     const signature = await provider.sendAndConfirm(flashloanTx);
@@ -436,7 +437,7 @@ export const withdrawUsdt = async(wallet: AnchorWallet, connection: web3.Connect
         const simulation = await connection.simulateTransaction(signedTx);
         console.log("Simulation result:", simulation);
 
-        const signature = await connection.sendRawTransaction(tx.serialize());
+        const signature = await connection.sendRawTransaction(signedTx.serialize());
         return signature;
     } catch (err) {
         if (!(err instanceof WalletSignTransactionError)) console.error(err);
