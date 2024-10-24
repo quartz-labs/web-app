@@ -1,10 +1,11 @@
 import { AnchorProvider, web3, BN } from "@coral-xyz/anchor";
 import { AnchorWallet } from "@solana/wallet-adapter-react";
-import { Connection, PublicKey, Transaction } from "@solana/web3.js";
+import { AddressLookupTableAccount, PublicKey, Transaction, TransactionInstruction, Connection } from "@solana/web3.js";
 import { getVault } from "./getPDAs";
 import { createAssociatedTokenAccountInstruction, getAssociatedTokenAddress } from "@solana/spl-token";
-import { Bank, MarginfiClient } from "@mrgnlabs/marginfi-client-v2";
+import { Bank, MarginfiAccountWrapper, MarginfiClient } from "@mrgnlabs/marginfi-client-v2";
 import BigNumber from "bignumber.js";
+import { Amount } from "@mrgnlabs/mrgn-common";
 
 export const isVaultInitialized = async (wallet: AnchorWallet, connection: web3.Connection) => {
     const vaultPda = getVault(wallet.publicKey);
@@ -100,4 +101,25 @@ export function getFlashLoanRepayAmount(
         .div(oracleRepay.priceWeighted.lowestPrice)
         .times(1 + slippage);
     return amountRepay;
+}
+
+export async function makeFlashLoanTx(
+    marginfiAccount: MarginfiAccountWrapper,
+    amountUi: Amount,
+    bankAddress: PublicKey,
+    instructions: TransactionInstruction[],
+    lookupTables: AddressLookupTableAccount[],
+    priorityFeeUi?: number,
+    createAtas: boolean = true,
+) {
+    return marginfiAccount.makeLoopTx(
+        amountUi,
+        amountUi,
+        bankAddress,
+        bankAddress,
+        instructions,
+        lookupTables,
+        priorityFeeUi,
+        createAtas
+    );
 }

@@ -1,13 +1,23 @@
 import { AddressLookupTableAccount, PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { web3 } from "@coral-xyz/anchor";
+import { QuoteResponse } from '@jup-ag/api';
 
-export async function getJupiterSwapIx(walletPubkey: PublicKey, connection: web3.Connection, amount: number, inputMint: PublicKey, outputMint: PublicKey, exactOut: boolean) {
-    const quoteEndpoint = exactOut
-        ? `https://quote-api.jup.ag/v6/quote?inputMint=${inputMint.toBase58()}&outputMint=${outputMint.toBase58()}&amount=${amount}&slippageBps=50&swapMode=ExactOut`
-        : `https://quote-api.jup.ag/v6/quote?inputMint=${inputMint.toBase58()}&outputMint=${outputMint.toBase58()}&amount=${amount}&slippageBps=50&maxAccounts=22`;
+export async function getJupiterSwapQuote(
+  inputMint: PublicKey, 
+  outputMint: PublicKey, 
+  amount: number, 
+  exactOut: boolean, 
+  maxAccounts?: number
+) {
+  const quoteEndpoint = exactOut
+        ? `https://quote-api.jup.ag/v6/quote?inputMint=${inputMint.toBase58()}&outputMint=${outputMint.toBase58()}&amount=${amount}&slippageBps=50&swapMode=ExactOut&onlyDirectRoutes=true`
+        : `https://quote-api.jup.ag/v6/quote?inputMint=${inputMint.toBase58()}&outputMint=${outputMint.toBase58()}&amount=${amount}&slippageBps=50&maxAccounts=${maxAccounts}`;
     
-    const quoteResponse = await (await fetch(quoteEndpoint)).json();
+    const quoteResponse: QuoteResponse = await (await fetch(quoteEndpoint)).json();
+    return quoteResponse;
+}
 
+export async function getJupiterSwapIx(walletPubkey: PublicKey, connection: web3.Connection, quoteResponse: QuoteResponse) {
     const instructions = await (
         await fetch('https://quote-api.jup.ag/v6/swap-instructions', {
             method: 'POST',
@@ -15,7 +25,6 @@ export async function getJupiterSwapIx(walletPubkey: PublicKey, connection: web3
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                // quoteResponse from /quote api
                 quoteResponse,
                 userPublicKey: walletPubkey.toBase58(),
                 useCompression: true,

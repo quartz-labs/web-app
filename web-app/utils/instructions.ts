@@ -10,18 +10,21 @@ import {
     DRIFT_ADDITIONAL_ACCOUNT_1, DRIFT_ADDITIONAL_ACCOUNT_2,
     USDC_MINT, WSOL_MINT, USDT_MINT, 
     DECIMAL_PLACES_USDC,
-    MARGINFI_GROUP_1 
+    MARGINFI_GROUP_1, 
+    FUNDS_PROGRAM_ADDRESS_TABLE
 } from "./constants";
 import { ASSOCIATED_PROGRAM_ID, TOKEN_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/utils/token";
-import { SystemProgram, Transaction, VersionedTransaction, TransactionMessage, LAMPORTS_PER_SOL, Connection } from "@solana/web3.js";
+import { SystemProgram, Transaction, VersionedTransaction, TransactionMessage, Connection, PublicKey, AddressLookupTableProgram } from "@solana/web3.js";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
 import { getDriftSpotMarketVault, getDriftState, getDriftUser, getDriftUserStats, getVault, getVaultUsdc, getVaultWsol } from "./getPDAs";
-import { baseUnitToToken, getFlashLoanRepayAmount, getOrCreateAssociatedTokenAccountAnchor } from "./helpers";
-import { getJupiterSwapIx } from "./jupiter";
-import { createAssociatedTokenAccountIdempotentInstruction, getAssociatedTokenAddress } from "@solana/spl-token";
+import { baseUnitToToken, getOrCreateAssociatedTokenAccountAnchor, makeFlashLoanTx } from "./helpers";
+import { getJupiterSwapIx, getJupiterSwapQuote } from "./jupiter";
+import { getAssociatedTokenAddress } from "@solana/spl-token";
 import { Keypair } from "@solana/web3.js";
 import { MarginfiClient, getConfig } from '@mrgnlabs/marginfi-client-v2';
 import BigNumber from "bignumber.js";
+import { sendTransactionHandler } from "./transactionSender";
+import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
 
 export const initAccount = async (wallet: AnchorWallet, connection: web3.Connection) => {
     const provider = new AnchorProvider(connection, wallet, {commitment: "confirmed"}); 
@@ -215,6 +218,9 @@ export const liquidateSol = async(wallet: AnchorWallet, connection: web3.Connect
     setProvider(provider);
     const quartzProgram = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>; 
 
+    const walletUsdc = await getAssociatedTokenAddress(USDC_MINT, wallet.publicKey);
+    const walletWSol = await getAssociatedTokenAddress(WSOL_MINT, wallet.publicKey);
+    
     const vaultPda = getVault(wallet.publicKey);
     const vaultUsdc = getVaultUsdc(vaultPda);
     const vaultWsol = getVaultWsol(vaultPda);
@@ -222,40 +228,40 @@ export const liquidateSol = async(wallet: AnchorWallet, connection: web3.Connect
     const driftUserStats = getDriftUserStats(vaultPda);
     const driftState = getDriftState();
 
-    // Get MarginFi client, init account if not found
+    // Get MarginFi client and bank
     const marginfiClient = await MarginfiClient.fetch(getConfig(), wallet, connection);
+    const usdcBank = marginfiClient.getBankByTokenSymbol("USDC");
+    if (!usdcBank) throw Error(`${"USDC"} bank not found`);
+
+    // Init MarginFi Account if not found
     let marginfiAccounts = await marginfiClient.getMarginfiAccountsForAuthority(wallet.publicKey);
     if (marginfiAccounts.length === 0) marginfiAccounts = await createNewMarginfiAccount(wallet, connection, provider, marginfiClient);
     const marginfiAccount = marginfiAccounts[0];
 
     // Get price info for flash loan
-    const solBank = marginfiClient.getBankByTokenSymbol("SOL");
-    if (!solBank) throw Error(`${"SOL"} bank not found`);
-    const usdcBank = marginfiClient.getBankByTokenSymbol("USDC");
-    if (!usdcBank) throw Error(`${"USDC"} bank not found`);
+    const jupiterQuote = await getJupiterSwapQuote(WSOL_MINT, USDC_MINT, amountMicroCents, true);
+    console.log(jupiterQuote);
+    const amountLamports = Number(jupiterQuote.inAmount);
+    if (isNaN(amountLamports)) throw Error("Invalid Jupiter quote");
 
-    const slippage = 1;
-    const amountUsdc = new BigNumber(baseUnitToToken(amountMicroCents, DECIMAL_PLACES_USDC));
-    const amountSol = getFlashLoanRepayAmount(amountUsdc, usdcBank, solBank, slippage, marginfiClient)
-    const amountLamports = new BN(amountSol.times(LAMPORTS_PER_SOL).integerValue().toString());
+    // -- ADDRESS LOOKUP TABLE
+    const fundsProgramLookupTable = await connection.getAddressLookupTable(FUNDS_PROGRAM_ADDRESS_TABLE).then((res) => res.value);
+    if (!fundsProgramLookupTable) throw Error("Address Lookup Table account not found");
+    
+    // // ATA instructions
+    // const ix_createUsdcAta = createAssociatedTokenAccountIdempotentInstruction(
+    //     wallet.publicKey,
+    //     walletUsdc,
+    //     wallet.publicKey,
+    //     USDC_MINT
+    // );
 
-    // ATA instructions
-    const walletUsdc = await getAssociatedTokenAddress(USDC_MINT, wallet.publicKey);
-    const walletWSol = await getAssociatedTokenAddress(WSOL_MINT, wallet.publicKey);
-
-    const ix_createUsdcAta = createAssociatedTokenAccountIdempotentInstruction(
-        wallet.publicKey,
-        walletUsdc,
-        wallet.publicKey,
-        USDC_MINT
-    );
-
-    const ix_createWSolAta = createAssociatedTokenAccountIdempotentInstruction(
-        wallet.publicKey,
-        walletWSol,
-        wallet.publicKey,
-        WSOL_MINT
-    );
+    // const ix_createWSolAta = createAssociatedTokenAccountIdempotentInstruction(
+    //     wallet.publicKey,
+    //     walletWSol,
+    //     wallet.publicKey,
+    //     WSOL_MINT
+    // );
 
     // Quartz program instructions
     const ix_depositUsdc = await quartzProgram.methods
@@ -283,7 +289,7 @@ export const liquidateSol = async(wallet: AnchorWallet, connection: web3.Connect
             .instruction();
 
     const ix_withdrawLamports = await quartzProgram.methods
-        .withdrawLamports(amountLamports, true)
+        .withdrawLamports(new BN(amountLamports), true)
         .accounts({
             // @ts-expect-error - IDL issue
             vault: vaultPda,
@@ -308,22 +314,31 @@ export const liquidateSol = async(wallet: AnchorWallet, connection: web3.Connect
     const ix_wrapSol = web3.SystemProgram.transfer({
         fromPubkey: wallet.publicKey,
         toPubkey: walletWSol,
-        lamports: amountLamports.toNumber(),
+        lamports: amountLamports,
     });
 
+    const { 
+        instructions: jupiterSwap, 
+        addressLookupTableAccounts: jupiterLookupTables
+    } = await getJupiterSwapIx(wallet.publicKey, connection, jupiterQuote);
+
     // Create flash loan and send tx
-    const { flashloanTx } = await marginfiAccount.makeLoopTx(
-        amountSol,
+    const amountUsdc = new BigNumber(baseUnitToToken(amountMicroCents, DECIMAL_PLACES_USDC));
+    const { flashloanTx } = await makeFlashLoanTx(
+        marginfiAccount,
         amountUsdc,
-        solBank.address,
         usdcBank.address,
-        // [ix_createUsdcAta, ix_createWSolAta, ix_depositUsdc, ix_withdrawLamports, ix_wrapSol],
-        [ix_depositUsdc, ix_withdrawLamports, ix_wrapSol],
-        [],
-        0.00001
+        [ix_depositUsdc, ix_withdrawLamports, ix_wrapSol, ...jupiterSwap],
+        [fundsProgramLookupTable, ...jupiterLookupTables],
+        0.001,
+        true
     );
 
-    const signature = await provider.sendAndConfirm(flashloanTx);
+    const signedTx = await wallet.signTransaction(flashloanTx);
+    const simulation = await connection.simulateTransaction(signedTx);
+    console.log("Simulation result:", simulation);
+
+    const signature = await sendTransactionHandler(connection, signedTx);
     console.log(signature);
     return signature;
 }
@@ -423,7 +438,8 @@ export const withdrawUsdt = async(wallet: AnchorWallet, connection: web3.Connect
             })
             .instruction();
 
-        const { instructions, addressLookupTableAccounts } = await getJupiterSwapIx(wallet.publicKey, connection, amountMicroCents, USDC_MINT, USDT_MINT, false);
+        const jupiterQuote = await getJupiterSwapQuote(USDC_MINT, USDT_MINT, amountMicroCents, false, 22);
+        const { instructions, addressLookupTableAccounts } = await getJupiterSwapIx(wallet.publicKey, connection, jupiterQuote);
 
         const latestBlockhash = await connection.getLatestBlockhash();
         const messageV0 = new TransactionMessage({
