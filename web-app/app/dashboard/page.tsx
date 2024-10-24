@@ -79,12 +79,16 @@ export default function Dashboard() {
         try {
             const response = await fetch('/api/solana-price');
             const { data } = await response.json();
-            setSolPrice(data.solana.usd);
+            const solPrice = data.solana.usd;
+            if (isNaN(solPrice)) throw new Error("Sol price is NaN");
 
+            setSolPrice(solPrice);
             setSolDailyRate(await getSolDailyEarnRate());
             setUsdcDailyRate(await getUsdcDailyBorrowRate());
-        } catch {
-            console.error("Error: Unable to reach CoinGecko for price data");
+            return true;
+        } catch (err) {
+            console.error(`Error fetching SOL price: ${err}`);
+            return false;
         }
     }
 
@@ -103,15 +107,15 @@ export default function Dashboard() {
 
         setTotalSolBalance(Math.abs(totalSolBalance));
         setUsdcLoanBalance(Math.abs(usdcLoanBalance));
-        updateFinancialData();
 
-        setBalanceLoaded(true);
+        const isBalanceLoaded = await updateFinancialData();
+        setBalanceLoaded(isBalanceLoaded);
     }, [connection, wallet]);
 
     useEffect(() => {
         updateBalance();
 
-        const interval = setInterval(updateFinancialData, 10000);
+        const interval = setInterval(updateFinancialData, 10_000);
         return () => clearInterval(interval);
     }, [updateBalance]);
 

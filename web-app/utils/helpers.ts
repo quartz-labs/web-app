@@ -3,6 +3,8 @@ import { AnchorWallet } from "@solana/wallet-adapter-react";
 import { Connection, PublicKey, Transaction } from "@solana/web3.js";
 import { getVault } from "./getPDAs";
 import { createAssociatedTokenAccountInstruction, getAssociatedTokenAddress } from "@solana/spl-token";
+import { Bank, MarginfiClient } from "@mrgnlabs/marginfi-client-v2";
+import BigNumber from "bignumber.js";
 
 export const isVaultInitialized = async (wallet: AnchorWallet, connection: web3.Connection) => {
     const vaultPda = getVault(wallet.publicKey);
@@ -79,3 +81,21 @@ export const divideBN = (a: BN, b: BN) => {
 }
 
 export const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+export function getFlashLoanRepayAmount(
+    amountBorrowUi: BigNumber | number,
+    borrowBank: Bank,
+    repayBank: Bank,
+    marginfiClient: MarginfiClient,
+) {
+    const oracleBorrow = marginfiClient.getOraclePriceByBank(borrowBank.address);
+    if (!oracleBorrow) throw Error(`Oracle for bank ${borrowBank.address} not found`);
+    const oracleRepay = marginfiClient.getOraclePriceByBank(repayBank.address);
+    if (!oracleRepay) throw Error(`Oracle for bank ${repayBank.address} not found`);
+
+    const amountBorrow = new BigNumber(amountBorrowUi);
+    const amountRepay = amountBorrow
+        .times(oracleBorrow.priceWeighted.lowestPrice)
+        .div(oracleRepay.priceWeighted.highestPrice);
+    return amountRepay;
+}
