@@ -12,7 +12,7 @@ import { fetchDriftData, getSolDailyEarnRate, getUsdcDailyBorrowRate } from '@/u
 import { getVault } from '@/utils/getPDAs';
 import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC } from '@/utils/constants';
 import DefaultModal, { DefaultModalProps } from '@/components/Modals/DefaultModal/DefaultModal';
-import OfframpModal from '@/components/Modals/OfframpModal/OfframpModal';
+//import OfframpModal from '@/components/Modals/OfframpModal/OfframpModal';
 
 export interface ViewProps {
     solPrice: number;
@@ -25,7 +25,7 @@ export interface ViewProps {
     enableModal: (data: DefaultModalProps) => void;
     disableModal: () => void;
     updateBalance: () => void;
-    enableOfframpModal: (url: string) => void;
+    //enableOfframpModal: (url: string) => void;
 }
 
 export default function Dashboard() {
@@ -53,8 +53,8 @@ export default function Dashboard() {
         onCancel: () => { }
     });
 
-    const [offrampModalEnabled, setOfframpModalEnabled] = useState(false);
-    const [offrampUrl, setOfframpUrl] = useState("");
+    //const [offrampModalEnabled, setOfframpModalEnabled] = useState(false);
+    //const [offrampUrl, setOfframpUrl] = useState("");
 
     const [solPrice, setSolPrice] = useState(0);
     const [totalSolBalance, setTotalSolBalance] = useState(0);
@@ -69,11 +69,11 @@ export default function Dashboard() {
     }
     const disableModal = () => setModalEnabled(false);
 
-    const enableOfframpModal = (url: string) => {
-        setOfframpUrl(url);
-        setOfframpModalEnabled(true);
-        setModalEnabled(false);
-    }
+    // const enableOfframpModal = (url: string) => {
+    //     setOfframpUrl(url);
+    //     setOfframpModalEnabled(true);
+    //     setModalEnabled(false);
+    // }
 
     const updateFinancialData = async () => {
         try {
@@ -125,9 +125,9 @@ export default function Dashboard() {
                 <DefaultModal {...modalData} />
             }
 
-            {offrampModalEnabled &&
+            {/* {offrampModalEnabled &&
                 <OfframpModal url={offrampUrl} closeModal={() => setOfframpModalEnabled(false)} />
-            }
+            } */}
 
             <div className="two-col-grid">
                 <Account />
@@ -144,7 +144,7 @@ export default function Dashboard() {
                         enableModal={enableModal}
                         disableModal={disableModal}
                         updateBalance={updateBalance}
-                        enableOfframpModal={enableOfframpModal}
+                        //enableOfframpModal={enableOfframpModal}
                     />
                 }
 
@@ -160,7 +160,7 @@ export default function Dashboard() {
                         enableModal={enableModal}
                         disableModal={disableModal}
                         updateBalance={updateBalance}
-                        enableOfframpModal={() => { }}
+                        //enableOfframpModal={() => { }}
                     />
                 }
             </div>

@@ -8,7 +8,7 @@ import { AnchorWallet } from "@solana/wallet-adapter-react";
 import { 
     DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC, DRIFT_PROGRAM_ID, DRIFT_SPOT_MARKET_SOL, DRIFT_SPOT_MARKET_USDC, DRIFT_SIGNER, 
     DRIFT_ADDITIONAL_ACCOUNT_1, DRIFT_ADDITIONAL_ACCOUNT_2,
-    USDC_MINT, WSOL_MINT, USDT_MINT, 
+    USDC_MINT, WSOL_MINT, 
     DECIMALS_USDC,
     MARGINFI_GROUP_1, 
     FUNDS_PROGRAM_ADDRESS_TABLE
@@ -285,21 +285,6 @@ export const liquidateSol = async(wallet: AnchorWallet, connection: web3.Connect
     // -- ADDRESS LOOKUP TABLE
     const fundsProgramLookupTable = await connection.getAddressLookupTable(FUNDS_PROGRAM_ADDRESS_TABLE).then((res) => res.value);
     if (!fundsProgramLookupTable) throw Error("Address Lookup Table account not found");
-    
-    // // ATA instructions
-    // const ix_createUsdcAta = createAssociatedTokenAccountIdempotentInstruction(
-    //     wallet.publicKey,
-    //     walletUsdc,
-    //     wallet.publicKey,
-    //     USDC_MINT
-    // );
-
-    // const ix_createWSolAta = createAssociatedTokenAccountIdempotentInstruction(
-    //     wallet.publicKey,
-    //     walletWSol,
-    //     wallet.publicKey,
-    //     WSOL_MINT
-    // );
 
     // Quartz program instructions
     const ix_depositUsdc = await quartzProgram.methods
@@ -466,7 +451,7 @@ export const depositUsdc = async(wallet: AnchorWallet, connection: Connection, a
     }
 }
 
-export const withdrawUsdt = async(wallet: AnchorWallet, connection: web3.Connection, amountMicroCents: number) => {
+export const withdrawUsdc = async(wallet: AnchorWallet, connection: web3.Connection, amountMicroCents: number) => {
     const provider = new AnchorProvider(connection, wallet, {commitment: "confirmed"}); 
     setProvider(provider);
     const program = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>;
@@ -499,15 +484,12 @@ export const withdrawUsdt = async(wallet: AnchorWallet, connection: web3.Connect
             })
             .instruction();
 
-        const jupiterQuote = await getJupiterSwapQuote(USDC_MINT, USDT_MINT, amountMicroCents, false, 22);
-        const { instructions, addressLookupTableAccounts } = await getJupiterSwapIx(wallet.publicKey, connection, jupiterQuote);
-
         const latestBlockhash = await connection.getLatestBlockhash();
         const messageV0 = new TransactionMessage({
             payerKey: wallet.publicKey,
             recentBlockhash: latestBlockhash.blockhash,
-            instructions: [ix_withdrawUsdc, ...instructions],
-        }).compileToV0Message(addressLookupTableAccounts);
+            instructions: [ix_withdrawUsdc],
+        }).compileToV0Message();
         const tx = new VersionedTransaction(messageV0);
         
         const signedTx = await wallet.signTransaction(tx);
