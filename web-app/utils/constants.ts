@@ -1,7 +1,7 @@
 import { PublicKey } from "@solana/web3.js";
 
 export const FUNDS_PROGRAM_ID = new PublicKey("6JjHXLheGSNvvexgzMthEcgjkcirDrGduc3HAKB2P1v2");
-export const FUNDS_PROGRAM_ADDRESS_TABLE = new PublicKey("");
+export const FUNDS_PROGRAM_ADDRESS_TABLE = new PublicKey("3ND9hEwC75yqtYbXY6ZLZXsqB9q6zn7VX4u7LVMofqcA");
 
 export const RPC_URL = "https://janella-g42vor-fast-mainnet.helius-rpc.com";
 
@@ -24,8 +24,8 @@ export const DRIFT_ADDITIONAL_ACCOUNT_2 = new PublicKey("En8hkHLkRe9d9DraYmBTrus
 export const DRIFT_MARKET_INDEX_USDC = 0;
 export const DRIFT_MARKET_INDEX_SOL = 1;
 
-export const DECIMAL_PLACES_SOL = 9;
-export const DECIMAL_PLACES_USDC = 6;
-export const MICRO_CENTS_PER_USDC = 10 ** DECIMAL_PLACES_USDC;
+export const DECIMALS_SOL = 9;
+export const DECIMALS_USDC = 6;
+export const MICRO_CENTS_PER_USDC = 1000000;
 
 export const MARGINFI_GROUP_1 = new PublicKey("4qp6Fx6tnZkY5Wropq9wUYgtFxXKwE6viZxFHg3rdAG8");

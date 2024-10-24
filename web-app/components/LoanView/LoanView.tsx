@@ -1,9 +1,9 @@
 import { ViewProps } from "@/app/dashboard/page";
-import { MICRO_CENTS_PER_USDC } from "@/utils/constants";
+import { DECIMALS_USDC } from "@/utils/constants";
 import { liquidateSol } from "@/utils/instructions";
 import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import styles from "./LoanView.module.css";
-import { getSign, roundToDecimalPlaces, roundToDecimalPlacesAbsolute } from "@/utils/helpers";
+import { getSign, roundToDecimalPlaces, roundToDecimalPlacesAbsolute, uiToBaseUnit } from "@/utils/helpers";
 import { PuffLoader } from "react-spinners";
 
 export default function LoanView ({
@@ -30,7 +30,8 @@ export default function LoanView ({
             onConfirm: async (amount: number) => {
                 if (!wallet) return;
 
-                const signature = await liquidateSol(wallet, connection, amount * MICRO_CENTS_PER_USDC);
+                const baseUnits = uiToBaseUnit(amount, DECIMALS_USDC).toNumber();
+                const signature = await liquidateSol(wallet, connection, baseUnits);
                 if (signature) {
                     updateBalance();
                     disableModal();

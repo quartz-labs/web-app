@@ -9,22 +9,21 @@ import {
     DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC, DRIFT_PROGRAM_ID, DRIFT_SPOT_MARKET_SOL, DRIFT_SPOT_MARKET_USDC, DRIFT_SIGNER, 
     DRIFT_ADDITIONAL_ACCOUNT_1, DRIFT_ADDITIONAL_ACCOUNT_2,
     USDC_MINT, WSOL_MINT, USDT_MINT, 
-    DECIMAL_PLACES_USDC,
+    DECIMALS_USDC,
     MARGINFI_GROUP_1, 
     FUNDS_PROGRAM_ADDRESS_TABLE
 } from "./constants";
 import { ASSOCIATED_PROGRAM_ID, TOKEN_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/utils/token";
-import { SystemProgram, Transaction, VersionedTransaction, TransactionMessage, Connection, PublicKey, AddressLookupTableProgram } from "@solana/web3.js";
+import { SystemProgram, VersionedTransaction, TransactionMessage, Connection } from "@solana/web3.js";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
 import { getDriftSpotMarketVault, getDriftState, getDriftUser, getDriftUserStats, getVault, getVaultUsdc, getVaultWsol } from "./getPDAs";
-import { baseUnitToToken, getOrCreateAssociatedTokenAccountAnchor, makeFlashLoanTx } from "./helpers";
+import { baseUnitToUi, getOrCreateAssociatedTokenAccountAnchor, makeFlashLoanTx } from "./helpers";
 import { getJupiterSwapIx, getJupiterSwapQuote } from "./jupiter";
 import { getAssociatedTokenAddress } from "@solana/spl-token";
 import { Keypair } from "@solana/web3.js";
 import { MarginfiClient, getConfig } from '@mrgnlabs/marginfi-client-v2';
 import BigNumber from "bignumber.js";
 import { sendTransactionHandler } from "./transactionSender";
-import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
 
 export const initAccount = async (wallet: AnchorWallet, connection: web3.Connection) => {
     const provider = new AnchorProvider(connection, wallet, {commitment: "confirmed"}); 
@@ -65,7 +64,7 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
             })
             .instruction();
 
-        const tx = new Transaction().add(ix_initUser, ix_initVaultDriftAccount);
+        const instructions = [ix_initUser, ix_initVaultDriftAccount];
 
         // Create MarginFi account if user doesn't have one already
         const marginfiAccounts = await marginfiClient.getMarginfiAccountsForAuthority(wallet.publicKey);
@@ -80,10 +79,20 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
                     systemProgram: SystemProgram.programId
                 })
                 .instruction();
-            tx.add(ix_initMarginfiAccount);
+            instructions.push(ix_initMarginfiAccount);
         }
 
-        const signature = await provider.sendAndConfirm(tx, [marginfiAccount]);
+        const latestBlockhash = await connection.getLatestBlockhash();
+        const messageV0 = new TransactionMessage({
+            payerKey: wallet.publicKey,
+            recentBlockhash: latestBlockhash.blockhash,
+            instructions: [...instructions],
+        }).compileToV0Message();
+        const tx = new VersionedTransaction(messageV0);
+
+        const signedTx = await wallet.signTransaction(tx);
+        tx.sign([marginfiAccount]);
+        const signature = await sendTransactionHandler(connection, signedTx);
         return signature;
     } catch (err) {
         if (!(err instanceof WalletSignTransactionError)) console.error(err);
@@ -123,8 +132,16 @@ export const closeAccount = async(wallet: AnchorWallet, connection: web3.Connect
             })
             .instruction();
         
-        const tx = new Transaction().add(ix_closeDriftAccount, ix_closeVault);
-        const signature = await provider.sendAndConfirm(tx);
+        const latestBlockhash = await connection.getLatestBlockhash();
+        const messageV0 = new TransactionMessage({
+            payerKey: wallet.publicKey,
+            recentBlockhash: latestBlockhash.blockhash,
+            instructions: [ix_closeDriftAccount, ix_closeVault],
+        }).compileToV0Message();
+        const tx = new VersionedTransaction(messageV0);
+
+        const signedTx = await wallet.signTransaction(tx);
+        const signature = await sendTransactionHandler(connection, signedTx);
         return signature;
     } catch (err) {
         if (!(err instanceof WalletSignTransactionError)) console.error(err);
@@ -145,7 +162,7 @@ export const withdrawLamports = async(wallet: AnchorWallet, connection: web3.Con
     const driftState = getDriftState();
 
     try {
-        const signature = await program.methods
+        const ix = await program.methods
             .withdrawLamports(new BN(amountLamports), true)
             .accounts({
                 // @ts-expect-error - IDL issue
@@ -166,7 +183,18 @@ export const withdrawLamports = async(wallet: AnchorWallet, connection: web3.Con
                 spotMarketUsdc: DRIFT_SPOT_MARKET_USDC,
                 systemProgram: SystemProgram.programId,
             })
-            .rpc();
+            .instruction();
+
+        const latestBlockhash = await connection.getLatestBlockhash();
+        const messageV0 = new TransactionMessage({
+            payerKey: wallet.publicKey,
+            recentBlockhash: latestBlockhash.blockhash,
+            instructions: [ix],
+        }).compileToV0Message();
+        const tx = new VersionedTransaction(messageV0);
+
+        const signedTx = await wallet.signTransaction(tx);
+        const signature = await sendTransactionHandler(connection, signedTx);
         return signature;
     } catch (err) {
         if (!(err instanceof WalletSignTransactionError)) console.error(err);
@@ -186,7 +214,7 @@ export const depositLamports = async(wallet: AnchorWallet, connection: web3.Conn
     const driftState = getDriftState();
 
     try {
-        const signature = await program.methods
+        const ix = await program.methods
             .depositLamports(new BN(amountLamports), false)
             .accounts({
                 // @ts-expect-error - IDL issue
@@ -204,7 +232,18 @@ export const depositLamports = async(wallet: AnchorWallet, connection: web3.Conn
                 spotMarket: DRIFT_SPOT_MARKET_SOL,
                 systemProgram: SystemProgram.programId,
             })
-            .rpc();
+            .instruction();
+
+        const latestBlockhash = await connection.getLatestBlockhash();
+        const messageV0 = new TransactionMessage({
+            payerKey: wallet.publicKey,
+            recentBlockhash: latestBlockhash.blockhash,
+            instructions: [ix],
+        }).compileToV0Message();
+        const tx = new VersionedTransaction(messageV0);
+
+        const signedTx = await wallet.signTransaction(tx);
+        const signature = await sendTransactionHandler(connection, signedTx);
         return signature;
     } catch (err) {
         if (!(err instanceof WalletSignTransactionError)) console.error(err);
@@ -240,9 +279,8 @@ export const liquidateSol = async(wallet: AnchorWallet, connection: web3.Connect
 
     // Get price info for flash loan
     const jupiterQuote = await getJupiterSwapQuote(WSOL_MINT, USDC_MINT, amountMicroCents, true);
-    console.log(jupiterQuote);
     const amountLamports = Number(jupiterQuote.inAmount);
-    if (isNaN(amountLamports)) throw Error("Invalid Jupiter quote");
+    if (isNaN(amountLamports)) throw Error(`Invalid Jupiter quote`);
 
     // -- ADDRESS LOOKUP TABLE
     const fundsProgramLookupTable = await connection.getAddressLookupTable(FUNDS_PROGRAM_ADDRESS_TABLE).then((res) => res.value);
@@ -323,7 +361,7 @@ export const liquidateSol = async(wallet: AnchorWallet, connection: web3.Connect
     } = await getJupiterSwapIx(wallet.publicKey, connection, jupiterQuote);
 
     // Create flash loan and send tx
-    const amountUsdc = new BigNumber(baseUnitToToken(amountMicroCents, DECIMAL_PLACES_USDC));
+    const amountUsdc = new BigNumber(baseUnitToUi(amountMicroCents, DECIMALS_USDC));
     const { flashloanTx } = await makeFlashLoanTx(
         marginfiAccount,
         amountUsdc,
@@ -344,10 +382,11 @@ export const liquidateSol = async(wallet: AnchorWallet, connection: web3.Connect
 }
 
 const createNewMarginfiAccount = async(wallet: AnchorWallet, connection: Connection, provider: AnchorProvider, client: MarginfiClient) => {
+    console.log("Creating MarginFi account");
     const marginfiProgram = new Program(marginfiIdl as Idl, provider) as unknown as Program<MarginFi>;
     const newAccount = Keypair.generate();
 
-    const tx_initMarginFiAccount = await marginfiProgram.methods
+    const ix = await marginfiProgram.methods
         .marginfiAccountInitialize()
         .accounts({
             marginfiGroup: MARGINFI_GROUP_1,
@@ -356,8 +395,19 @@ const createNewMarginfiAccount = async(wallet: AnchorWallet, connection: Connect
             feePayer: wallet.publicKey,
             systemProgram: SystemProgram.programId
         })
-        .transaction();
-    const signature = await provider.sendAndConfirm(tx_initMarginFiAccount, [newAccount]);
+        .instruction();
+
+    const latestBlockhash = await connection.getLatestBlockhash();
+    const messageV0 = new TransactionMessage({
+        payerKey: wallet.publicKey,
+        recentBlockhash: latestBlockhash.blockhash,
+        instructions: [ix],
+    }).compileToV0Message();
+    const tx = new VersionedTransaction(messageV0);
+    
+    const signedTx = await wallet.signTransaction(tx);
+    signedTx.sign([newAccount]);
+    const signature = await sendTransactionHandler(connection, signedTx);
 
     // Wait for tx to be finalized
     await connection.confirmTransaction({signature, ...(await connection.getLatestBlockhash())}, "finalized");
@@ -375,7 +425,7 @@ export const depositUsdc = async(wallet: AnchorWallet, connection: Connection, a
     if (!walletUsdc) throw new Error("No USDC account found on connected wallet");
 
     try {       
-        const signature = await program.methods
+        const ix = await program.methods
             .depositUsdc(new BN(amountMicroCents), false)
             .accounts({
                 // @ts-expect-error - IDL issue
@@ -397,7 +447,18 @@ export const depositUsdc = async(wallet: AnchorWallet, connection: Connection, a
                 spotMarketUsdc: DRIFT_SPOT_MARKET_USDC,
                 systemProgram: SystemProgram.programId,
             })
-            .rpc();
+            .instruction();
+        
+        const latestBlockhash = await connection.getLatestBlockhash();
+        const messageV0 = new TransactionMessage({
+            payerKey: wallet.publicKey,
+            recentBlockhash: latestBlockhash.blockhash,
+            instructions: [ix],
+        }).compileToV0Message();
+        const tx = new VersionedTransaction(messageV0);
+
+        const signedTx = await wallet.signTransaction(tx);
+        const signature = await sendTransactionHandler(connection, signedTx);
         return signature;
     } catch (err) {
         if (!(err instanceof WalletSignTransactionError)) console.error(err);
@@ -453,7 +514,7 @@ export const withdrawUsdt = async(wallet: AnchorWallet, connection: web3.Connect
         const simulation = await connection.simulateTransaction(signedTx);
         console.log("Simulation result:", simulation);
 
-        const signature = await connection.sendRawTransaction(signedTx.serialize());
+        const signature = await sendTransactionHandler(connection, signedTx);
         return signature;
     } catch (err) {
         if (!(err instanceof WalletSignTransactionError)) console.error(err);

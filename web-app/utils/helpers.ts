@@ -52,7 +52,7 @@ export const getOrCreateAssociatedTokenAccountAnchor = async (wallet: AnchorWall
     return associatedTokenAddress;
 }
 
-export const baseUnitToToken = (amountBase: number | BN, decimals: number): string => {
+export const baseUnitToUi = (amountBase: number | BN, decimals: number): string => {
     const amountBN = BN.isBN(amountBase) ? amountBase : new BN(amountBase);
 
     if (amountBN.isNeg()) {
@@ -75,6 +75,13 @@ export const baseUnitToToken = (amountBase: number | BN, decimals: number): stri
     if (decimals === 0) return wholeStr;
     const trimmed = `${wholeStr}.${decimalStr}`.replace(/\.?0+$/, '');
     return trimmed === '' ? '0' : trimmed;
+}
+
+export const uiToBaseUnit = (amountUi: number | BigNumber, decimals: number): BigNumber => {
+    const input = new BigNumber(amountUi);
+    const multiplier = new BigNumber(10 ** decimals);
+    const baseUnits = input.times(multiplier).integerValue();
+    return baseUnits;
 }
 
 export const divideBN = (a: BN, b: BN) => {

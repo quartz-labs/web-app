@@ -1,11 +1,10 @@
 import { ViewProps } from "@/app/dashboard/page";
-import { MICRO_CENTS_PER_USDC } from "@/utils/constants";
+import { DECIMALS_SOL, DECIMALS_USDC } from "@/utils/constants";
 import { depositLamports, withdrawLamports, withdrawUsdt } from "@/utils/instructions";
 import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
-import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import Image from "next/image";
 import styles from "./MainView.module.css";
-import { getSign, roundToDecimalPlaces, roundToDecimalPlacesAbsolute } from "@/utils/helpers";
+import { getSign, roundToDecimalPlaces, roundToDecimalPlacesAbsolute, uiToBaseUnit } from "@/utils/helpers";
 import { PuffLoader } from "react-spinners";
 import React from "react";
 
@@ -39,7 +38,8 @@ export default function MainView({
             onConfirm: async (amount: number) => {
                 if (!wallet) return;
 
-                const signature = await depositLamports(wallet, connection, amount * LAMPORTS_PER_SOL);
+                const baseUnits = uiToBaseUnit(amount, DECIMALS_SOL).toNumber();
+                const signature = await depositLamports(wallet, connection, baseUnits);
                 if (signature) {
                     updateBalance();
                     disableModal();
@@ -58,7 +58,8 @@ export default function MainView({
             onConfirm: async (amount: number) => {
                 if (!wallet) return;
 
-                const signature = await withdrawLamports(wallet, connection, amount * LAMPORTS_PER_SOL);
+                const baseUnits = uiToBaseUnit(amount, DECIMALS_SOL).toNumber();
+                const signature = await withdrawLamports(wallet, connection, baseUnits);
                 if (signature) {
                     updateBalance();
                     disableModal();
@@ -78,7 +79,8 @@ export default function MainView({
             onConfirm: async (amount: number) => {
                 if (!wallet) return;
 
-                const signature = await withdrawUsdt(wallet, connection, amount * MICRO_CENTS_PER_USDC);
+                const baseUnits = uiToBaseUnit(amount, DECIMALS_USDC).toNumber();
+                const signature = await withdrawUsdt(wallet, connection, baseUnits);
                 if (!signature) return;
 
                 updateBalance();
