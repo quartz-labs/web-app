@@ -194,16 +194,16 @@
       "args": []
     },
     {
-      "name": "deposit_lamports",
+      "name": "deposit",
       "discriminator": [
-        108,
-        4,
-        176,
-        112,
-        110,
-        10,
-        202,
-        195
+        242,
+        35,
+        198,
+        137,
+        82,
+        225,
+        242,
+        182
       ],
       "accounts": [
         {
@@ -229,7 +229,7 @@
           }
         },
         {
-          "name": "vault_wsol",
+          "name": "vault_spl",
           "writable": true,
           "pda": {
             "seeds": [
@@ -239,7 +239,7 @@
               },
               {
                 "kind": "account",
-                "path": "wsol_mint"
+                "path": "spl_mint"
               }
             ]
           }
@@ -253,231 +253,7 @@
           ]
         },
         {
-          "name": "drift_state",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  100,
-                  114,
-                  105,
-                  102,
-                  116,
-                  95,
-                  115,
-                  116,
-                  97,
-                  116,
-                  101
-                ]
-              }
-            ],
-            "program": {
-              "kind": "account",
-              "path": "drift_program"
-            }
-          }
-        },
-        {
-          "name": "drift_user",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  117,
-                  115,
-                  101,
-                  114
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "vault"
-              },
-              {
-                "kind": "const",
-                "value": [
-                  0,
-                  0
-                ]
-              }
-            ],
-            "program": {
-              "kind": "account",
-              "path": "drift_program"
-            }
-          }
-        },
-        {
-          "name": "drift_user_stats",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  117,
-                  115,
-                  101,
-                  114,
-                  95,
-                  115,
-                  116,
-                  97,
-                  116,
-                  115
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "vault"
-              }
-            ],
-            "program": {
-              "kind": "account",
-              "path": "drift_program"
-            }
-          }
-        },
-        {
-          "name": "spot_market_vault",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  115,
-                  112,
-                  111,
-                  116,
-                  95,
-                  109,
-                  97,
-                  114,
-                  107,
-                  101,
-                  116,
-                  95,
-                  118,
-                  97,
-                  117,
-                  108,
-                  116
-                ]
-              },
-              {
-                "kind": "const",
-                "value": [
-                  1,
-                  0
-                ]
-              }
-            ],
-            "program": {
-              "kind": "account",
-              "path": "drift_program"
-            }
-          }
-        },
-        {
-          "name": "wsol_mint"
-        },
-        {
-          "name": "token_program",
-          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
-        },
-        {
-          "name": "drift_program"
-        },
-        {
-          "name": "const_account"
-        },
-        {
-          "name": "spot_market",
-          "writable": true
-        },
-        {
-          "name": "system_program",
-          "address": "11111111111111111111111111111111"
-        }
-      ],
-      "args": [
-        {
-          "name": "amount",
-          "type": "u64"
-        },
-        {
-          "name": "reduce_only",
-          "type": "bool"
-        }
-      ]
-    },
-    {
-      "name": "deposit_usdc",
-      "discriminator": [
-        184,
-        148,
-        250,
-        169,
-        224,
-        213,
-        34,
-        126
-      ],
-      "accounts": [
-        {
-          "name": "vault",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  118,
-                  97,
-                  117,
-                  108,
-                  116
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "owner"
-              }
-            ]
-          }
-        },
-        {
-          "name": "vault_usdc",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "account",
-                "path": "vault"
-              },
-              {
-                "kind": "account",
-                "path": "usdc_mint"
-              }
-            ]
-          }
-        },
-        {
-          "name": "owner",
-          "writable": true,
-          "signer": true,
-          "relations": [
-            "vault"
-          ]
-        },
-        {
-          "name": "owner_usdc",
+          "name": "owner_spl",
           "writable": true,
           "pda": {
             "seeds": [
@@ -524,7 +300,7 @@
               },
               {
                 "kind": "account",
-                "path": "usdc_mint"
+                "path": "spl_mint"
               }
             ],
             "program": {
@@ -685,11 +461,8 @@
                 ]
               },
               {
-                "kind": "const",
-                "value": [
-                  0,
-                  0
-                ]
+                "kind": "arg",
+                "path": "drift_market_index"
               }
             ],
             "program": {
@@ -699,7 +472,7 @@
           }
         },
         {
-          "name": "usdc_mint"
+          "name": "spl_mint"
         },
         {
           "name": "token_program",
@@ -713,27 +486,18 @@
           "name": "drift_program"
         },
         {
-          "name": "const_account"
-        },
-        {
-          "name": "additional_account"
-        },
-        {
-          "name": "spot_market_sol"
-        },
-        {
-          "name": "spot_market_usdc",
-          "writable": true
-        },
-        {
           "name": "system_program",
           "address": "11111111111111111111111111111111"
         }
       ],
       "args": [
         {
-          "name": "amount_micro_cents",
+          "name": "amount_base_units",
           "type": "u64"
+        },
+        {
+          "name": "drift_market_index",
+          "type": "u16"
         },
         {
           "name": "reduce_only",
@@ -937,249 +701,16 @@
       "args": []
     },
     {
-      "name": "withdraw_lamports",
+      "name": "withdraw",
       "discriminator": [
-        251,
-        144,
-        115,
-        229,
-        113,
-        247,
-        206,
-        64
-      ],
-      "accounts": [
-        {
-          "name": "vault",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  118,
-                  97,
-                  117,
-                  108,
-                  116
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "owner"
-              }
-            ]
-          }
-        },
-        {
-          "name": "vault_wsol",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "account",
-                "path": "vault"
-              },
-              {
-                "kind": "account",
-                "path": "wsol_mint"
-              }
-            ]
-          }
-        },
-        {
-          "name": "owner",
-          "writable": true,
-          "signer": true,
-          "relations": [
-            "vault"
-          ]
-        },
-        {
-          "name": "drift_state",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  100,
-                  114,
-                  105,
-                  102,
-                  116,
-                  95,
-                  115,
-                  116,
-                  97,
-                  116,
-                  101
-                ]
-              }
-            ],
-            "program": {
-              "kind": "account",
-              "path": "drift_program"
-            }
-          }
-        },
-        {
-          "name": "drift_user",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  117,
-                  115,
-                  101,
-                  114
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "vault"
-              },
-              {
-                "kind": "const",
-                "value": [
-                  0,
-                  0
-                ]
-              }
-            ],
-            "program": {
-              "kind": "account",
-              "path": "drift_program"
-            }
-          }
-        },
-        {
-          "name": "drift_user_stats",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  117,
-                  115,
-                  101,
-                  114,
-                  95,
-                  115,
-                  116,
-                  97,
-                  116,
-                  115
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "vault"
-              }
-            ],
-            "program": {
-              "kind": "account",
-              "path": "drift_program"
-            }
-          }
-        },
-        {
-          "name": "spot_market_vault",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  115,
-                  112,
-                  111,
-                  116,
-                  95,
-                  109,
-                  97,
-                  114,
-                  107,
-                  101,
-                  116,
-                  95,
-                  118,
-                  97,
-                  117,
-                  108,
-                  116
-                ]
-              },
-              {
-                "kind": "const",
-                "value": [
-                  1,
-                  0
-                ]
-              }
-            ],
-            "program": {
-              "kind": "account",
-              "path": "drift_program"
-            }
-          }
-        },
-        {
-          "name": "drift_signer"
-        },
-        {
-          "name": "wsol_mint"
-        },
-        {
-          "name": "token_program",
-          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
-        },
-        {
-          "name": "drift_program"
-        },
-        {
-          "name": "const_account"
-        },
-        {
-          "name": "additional_account"
-        },
-        {
-          "name": "spot_market_sol",
-          "writable": true
-        },
-        {
-          "name": "spot_market_usdc"
-        },
-        {
-          "name": "system_program",
-          "address": "11111111111111111111111111111111"
-        }
-      ],
-      "args": [
-        {
-          "name": "amount",
-          "type": "u64"
-        },
-        {
-          "name": "reduce_only",
-          "type": "bool"
-        }
-      ]
-    },
-    {
-      "name": "withdraw_usdc",
-      "discriminator": [
-        114,
-        49,
-        72,
-        184,
-        27,
+        183,
+        18,
+        70,
         156,
-        243,
-        155
+        148,
+        109,
+        161,
+        34
       ],
       "accounts": [
         {
@@ -1205,7 +736,7 @@
           }
         },
         {
-          "name": "vault_usdc",
+          "name": "vault_spl",
           "writable": true,
           "pda": {
             "seeds": [
@@ -1215,7 +746,7 @@
               },
               {
                 "kind": "account",
-                "path": "usdc_mint"
+                "path": "spl_mint"
               }
             ]
           }
@@ -1229,7 +760,7 @@
           ]
         },
         {
-          "name": "owner_usdc",
+          "name": "owner_spl",
           "writable": true,
           "pda": {
             "seeds": [
@@ -1276,7 +807,7 @@
               },
               {
                 "kind": "account",
-                "path": "usdc_mint"
+                "path": "spl_mint"
               }
             ],
             "program": {
@@ -1437,11 +968,8 @@
                 ]
               },
               {
-                "kind": "const",
-                "value": [
-                  0,
-                  0
-                ]
+                "kind": "arg",
+                "path": "drift_market_index"
               }
             ],
             "program": {
@@ -1454,7 +982,7 @@
           "name": "drift_signer"
         },
         {
-          "name": "usdc_mint"
+          "name": "spl_mint"
         },
         {
           "name": "token_program",
@@ -1468,27 +996,18 @@
           "name": "drift_program"
         },
         {
-          "name": "const_account"
-        },
-        {
-          "name": "additional_account"
-        },
-        {
-          "name": "spot_market_sol"
-        },
-        {
-          "name": "spot_market_usdc",
-          "writable": true
-        },
-        {
           "name": "system_program",
           "address": "11111111111111111111111111111111"
         }
       ],
       "args": [
         {
-          "name": "amount_micro_cents",
+          "name": "amount_base_units",
           "type": "u64"
+        },
+        {
+          "name": "drift_market_index",
+          "type": "u16"
         },
         {
           "name": "reduce_only",
@@ -1554,33 +1073,8 @@
   "errors": [
     {
       "code": 6000,
-      "name": "InvalidQuartzAccount",
-      "msg": "Invalid Quartz account"
-    },
-    {
-      "code": 6001,
-      "name": "InvalidInitPayer",
-      "msg": "Invalid init_payer"
-    },
-    {
-      "code": 6002,
-      "name": "InsufficientFunds",
-      "msg": "Insufficent funds for transaction"
-    },
-    {
-      "code": 6003,
-      "name": "InvalidMintAddress",
-      "msg": "Invalid SPL token mint address"
-    },
-    {
-      "code": 6004,
       "name": "InvalidDriftProgram",
       "msg": "Invalid Drift program address"
-    },
-    {
-      "code": 6005,
-      "name": "UnableToLoadAccountLoader",
-      "msg": "Unable to load account loader"
     }
   ],
   "types": [
@@ -2944,18 +2438,6 @@
           }
         ]
       }
-    }
-  ],
-  "constants": [
-    {
-      "name": "USDC_MINT_ADDRESS",
-      "type": "pubkey",
-      "value": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
-    },
-    {
-      "name": "WSOL_MINT_ADDRESS",
-      "type": "pubkey",
-      "value": "So11111111111111111111111111111111111111112"
     }
   ]
 }

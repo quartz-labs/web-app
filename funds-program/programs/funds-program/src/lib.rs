@@ -44,19 +44,21 @@ pub mod funds_program {
 
     // Balance
 
-    pub fn withdraw_lamports(ctx: Context<WithdrawLamports>, amount: u64, reduce_only: bool) -> Result<()> {
-        withdraw_lamports_handler(ctx, amount, reduce_only)
+    pub fn deposit<'info>(
+        ctx: Context<'_, '_, '_, 'info, Deposit<'info>>, 
+        amount_base_units: u64, 
+        drift_market_index: u16,
+        reduce_only: bool
+    ) -> Result<()> {
+        deposit_handler(ctx, amount_base_units, drift_market_index, reduce_only)
     }
 
-    pub fn deposit_lamports(ctx: Context<DepositLamports>, amount: u64, reduce_only: bool) -> Result<()> {
-        deposit_lamports_handler(ctx, amount, reduce_only)
-    }
-
-    pub fn deposit_usdc(ctx: Context<DepositUsdc>, amount_micro_cents: u64, reduce_only: bool) -> Result<()> {
-        deposit_usdc_handler(ctx, amount_micro_cents, reduce_only)
-    }
-
-    pub fn withdraw_usdc(ctx: Context<WithdrawUsdc>, amount_micro_cents: u64, reduce_only: bool) -> Result<()> {
-        withdraw_usdc_handler(ctx, amount_micro_cents, reduce_only)
+    pub fn withdraw<'info>(
+        ctx: Context<'_, '_, '_, 'info, Withdraw<'info>>, 
+        amount_base_units: u64, 
+        drift_market_index: u16,
+        reduce_only: bool
+    ) -> Result<()> {
+        withdraw_handler(ctx, amount_base_units, drift_market_index, reduce_only)
     }
 }
