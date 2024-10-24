@@ -20,7 +20,7 @@ export default function MainView({
     enableModal, 
     disableModal, 
     updateBalance,
-    enableOfframpModal 
+    //enableOfframpModal 
 }: ViewProps) {
     const { connection } = useConnection();
     const wallet = useAnchorWallet();
