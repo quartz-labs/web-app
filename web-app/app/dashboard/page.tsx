@@ -78,7 +78,7 @@ export default function Dashboard() {
     const updateFinancialData = async () => {
         try {
             const response = await fetch('/api/solana-price');
-            const data = await response.json();
+            const { data } = await response.json();
             setSolPrice(data.solana.usd);
 
             setSolDailyRate(await getSolDailyEarnRate());
