@@ -78,3 +78,4 @@ export const divideBN = (a: BN, b: BN) => {
     return a.div(b).toNumber() + a.mod(b).toNumber();
 }
 
+export const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));

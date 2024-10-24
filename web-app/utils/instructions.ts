@@ -5,12 +5,18 @@ import { MarginFi } from "@/types/marginfi";
 
 import { AnchorProvider, BN, Idl, Program, setProvider, web3 } from "@coral-xyz/anchor";
 import { AnchorWallet } from "@solana/wallet-adapter-react";
-import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC, DRIFT_PROGRAM_ID, DRIFT_SPOT_MARKET_SOL, DRIFT_SPOT_MARKET_USDC, DRIFT_SIGNER, USDC_MINT, WSOL_MINT, DRIFT_ADDITIONAL_ACCOUNT_1, DRIFT_ADDITIONAL_ACCOUNT_2, USDT_MINT, DECIMAL_PLACES_USDC, MARGINFI_GROUP_1 } from "./constants";
+import { 
+    DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC, DRIFT_PROGRAM_ID, DRIFT_SPOT_MARKET_SOL, DRIFT_SPOT_MARKET_USDC, DRIFT_SIGNER, 
+    DRIFT_ADDITIONAL_ACCOUNT_1, DRIFT_ADDITIONAL_ACCOUNT_2,
+    USDC_MINT, WSOL_MINT, USDT_MINT, 
+    DECIMAL_PLACES_USDC,
+    MARGINFI_GROUP_1 
+} from "./constants";
 import { ASSOCIATED_PROGRAM_ID, TOKEN_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/utils/token";
 import { SystemProgram, Transaction, VersionedTransaction, TransactionMessage, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
 import { getDriftSpotMarketVault, getDriftState, getDriftUser, getDriftUserStats, getVault, getVaultUsdc, getVaultWsol } from "./getPDAs";
-import { baseUnitToToken, divideBN, getOrCreateAssociatedTokenAccountAnchor } from "./utils";
+import { baseUnitToToken, getOrCreateAssociatedTokenAccountAnchor } from "./helpers";
 import { getJupiterSwapIx } from "./jupiter";
 import { createAssociatedTokenAccountIdempotentInstruction, getAssociatedTokenAddress } from "@solana/spl-token";
 import { Keypair } from "@solana/web3.js";
@@ -231,7 +237,8 @@ export const liquidateSol = async(wallet: AnchorWallet, connection: web3.Connect
     const amountUsdc = new BigNumber(baseUnitToToken(amountMicroCents, DECIMAL_PLACES_USDC));
     const amountSol = amountUsdc
         .times(oracleUsdc.priceWeighted.highestPrice)
-        .div(oracleSol.priceWeighted.lowestPrice);
+        .div(oracleSol.priceWeighted.lowestPrice)
+        .times(2);
     const amountLamports = new BN(amountSol.times(LAMPORTS_PER_SOL).integerValue().toString());
 
     const ix_createUsdcAta = createAssociatedTokenAccountIdempotentInstruction(
@@ -306,19 +313,17 @@ export const liquidateSol = async(wallet: AnchorWallet, connection: web3.Connect
         amountUsdc,
         solBank.address,
         usdcBank.address,
-        [ix_depositUsdc, ix_withdrawLamports, ix_wrapSol],
-        []
+        [ix_createUsdcAta, ix_createWSolAta, ix_depositUsdc, ix_withdrawLamports, ix_wrapSol],
+        [],
+        0.000001
     );
 
     const signedTx = await wallet.signTransaction(flashloanTx);
     const simulation = await connection.simulateTransaction(signedTx);
     console.log("Simulation result:", simulation);
 
-    const signature = await connection.sendRawTransaction(signedTx.serialize(), {
-        skipPreflight: true,
-        maxRetries: 5,
-        preflightCommitment: 'processed',
-    });
+    const signature = await connection.sendRawTransaction(signedTx.serialize());
+    // const signature = await sendTransactionHandler(connection, signedTx)
     console.log(signature);
     return signature;
 }

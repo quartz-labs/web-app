@@ -3,7 +3,7 @@ import { MICRO_CENTS_PER_USDC } from "@/utils/constants";
 import { liquidateSol } from "@/utils/instructions";
 import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import styles from "./LoanView.module.css";
-import { getSign, roundToDecimalPlaces, roundToDecimalPlacesAbsolute } from "@/utils/utils";
+import { getSign, roundToDecimalPlaces, roundToDecimalPlacesAbsolute } from "@/utils/helpers";
 import { PuffLoader } from "react-spinners";
 
 export default function LoanView ({
