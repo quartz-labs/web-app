@@ -1,5 +1,9 @@
 .accountWrapper {
-    gap: var(--logo-margin);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: calc(var(--logo-margin) * 0.5);
 }
 
 .warning {
@@ -12,5 +16,5 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 35px;
+    gap: calc(var(--logo-margin) * 0.75);
 }

@@ -134,7 +134,7 @@ a:hover {
   --color-link-hover: #d8f3ff;
 
   --logo-width: 360px;
-  --logo-margin: 60px;
+  --logo-margin: 80px;
   --modal-width: 600px;
   --modal-content-width: 60%;
   --input-field-height: 80px;
@@ -159,7 +159,7 @@ a:hover {
 @media only screen and (max-width: 800px) {
   :root {
     --logo-width: 288px;
-    --logo-margin: 25px;
+    --logo-margin: 45px;
     --modal-width: 90%;
     --modal-content-width: 75%;
 
@@ -196,7 +196,7 @@ a:hover {
 @media only screen and (max-width: 568px) {
   :root {
     --logo-width: 245px;
-    --logo-margin: 20px;
+    --logo-margin: 40px;
     --modal-content-width: 90%;
     --input-field-height: 75px;
 
@@ -221,7 +221,7 @@ a:hover {
 @media only screen and (max-width: 428px) {
   :root {
     --logo-width: 208px;
-    --logo-margin: 10px;
+    --logo-margin: 30px;
     --input-field-height: 65px;
   }
 
