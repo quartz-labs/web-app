@@ -24,7 +24,7 @@ use crate::{
 pub struct Withdraw<'info> {
     #[account(
         mut,
-        seeds = [b"vault", owner.key().as_ref()],
+        seeds = [b"vault".as_ref(), owner.key().as_ref()],
         bump = vault.bump,
         has_one = owner
     )]
@@ -52,7 +52,7 @@ pub struct Withdraw<'info> {
 
     #[account(
         mut,
-        seeds = [b"drift_state"],
+        seeds = [b"drift_state".as_ref()],
         seeds::program = drift_program.key(),
         bump
     )]
@@ -60,7 +60,7 @@ pub struct Withdraw<'info> {
 
     #[account(
         mut,
-        seeds = [b"user", vault.key().as_ref(), (0u16).to_le_bytes().as_ref()],
+        seeds = [b"user".as_ref(), vault.key().as_ref(), (0u16).to_le_bytes().as_ref()],
         seeds::program = drift_program.key(),
         bump
     )]
@@ -68,20 +68,22 @@ pub struct Withdraw<'info> {
     
     #[account(
         mut,
-        seeds = [b"user_stats", vault.key().as_ref()],
+        seeds = [b"user_stats".as_ref(), vault.key().as_ref()],
         seeds::program = drift_program.key(),
         bump
     )]
     pub drift_user_stats: AccountLoader<'info, DriftUserStats>,
     
-    #[account(
-        mut,
-        seeds = [b"spot_market_vault", drift_market_index.to_le_bytes().as_ref()],
-        seeds::program = drift_program.key(),
-        token::mint = spl_mint,
-        bump,
-    )]
-    pub spot_market_vault: Box<Account<'info, TokenAccount>>,
+    // #[account(
+    //     mut,
+    //     seeds = [b"spot_market_vault".as_ref(), drift_market_index.to_le_bytes().as_ref()],
+    //     seeds::program = drift_program.key(),
+    //     token::mint = spl_mint,
+    //     bump,
+    // )]
+    // pub spot_market_vault: Box<Account<'info, TokenAccount>>,
+    /// CHECK: No check, just passed to Drift
+    pub spot_market_vault: UncheckedAccount<'info>,
     
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     pub drift_signer: UncheckedAccount<'info>,

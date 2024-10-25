@@ -16,8 +16,6 @@ export default function Onboarding() {
 
     useEffect(() => {
         const isLoggedIn = async () => {
-            router.push("/");  // TODO - Remove tmp redirect
-            return;
             if (!wallet) router.push("/");
             else if (await isVaultInitialized(wallet, connection)) router.push("/dashboard");
         }

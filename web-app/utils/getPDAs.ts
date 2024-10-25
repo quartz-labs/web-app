@@ -58,9 +58,16 @@ export const getDriftSpotMarketVault = (marketIndex: number) => {
     const [spotMarketVaultPda] = web3.PublicKey.findProgramAddressSync(
         [
             Buffer.from("spot_market_vault"), 
-            new BN(marketIndex).toArrayLike(Buffer, 'le', 2)
+            new BN(marketIndex).toArrayLike(Buffer, 'le', 2)    
         ],
         DRIFT_PROGRAM_ID
-    )
+    );
+    const [wrongVault] = web3.PublicKey.findProgramAddressSync(
+        [
+            Buffer.from("spot_market_vault"), 
+            new BN(marketIndex).toArrayLike(Buffer, 'le', 2)    
+        ],
+        DRIFT_PROGRAM_ID
+    );
     return spotMarketVaultPda;
 }

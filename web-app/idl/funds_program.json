@@ -701,6 +701,30 @@
       "args": []
     },
     {
+      "name": "test_pda",
+      "discriminator": [
+        114,
+        253,
+        95,
+        153,
+        133,
+        149,
+        207,
+        243
+      ],
+      "accounts": [
+        {
+          "name": "drift_program"
+        }
+      ],
+      "args": [
+        {
+          "name": "drift_market_index",
+          "type": "u16"
+        }
+      ]
+    },
+    {
       "name": "withdraw",
       "discriminator": [
         183,

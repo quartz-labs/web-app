@@ -24,7 +24,7 @@ use crate::{
 pub struct Deposit<'info> {
     #[account(
         mut,
-        seeds = [b"vault", owner.key().as_ref()],
+        seeds = [b"vault".as_ref(), owner.key().as_ref()],
         bump = vault.bump,
         has_one = owner
     )]
@@ -52,7 +52,7 @@ pub struct Deposit<'info> {
 
     #[account(
         mut,
-        seeds = [b"drift_state"],
+        seeds = [b"drift_state".as_ref()],
         seeds::program = drift_program.key(),
         bump
     )]
@@ -60,7 +60,7 @@ pub struct Deposit<'info> {
 
     #[account(
         mut,
-        seeds = [b"user", vault.key().as_ref(), (0u16).to_le_bytes().as_ref()],
+        seeds = [b"user".as_ref(), vault.key().as_ref(), (0u16).to_le_bytes().as_ref()],
         seeds::program = drift_program.key(),
         bump
     )]
@@ -68,20 +68,22 @@ pub struct Deposit<'info> {
     
     #[account(
         mut,
-        seeds = [b"user_stats", vault.key().as_ref()],
+        seeds = [b"user_stats".as_ref(), vault.key().as_ref()],
         seeds::program = drift_program.key(),
         bump
     )]
     pub drift_user_stats: AccountLoader<'info, DriftUserStats>,
     
-    #[account(
-        mut,
-        seeds = [b"spot_market_vault", drift_market_index.to_le_bytes().as_ref()],
-        seeds::program = drift_program.key(),
-        token::mint = spl_mint,
-        bump,
-    )]
-    pub spot_market_vault: Box<Account<'info, TokenAccount>>,
+    // #[account(
+    //     mut,
+    //     seeds = [b"spot_market_vault".as_ref(), drift_market_index.to_le_bytes().as_ref()],
+    //     seeds::program = drift_program.key(),
+    //     token::mint = spl_mint,
+    //     bump,
+    // )]
+    // pub spot_market_vault: Box<Account<'info, TokenAccount>>,
+    /// CHECK: No check, just passed to Drift
+    pub spot_market_vault: UncheckedAccount<'info>,
 
     pub spl_mint: Box<Account<'info, Mint>>,
 
@@ -104,6 +106,19 @@ pub fn deposit_handler<'info>(
     drift_market_index: u16,
     reduce_only: bool
 ) -> Result<()> {
+    let (expected_pda, _bump) = Pubkey::find_program_address(
+        &[
+            b"spot_market_vault".as_ref(),
+            drift_market_index.to_le_bytes().as_ref()
+        ],
+        &ctx.accounts.drift_program.key()
+    );
+
+    msg!("Market Index: {}", drift_market_index);
+    msg!("Bytes: {:?}", drift_market_index.to_le_bytes());
+    msg!("Passed PDA: {}", ctx.accounts.spot_market_vault.key());
+    msg!("Expected PDA: {}", expected_pda);
+
     let vault_bump = ctx.accounts.vault.bump;
     let owner = ctx.accounts.owner.key();
     let seeds = &[

@@ -1,6 +1,6 @@
 'use client';
 
-import { Connection } from '@solana/web3.js';
+import { clusterApiUrl, Connection } from '@solana/web3.js';
 import { atom, useAtomValue, useSetAtom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
 import { createContext, ReactNode, useContext } from 'react';
@@ -23,16 +23,16 @@ export enum ClusterNetwork {
 // The endpoint provided by clusterApiUrl('mainnet-beta') does not allow access from the browser due to CORS restrictions
 // To use the mainnet-beta cluster, provide a custom endpoint
 export const defaultClusters: Cluster[] = [
-  {
-    name: 'mainnet-beta',
-    endpoint: "https://janella-g42vor-fast-mainnet.helius-rpc.com",
-    network: ClusterNetwork.Mainnet,
-  },
   // {
-  //   name: 'devnet',
-  //   endpoint: clusterApiUrl('devnet'),
-  //   network: ClusterNetwork.Devnet,
+  //   name: 'mainnet-beta',
+  //   endpoint: "https://janella-g42vor-fast-mainnet.helius-rpc.com",
+  //   network: ClusterNetwork.Mainnet,
   // },
+    {
+      name: 'devnet',
+      endpoint: clusterApiUrl('devnet'),
+      network: ClusterNetwork.Devnet,
+    },
 //   { name: 'local', endpoint: 'http://localhost:8899' },
 ];
 

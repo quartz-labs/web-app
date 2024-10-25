@@ -61,4 +61,28 @@ pub mod funds_program {
     ) -> Result<()> {
         withdraw_handler(ctx, amount_base_units, drift_market_index, reduce_only)
     }
+
+    pub fn test_pda(ctx: Context<TestPda>, drift_market_index: u16) -> Result<()> {
+        let (expected_pda, _bump) = Pubkey::find_program_address(
+            &[
+                b"spot_market_vault".as_ref(),
+                drift_market_index.to_le_bytes().as_ref()
+            ],
+            &ctx.accounts.drift_program.key()
+        );
+        
+        msg!("Market Index: {}", drift_market_index);
+        msg!("Bytes: {:?}", drift_market_index.to_le_bytes());
+        msg!("Derived PDA: {}", expected_pda);
+        
+        Ok(())
+    }
+}
+
+
+#[derive(Accounts)]
+#[instruction(drift_market_index: u16)]
+pub struct TestPda<'info> {
+    /// CHECK: no check
+    pub drift_program: AccountInfo<'info>,
 }

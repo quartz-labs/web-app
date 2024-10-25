@@ -5,7 +5,7 @@ use crate::state::Vault;
 pub struct CloseUser<'info> {
     #[account(
         mut,
-        seeds = [b"vault", owner.key().as_ref()],
+        seeds = [b"vault".as_ref(), owner.key().as_ref()],
         bump = vault.bump,
         has_one = owner,
         close = owner,

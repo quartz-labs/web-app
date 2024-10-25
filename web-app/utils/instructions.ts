@@ -164,6 +164,30 @@ export const depositLamports = async(wallet: AnchorWallet, connection: web3.Conn
     const driftSpotMarketVault = getDriftSpotMarketVault(DRIFT_MARKET_INDEX_SOL);
 
     try {
+        // {
+        //     console.log("Market Index:", DRIFT_MARKET_INDEX_SOL);
+        //     console.log("Expected PDA:", driftSpotMarketVault.toBase58());
+        //     const ix_test = await program.methods
+        //         .testPda(DRIFT_MARKET_INDEX_SOL)
+        //         .accounts({
+        //             driftProgram: DRIFT_PROGRAM_ID,
+        //         })
+        //         .instruction();
+
+        //     const latestBlockhash = await connection.getLatestBlockhash();
+        //     const messageV0 = new TransactionMessage({
+        //         payerKey: wallet.publicKey,
+        //         recentBlockhash: latestBlockhash.blockhash,
+        //         instructions: [ix_test],
+        //     }).compileToV0Message();
+        //     const tx = new VersionedTransaction(messageV0);
+
+        //     const simulatedTx = await connection.simulateTransaction(tx);
+        //     console.log("Transaction simulation result:", simulatedTx);
+        //     console.log(ix_test);
+        // }
+
+        // return;
         const createAtaIx = createAssociatedTokenAccountInstruction(
             wallet.publicKey,
             walletWSol,
@@ -180,7 +204,11 @@ export const depositLamports = async(wallet: AnchorWallet, connection: web3.Conn
         const syncNativeIx = createSyncNativeInstruction(walletWSol);
 
         const instruction = await program.methods
-            .deposit(new BN(amountLamports), DRIFT_MARKET_INDEX_SOL, false)
+            .deposit(
+                new BN(amountLamports), 
+                DRIFT_MARKET_INDEX_SOL, 
+                false
+            )
             .accounts({
                 //@ts-expect-error: IDL issues
                 vault: vaultPda,

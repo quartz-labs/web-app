@@ -707,6 +707,30 @@ export type FundsProgram = {
       "args": []
     },
     {
+      "name": "testPda",
+      "discriminator": [
+        114,
+        253,
+        95,
+        153,
+        133,
+        149,
+        207,
+        243
+      ],
+      "accounts": [
+        {
+          "name": "driftProgram"
+        }
+      ],
+      "args": [
+        {
+          "name": "driftMarketIndex",
+          "type": "u16"
+        }
+      ]
+    },
+    {
       "name": "withdraw",
       "discriminator": [
         183,

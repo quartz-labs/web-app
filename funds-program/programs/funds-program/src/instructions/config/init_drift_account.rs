@@ -13,7 +13,7 @@ use crate::{
 pub struct InitDriftAccount<'info> {
     #[account(
         mut,
-        seeds = [b"vault", owner.key().as_ref()],
+        seeds = [b"vault".as_ref(), owner.key().as_ref()],
         bump = vault.bump,
         has_one = owner
     )]
@@ -25,7 +25,7 @@ pub struct InitDriftAccount<'info> {
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
         mut,
-        seeds = [b"user", vault.key().as_ref(), (0u16).to_le_bytes().as_ref()],
+        seeds = [b"user".as_ref(), vault.key().as_ref(), (0u16).to_le_bytes().as_ref()],
         seeds::program = drift_program.key(),
         bump
     )]
@@ -34,7 +34,7 @@ pub struct InitDriftAccount<'info> {
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
         mut,
-        seeds = [b"user_stats", vault.key().as_ref()],
+        seeds = [b"user_stats".as_ref(), vault.key().as_ref()],
         seeds::program = drift_program.key(),
         bump
     )]
@@ -42,7 +42,7 @@ pub struct InitDriftAccount<'info> {
 
     #[account(
         mut,
-        seeds = [b"drift_state"],
+        seeds = [b"drift_state".as_ref()],
         seeds::program = drift_program.key(),
         bump
     )]
