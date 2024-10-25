@@ -434,7 +434,8 @@
           }
         },
         {
-          "name": "spot_market_vault"
+          "name": "spot_market_vault",
+          "writable": true
         },
         {
           "name": "spl_mint"
@@ -930,7 +931,8 @@
           }
         },
         {
-          "name": "spot_market_vault"
+          "name": "spot_market_vault",
+          "writable": true
         },
         {
           "name": "drift_signer"

@@ -440,7 +440,8 @@ export type FundsProgram = {
           }
         },
         {
-          "name": "spotMarketVault"
+          "name": "spotMarketVault",
+          "writable": true
         },
         {
           "name": "splMint"
@@ -936,7 +937,8 @@ export type FundsProgram = {
           }
         },
         {
-          "name": "spotMarketVault"
+          "name": "spotMarketVault",
+          "writable": true
         },
         {
           "name": "driftSigner"

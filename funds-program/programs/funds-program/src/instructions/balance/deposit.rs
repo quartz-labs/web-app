@@ -83,6 +83,7 @@ pub struct Deposit<'info> {
     // )]
     // pub spot_market_vault: Box<Account<'info, TokenAccount>>,
     /// CHECK: Had seed issues checking this account, so leaving unchecked for now. Still safe as is only used for CPI, where Drift performs checks.
+    #[account(mut)]
     pub spot_market_vault: UncheckedAccount<'info>,
 
     pub spl_mint: Box<Account<'info, Mint>>,
