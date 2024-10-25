@@ -1,8 +1,8 @@
-import { AnchorProvider, web3, BN } from "@coral-xyz/anchor";
+import { web3, BN } from "@coral-xyz/anchor";
 import { AnchorWallet } from "@solana/wallet-adapter-react";
-import { AddressLookupTableAccount, PublicKey, Transaction, TransactionInstruction, Connection } from "@solana/web3.js";
-import { getVault } from "./getPDAs";
-import { createAssociatedTokenAccountInstruction, getAssociatedTokenAddress } from "@solana/spl-token";
+import { AddressLookupTableAccount, PublicKey, TransactionInstruction, Connection } from "@solana/web3.js";
+import { getVault } from "./getAccounts";
+import { createAssociatedTokenAccountInstruction } from "@solana/spl-token";
 import { Bank, MarginfiAccountWrapper, MarginfiClient } from "@mrgnlabs/marginfi-client-v2";
 import BigNumber from "bignumber.js";
 import { Amount } from "@mrgnlabs/mrgn-common";
@@ -26,30 +26,6 @@ export const roundToDecimalPlacesAbsolute = (num: number, place: number) => {
 export const getSign = (num: number) => {
     if (num < 0) return "-";
     else return "+"
-}
-
-export const getOrCreateAssociatedTokenAccountAnchor = async (wallet: AnchorWallet, connection: Connection, provider: AnchorProvider, mint: PublicKey) => {
-    const associatedTokenAddress = await getAssociatedTokenAddress(
-        mint,
-        wallet.publicKey
-    );
-
-    const accountInfo = await connection.getAccountInfo(associatedTokenAddress);
-    if (!accountInfo) {
-        const tx = new Transaction().add(
-            createAssociatedTokenAccountInstruction(
-                wallet.publicKey,
-                associatedTokenAddress,
-                wallet.publicKey,
-                mint
-            )
-        );
-
-        const signature = await provider.sendAndConfirm(tx);
-        console.log(signature);
-    }
-
-    return associatedTokenAddress;
 }
 
 export const baseUnitToUi = (amountBase: number | BN, decimals: number): string => {
@@ -129,4 +105,25 @@ export async function makeFlashLoanTx(
         priorityFeeUi,
         createAtas
     );
+}
+
+export async function createAtaIfNeeded(
+    connection: Connection,
+    ata: PublicKey,
+    authority: PublicKey,
+    mint: PublicKey
+) {
+    const oix_createAta: TransactionInstruction[] = [];
+    const ataInfo = await connection.getAccountInfo(ata);
+    if (ataInfo === null) { 
+        oix_createAta.push(
+            createAssociatedTokenAccountInstruction(
+                authority,
+                ata,
+                authority,
+                mint
+            )
+        );
+    }
+    return oix_createAta;
 }

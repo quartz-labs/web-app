@@ -9,7 +9,7 @@ import MainView from '@/components/MainView/MainView';
 import LoanView from '@/components/LoanView/LoanView';
 import styles from "./page.module.css";
 import { fetchDriftData, getSolDailyEarnRate, getUsdcDailyBorrowRate } from '@/utils/balance';
-import { getVault } from '@/utils/getPDAs';
+import { getVault } from '@/utils/getAccounts';
 import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC } from '@/utils/constants';
 import DefaultModal, { DefaultModalProps } from '@/components/Modals/DefaultModal/DefaultModal';
 //import OfframpModal from '@/components/Modals/OfframpModal/OfframpModal';

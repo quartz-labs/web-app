@@ -82,7 +82,7 @@ pub struct Deposit<'info> {
     //     bump,
     // )]
     // pub spot_market_vault: Box<Account<'info, TokenAccount>>,
-    /// CHECK: No check, just passed to Drift
+    /// CHECK: Had seed issues checking this account, so leaving unchecked for now. Still safe as is only used for CPI, where Drift performs checks.
     pub spot_market_vault: UncheckedAccount<'info>,
 
     pub spl_mint: Box<Account<'info, Mint>>,
@@ -106,19 +106,6 @@ pub fn deposit_handler<'info>(
     drift_market_index: u16,
     reduce_only: bool
 ) -> Result<()> {
-    let (expected_pda, _bump) = Pubkey::find_program_address(
-        &[
-            b"spot_market_vault".as_ref(),
-            drift_market_index.to_le_bytes().as_ref()
-        ],
-        &ctx.accounts.drift_program.key()
-    );
-
-    msg!("Market Index: {}", drift_market_index);
-    msg!("Bytes: {:?}", drift_market_index.to_le_bytes());
-    msg!("Passed PDA: {}", ctx.accounts.spot_market_vault.key());
-    msg!("Expected PDA: {}", expected_pda);
-
     let vault_bump = ctx.accounts.vault.bump;
     let owner = ctx.accounts.owner.key();
     let seeds = &[
@@ -168,7 +155,7 @@ pub fn deposit_handler<'info>(
         ctx.accounts.token_program.to_account_info(),
         token::CloseAccount {
             account: ctx.accounts.vault_spl.to_account_info(),
-            destination: ctx.accounts.owner_spl.to_account_info(),
+            destination: ctx.accounts.owner.to_account_info(),
             authority: ctx.accounts.vault.to_account_info(),
         },
         signer_seeds

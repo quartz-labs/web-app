@@ -16,10 +16,10 @@ export const DRIFT_SIGNER = new PublicKey("JCNCMFXo5M5qwUPg2Utu1u6YWp3MbygxqBsBe
 export const DRIFT_SPOT_MARKET_SOL = new PublicKey("3x85u7SWkmmr7YQGYhtjARgxwegTLJgkSLRprfXod6rh");
 export const DRIFT_SPOT_MARKET_USDC = new PublicKey("6gMq3mRCKf8aP3ttTyYhuijVZ2LGi14oDsBbkgubfLB3");
 
-// export const DRIFT_ADDITIONAL_ACCOUNT_1 = new PublicKey("J83w4HKfqxwcq3BEMMkPFSppX3gqekLyLJBexebFVkix"); // Devnet
-// export const DRIFT_ADDITIONAL_ACCOUNT_2 = new PublicKey("5SSkXsEKQepHHAewytPVwdej4epN1nxgLVM84L4KXgy7"); // Devnet
-export const DRIFT_ADDITIONAL_ACCOUNT_1 = new PublicKey("BAtFj4kQttZRVep3UZS2aZRDixkGYgWsbqTBVDbnSsPF"); // Mainnet
-export const DRIFT_ADDITIONAL_ACCOUNT_2 = new PublicKey("En8hkHLkRe9d9DraYmBTrus518BvmVH448YcvmrFM6Ce"); // Mainnet
+// export const DRIFT_ORACLE_1 = new PublicKey("J83w4HKfqxwcq3BEMMkPFSppX3gqekLyLJBexebFVkix"); // Devnet
+// export const DRIFT_ORACLE_2 = new PublicKey("5SSkXsEKQepHHAewytPVwdej4epN1nxgLVM84L4KXgy7"); // Devnet
+export const DRIFT_ORACLE_1 = new PublicKey("BAtFj4kQttZRVep3UZS2aZRDixkGYgWsbqTBVDbnSsPF"); // Mainnet
+export const DRIFT_ORACLE_2 = new PublicKey("En8hkHLkRe9d9DraYmBTrus518BvmVH448YcvmrFM6Ce"); // Mainnet
 
 export const DRIFT_MARKET_INDEX_USDC = 0;
 export const DRIFT_MARKET_INDEX_SOL = 1;

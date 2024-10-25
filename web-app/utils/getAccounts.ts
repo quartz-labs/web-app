@@ -1,6 +1,6 @@
 import { BN, web3 } from "@coral-xyz/anchor";
 import { PublicKey } from "@solana/web3.js";
-import { DRIFT_PROGRAM_ID, FUNDS_PROGRAM_ID, USDC_MINT, WSOL_MINT } from "./constants";
+import { DRIFT_PROGRAM_ID, FUNDS_PROGRAM_ID } from "./constants";
 
 export const getVault = (owner: PublicKey) => {
     const [vault] = web3.PublicKey.findProgramAddressSync(
@@ -10,17 +10,9 @@ export const getVault = (owner: PublicKey) => {
     return vault;
 }
 
-export const getVaultUsdc = (vaultPda: PublicKey) => {
-    const [vaultUsdc] = web3.PublicKey.findProgramAddressSync(
-        [vaultPda.toBuffer(), USDC_MINT.toBuffer()],
-        new web3.PublicKey(FUNDS_PROGRAM_ID)
-    );
-    return vaultUsdc;
-}
-
-export const getVaultWsol = (vaultPda: PublicKey) => {
+export const getVaultSpl = (vaultPda: PublicKey, mint: PublicKey) => {
     const [vaultWSol] = web3.PublicKey.findProgramAddressSync(
-        [vaultPda.toBuffer(), WSOL_MINT.toBuffer()],
+        [vaultPda.toBuffer(), mint.toBuffer()],
         new web3.PublicKey(FUNDS_PROGRAM_ID)
     );
     return vaultWSol;
@@ -62,12 +54,13 @@ export const getDriftSpotMarketVault = (marketIndex: number) => {
         ],
         DRIFT_PROGRAM_ID
     );
-    const [wrongVault] = web3.PublicKey.findProgramAddressSync(
-        [
-            Buffer.from("spot_market_vault"), 
-            new BN(marketIndex).toArrayLike(Buffer, 'le', 2)    
-        ],
-        DRIFT_PROGRAM_ID
-    );
     return spotMarketVaultPda;
+}
+
+export const toRemainingAccount = (
+    pubkey: PublicKey, 
+    isWritable: boolean, 
+    isSigner: boolean
+) => {
+    return { pubkey, isWritable, isSigner }
 }
