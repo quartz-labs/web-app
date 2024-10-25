@@ -24,7 +24,7 @@ export interface ViewProps {
     swapView: () => void;
     enableModal: (data: DefaultModalProps) => void;
     disableModal: () => void;
-    updateBalance: () => void;
+    updateBalance: (signature?: string) => void;
     //enableOfframpModal: (url: string) => void;
 }
 
@@ -92,10 +92,12 @@ export default function Dashboard() {
         }
     }
 
-    const updateBalance = useCallback(async () => {
+    const updateBalance = useCallback(async (signature?: string) => {
         if (!connection || !wallet || !await isVaultInitialized(wallet, connection)) return;
 
         setBalanceLoaded(false);
+
+        if (signature) await connection.confirmTransaction({signature, ...(await connection.getLatestBlockhash())}, "finalized");
 
         const vault = getVault(wallet.publicKey);
         const [totalSolBalance, usdcLoanBalance] = await fetchDriftData(vault, [

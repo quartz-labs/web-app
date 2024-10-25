@@ -11,11 +11,6 @@ export function setupRoutes(app: Express, driftClientManager: DriftClientManager
 
   // Get drift balance for a specific address and market indices
   app.get('/drift-balance', async (req: Request, res: Response) => {
-    if (req.get('host') !== 'localhost:3000' || req.get('host') !== 'quartzapp.io') {
-      res.send('This domain is not allowed to call this route')
-      return
-    }
-
     const address = req.query.address as string;
     const marketIndicesParam = req.query.marketIndices as string;
 
@@ -31,11 +26,6 @@ export function setupRoutes(app: Express, driftClientManager: DriftClientManager
   });
 
   app.get('/get-price', async (req: Request, res: Response) => {
-    if (req.get('host') !== 'localhost:3000' || req.get('host') !== 'quartzapp.io') {
-      res.send('This domain is not allowed to call this route')
-      return
-    }
-
     const asset = req.query.asset as string;
 
     try {

@@ -42,7 +42,7 @@ export default function MainView({
                 const signature = await depositLamports(wallet, connection, baseUnits);
                 if (!signature) return;
 
-                updateBalance();
+                updateBalance(signature);
                 disableModal();
             },
             onCancel: () => { disableModal(); }
@@ -62,7 +62,7 @@ export default function MainView({
                 const signature = await withdrawLamports(wallet, connection, baseUnits);
                 if (!signature) return;
                 
-                updateBalance();
+                updateBalance(signature);
                 disableModal();
             },
             onCancel: () => { disableModal(); },
@@ -83,7 +83,7 @@ export default function MainView({
                 const signature = await withdrawUsdc(wallet, connection, baseUnits);
                 if (!signature) return;
 
-                updateBalance();
+                updateBalance(signature);
                 disableModal();
             },
             onCancel: () => { disableModal(); }

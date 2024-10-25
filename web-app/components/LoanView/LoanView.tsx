@@ -34,7 +34,7 @@ export default function LoanView({
                 const signature = await depositUsdc(wallet, connection, baseUnits);
                 if (!signature) return;
 
-                updateBalance();
+                updateBalance(signature);
                 disableModal();
             },
             onCancel: () => { disableModal(); }
@@ -54,7 +54,7 @@ export default function LoanView({
                 const signature = await liquidateSol(wallet, connection, baseUnits);
                 if (!signature) return;
 
-                updateBalance();
+                updateBalance(signature);
                 disableModal();
             },
             onCancel: () => { disableModal(); }
