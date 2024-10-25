@@ -30,7 +30,8 @@ export function setupRoutes(app: Express, driftClientManager: DriftClientManager
 
     try {
       const data = await getPriceData(asset);
-      res.status(200).json({ data });
+      const priceUsdc = data[asset].usd;
+      res.status(200).json(priceUsdc);
     } catch (error) {
       console.error('Error fetching price data:', error);
       res.status(500).json({ error: 'Failed to fetch price data' });

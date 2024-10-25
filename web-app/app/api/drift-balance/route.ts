@@ -21,8 +21,6 @@ export async function GET(request: Request) {
 
   try {
     const response = await fetch(`https://quartz-server-puoxw.ondigitalocean.app/drift-balance?address=${address}&marketIndices=${marketIndices}`);
-    console.log("Drift")
-    console.log(response);
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
