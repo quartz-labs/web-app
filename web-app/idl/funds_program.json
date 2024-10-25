@@ -434,42 +434,7 @@
           }
         },
         {
-          "name": "spot_market_vault",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  115,
-                  112,
-                  111,
-                  116,
-                  95,
-                  109,
-                  97,
-                  114,
-                  107,
-                  101,
-                  116,
-                  95,
-                  118,
-                  97,
-                  117,
-                  108,
-                  116
-                ]
-              },
-              {
-                "kind": "arg",
-                "path": "drift_market_index"
-              }
-            ],
-            "program": {
-              "kind": "account",
-              "path": "drift_program"
-            }
-          }
+          "name": "spot_market_vault"
         },
         {
           "name": "spl_mint"
@@ -965,42 +930,7 @@
           }
         },
         {
-          "name": "spot_market_vault",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  115,
-                  112,
-                  111,
-                  116,
-                  95,
-                  109,
-                  97,
-                  114,
-                  107,
-                  101,
-                  116,
-                  95,
-                  118,
-                  97,
-                  117,
-                  108,
-                  116
-                ]
-              },
-              {
-                "kind": "arg",
-                "path": "drift_market_index"
-              }
-            ],
-            "program": {
-              "kind": "account",
-              "path": "drift_program"
-            }
-          }
+          "name": "spot_market_vault"
         },
         {
           "name": "drift_signer"

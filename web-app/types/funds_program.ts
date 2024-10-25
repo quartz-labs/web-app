@@ -440,42 +440,7 @@ export type FundsProgram = {
           }
         },
         {
-          "name": "spotMarketVault",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  115,
-                  112,
-                  111,
-                  116,
-                  95,
-                  109,
-                  97,
-                  114,
-                  107,
-                  101,
-                  116,
-                  95,
-                  118,
-                  97,
-                  117,
-                  108,
-                  116
-                ]
-              },
-              {
-                "kind": "arg",
-                "path": "driftMarketIndex"
-              }
-            ],
-            "program": {
-              "kind": "account",
-              "path": "driftProgram"
-            }
-          }
+          "name": "spotMarketVault"
         },
         {
           "name": "splMint"
@@ -971,42 +936,7 @@ export type FundsProgram = {
           }
         },
         {
-          "name": "spotMarketVault",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  115,
-                  112,
-                  111,
-                  116,
-                  95,
-                  109,
-                  97,
-                  114,
-                  107,
-                  101,
-                  116,
-                  95,
-                  118,
-                  97,
-                  117,
-                  108,
-                  116
-                ]
-              },
-              {
-                "kind": "arg",
-                "path": "driftMarketIndex"
-              }
-            ],
-            "program": {
-              "kind": "account",
-              "path": "driftProgram"
-            }
-          }
+          "name": "spotMarketVault"
         },
         {
           "name": "driftSigner"
