@@ -3,7 +3,7 @@
 import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
-import { isVaultInitialized } from '@/utils/helpers';
+import { hasBetaKey, isVaultInitialized } from '@/utils/helpers';
 import Account from '@/components/Account/Account';
 import MainView from '@/components/MainView/MainView';
 import LoanView from '@/components/LoanView/LoanView';
@@ -35,8 +35,8 @@ export default function Dashboard() {
 
     useEffect(() => {
         const isLoggedIn = async () => {
-            if (!wallet) router.push("/");
-            else if (!await isVaultInitialized(wallet, connection)) router.push("/onboarding");
+            if (!wallet || !await hasBetaKey(connection, wallet.publicKey)) router.push("/");
+            else if (!await isVaultInitialized(connection, wallet.publicKey)) router.push("/onboarding");
         }
         isLoggedIn();
     }, [wallet, connection, router]);
@@ -93,7 +93,7 @@ export default function Dashboard() {
     }
 
     const updateBalance = useCallback(async (signature?: string) => {
-        if (!connection || !wallet || !await isVaultInitialized(wallet, connection)) return;
+        if (!connection || !wallet || !await isVaultInitialized(connection, wallet.publicKey)) return;
 
         setBalanceLoaded(false);
 

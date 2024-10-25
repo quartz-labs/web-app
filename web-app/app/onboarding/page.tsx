@@ -5,7 +5,7 @@ import styles from './page.module.css';
 import { useRouter } from 'next/navigation';
 import { initAccount } from '@/utils/instructions';
 import { useEffect, useState } from 'react';
-import { isVaultInitialized } from '@/utils/helpers';
+import { hasBetaKey, isVaultInitialized } from '@/utils/helpers';
 import Account from '@/components/Account/Account';
 import { PuffLoader } from 'react-spinners';
 
@@ -14,10 +14,13 @@ export default function Onboarding() {
     const wallet = useAnchorWallet();
     const router = useRouter();
 
+    const [userAuthed, setUserAuthed] = useState(false);
+
     useEffect(() => {
         const isLoggedIn = async () => {
-            if (!wallet) router.push("/");
-            else if (await isVaultInitialized(wallet, connection)) router.push("/dashboard");
+            if (!wallet || !await hasBetaKey(connection, wallet.publicKey)) router.push("/");
+            else if (await isVaultInitialized(connection, wallet.publicKey)) router.push("/dashboard");
+            setUserAuthed(true);
         }
         isLoggedIn();
     }, [wallet, connection, router]);
@@ -34,7 +37,7 @@ export default function Onboarding() {
     };
 
     const handleCreateAccount = async () => {
-        if (!wallet || awaitingSign) return;
+        if (!wallet || !userAuthed || awaitingSign) return;
 
         setMissingCheckboxes(checkboxes.map(checked => !checked));
         if (!checkboxes.every(checked => checked)) {

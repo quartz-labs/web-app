@@ -1,14 +1,13 @@
-import { web3, BN } from "@coral-xyz/anchor";
-import { AnchorWallet } from "@solana/wallet-adapter-react";
 import { AddressLookupTableAccount, PublicKey, TransactionInstruction, Connection } from "@solana/web3.js";
 import { getVault } from "./getAccounts";
 import { createAssociatedTokenAccountInstruction } from "@solana/spl-token";
 import { Bank, MarginfiAccountWrapper, MarginfiClient } from "@mrgnlabs/marginfi-client-v2";
 import BigNumber from "bignumber.js";
 import { Amount } from "@mrgnlabs/mrgn-common";
+import { BN } from "@coral-xyz/anchor";
 
-export const isVaultInitialized = async (wallet: AnchorWallet, connection: web3.Connection) => {
-    const vaultPda = getVault(wallet.publicKey);
+export const isVaultInitialized = async (connection: Connection, wallet: PublicKey) => {
+    const vaultPda = getVault(wallet);
     const vaultPdaAccount = await connection.getAccountInfo(vaultPda);
     return (vaultPdaAccount !== null);
 }
@@ -126,4 +125,11 @@ export async function createAtaIfNeeded(
         );
     }
     return oix_createAta;
+}
+
+export async function hasBetaKey(connecion: Connection, wallet: PublicKey) {
+    const requireBetaKey = (process.env.NEXT_PUBLIC_REQUIRE_BETA_KEY === "true") ?? false;
+    if (!requireBetaKey) return true;
+    
+    return false;
 }
