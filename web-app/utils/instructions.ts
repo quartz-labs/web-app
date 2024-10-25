@@ -497,7 +497,7 @@ export const liquidateSol = async(wallet: AnchorWallet, connection: web3.Connect
         usdcBank.address,
         [...oix_createWSolAta, ix_depositUsdc, ix_withdrawLamports, ...jupiterSwap, ix_closeWSolAta],
         [fundsProgramLookupTable, ...jupiterLookupTables],
-        0.001,
+        0.002,
         true
     );
 

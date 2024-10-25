@@ -20,7 +20,10 @@ export default function Account({disableCloseAccount} : AccountProps) {
     return (
         <div className={styles.accountWrapper}>
             <Logo />
-            <WalletButton onCloseAccount={onCloseAccount} disableCloseAccount={disableCloseAccount ?? false} />
+            <div className={styles.warningWrapper}>
+                <p className={styles.warning}>Off-ramps temporarily disabled, click <a href="https://x.com/quartzpay/status/1849526071755960533" target="_blank">here</a> for more info</p>
+                <WalletButton onCloseAccount={onCloseAccount} disableCloseAccount={disableCloseAccount ?? false} />
+            </div>
       </div>
     )
 }
