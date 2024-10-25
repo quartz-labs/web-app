@@ -17,7 +17,7 @@ funds_program = "6JjHXLheGSNvvexgzMthEcgjkcirDrGduc3HAKB2P1v2"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "devnet"
+cluster = "mainnet"
 wallet = "~/.config/solana/id.json"
 buffer_authority = "./target/deploy/recover.json"
 

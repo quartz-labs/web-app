@@ -7,3 +7,17 @@
 .title {
     gap: 40px;
 }
+
+.serviceDown {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 20px;
+}
+
+.serviceDown h2 {
+    font-size: var(--text-size-h4);
+    margin-bottom: 20px;
+}

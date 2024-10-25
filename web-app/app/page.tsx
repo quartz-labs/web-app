@@ -16,6 +16,7 @@ export default function Page() {
   useEffect(() => {
     const isLoggedIn = async () => {
       if (wallet) {
+        return; // TODO - remove tmp redirect
         if (await isVaultInitialized(wallet, connection)) router.push("/dashboard");
         else router.push("/onboarding");
       }
@@ -32,7 +33,16 @@ export default function Page() {
       </div>
       
       <div>
-        <WalletButton disableCloseAccount={true} />
+        {/* <WalletButton disableCloseAccount={true} /> */}
+
+        <div className={styles.serviceDown}>
+          <h2>We&apos;re currently deploying a new program upgrade. The website will be offline until 12:30 UTC</h2>
+          <p>
+            Click <a href="https://earn.superteam.fun/listings/hackathon/best-consumer-use-cases/submission/90c99fc7-e3e6-4fad-b743-42d7e4cf88f8/#details" target='_blank'>
+              here
+            </a> to view a demo of our Radar submission.</p>
+          <p>You can find more info on our <a href="https://x.com/quartzpay" target="_blank">X</a> and <a href="https://quartzpay.io/">main website</a>.</p>
+        </div>
       </div>
     </main>
   );
