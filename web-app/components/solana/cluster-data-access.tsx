@@ -1,6 +1,10 @@
 'use client';
 
+<<<<<<< HEAD
 import { clusterApiUrl } from '@solana/web3.js';
+=======
+import { RPC_URL } from '@/utils/constants';
+>>>>>>> main
 import { Connection } from '@solana/web3.js';
 import { atom, useAtomValue, useSetAtom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';

@@ -5,7 +5,7 @@ import styles from './page.module.css';
 import { useRouter } from 'next/navigation';
 import { initAccount } from '@/utils/instructions';
 import { useEffect, useState } from 'react';
-import { isVaultInitialized } from '@/utils/utils';
+import { isVaultInitialized } from '@/utils/helpers';
 import Account from '@/components/Account/Account';
 import { PuffLoader } from 'react-spinners';
 
@@ -96,7 +96,7 @@ export default function Onboarding() {
                                 onChange={() => handleCheckboxChange(2)} 
                             />
                             <span className={styles.checkboxText}>
-                                I understand that my SOL deposits will liquidate for USDT if their value drops below 80% of the loan value
+                                I understand that my SOL deposits will liquidate for USDC if their value drops below 80% of the loan value
                             </span>
                         </label>
                     </li>

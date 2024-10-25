@@ -3,7 +3,7 @@
 import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
-import { isVaultInitialized } from '@/utils/utils';
+import { isVaultInitialized } from '@/utils/helpers';
 import Account from '@/components/Account/Account';
 import MainView from '@/components/MainView/MainView';
 import LoanView from '@/components/LoanView/LoanView';
@@ -12,7 +12,7 @@ import { fetchDriftData, getSolDailyEarnRate, getUsdcDailyBorrowRate } from '@/u
 import { getVault } from '@/utils/getPDAs';
 import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC } from '@/utils/constants';
 import DefaultModal, { DefaultModalProps } from '@/components/Modals/DefaultModal/DefaultModal';
-import OfframpModal from '@/components/Modals/OfframpModal/OfframpModal';
+//import OfframpModal from '@/components/Modals/OfframpModal/OfframpModal';
 
 export interface ViewProps {
     solPrice: number;
@@ -24,8 +24,8 @@ export interface ViewProps {
     swapView: () => void;
     enableModal: (data: DefaultModalProps) => void;
     disableModal: () => void;
-    updateBalance: () => void;
-    enableOfframpModal: (url: string) => void;
+    updateBalance: (signature?: string) => void;
+    //enableOfframpModal: (url: string) => void;
 }
 
 export default function Dashboard() {
@@ -53,8 +53,8 @@ export default function Dashboard() {
         onCancel: () => { }
     });
 
-    const [offrampModalEnabled, setOfframpModalEnabled] = useState(false);
-    const [offrampUrl, setOfframpUrl] = useState("");
+    //const [offrampModalEnabled, setOfframpModalEnabled] = useState(false);
+    //const [offrampUrl, setOfframpUrl] = useState("");
 
     const [solPrice, setSolPrice] = useState(0);
     const [totalSolBalance, setTotalSolBalance] = useState(0);
@@ -69,29 +69,35 @@ export default function Dashboard() {
     }
     const disableModal = () => setModalEnabled(false);
 
-    const enableOfframpModal = (url: string) => {
-        setOfframpUrl(url);
-        setOfframpModalEnabled(true);
-        setModalEnabled(false);
-    }
+    // const enableOfframpModal = (url: string) => {
+    //     setOfframpUrl(url);
+    //     setOfframpModalEnabled(true);
+    //     setModalEnabled(false);
+    // }
 
     const updateFinancialData = async () => {
         try {
             const response = await fetch('/api/solana-price');
-            const { data } = await response.json();
-            setSolPrice(data.solana.usd);
+            const responseJson = await response.json();
+            const solPrice = Number(responseJson);
+            if (isNaN(solPrice)) throw new Error("Sol price is NaN");
 
+            setSolPrice(solPrice);
             setSolDailyRate(await getSolDailyEarnRate());
             setUsdcDailyRate(await getUsdcDailyBorrowRate());
-        } catch (error) {
-            console.error("Error: Unable to reach CoinGecko for price data", error);
+            return true;
+        } catch (err) {
+            console.error(`Error fetching SOL price: ${err}`);
+            return false;
         }
     }
 
-    const updateBalance = useCallback(async () => {
+    const updateBalance = useCallback(async (signature?: string) => {
         if (!connection || !wallet || !await isVaultInitialized(wallet, connection)) return;
 
         setBalanceLoaded(false);
+
+        if (signature) await connection.confirmTransaction({signature, ...(await connection.getLatestBlockhash())}, "finalized");
 
         const vault = getVault(wallet.publicKey);
         const [totalSolBalance, usdcLoanBalance] = await fetchDriftData(vault, [
@@ -103,15 +109,15 @@ export default function Dashboard() {
 
         setTotalSolBalance(Math.abs(totalSolBalance));
         setUsdcLoanBalance(Math.abs(usdcLoanBalance));
-        updateFinancialData();
 
-        setBalanceLoaded(true);
+        const isBalanceLoaded = await updateFinancialData();
+        setBalanceLoaded(isBalanceLoaded);
     }, [connection, wallet]);
 
     useEffect(() => {
         updateBalance();
 
-        const interval = setInterval(updateFinancialData, 10000);
+        const interval = setInterval(updateFinancialData, 10_000);
         return () => clearInterval(interval);
     }, [updateBalance]);
 
@@ -121,9 +127,9 @@ export default function Dashboard() {
                 <DefaultModal {...modalData} />
             }
 
-            {offrampModalEnabled &&
+            {/* {offrampModalEnabled &&
                 <OfframpModal url={offrampUrl} closeModal={() => setOfframpModalEnabled(false)} />
-            }
+            } */}
 
             <div className="two-col-grid">
                 <Account />
@@ -140,7 +146,7 @@ export default function Dashboard() {
                         enableModal={enableModal}
                         disableModal={disableModal}
                         updateBalance={updateBalance}
-                        enableOfframpModal={enableOfframpModal}
+                        //enableOfframpModal={enableOfframpModal}
                     />
                 }
 
@@ -156,7 +162,7 @@ export default function Dashboard() {
                         enableModal={enableModal}
                         disableModal={disableModal}
                         updateBalance={updateBalance}
-                        enableOfframpModal={() => { }}
+                        //enableOfframpModal={() => { }}
                     />
                 }
             </div>
