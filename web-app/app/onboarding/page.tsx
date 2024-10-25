@@ -18,7 +18,7 @@ export default function Onboarding() {
 
     useEffect(() => {
         const isLoggedIn = async () => {
-            if (!wallet || !await hasBetaKey(connection, wallet.publicKey)) router.push("/");
+            if (!wallet || !await hasBetaKey(wallet.publicKey)) router.push("/");
             else if (await isVaultInitialized(connection, wallet.publicKey)) router.push("/dashboard");
             setUserAuthed(true);
         }

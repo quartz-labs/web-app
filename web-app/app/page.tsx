@@ -18,7 +18,7 @@ export default function Page() {
   useEffect(() => {
     const isLoggedIn = async () => {
       if (wallet) {
-        if (!await hasBetaKey(connection, wallet.publicKey)) {
+        if (!await hasBetaKey(wallet.publicKey)) {
           setMissingBetaKey(true);
           return;
         }

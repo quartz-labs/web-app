@@ -127,9 +127,12 @@ export async function createAtaIfNeeded(
     return oix_createAta;
 }
 
-export async function hasBetaKey(connecion: Connection, wallet: PublicKey) {
-    const requireBetaKey = (process.env.NEXT_PUBLIC_REQUIRE_BETA_KEY === "true") ?? false;
+export async function hasBetaKey(wallet: PublicKey) {
+    const requireBetaKey = (process.env.NEXT_PUBLIC_REQUIRE_BETA_KEY === "true");
     if (!requireBetaKey) return true;
     
+    // TODO - Implement function
+    console.log(wallet);
+
     return false;
 }
