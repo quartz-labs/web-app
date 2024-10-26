@@ -5,6 +5,7 @@ import { Bank, MarginfiAccountWrapper, MarginfiClient } from "@mrgnlabs/marginfi
 import BigNumber from "bignumber.js";
 import { Amount } from "@mrgnlabs/mrgn-common";
 import { BN } from "@coral-xyz/anchor";
+import { Metaplex } from "@metaplex-foundation/js";
 
 export const isVaultInitialized = async (connection: Connection, wallet: PublicKey) => {
     const vaultPda = getVault(wallet);
@@ -33,7 +34,7 @@ export const baseUnitToUi = (amountBase: number | BN, decimals: number): string 
     if (amountBN.isNeg()) {
         throw new Error('Negative amounts not allowed');
     }
-    
+
     if (decimals < 0 || decimals > 20) { // 20 is a safe upper limit for most tokens
         throw new Error('Decimals must be between 0 and 20');
     }
@@ -41,11 +42,11 @@ export const baseUnitToUi = (amountBase: number | BN, decimals: number): string 
     // Convert to string and handle padding
     const amountStr = amountBN.toString();
     const paddedStr = amountStr.padStart(decimals + 1, '0'); // +1 to ensure we always have at least one digit before decimal
-    
+
     // Split into whole and decimal parts
     const wholeStr = paddedStr.slice(0, -decimals) || '0';
     const decimalStr = paddedStr.slice(-decimals);
-    
+
     // Return formatted string, trimming trailing zeros after decimal
     if (decimals === 0) return wholeStr;
     const trimmed = `${wholeStr}.${decimalStr}`.replace(/\.?0+$/, '');
@@ -114,7 +115,7 @@ export async function createAtaIfNeeded(
 ) {
     const oix_createAta: TransactionInstruction[] = [];
     const ataInfo = await connection.getAccountInfo(ata);
-    if (ataInfo === null) { 
+    if (ataInfo === null) {
         oix_createAta.push(
             createAssociatedTokenAccountInstruction(
                 authority,
@@ -130,9 +131,44 @@ export async function createAtaIfNeeded(
 export async function hasBetaKey(wallet: PublicKey) {
     const requireBetaKey = (process.env.NEXT_PUBLIC_REQUIRE_BETA_KEY === "true");
     if (!requireBetaKey) return true;
-    
-    // TODO - Implement function
-    console.log(wallet);
+
+    const metaplex = new Metaplex(new Connection(process.env.NEXT_PUBLIC_RPC_URL || "https://api.mainnet-beta.solana.com"));
+
+    try {
+        // Check regular NFTs
+        const regularNfts = await metaplex.nfts().findAllByOwner({ owner: wallet });
+        for (const nft of regularNfts) {
+            if (nft.name && nft.name.includes("Quartz Pin")) {
+                return true;
+            }
+        }
+
+        // Check compressed NFTs using Read API
+        const response = await fetch(`${process.env.NEXT_PUBLIC_RPC_URL}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                jsonrpc: '2.0',
+                id: 'User-NFTs',
+                method: 'getAssetsByOwner',
+                params: {
+                    ownerAddress: wallet.toBase58(),
+                    page: 1,
+                    limit: 1000
+                },
+            }),
+        });
+        const { result } = await response.json();
+
+        console.log("Compressed NFTs:", result);
+        for (const asset of result.items) {
+            if (asset.content.metadata.name && asset.content.metadata.name.includes("Quartz Pin")) {
+                return true;
+            }
+        }
+    } catch (error) {
+        console.error("Error fetching NFTs:", error);
+    }
 
     return false;
 }
