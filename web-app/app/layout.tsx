@@ -2,6 +2,7 @@ import './global.css';
 import { ClusterProvider } from '@/components/solana/cluster-data-access';
 import { SolanaProvider } from '@/components/solana/solana-provider';
 import { ReactQueryProvider } from './react-query-provider';
+import { CSPostHogProvider } from './providers'
 
 export const metadata = {
   title: 'Quartz',
@@ -20,13 +21,15 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.className}>
       <body>
-        <ReactQueryProvider>
-          <ClusterProvider>
-            <SolanaProvider>
-              {children}
-            </SolanaProvider>
-          </ClusterProvider>
-        </ReactQueryProvider>
+        <CSPostHogProvider>
+          <ReactQueryProvider>
+            <ClusterProvider>
+              <SolanaProvider>
+                {children}
+              </SolanaProvider>
+            </ClusterProvider>
+          </ReactQueryProvider>
+        </CSPostHogProvider>
       </body>
     </html>
   );

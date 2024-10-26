@@ -12,6 +12,7 @@ import { fetchDriftData, getSolDailyEarnRate, getUsdcDailyBorrowRate } from '@/u
 import { getVault } from '@/utils/getAccounts';
 import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC } from '@/utils/constants';
 import DefaultModal, { DefaultModalProps } from '@/components/Modals/DefaultModal/DefaultModal';
+import posthog from 'posthog-js';
 //import OfframpModal from '@/components/Modals/OfframpModal/OfframpModal';
 
 export interface ViewProps {
@@ -39,6 +40,9 @@ export default function Dashboard() {
             else if (!await isVaultInitialized(connection, wallet.publicKey)) router.push("/onboarding");
         }
         isLoggedIn();
+
+        posthog.capture('In Dashboard', { property: 'true' })
+        console.log("In Dashboard");
     }, [wallet, connection, router]);
 
     const [mainView, setMainView] = useState(true);
