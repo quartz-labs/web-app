@@ -6,6 +6,7 @@ import BigNumber from "bignumber.js";
 import { Amount } from "@mrgnlabs/mrgn-common";
 import { BN } from "@coral-xyz/anchor";
 import { Metaplex } from "@metaplex-foundation/js";
+import { RPC_URL } from "./constants";
 
 export const isVaultInitialized = async (connection: Connection, wallet: PublicKey) => {
     const vaultPda = getVault(wallet);
@@ -132,7 +133,7 @@ export async function hasBetaKey(wallet: PublicKey) {
     const requireBetaKey = (process.env.NEXT_PUBLIC_REQUIRE_BETA_KEY === "true");
     if (!requireBetaKey) return true;
 
-    const metaplex = new Metaplex(new Connection(process.env.NEXT_PUBLIC_RPC_URL || "https://api.mainnet-beta.solana.com"));
+    const metaplex = new Metaplex(new Connection(process.env.NEXT_PUBLIC_RPC_URL || RPC_URL));
 
     try {
         // Check regular NFTs
@@ -144,7 +145,7 @@ export async function hasBetaKey(wallet: PublicKey) {
         }
 
         // Check compressed NFTs using Read API
-        const response = await fetch(`${process.env.NEXT_PUBLIC_RPC_URL}`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_RPC_URL}` || RPC_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
