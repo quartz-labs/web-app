@@ -82,7 +82,6 @@ export default function Dashboard() {
         try {
             const response = await fetch('/api/solana-price');
             const responseJson = await response.json();
-            console.log(responseJson);
             const solPrice = Number(responseJson);
             if (isNaN(solPrice)) throw new Error("Sol price is NaN");
 
