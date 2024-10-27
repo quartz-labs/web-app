@@ -1,8 +1,8 @@
 import './global.css';
 import { ClusterProvider } from '@/components/solana/cluster-data-access';
 import { SolanaProvider } from '@/components/solana/solana-provider';
-import { ReactQueryProvider } from './react-query-provider';
-import { CSPostHogProvider } from './providers'
+import { ReactQueryProvider } from './providers/react-query-provider';
+import { CSPostHogProvider } from './providers/posthog-provider'
 
 export const metadata = {
   title: 'Quartz',
