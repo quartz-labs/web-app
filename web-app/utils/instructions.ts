@@ -64,7 +64,7 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
             })
             .instruction();
 
-        const computeBudget = 150_000;
+        const computeBudget = 200_000;
         const priorityIxs = createPriorityFeeInstructions(computeBudget);
 
         const instructions = [...priorityIxs, ix_initUser, ix_initVaultDriftAccount];
@@ -141,7 +141,7 @@ export const closeAccount = async (wallet: AnchorWallet, connection: web3.Connec
 
         const latestBlockhash = await connection.getLatestBlockhash();
 
-        const computeBudget = 150_000;
+        const computeBudget = 200_000;
         const priorityIxs = createPriorityFeeInstructions(computeBudget);
 
         const instructions = [...priorityIxs, ix_closeDriftAccount, ix_closeVault];
@@ -215,7 +215,7 @@ export const depositLamports = async (wallet: AnchorWallet, connection: web3.Con
             wallet.publicKey
         );
 
-        const computeBudget = 120_000;
+        const computeBudget = 200_000;
         const priorityIxs = createPriorityFeeInstructions(computeBudget);
 
         const instructions = [...priorityIxs, ...oix_createWSolAta, ix_wrapSol, ix_syncNative, ix_deposit, ix_closeWSolAta];
@@ -285,7 +285,7 @@ export const withdrawLamports = async (wallet: AnchorWallet, connection: web3.Co
             wallet.publicKey
         );
 
-        const computeBudget = 200_000;
+        const computeBudget = 250_000;
         const priorityIxs = createPriorityFeeInstructions(computeBudget);
 
         const instructions = [...priorityIxs, ...oix_createWSolAta, ix_withdraw, ix_closeWSolAta];
@@ -347,7 +347,7 @@ export const depositUsdc = async (wallet: AnchorWallet, connection: Connection, 
             ])
             .instruction();
 
-        const computeBudget = 150_000;
+        const computeBudget = 200_000;
         const priorityIxs = createPriorityFeeInstructions(computeBudget);
 
         const instructions = [...priorityIxs, ix_deposit];
@@ -410,7 +410,7 @@ export const withdrawUsdc = async (wallet: AnchorWallet, connection: web3.Connec
             ])
             .instruction();
 
-        const computeBudget = 150_000;
+        const computeBudget = 200_000;
         const priorityIxs = createPriorityFeeInstructions(computeBudget);
 
         const instructions = [...priorityIxs, ...oix_createAta, ix_withdraw];
@@ -570,7 +570,7 @@ const createNewMarginfiAccount = async (wallet: AnchorWallet, connection: Connec
         })
         .instruction();
 
-    const computeBudget = 120_000;
+    const computeBudget = 200_000;
     const priorityIxs = createPriorityFeeInstructions(computeBudget);
 
     const instructions = [...priorityIxs, ix];
