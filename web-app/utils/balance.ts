@@ -1,4 +1,5 @@
 import { PublicKey } from "@solana/web3.js";
+import { captureError } from "./helpers";
 
 export const getUsdcAPR = async () => {
     // TODO - Implement pulling real data
@@ -24,8 +25,9 @@ export const fetchDriftData = async (vaultAddress: PublicKey, marketIndices: num
             return isNaN(value) ? NaN : value;
         });
         return balances;
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error fetching Drift data:', error);
+        captureError("Could not fetch Drift data", "utils: /balance.ts", error);          
         return marketIndices.map(() => NaN);
     }
 };

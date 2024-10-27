@@ -3,7 +3,7 @@
 import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
-import { hasBetaKey, isVaultInitialized } from '@/utils/helpers';
+import { captureError, hasBetaKey, isVaultInitialized } from '@/utils/helpers';
 import Account from '@/components/Account/Account';
 import MainView from '@/components/MainView/MainView';
 import LoanView from '@/components/LoanView/LoanView';
@@ -42,7 +42,6 @@ export default function Dashboard() {
         isLoggedIn();
 
         posthog.capture('In Dashboard', { property: 'true' })
-        console.log("In Dashboard");
     }, [wallet, connection, router]);
 
     const [mainView, setMainView] = useState(true);
@@ -83,6 +82,7 @@ export default function Dashboard() {
         try {
             const response = await fetch('/api/solana-price');
             const responseJson = await response.json();
+            console.log(responseJson);
             const solPrice = Number(responseJson);
             if (isNaN(solPrice)) throw new Error("Sol price is NaN");
 
@@ -90,8 +90,9 @@ export default function Dashboard() {
             setSolDailyRate(await getSolDailyEarnRate());
             setUsdcDailyRate(await getUsdcDailyBorrowRate());
             return true;
-        } catch (err) {
+        } catch (err: any) {
             console.error(`Error fetching SOL price: ${err}`);
+            captureError(`Unable to process Solana price`, "dashboard: /page.tsx", err);
             return false;
         }
     }
@@ -101,7 +102,7 @@ export default function Dashboard() {
 
         setBalanceLoaded(false);
 
-        if (signature) await connection.confirmTransaction({signature, ...(await connection.getLatestBlockhash())}, "finalized");
+        if (signature) await connection.confirmTransaction({ signature, ...(await connection.getLatestBlockhash()) }, "finalized");
 
         const vault = getVault(wallet.publicKey);
         const [totalSolBalance, usdcLoanBalance] = await fetchDriftData(vault, [
@@ -150,7 +151,7 @@ export default function Dashboard() {
                         enableModal={enableModal}
                         disableModal={disableModal}
                         updateBalance={updateBalance}
-                        //enableOfframpModal={enableOfframpModal}
+                    //enableOfframpModal={enableOfframpModal}
                     />
                 }
 
@@ -166,7 +167,7 @@ export default function Dashboard() {
                         enableModal={enableModal}
                         disableModal={disableModal}
                         updateBalance={updateBalance}
-                        //enableOfframpModal={() => { }}
+                    //enableOfframpModal={() => { }}
                     />
                 }
             </div>

@@ -1,3 +1,4 @@
+import { captureError } from '@/utils/helpers';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
@@ -36,6 +37,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(data);
   } catch (error) {
     console.error(error);
+    captureError("Unable to get transaction from RPC", "route: /tx", error);
+    
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -1,5 +1,5 @@
 import { AddressLookupTableAccount, Connection, Signer, Transaction, TransactionInstruction, TransactionMessage, VersionedTransaction } from "@solana/web3.js";
-import { delay } from "./helpers";
+import { captureError, delay } from "./helpers";
 
 export const sendTransactionHandler = async (connection: Connection, tx: VersionedTransaction | Transaction) => {
     const DELAY = 500;
@@ -19,7 +19,9 @@ export const sendTransactionHandler = async (connection: Connection, tx: Version
                     console.log(`${sx} transaction CONFIRMED`);
                     return sx;
                 } else {
-                    console.log(`${sx} transaction FAILED`);
+                    const error = `${sx} transaction FAILED`;
+                    console.log(error);
+                    captureError(error, "route: /transactionSender.ts");
                     return "";
                 }
             }
@@ -29,16 +31,21 @@ export const sendTransactionHandler = async (connection: Connection, tx: Version
         } catch (error: any) {
             if (error.transactionMessage == 'Transaction simulation failed: This transaction has already been processed') {
                 console.error("Transaction was already processed");
+                captureError("Transaction already processed", "utils: /transactionSender.ts", error);
             } else if (error.transactionMessage == "Transaction simulation failed: Blockhash not found") {
                 console.error("Transaction expired: have to retry");
+                captureError("Transaction expired", "utils: /transactionSender.ts", error);
                 return "";
             } else {
                 console.error("Send transaction error: ", error);
+                captureError("Send transaction error", "utils: /transactionSender.ts", error);
             }
         }
     }
 
     console.error("Transaction timed out");
+    captureError("Transaction timed out", "utils: /transactionSender.ts");
+
     return "";
 }
 

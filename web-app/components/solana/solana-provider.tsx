@@ -12,6 +12,7 @@ import { ReactNode, useCallback, useMemo } from 'react';
 import { useCluster } from './cluster-data-access';
 
 import './wallet-adapter-react-ui/styles.css';
+import { captureError } from '@/utils/helpers';
 
 type WalletButtonProps = React.ComponentProps<typeof WalletMultiButton> & {
   onCloseAccount?: () => void;
@@ -36,6 +37,7 @@ export function SolanaProvider({ children }: { children: ReactNode }) {
   const onError = useCallback((error: WalletError) => {
     // TODO: Handle user not signing transaction
     console.error(error);
+    captureError(`Wallet error, user did not sign transaction`, "component: /solana-provider", error);
   }, []);
 
   return (

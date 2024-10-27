@@ -7,6 +7,7 @@ import { Amount } from "@mrgnlabs/mrgn-common";
 import { BN } from "@coral-xyz/anchor";
 import { Metaplex } from "@metaplex-foundation/js";
 import { RPC_URL } from "./constants";
+import posthog from "posthog-js";
 
 export const isVaultInitialized = async (connection: Connection, wallet: PublicKey) => {
     const vaultPda = getVault(wallet);
@@ -167,9 +168,21 @@ export async function hasBetaKey(wallet: PublicKey) {
                 return true;
             }
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error fetching NFTs:", error);
+        captureError("Could not fetch NFTs", "utils: /helpers.ts", error);
     }
 
     return false;
+}
+
+export function captureError(errorString: string, location: string, error?: any) {
+    const errorStack = error ? error.stack?.split('\n')[1]?.trim() : new Error(errorString).stack?.split('\n')[1]?.trim();
+    const errorItem = error ? error : new Error(errorString);
+
+    posthog.capture(`Error: ${errorString}`, {
+        error: errorItem,
+        location: location,
+        line: errorStack.toString(),
+    })
 }
