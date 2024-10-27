@@ -1,6 +1,5 @@
 import { captureError } from '@/utils/helpers';
 import { NextResponse } from 'next/server';
-import posthog from 'posthog-js';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
