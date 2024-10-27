@@ -5,7 +5,6 @@ import { Bank, MarginfiAccountWrapper, MarginfiClient } from "@mrgnlabs/marginfi
 import BigNumber from "bignumber.js";
 import { Amount } from "@mrgnlabs/mrgn-common";
 import { BN } from "@coral-xyz/anchor";
-import { Metaplex } from "@metaplex-foundation/js";
 import { RPC_URL } from "./constants";
 import posthog from "posthog-js";
 
@@ -134,17 +133,7 @@ export async function hasBetaKey(connection: Connection, wallet: PublicKey) {
     const requireBetaKey = (process.env.NEXT_PUBLIC_REQUIRE_BETA_KEY === "true");
     if (!requireBetaKey) return true;
 
-    const metaplex = new Metaplex(connection);
-
     try {
-        // Check regular NFTs
-        const regularNfts = await metaplex.nfts().findAllByOwner({ owner: wallet });
-        for (const nft of regularNfts) {
-            if (nft.name && nft.name.includes("Quartz Pin")) {
-                return true;
-            }
-        }
-
         // Check compressed NFTs using Read API
         const response = await fetch(RPC_URL, {
             method: 'POST',
