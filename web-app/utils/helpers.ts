@@ -130,11 +130,11 @@ export async function createAtaIfNeeded(
     return oix_createAta;
 }
 
-export async function hasBetaKey(wallet: PublicKey) {
+export async function hasBetaKey(connection: Connection, wallet: PublicKey) {
     const requireBetaKey = (process.env.NEXT_PUBLIC_REQUIRE_BETA_KEY === "true");
     if (!requireBetaKey) return true;
 
-    const metaplex = new Metaplex(new Connection(process.env.NEXT_PUBLIC_RPC_URL || RPC_URL));
+    const metaplex = new Metaplex(connection);
 
     try {
         // Check regular NFTs
@@ -146,8 +146,7 @@ export async function hasBetaKey(wallet: PublicKey) {
         }
 
         // Check compressed NFTs using Read API
-        const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL || RPC_URL;
-        const response = await fetch(rpcUrl, {
+        const response = await fetch(RPC_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
