@@ -146,7 +146,8 @@ export async function hasBetaKey(wallet: PublicKey) {
         }
 
         // Check compressed NFTs using Read API
-        const response = await fetch(`${process.env.NEXT_PUBLIC_RPC_URL}` || RPC_URL, {
+        const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL || RPC_URL;
+        const response = await fetch(rpcUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
