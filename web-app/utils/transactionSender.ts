@@ -1,4 +1,4 @@
-import { AddressLookupTableAccount, Connection, Signer, Transaction, TransactionInstruction, TransactionMessage, VersionedTransaction } from "@solana/web3.js";
+import { AddressLookupTableAccount, ComputeBudgetProgram, Connection, Signer, Transaction, TransactionInstruction, TransactionMessage, VersionedTransaction } from "@solana/web3.js";
 import { captureError, delay } from "./helpers";
 
 export const sendTransactionHandler = async (connection: Connection, tx: VersionedTransaction | Transaction) => {
@@ -75,3 +75,16 @@ export const getTransaction = async (signature: string) => {
 
     return response.json();
 };
+
+
+export const createPriorityFeeInstructions = (computeBudget: number, priorityFee?: number) => {
+
+    const computeLimitIx = ComputeBudgetProgram.setComputeUnitLimit({
+        units: computeBudget,
+    });
+
+    const computePriceIx = ComputeBudgetProgram.setComputeUnitPrice({
+        microLamports: priorityFee ? priorityFee : 100,
+    });
+    return [computeLimitIx, computePriceIx];
+}
