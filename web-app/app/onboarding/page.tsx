@@ -92,6 +92,19 @@ export default function Onboarding() {
                     </li>
 
                     <li>
+                        <label className={missingCheckboxes[3] ? styles.missingLabel : ""}>
+                            <input 
+                                type="checkbox" 
+                                checked={checkboxes[3]} 
+                                onChange={() => handleCheckboxChange(3)} 
+                            />
+                            <span className={styles.checkboxText}>
+                                I have read and understood the <a href="https://docs.quartzpay.io/legal/risks" target="_blank">Quartz protocol disclaimer</a>
+                            </span>
+                        </label>
+                    </li>
+
+                    <li>
                         <label className={missingCheckboxes[2] ? styles.missingLabel : ""}>
                             <input 
                                 type="checkbox" 
@@ -100,19 +113,6 @@ export default function Onboarding() {
                             />
                             <span className={styles.checkboxText}>
                                 I understand that my SOL deposits will liquidate for USDC if their value drops below 80% of the loan value
-                            </span>
-                        </label>
-                    </li>
-
-                    <li>
-                        <label className={missingCheckboxes[3] ? styles.missingLabel : ""}>
-                            <input 
-                                type="checkbox" 
-                                checked={checkboxes[3]} 
-                                onChange={() => handleCheckboxChange(3)} 
-                            />
-                            <span className={styles.checkboxText}>
-                                I understand that this is an un-audited demo application and I will only deposit funds I am willing to lose
                             </span>
                         </label>
                     </li>
