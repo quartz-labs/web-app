@@ -1,55 +1,57 @@
 import { AddressLookupTableAccount, ComputeBudgetProgram, Connection, Keypair, Signer, Transaction, TransactionInstruction, TransactionMessage, VersionedTransaction } from "@solana/web3.js";
-import { captureError, delay } from "./helpers";
 import { RPC_URL } from "./constants";
 
 export const sendTransactionHandler = async (connection: Connection, tx: VersionedTransaction | Transaction) => {
-    const DELAY = 1_000;
-    const MAX_WAIT = 15_000;
+    const signature = await connection.sendRawTransaction(tx.serialize());
+    return signature;
 
-    // TODO - Add preflight checks here
+    // const DELAY = 1_000;
+    // const MAX_WAIT = 15_000;
 
-    // TODO - This doesn't actually wait the given amount of MAX_WAIT, as checking takes some time too. Insstead, use an actual timer.
+    // // TODO - Add preflight checks here
 
-    console.log("Sending transaction...");
-    for (let i = 0; i < MAX_WAIT; i += DELAY) {
-        try {
-            const sx = await connection.sendRawTransaction(tx.serialize(), { maxRetries: 0, skipPreflight: true });
+    // // TODO - This doesn't actually wait the given amount of MAX_WAIT, as checking takes some time too. Instead, use an actual timer.
 
-            const status = await getTransaction(sx);
-            if (status.result != null) {
-                //Transaction accepted
-                if ('Ok' in status.result.meta.status) {
-                    console.log(`${sx} transaction CONFIRMED`);
-                    return sx;
-                } else {
-                    const error = `${sx} transaction FAILED`;
-                    console.log(error);
-                    captureError(error, "route: /transactionSender.ts");
-                    return "";
-                }
-            }
+    // console.log("Sending transaction...");
+    // for (let i = 0; i < MAX_WAIT; i += DELAY) {
+    //     try {
+    //         const sx = await connection.sendRawTransaction(tx.serialize(), { maxRetries: 0, skipPreflight: true });
 
-            await delay(DELAY);
+    //         const status = await getTransaction(sx);
+    //         if (status.result != null) {
+    //             //Transaction accepted
+    //             if ('Ok' in status.result.meta.status) {
+    //                 console.log(`${sx} transaction CONFIRMED`);
+    //                 return sx;
+    //             } else {
+    //                 const error = `${sx} transaction FAILED`;
+    //                 console.log(error);
+    //                 captureError(error, "route: /transactionSender.ts");
+    //                 return "";
+    //             }
+    //         }
 
-        } catch (error: any) {
-            if (error.transactionMessage == 'Transaction simulation failed: This transaction has already been processed') {
-                console.error("Transaction was already processed");
-                captureError("Transaction already processed", "utils: /transactionSender.ts", error);
-            } else if (error.transactionMessage == "Transaction simulation failed: Blockhash not found") {
-                console.error("Transaction expired: have to retry");
-                captureError("Transaction expired", "utils: /transactionSender.ts", error);
-                return "";
-            } else {
-                console.error("Send transaction error: ", error);
-                captureError("Send transaction error", "utils: /transactionSender.ts", error);
-            }
-        }
-    }
+    //         await delay(DELAY);
 
-    console.error("Transaction timed out");
-    captureError("Transaction timed out", "utils: /transactionSender.ts");
+    //     } catch (error: any) {
+    //         if (error.transactionMessage == 'Transaction simulation failed: This transaction has already been processed') {
+    //             console.error("Transaction was already processed");
+    //             captureError("Transaction already processed", "utils: /transactionSender.ts", error);
+    //         } else if (error.transactionMessage == "Transaction simulation failed: Blockhash not found") {
+    //             console.error("Transaction expired: have to retry");
+    //             captureError("Transaction expired", "utils: /transactionSender.ts", error);
+    //             return "";
+    //         } else {
+    //             console.error("Send transaction error: ", error);
+    //             captureError("Send transaction error", "utils: /transactionSender.ts", error);
+    //         }
+    //     }
+    // }
 
-    return "";
+    // console.error("Transaction timed out");
+    // captureError("Transaction timed out", "utils: /transactionSender.ts");
+
+    // return "";
 }
 
 export const instructionsIntoV0 = async (connection: Connection, txInstructions: TransactionInstruction[], signers: Signer[], lookupTables?: AddressLookupTableAccount[]) => {
@@ -100,7 +102,7 @@ export const createPriorityFeeInstructions = async (connection: Connection, inst
 }
 
 const getPriorityFeeEstimate = async (accounts: string[]) => {
-    return 50_000;
+    return 1_000_000;
 
     try {
         const response = await fetch(RPC_URL, {
@@ -115,6 +117,7 @@ const getPriorityFeeEstimate = async (accounts: string[]) => {
                 accountKeys: accounts,
                 options: {
                   recommended: true,
+                  evaluateEmptySlotAsZero: true
                 },
               }
             ],
@@ -128,6 +131,6 @@ const getPriorityFeeEstimate = async (accounts: string[]) => {
         return priorityFeeEstimate;
       } catch (err) {
         console.error(`Error: ${err}`);
-        return 20_000;
+        return 100_000;
       }
 }

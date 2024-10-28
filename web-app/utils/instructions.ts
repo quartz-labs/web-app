@@ -96,7 +96,7 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
         const tx = new VersionedTransaction(messageV0);
 
         const signedTx = await wallet.signTransaction(tx);
-        tx.sign([marginfiAccount]);
+        signedTx.sign([marginfiAccount]);
         const signature = await sendTransactionHandler(connection, signedTx);
         return signature;
     } catch (err) {
