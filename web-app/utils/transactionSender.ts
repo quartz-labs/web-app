@@ -100,7 +100,7 @@ export const createPriorityFeeInstructions = async (connection: Connection, inst
 }
 
 const getPriorityFeeEstimate = async (accounts: string[]) => {
-    return 20_000;
+    return 50_000;
 
     try {
         const response = await fetch(RPC_URL, {
@@ -128,6 +128,6 @@ const getPriorityFeeEstimate = async (accounts: string[]) => {
         return priorityFeeEstimate;
       } catch (err) {
         console.error(`Error: ${err}`);
-        return 10_000;
+        return 20_000;
       }
 }
