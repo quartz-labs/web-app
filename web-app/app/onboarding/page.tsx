@@ -49,10 +49,13 @@ export default function Onboarding() {
         setAwaitingSign(true);
         
         const signature = await initAccount(wallet, connection);
-        if (signature) {
-            router.push("/dashboard");
-        } else {
-            setAwaitingSign(false);
+
+        
+        if (signature) router.push("/dashboard");
+        else {
+            if (!wallet || !await hasBetaKey(connection, wallet.publicKey)) router.push("/");
+            else if (await isVaultInitialized(connection, wallet.publicKey)) router.push("/dashboard");
+            else setAwaitingSign(false);
         }
     };
     
