@@ -3,7 +3,7 @@ import { captureError, delay } from "./helpers";
 
 export const sendTransactionHandler = async (connection: Connection, tx: VersionedTransaction | Transaction) => {
     const DELAY = 500;
-    const MAX_WAIT = 30_000;
+    const MAX_WAIT = 20_000;
 
     // TODO - Add preflight checks here
 
@@ -84,7 +84,7 @@ export const createPriorityFeeInstructions = (computeBudget: number, priorityFee
     });
 
     const computePriceIx = ComputeBudgetProgram.setComputeUnitPrice({
-        microLamports: priorityFee ? priorityFee : 100,
+        microLamports: priorityFee ? priorityFee : 10000,
     });
     return [computeLimitIx, computePriceIx];
 }
