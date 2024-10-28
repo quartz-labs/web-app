@@ -65,10 +65,9 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
             .instruction();
 
         const computeBudget = 200_000;
-        const priorityIxs = createPriorityFeeInstructions(computeBudget);
+        
 
-        const instructions = [...priorityIxs, ix_initUser, ix_initVaultDriftAccount];
-
+        const instructions = [ix_initUser, ix_initVaultDriftAccount];
         // Create MarginFi account if user doesn't have one already
         const marginfiAccounts = await marginfiClient.getMarginfiAccountsForAuthority(wallet.publicKey);
         if (marginfiAccounts.length === 0) {
@@ -84,6 +83,9 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
                 .instruction();
             instructions.push(ix_initMarginfiAccount);
         }
+
+        const ix_priority = await createPriorityFeeInstructions(connection, instructions, computeBudget);
+        instructions.unshift(...ix_priority);
 
         const latestBlockhash = await connection.getLatestBlockhash();
         const messageV0 = new TransactionMessage({
@@ -142,9 +144,11 @@ export const closeAccount = async (wallet: AnchorWallet, connection: web3.Connec
         const latestBlockhash = await connection.getLatestBlockhash();
 
         const computeBudget = 200_000;
-        const priorityIxs = createPriorityFeeInstructions(computeBudget);
 
-        const instructions = [...priorityIxs, ix_closeDriftAccount, ix_closeVault];
+        const instructions = [ix_closeDriftAccount, ix_closeVault];
+        const ix_priority = await createPriorityFeeInstructions(connection, instructions, computeBudget);
+
+        instructions.unshift(...ix_priority);
 
         const messageV0 = new TransactionMessage({
             payerKey: wallet.publicKey,
@@ -216,9 +220,9 @@ export const depositLamports = async (wallet: AnchorWallet, connection: web3.Con
         );
 
         const computeBudget = 200_000;
-        const priorityIxs = createPriorityFeeInstructions(computeBudget);
-
-        const instructions = [...priorityIxs, ...oix_createWSolAta, ix_wrapSol, ix_syncNative, ix_deposit, ix_closeWSolAta];
+        const instructions = [...oix_createWSolAta, ix_wrapSol, ix_syncNative, ix_deposit, ix_closeWSolAta];
+        const ix_priority = await createPriorityFeeInstructions(connection, instructions, computeBudget);
+        instructions.unshift(...ix_priority);
 
         const latestBlockhash = await connection.getLatestBlockhash();
         const messageV0 = new TransactionMessage({
@@ -286,9 +290,9 @@ export const withdrawLamports = async (wallet: AnchorWallet, connection: web3.Co
         );
 
         const computeBudget = 250_000;
-        const priorityIxs = createPriorityFeeInstructions(computeBudget);
-
-        const instructions = [...priorityIxs, ...oix_createWSolAta, ix_withdraw, ix_closeWSolAta];
+        const instructions = [...oix_createWSolAta, ix_withdraw, ix_closeWSolAta];
+        const ix_priority = await createPriorityFeeInstructions(connection, instructions, computeBudget);
+        instructions.unshift(...ix_priority);
 
         const latestBlockhash = await connection.getLatestBlockhash();
         const messageV0 = new TransactionMessage({
@@ -348,9 +352,9 @@ export const depositUsdc = async (wallet: AnchorWallet, connection: Connection, 
             .instruction();
 
         const computeBudget = 200_000;
-        const priorityIxs = createPriorityFeeInstructions(computeBudget);
-
-        const instructions = [...priorityIxs, ix_deposit];
+        const instructions = [ix_deposit];
+        const ix_priority = await createPriorityFeeInstructions(connection, instructions, computeBudget);
+        instructions.unshift(...ix_priority);
 
         const latestBlockhash = await connection.getLatestBlockhash();
         const messageV0 = new TransactionMessage({
@@ -411,9 +415,9 @@ export const withdrawUsdc = async (wallet: AnchorWallet, connection: web3.Connec
             .instruction();
 
         const computeBudget = 200_000;
-        const priorityIxs = createPriorityFeeInstructions(computeBudget);
-
-        const instructions = [...priorityIxs, ...oix_createAta, ix_withdraw];
+        const instructions = [...oix_createAta, ix_withdraw];
+        const ix_priority = await createPriorityFeeInstructions(connection, instructions, computeBudget);
+        instructions.unshift(...ix_priority);
 
         const latestBlockhash = await connection.getLatestBlockhash();
         const messageV0 = new TransactionMessage({
@@ -559,7 +563,7 @@ const createNewMarginfiAccount = async (wallet: AnchorWallet, connection: Connec
     const marginfiProgram = new Program(marginfiIdl as Idl, provider) as unknown as Program<MarginFi>;
     const newAccount = Keypair.generate();
 
-    const ix = await marginfiProgram.methods
+    const ix_createAccount = await marginfiProgram.methods
         .marginfiAccountInitialize()
         .accounts({
             marginfiGroup: MARGINFI_GROUP_1,
@@ -571,9 +575,9 @@ const createNewMarginfiAccount = async (wallet: AnchorWallet, connection: Connec
         .instruction();
 
     const computeBudget = 200_000;
-    const priorityIxs = createPriorityFeeInstructions(computeBudget);
-
-    const instructions = [...priorityIxs, ix];
+    const instructions = [ix_createAccount];
+    const ix_priority = await createPriorityFeeInstructions(connection, instructions, computeBudget);
+    instructions.unshift(...ix_priority);
 
     const latestBlockhash = await connection.getLatestBlockhash();
     const messageV0 = new TransactionMessage({

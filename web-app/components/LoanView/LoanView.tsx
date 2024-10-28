@@ -88,7 +88,7 @@ export default function LoanView({
                                 ${(totalSolBalance * solPrice).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </p>
                             <p className={styles.subBalance}>
-                                {roundToDecimalPlaces(totalSolBalance, 4)} SOL ({getSign(dailySolChange)}${roundToDecimalPlacesAbsolute(dailySolChange, 4)} /day)
+                                {roundToDecimalPlaces(totalSolBalance, 5)} SOL ({getSign(dailySolChange)}${roundToDecimalPlacesAbsolute(dailySolChange, 4)} /day)
                             </p>
                         </div>
                     }

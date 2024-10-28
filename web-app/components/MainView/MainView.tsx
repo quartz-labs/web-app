@@ -109,7 +109,7 @@ export default function MainView({
             {balanceLoaded &&
                 <div className={styles.balanceWrapper}>
                     <p className={styles.title}>
-                        {roundToDecimalPlaces(netSolBalance, 4)} SOL
+                        {roundToDecimalPlaces(netSolBalance, 5)} SOL
                     </p>
                     <div className={styles.mainBalance}>
                         <p className={styles.fiatAmount}>

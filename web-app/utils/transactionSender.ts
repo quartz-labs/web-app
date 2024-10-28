@@ -1,11 +1,14 @@
-import { AddressLookupTableAccount, ComputeBudgetProgram, Connection, Signer, Transaction, TransactionInstruction, TransactionMessage, VersionedTransaction } from "@solana/web3.js";
+import { AddressLookupTableAccount, ComputeBudgetProgram, Connection, Keypair, Signer, Transaction, TransactionInstruction, TransactionMessage, VersionedTransaction } from "@solana/web3.js";
 import { captureError, delay } from "./helpers";
+import { RPC_URL } from "./constants";
 
 export const sendTransactionHandler = async (connection: Connection, tx: VersionedTransaction | Transaction) => {
-    const DELAY = 500;
-    const MAX_WAIT = 20_000;
+    const DELAY = 1_000;
+    const MAX_WAIT = 15_000;
 
     // TODO - Add preflight checks here
+
+    // TODO - This doesn't actually wait the given amount of MAX_WAIT, as checking takes some time too. Insstead, use an actual timer.
 
     console.log("Sending transaction...");
     for (let i = 0; i < MAX_WAIT; i += DELAY) {
@@ -77,14 +80,54 @@ export const getTransaction = async (signature: string) => {
 };
 
 
-export const createPriorityFeeInstructions = (computeBudget: number, priorityFee?: number) => {
+export const createPriorityFeeInstructions = async (connection: Connection, instructions: TransactionInstruction[], computeBudget: number) => {
+    const tx = new Transaction();
+    instructions.forEach(ix => tx.add(ix));
+    tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+    tx.feePayer = Keypair.generate().publicKey;
+
+    const accounts = tx.compileMessage().accountKeys;
+    const accountKeys = accounts.map(key => key.toBase58());
 
     const computeLimitIx = ComputeBudgetProgram.setComputeUnitLimit({
         units: computeBudget,
     });
 
     const computePriceIx = ComputeBudgetProgram.setComputeUnitPrice({
-        microLamports: priorityFee ? priorityFee : 10000,
+        microLamports: await getPriorityFeeEstimate(accountKeys)
     });
     return [computeLimitIx, computePriceIx];
+}
+
+const getPriorityFeeEstimate = async (accounts: string[]) => {
+    return 20_000;
+
+    try {
+        const response = await fetch(RPC_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            id: 'helius-example',
+            method: 'getPriorityFeeEstimate',
+            params: [
+              {
+                accountKeys: accounts,
+                options: {
+                  recommended: true,
+                },
+              }
+            ],
+          }),
+        });
+    
+        const data = await response.json();
+    
+        const priorityFeeEstimate = data.result?.priorityFeeEstimate;
+        console.log(`Fetched priority fee: ${priorityFeeEstimate}`);
+        return priorityFeeEstimate;
+      } catch (err) {
+        console.error(`Error: ${err}`);
+        return 10_000;
+      }
 }
