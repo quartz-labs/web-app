@@ -65,7 +65,8 @@ export default function Onboarding() {
 
             <div>
                 <h1 className={styles.heading}>Acknowledge Terms</h1>
-                <p className={styles.subheading}>We use Drift&apos;s lending protocol for yield and borrowing</p>
+                <p className={styles.subheading}>We use Drift&apos;s lending protocol for yield and borrowing.</p>
+                <p className={styles.rentInfo}>Creating an account requires ~0.052 SOL for rent which can be reclaimed if you ever decide to close your account.</p>
 
                 <ul className={styles.checkboxes}>
                     <li>
