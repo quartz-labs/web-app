@@ -37,7 +37,7 @@ export function SolanaProvider({ children }: { children: ReactNode }) {
   const onError = useCallback((error: WalletError) => {
     // TODO: Handle user not signing transaction
     console.error(error);
-    captureError(`Wallet error, user did not sign transaction`, "component: /solana-provider", error);
+    captureError(`Wallet error, user did not sign transaction`, "component: /solana-provider", undefined, error);
   }, []);
 
   return (

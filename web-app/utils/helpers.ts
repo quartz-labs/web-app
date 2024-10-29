@@ -165,13 +165,15 @@ export async function hasBetaKey(connection: Connection, wallet: PublicKey) {
     return false;
 }
 
-export function captureError(errorString: string, location: string, error?: any) {
+export function captureError(errorString: string, location: string, wallet?: PublicKey | string, error?: any) {
     const errorStack = error ? error.stack?.split('\n')[1]?.trim() : new Error(errorString).stack?.split('\n')[1]?.trim();
     const errorItem = error ? error : new Error(errorString);
+    const walletString = wallet ? (typeof wallet === 'string' ? wallet : wallet.toBase58()) : 'AddressNotProvided';
 
     posthog.capture(`Error: ${errorString}`, {
         error: errorItem,
         location: location,
         line: errorStack.toString(),
+        wallet: walletString,
     })
 }

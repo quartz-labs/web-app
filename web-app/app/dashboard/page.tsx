@@ -89,9 +89,9 @@ export default function Dashboard() {
             setSolDailyRate(await getSolDailyEarnRate());
             setUsdcDailyRate(await getUsdcDailyBorrowRate());
             return true;
-        } catch (err: any) {
+        } catch (err) {
             console.error(`Error fetching SOL price: ${err}`);
-            captureError(`Unable to process Solana price`, "dashboard: /page.tsx", err);
+            captureError(`Unable to process Solana price`, "dashboard: /page.tsx", undefined, err);
             return false;
         }
     }

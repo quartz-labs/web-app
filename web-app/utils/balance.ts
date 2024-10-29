@@ -25,9 +25,9 @@ export const fetchDriftData = async (vaultAddress: PublicKey, marketIndices: num
             return isNaN(value) ? NaN : value;
         });
         return balances;
-    } catch (error: any) {
+    } catch (error) {
         console.error('Error fetching Drift data:', error);
-        captureError("Could not fetch Drift data", "utils: /balance.ts", error);          
+        captureError("Could not fetch Drift data", "utils: /balance.ts", vaultAddress, error);          
         return marketIndices.map(() => NaN);
     }
 };
