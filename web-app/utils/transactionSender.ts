@@ -2,7 +2,7 @@ import { AddressLookupTableAccount, ComputeBudgetProgram, Connection, Keypair, P
 import { RPC_URL } from "./constants";
 
 export const sendTransactionHandler = async (connection: Connection, tx: VersionedTransaction | Transaction) => {
-    const signature = await connection.sendRawTransaction(tx.serialize());
+    const signature = await connection.sendRawTransaction(tx.serialize(), {skipPreflight: true});
     return signature;
 
     // const DELAY = 1_000;
