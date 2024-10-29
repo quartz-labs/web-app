@@ -14,14 +14,19 @@ export const isVaultInitialized = async (connection: Connection, wallet: PublicK
     return (vaultPdaAccount !== null);
 }
 
-export const roundToDecimalPlaces = (num: number, place: number) => {
+export const truncateToDecimalPlaces = (num: number, place: number) => {
     const multiplier = Math.pow(10, place);
-    return Math.round((num * multiplier + Number.EPSILON)) / multiplier;
+    return Math.trunc(num * multiplier) / multiplier;
 }
 
-export const roundToDecimalPlacesAbsolute = (num: number, place: number) => {
-    const rounded = roundToDecimalPlaces(num, place);
-    return Math.abs(rounded);
+export const truncateToDecimalPlacesAbsolute = (num: number, place: number) => {
+    const truncated = truncateToDecimalPlaces(num, place);
+    return Math.abs(truncated);
+}
+
+export const roundToDecimalPlaces = (num: number, place: number) => {
+    const multiplier = Math.pow(10, place);
+    return Math.round(num * multiplier + Number.EPSILON) / multiplier; // Add epsilon to help with floating points
 }
 
 export const getSign = (num: number) => {

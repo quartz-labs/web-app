@@ -3,7 +3,7 @@ import { DECIMALS_USDC } from "@/utils/constants";
 import { depositUsdc, liquidateSol } from "@/utils/instructions";
 import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import styles from "./LoanView.module.css";
-import { getSign, roundToDecimalPlaces, roundToDecimalPlacesAbsolute, uiToBaseUnit } from "@/utils/helpers";
+import { getSign, truncateToDecimalPlaces, truncateToDecimalPlacesAbsolute, uiToBaseUnit } from "@/utils/helpers";
 import { PuffLoader } from "react-spinners";
 
 export default function LoanView({
@@ -88,7 +88,7 @@ export default function LoanView({
                                 ${(totalSolBalance * solPrice).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </p>
                             <p className={styles.subBalance}>
-                                {roundToDecimalPlaces(totalSolBalance, 5)} SOL ({getSign(dailySolChange)}${roundToDecimalPlacesAbsolute(dailySolChange, 4)} /day)
+                                {truncateToDecimalPlaces(totalSolBalance, 5)} SOL ({getSign(dailySolChange)}${truncateToDecimalPlacesAbsolute(dailySolChange, 4)} /day)
                             </p>
                         </div>
                     }
@@ -113,7 +113,7 @@ export default function LoanView({
                                 ${usdcLoanBalance.toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </p>
                             <p className={styles.subBalance}>
-                                USDC ({getSign(dailyUsdcChange)}${roundToDecimalPlacesAbsolute(dailyUsdcChange, 4)} /day)
+                                USDC ({getSign(dailyUsdcChange)}${truncateToDecimalPlacesAbsolute(dailyUsdcChange, 4)} /day)
                             </p>
                         </div>
                     }
@@ -138,7 +138,7 @@ export default function LoanView({
                                 ${(netSolBalance * solPrice).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </p>
                             <p className={styles.subBalance}>
-                                After outstanding loans ({getSign(dailyNetChange)}${roundToDecimalPlacesAbsolute(dailyNetChange, 4)} /day)
+                                After outstanding loans ({getSign(dailyNetChange)}${truncateToDecimalPlacesAbsolute(dailyNetChange, 4)} /day)
                             </p>
                         </div>
                     }

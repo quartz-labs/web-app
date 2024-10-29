@@ -5,8 +5,8 @@ import { ReactQueryProvider } from './providers/react-query-provider';
 import { CSPostHogProvider } from './providers/posthog-provider'
 
 export const metadata = {
-  title: 'Quartz',
-  description: 'Quartz MVP built for the Colosseum Radar hackathon',
+  title: 'Quartz App',
+  description: 'Quartz web app built for the Colosseum Radar hackathon',
 };
 
 import { Inter } from 'next/font/google';

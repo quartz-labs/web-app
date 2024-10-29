@@ -3,7 +3,7 @@ import { depositLamports, withdrawLamports, withdrawUsdc } from "@/utils/instruc
 import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import Image from "next/image";
 import styles from "./MainView.module.css";
-import { getSign, roundToDecimalPlaces, roundToDecimalPlacesAbsolute, uiToBaseUnit } from "@/utils/helpers";
+import { getSign, truncateToDecimalPlaces, truncateToDecimalPlacesAbsolute, uiToBaseUnit } from "@/utils/helpers";
 import { PuffLoader } from "react-spinners";
 import React from "react";
 import { DECIMALS_SOL, DECIMALS_USDC } from "@/utils/constants";
@@ -109,14 +109,14 @@ export default function MainView({
             {balanceLoaded &&
                 <div className={styles.balanceWrapper}>
                     <p className={styles.title}>
-                        {roundToDecimalPlaces(netSolBalance, 5)} SOL
+                        {truncateToDecimalPlaces(netSolBalance, 5)} SOL
                     </p>
                     <div className={styles.mainBalance}>
                         <p className={styles.fiatAmount}>
                             ${(netSolBalance * solPrice).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
                         <p className={styles.subBalance}>
-                            {getSign(dailyNetChange)}${roundToDecimalPlacesAbsolute(dailyNetChange, 4)} /day
+                            {getSign(dailyNetChange)}${truncateToDecimalPlacesAbsolute(dailyNetChange, 4)} /day
                         </p>
                     </div>
                 </div>
