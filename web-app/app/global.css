@@ -119,6 +119,7 @@ a:hover {
   --placeholder-glass-stroke: #2B3A4A;
   --placeholder-glass-stroke-accent: #5A355A;
   --glass-border: 2px solid var(--placeholder-glass-stroke); /* TODO: Make gradient */
+  --glass-border-error: 1.5px solid #83484E;
   --glass-background: 
     url("/noise.png"),
     radial-gradient(circle at 80% 20%, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%),
@@ -130,7 +131,7 @@ a:hover {
   --color-background: #0B111D;
   --color-text: #ffffff;
   --color-text-light: #ffffffA5;
-  --color-text-error: #FF8080;
+  --color-error: #FF8080;
   --color-link-hover: #d8f3ff;
 
   --logo-width: 360px;
@@ -146,6 +147,7 @@ a:hover {
   --text-size-large-base: 20.16px;
   --text-size-p-base: 16.8px;
   --text-size-small-base: 14px;
+  --text-size-tiny-base: 12px;
 
   --text-size-h1: var(--text-size-h1-base);
   --text-size-h2: var(--text-size-h2-base);
@@ -154,6 +156,7 @@ a:hover {
   --text-size-large: var(--text-size-large-base);
   --text-size-p: var(--text-size-p-base);
   --text-size-small: var(--text-size-small-base);
+  --text-size-tiny: var(--text-size-tiny-base);
 }
 
 @media only screen and (max-width: 800px) {
@@ -170,6 +173,7 @@ a:hover {
     --text-size-large: calc(0.9 * var(--text-size-large-base));
     --text-size-p: calc(0.9 * var(--text-size-p-base));
     --text-size-small: calc(0.9 * var(--text-size-small-base));
+    --text-size-tiny: calc(0.9 * var(--text-size-tiny-base));
   }
 
   .two-col-grid {
@@ -207,6 +211,7 @@ a:hover {
     --text-size-large: calc(0.8 * var(--text-size-large-base));
     --text-size-p: calc(0.8 * var(--text-size-p-base));
     --text-size-small: calc(0.8 * var(--text-size-small-base));
+    --text-size-tiny: calc(0.8 * var(--text-size-tiny-base));
   }
 
   .two-col-grid {

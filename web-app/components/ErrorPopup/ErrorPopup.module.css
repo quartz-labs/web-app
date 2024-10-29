@@ -1,0 +1,48 @@
+.errorPopup {
+    position: fixed;
+    bottom: 50px;
+    left: 100px;
+    z-index: 1000;
+    width: 220px;
+
+    border: var(--glass-border-error) !important;
+    border-radius: 18px;
+    padding: 20px;
+    cursor: pointer;
+}
+
+.errorPopup:hover {
+    background-image: 
+        var(--overlay), 
+        var(--glass-background) !important;
+}
+
+.errorPopup:active {
+    background-image: 
+        var(--overlay), 
+        var(--overlay), 
+        var(--glass-background) !important;
+}
+
+.message {
+    color: var(--color-text-light);
+    font-size: var(--text-size-tiny);
+}
+
+.heading {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.headingError {
+    color: var(--color-error);
+}
+
+.headingDetails {
+    color: var(--color-text-light);
+    font-size: var(--text-size-small);
+    text-decoration: underline;
+}

@@ -10,6 +10,7 @@ export const metadata = {
 };
 
 import { Inter } from 'next/font/google';
+import ErrorPopup from '@/components/ErrorPopup/ErrorPopup';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -25,6 +26,7 @@ export default function RootLayout({
           <ReactQueryProvider>
             <ClusterProvider>
               <SolanaProvider>
+                <ErrorPopup enabled={false} message={"Transaction timed out. Please try again."}/>
                 {children}
               </SolanaProvider>
             </ClusterProvider>

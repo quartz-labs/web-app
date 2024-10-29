@@ -51,7 +51,7 @@
 
 .error {
     margin-top: 10px;
-    color: var(--color-text-error);
+    color: var(--color-error);
 }
 
 .contentWrapper {
