@@ -102,7 +102,7 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
     } catch (err) {
         if (!(err instanceof WalletSignTransactionError)) {
             console.error(err);
-            captureError("Could not initialize account", "utils: /instructions.ts", err);
+            captureError("Could not initialize account", "utils: /instructions.ts", wallet.publicKey, err);
         }
         return null;
     }
@@ -163,7 +163,7 @@ export const closeAccount = async (wallet: AnchorWallet, connection: web3.Connec
     } catch (err) {
         if (!(err instanceof WalletSignTransactionError)) {
             console.error(err);
-            captureError("Could not close account", "utils: /instructions.ts", err)
+            captureError("Could not close account", "utils: /instructions.ts", wallet.publicKey, err)
         }
         return null;
     }
@@ -238,7 +238,7 @@ export const depositLamports = async (wallet: AnchorWallet, connection: web3.Con
     } catch (err) {
         if (!(err instanceof WalletSignTransactionError)) {
             console.error(err);
-            captureError("Could not deposit SOL", "utils: /instructions.ts", err);
+            captureError("Could not deposit SOL", "utils: /instructions.ts", wallet.publicKey, err);
         }
         return null;
     }
@@ -308,7 +308,7 @@ export const withdrawLamports = async (wallet: AnchorWallet, connection: web3.Co
     } catch (err) {
         if (!(err instanceof WalletSignTransactionError)) {
             console.error(err);
-            captureError("Could not withdraw SOL", "utils: /instructions.ts", err);
+            captureError("Could not withdraw SOL", "utils: /instructions.ts", wallet.publicKey, err);
         }
         return null;
     }
@@ -370,7 +370,7 @@ export const depositUsdc = async (wallet: AnchorWallet, connection: Connection, 
     } catch (err) {
         if (!(err instanceof WalletSignTransactionError)) {
             console.error(err);
-            captureError("Could not deposit USDC", "utils: /instructions.ts", err);
+            captureError("Could not deposit USDC", "utils: /instructions.ts", wallet.publicKey, err);
         }
         return null;
     }
@@ -433,7 +433,7 @@ export const withdrawUsdc = async (wallet: AnchorWallet, connection: web3.Connec
     } catch (err) {
         if (!(err instanceof WalletSignTransactionError)) {
             console.error(err);
-            captureError("Could not withdraw USDC", "utils: /instructions.ts", err);
+            captureError("Could not withdraw USDC", "utils: /instructions.ts", wallet.publicKey, err);
         }
         return null;
     }

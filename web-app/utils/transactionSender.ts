@@ -1,4 +1,4 @@
-import { AddressLookupTableAccount, ComputeBudgetProgram, Connection, Keypair, Signer, Transaction, TransactionInstruction, TransactionMessage, VersionedTransaction } from "@solana/web3.js";
+import { AddressLookupTableAccount, ComputeBudgetProgram, Connection, Keypair, PublicKey, Signer, Transaction, TransactionInstruction, TransactionMessage, VersionedTransaction } from "@solana/web3.js";
 import { RPC_URL } from "./constants";
 
 export const sendTransactionHandler = async (connection: Connection, tx: VersionedTransaction | Transaction) => {
@@ -17,7 +17,7 @@ export const sendTransactionHandler = async (connection: Connection, tx: Version
     //     try {
     //         const sx = await connection.sendRawTransaction(tx.serialize(), { maxRetries: 0, skipPreflight: true });
 
-    //         const status = await getTransaction(sx);
+    //         const status = await getTransaction(sx, wallet);
     //         if (status.result != null) {
     //             //Transaction accepted
     //             if ('Ok' in status.result.meta.status) {
@@ -26,7 +26,7 @@ export const sendTransactionHandler = async (connection: Connection, tx: Version
     //             } else {
     //                 const error = `${sx} transaction FAILED`;
     //                 console.log(error);
-    //                 captureError(error, "route: /transactionSender.ts");
+    //                 captureError("Transction Failed to Send", "route: /transactionSender.ts");
     //                 return "";
     //             }
     //         }
@@ -69,13 +69,13 @@ export const instructionsIntoV0 = async (connection: Connection, txInstructions:
     return transaction;
 }
 
-export const getTransaction = async (signature: string) => {
+export const getTransaction = async (signature: string, wallet: PublicKey) => {
     const response = await fetch('/api/tx', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ signature }),
+        body: JSON.stringify({ signature, wallet }),
     });
 
     return response.json();

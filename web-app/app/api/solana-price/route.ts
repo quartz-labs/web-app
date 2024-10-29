@@ -9,7 +9,7 @@ export async function GET() {
     return NextResponse.json(data);
   } catch (error) {
     console.error(error);
-    captureError("Unable to fetch Solana price", "route: /solana-price", error);
+    captureError("Unable to fetch Solana price", "route: /solana-price", undefined, error);
 
     return NextResponse.json({ error: `Unable to fetch Solana price: ${error}` }, { status: 500 });
   }
