@@ -55,7 +55,7 @@ export default function MainView({
                 disableModal();
             },
             onCancel: () => { disableModal(); },
-            extraInfo: <p >${solPrice * } <span className="tiny-text">({solDailyRate * 365}% APY)</span></p>
+            extraInfo: 
         })
     }
 

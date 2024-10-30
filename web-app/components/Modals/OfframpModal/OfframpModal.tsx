@@ -1,4 +1,4 @@
-import ModalWrapper from "../ModalWrapper/ModalWrapper";
+import Modal from "../Modal";
 import styles from "../DefaultModal/DefaultModal.module.css";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 
@@ -16,7 +16,7 @@ export default function OfframpModal(
         : "";
 
     return (
-        <ModalWrapper onClose={closeModal}>
+        <Modal onClose={closeModal}>
             <div className={styles.contentWrapper}>
                 <h2 className={styles.offrampTitle}>You will be redirected to Mercuryo to complete <span className="no-wrap">your off-ramp</span></h2>
                 <p className={styles.offrampRedirect}>If you are not redirected <a href={url} target="_blank">click here</a></p>
@@ -32,6 +32,6 @@ export default function OfframpModal(
                     Done
                 </button>
             </div>
-        </ModalWrapper>
+        </Modal>
     )
 }

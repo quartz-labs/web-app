@@ -1,7 +1,7 @@
 "use client";
 
 import styles from "../DefaultModal/DefaultModal.module.css";
-import ModalWrapper from "../ModalWrapper/ModalWrapper";
+import Modal from "../Modal";
 import { useError } from "@/context/error-provider";
 
 export default function ErrorModal() {
@@ -15,7 +15,7 @@ export default function ErrorModal() {
 
     if (!detailsEnabled) return (<></>);
     return (
-        <ModalWrapper onClose={hideDetails} extraClass={"modalError"}>
+        <Modal onClose={hideDetails} extraClass={"modalError"}>
             <div className={styles.contentWrapper}>
                 <h2 className={`${styles.heading} ${styles.errorHeading}`}>Error</h2>
 
@@ -39,6 +39,6 @@ export default function ErrorModal() {
                     Close
                 </button>     
             </div>  
-        </ModalWrapper>
+        </Modal>
     )
 }
