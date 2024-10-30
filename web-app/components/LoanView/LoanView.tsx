@@ -13,7 +13,6 @@ export default function LoanView({
     usdcLoanBalance,
     solDailyRate,
     usdcDailyRate,
-    balanceLoaded,
     swapView,
     enableModal,
     disableModal,
@@ -62,6 +61,14 @@ export default function LoanView({
             onCancel: () => { disableModal(); }
         })
     }
+
+    // TODO - If only daily rates are null, just keep them loading and show balance
+    const balanceLoaded = (solPrice !== null && totalSolBalance !== null && usdcLoanBalance !== null && solDailyRate !== null && usdcDailyRate !== null);
+    solPrice = solPrice ?? 0;
+    totalSolBalance = totalSolBalance ?? 0;
+    usdcLoanBalance = usdcLoanBalance ?? 0;
+    solDailyRate = solDailyRate ?? 0;
+    usdcDailyRate = usdcDailyRate ?? 0;
 
     const netSolBalance = ((totalSolBalance * solPrice) - usdcLoanBalance) / solPrice;
     const dailySolChange = totalSolBalance * solDailyRate * solPrice;

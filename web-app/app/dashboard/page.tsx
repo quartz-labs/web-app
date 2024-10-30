@@ -8,7 +8,7 @@ import Account from '@/components/Account/Account';
 import MainView from '@/components/MainView/MainView';
 import LoanView from '@/components/LoanView/LoanView';
 import styles from "./page.module.css";
-import { fetchDriftData, getSolDailyEarnRate, getUsdcDailyBorrowRate } from '@/utils/balance';
+import { fetchDriftData, fetchSolPrice, getSolDailyEarnRate, getUsdcDailyBorrowRate } from '@/utils/balance';
 import { getVault } from '@/utils/getAccounts';
 import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC } from '@/utils/constants';
 import DefaultModal, { DefaultModalProps } from '@/components/Modals/DefaultModal/DefaultModal';
@@ -18,12 +18,11 @@ import { captureError } from '@/utils/errors';
 //import OfframpModal from '@/components/Modals/OfframpModal/OfframpModal';
 
 export interface ViewProps {
-    solPrice: number;
-    totalSolBalance: number;
-    usdcLoanBalance: number;
-    solDailyRate: number;
-    usdcDailyRate: number;
-    balanceLoaded: boolean;
+    solPrice: number | null;
+    totalSolBalance: number | null;
+    usdcLoanBalance: number | null;
+    solDailyRate: number | null;
+    usdcDailyRate: number | null;
     swapView: () => void;
     enableModal: (data: DefaultModalProps) => void;
     disableModal: () => void;
@@ -62,12 +61,11 @@ export default function Dashboard() {
     //const [offrampModalEnabled, setOfframpModalEnabled] = useState(false);
     //const [offrampUrl, setOfframpUrl] = useState("");
 
-    const [solPrice, setSolPrice] = useState(0);
-    const [totalSolBalance, setTotalSolBalance] = useState(0);
-    const [usdcLoanBalance, setUsdcLoanBalance] = useState(0);
-    const [solDailyRate, setSolDailyRate] = useState(0);
-    const [usdcDailyRate, setUsdcDailyRate] = useState(0);
-    const [balanceLoaded, setBalanceLoaded] = useState(false);
+    const [solPrice, setSolPrice] = useState<number | null>(null);
+    const [totalSolBalance, setTotalSolBalance] = useState<number | null>(null);
+    const [usdcLoanBalance, setUsdcLoanBalance] = useState<number | null>(null);
+    const [solDailyRate, setSolDailyRate] = useState<number | null>(null);
+    const [usdcDailyRate, setUsdcDailyRate] = useState<number | null>(null);
 
     const enableModal = (data: DefaultModalProps) => {
         setModalData(data);
@@ -81,55 +79,72 @@ export default function Dashboard() {
     //     setModalEnabled(false);
     // }
 
-    const updateFinancialData = useCallback(async () => {
-        try {
-            const response = await fetch('/api/solana-price');
-            if (!response.ok) {
-                const errorResponse = await response.json();
-                throw new Error(`Failed to fetch Drift data: ${errorResponse.error}`);
-            }
-            const responseJson = await response.json();
-            const solPrice = Number(responseJson);
-            if (isNaN(solPrice)) throw new Error(`Sol price is NaN, instead found ${responseJson}`);
 
-            setSolPrice(solPrice);
-            setSolDailyRate(await getSolDailyEarnRate());
-            setUsdcDailyRate(await getUsdcDailyBorrowRate());
-            return true;
-        } catch (error) {
-            captureError(showError, `Unable to fetch Solana price`, "dashboard: /page.tsx", error, undefined);
-            return false;
-        }
-    }, [showError]);
-
+    // Fetch Drift Balance
     const updateBalance = useCallback(async (signature?: string) => {
         if (!connection || !wallet || !await isVaultInitialized(connection, wallet.publicKey)) return;
 
-        setBalanceLoaded(false);
+        setTotalSolBalance(null);
+        setUsdcLoanBalance(null);
 
         if (signature) await connection.confirmTransaction({ signature, ...(await connection.getLatestBlockhash()) }, "finalized");
 
-        const vault = getVault(wallet.publicKey);
-        const [totalSolBalance, usdcLoanBalance] = await fetchDriftData(showError, vault, [
-            DRIFT_MARKET_INDEX_SOL,
-            DRIFT_MARKET_INDEX_USDC
-        ]);
-
-        if (isNaN(Number(totalSolBalance)) || isNaN(Number(usdcLoanBalance))) return;
+        let totalSolBalance, usdcLoanBalance;
+        try {
+            [totalSolBalance, usdcLoanBalance] = await fetchDriftData(
+                getVault(wallet.publicKey), 
+                [
+                    DRIFT_MARKET_INDEX_SOL,
+                    DRIFT_MARKET_INDEX_USDC
+                ]
+            );
+        } catch (error) {
+            captureError(showError, "Could not fetch Drift deposits balance", "./app/dashboard/page.tsx", error, wallet?.publicKey);
+            // TODO - Retry for a set amount of times
+            return;
+        }
 
         setTotalSolBalance(Math.abs(totalSolBalance));
         setUsdcLoanBalance(Math.abs(usdcLoanBalance));
+    }, [connection, wallet, showError]);
 
-        const isBalanceLoaded = await updateFinancialData();
-        setBalanceLoaded(isBalanceLoaded);
-    }, [connection, wallet, updateFinancialData, showError]);
 
     useEffect(() => {
-        updateBalance();
+        // Fetch SOL price
+        const updatePrice = async() => {
+            try {
+                setSolPrice(await fetchSolPrice());
+            } catch (error) {
+                captureError(showError, "Could not fetch SOL price", "./app/dashboard/page.tsx", error, wallet?.publicKey);
+            }
+        }
 
-        const interval = setInterval(updateFinancialData, 10_000);
+        // Fetch Drift APR & APY
+        const updateRates = async() => {
+            try {
+                Promise.all([
+                    getSolDailyEarnRate(),
+                    getUsdcDailyBorrowRate()
+                ]).then(([solRate, usdcRate]) => {
+                    setSolDailyRate(solRate);
+                    setUsdcDailyRate(usdcRate);
+                });
+            } catch (error) {
+                captureError(showError, "Could not fetch Drift rates", "./app/dashboard/page.tsx", error, wallet?.publicKey);
+            }
+        }
+
+        updateBalance();
+        updatePrice();
+        updateRates();
+        
+        const interval = setInterval(() => {
+            updatePrice();
+            updateRates();
+        }, 10_000);
         return () => clearInterval(interval);
-    }, [updateBalance, updateFinancialData]);
+    }, [showError, wallet, updateBalance]);
+
 
     return (
         <main className={styles.maxHeight}>
@@ -151,7 +166,6 @@ export default function Dashboard() {
                         usdcLoanBalance={usdcLoanBalance}
                         solDailyRate={solDailyRate}
                         usdcDailyRate={usdcDailyRate}
-                        balanceLoaded={balanceLoaded}
                         swapView={() => setMainView(false)}
                         enableModal={enableModal}
                         disableModal={disableModal}
@@ -167,7 +181,6 @@ export default function Dashboard() {
                         usdcLoanBalance={usdcLoanBalance}
                         solDailyRate={solDailyRate}
                         usdcDailyRate={usdcDailyRate}
-                        balanceLoaded={balanceLoaded}
                         swapView={() => setMainView(true)}
                         enableModal={enableModal}
                         disableModal={disableModal}

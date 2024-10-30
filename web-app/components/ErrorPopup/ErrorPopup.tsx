@@ -12,7 +12,6 @@ export default function ErrorPopup() {
 
     useEffect(() => {
         timeoutRef.current = setTimeout(() => {
-            console.log(isMouseEntered);
             if(!isMouseEntered) hideError();
         }, TIMEOUT_TIME);
 
