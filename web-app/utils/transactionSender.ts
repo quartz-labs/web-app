@@ -1,7 +1,15 @@
 import { AddressLookupTableAccount, ComputeBudgetProgram, Connection, Keypair, PublicKey, Signer, Transaction, TransactionInstruction, TransactionMessage, VersionedTransaction } from "@solana/web3.js";
 import { RPC_URL } from "./constants";
+import { captureError } from "./helpers";
 
-export const sendTransactionHandler = async (connection: Connection, tx: VersionedTransaction | Transaction) => {
+export const sendTransactionHandler = async (connection: Connection, tx: VersionedTransaction) => {
+    const simulation = await connection.simulateTransaction(tx);
+    if (simulation.value.err) {
+        console.error("Transaction simulation failed:", simulation.value.err);
+        captureError("Transaction simulation failed", "transactionSender", tx.signatures[0].toString(), simulation);
+        throw new Error("Transaction simulation failed");
+    }
+
     const signature = await connection.sendRawTransaction(tx.serialize());
     return signature;
 
