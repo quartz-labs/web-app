@@ -31,6 +31,10 @@ a:hover {
   font-size: var(--text-size-small);
 }
 
+.tiny-text {
+  font-size: var(--text-size-small);
+}
+
 .glass-button {
   display: flex;
   flex-direction: row;

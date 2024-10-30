@@ -28,6 +28,7 @@ export default function LoanView({
             denomination: "USDC",
             buttonText: "Repay",
             minAmount: 0,
+            maxAmount: null,
             onConfirm: async (amount: number) => {
                 if (!wallet) return;
 
@@ -38,7 +39,8 @@ export default function LoanView({
                 updateBalance(signature);
                 disableModal();
             },
-            onCancel: () => { disableModal(); }
+            onCancel: () => { disableModal(); },
+            extraInfo: <p className="small-text light-text">Loan remaining: {usdcLoanBalance}</p>
         })
     }
 
@@ -48,6 +50,7 @@ export default function LoanView({
             denomination: "USDC",
             buttonText: "Repay",
             minAmount: 0,
+            maxAmount: null,
             onConfirm: async (amount: number) => {
                 if (!wallet) return;
 
@@ -58,7 +61,8 @@ export default function LoanView({
                 updateBalance(signature);
                 disableModal();
             },
-            onCancel: () => { disableModal(); }
+            onCancel: () => { disableModal(); },
+            extraInfo: <p className="small-text light-text">Loan remaining: {usdcLoanBalance} USDC</p>
         })
     }
 

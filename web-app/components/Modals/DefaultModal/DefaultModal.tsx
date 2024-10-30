@@ -11,11 +11,11 @@ export interface DefaultModalProps {
     maxAmount: number;
     onConfirm: (amount: number) => void;
     onCancel: () => void;
-    children: React.ReactNode;
+    extraInfo: React.ReactNode;
 }
 
 export default function DefaultModal(
-    { title, denomination, buttonText, minAmount, maxAmount, onConfirm, onCancel, children }: DefaultModalProps
+    { title, denomination, buttonText, minAmount, maxAmount, onConfirm, onCancel, extraInfo: children }: DefaultModalProps
 ) {
     const [awaitingSign, setAwaitingSign] = useState(false);
     const [amount, setAmount] = useState(""); 

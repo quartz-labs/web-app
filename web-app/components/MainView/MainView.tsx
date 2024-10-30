@@ -43,6 +43,7 @@ export default function MainView({
             denomination: "SOL",
             buttonText: "Deposit",
             minAmount: 0,
+            maxAmount: null,
             onConfirm: async (amount: number) => {
                 if (!wallet) return;
 
@@ -53,7 +54,8 @@ export default function MainView({
                 updateBalance(signature);
                 disableModal();
             },
-            onCancel: () => { disableModal(); }
+            onCancel: () => { disableModal(); },
+            extraInfo: <p >${solPrice * } <span className="tiny-text">({solDailyRate * 365}% APY)</span></p>
         })
     }
 
@@ -63,6 +65,7 @@ export default function MainView({
             denomination: "SOL",
             buttonText: "Withdraw",
             minAmount: 0,
+            maxAmount: null,
             onConfirm: async (amount: number) => {
                 if (!wallet) return;
 
@@ -84,6 +87,7 @@ export default function MainView({
             denomination: "USDC",
             buttonText: "Withdraw",
             minAmount: 0,
+            maxAmount: null,
             onConfirm: async (amount: number) => {
                 if (!wallet) return;
 
