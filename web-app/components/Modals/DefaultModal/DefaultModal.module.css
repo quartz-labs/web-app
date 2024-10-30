@@ -1,11 +1,11 @@
 .heading {
     font-size: var(--text-size-h2);
-    margin-bottom: 55px;
+    margin-bottom: 45px;
 }
 
 .inputSection {
     width: var(--modal-content-width);
-    margin-bottom: 55px;
+    margin-bottom: 16px;
 }
 
 .inputFieldWrapper {
@@ -55,7 +55,7 @@
 }
 
 .contentWrapper {
-    max-width: 70%;
+    max-width: var(--modal-content-width);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -104,4 +104,28 @@
     flex-direction: column;
     align-items: center;
     gap: 6px;
+}
+
+.infoSection {
+    width: var(--modal-content-width);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 45px;
+}
+
+.infoValue {
+    dispaly: flex;
+    align-items: baseline;
+}
+
+.infoBalances {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.balanceButton {
+    padding: 8px 10px;
+    font-size: var(--text-size-small);
 }

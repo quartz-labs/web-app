@@ -8,29 +8,33 @@ export interface DefaultModalProps {
     denomination: string;
     buttonText: string;
     minAmount: number;
+    maxAmount: number;
     onConfirm: (amount: number) => void;
     onCancel: () => void;
-    onSetMax?: () => string;
+    children: React.ReactNode;
 }
 
 export default function DefaultModal(
-    { title, denomination, buttonText, minAmount, onConfirm, onCancel, onSetMax }: DefaultModalProps
+    { title, denomination, buttonText, minAmount, maxAmount, onConfirm, onCancel, children }: DefaultModalProps
 ) {
     const [awaitingSign, setAwaitingSign] = useState(false);
     const [amount, setAmount] = useState(""); 
     const [errorText, setErrorText] = useState("");
 
     const handleConfirm = async (amount: string) => {
-        let numAmount;
-        try {
-            numAmount = Number(amount);
-        } catch {
+        const numAmount = Number(amount);
+        if (isNaN(numAmount)) {
             setErrorText("Invalid input");
             return;
         }
 
         if (numAmount < minAmount) {
             setErrorText("Minimum amount: " + minAmount);
+            return;
+        }
+
+        if (numAmount > maxAmount) {
+            setErrorText("Maximum amount: " + minAmount);
             return;
         }
 
@@ -47,29 +51,37 @@ export default function DefaultModal(
             </div>
             
             <div className={styles.inputSection}>
-                <p>Amount ({denomination})</p>
+                <p>Amount</p>
                 <div className={styles.inputFieldWrapper}>
                     <input 
                         className={styles.inputField}
                         type="text" 
-                        placeholder={"0.0"} 
+                        placeholder={"0.0 " + denomination} 
                         value={amount} 
                         onChange={(e) => 
                             setAmount(e.target.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1'))
                         }
                     />
-                    {onSetMax &&
-                        <button 
-                            className={styles.maxButton} 
-                            onClick={() => setAmount(onSetMax())}
-                        >
-                            Max
-                        </button>
-                    }
                 </div>
                 {errorText &&
                     <p className={styles.error}>{errorText}</p>
                 }  
+            </div>
+
+            <div className={styles.infoSection}>
+                <div className={styles.infoValue}>
+                    {children}
+                </div>
+
+                <div className={styles.infoBalances}>
+                    <p className="small-text light-text">Available: {maxAmount}</p>
+                    <button className={`glass-button ghost ${styles.balanceButton}`} onClick={() => setAmount((maxAmount / 2).toString())}>
+                        Half
+                    </button>
+                    <button className={`glass-button ghost ${styles.balanceButton}`} onClick={() => setAmount(maxAmount.toString())}>
+                        Max
+                    </button>
+                </div>
             </div>
             
             <div className={styles.buttons}>
