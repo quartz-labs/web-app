@@ -1,12 +1,13 @@
 import { AddressLookupTableAccount, ComputeBudgetProgram, Connection, Keypair, PublicKey, Signer, Transaction, TransactionInstruction, TransactionMessage, VersionedTransaction } from "@solana/web3.js";
 import { RPC_URL } from "./constants";
-import { captureError } from "./helpers";
+import { captureError } from "@/utils/errors";
+import { ShowErrorProps } from "@/context/error-provider";
 
-export const sendTransactionHandler = async (showError: (message: string) => void, connection: Connection, tx: VersionedTransaction) => {
+export const sendTransactionHandler = async (showError: (props: ShowErrorProps) => void, connection: Connection, tx: VersionedTransaction) => {
     const simulation = await connection.simulateTransaction(tx);
     if (simulation.value.err) {
         console.error("Transaction simulation failed:", simulation.value.err);
-        captureError(showError, "Transaction simulation failed", "transactionSender", tx.signatures[0].toString(), simulation);
+        captureError(showError, "Transaction simulation failed", "transactionSender", simulation, new PublicKey(tx.signatures[0]));
         throw new Error("Transaction simulation failed");
     }
 
@@ -77,7 +78,7 @@ export const instructionsIntoV0 = async (connection: Connection, txInstructions:
     return transaction;
 }
 
-export const getTransaction = async (showError: (message: string) => void, signature: string, wallet: PublicKey) => {
+export const getTransaction = async (showError: (props: ShowErrorProps) => void, signature: string, wallet: PublicKey) => {
     const response = await fetch('/api/tx', {
         method: 'POST',
         headers: {

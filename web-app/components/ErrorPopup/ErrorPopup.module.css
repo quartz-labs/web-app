@@ -9,7 +9,7 @@
     background-image: var(--glass-background);
     background-size: 17% auto, auto, auto, auto;
     backdrop-filter: blur(22px);
-    border: var(--glass-border-error) !important;
+    border: var(--glass-border-error);
     border-radius: 18px;
 }
 
@@ -29,6 +29,8 @@
 .message {
     color: var(--color-text-light);
     font-size: var(--text-size-tiny);
+    width: 100%;
+    text-align: left;
 }
 
 .heading {

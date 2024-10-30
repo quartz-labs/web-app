@@ -17,15 +17,17 @@ import { ASSOCIATED_PROGRAM_ID, TOKEN_PROGRAM_ID } from "@coral-xyz/anchor/dist/
 import { SystemProgram, VersionedTransaction, TransactionMessage, Connection } from "@solana/web3.js";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
 import { getDriftSpotMarketVault, getDriftState, getDriftUser, getDriftUserStats, getVault, getVaultSpl, toRemainingAccount } from "./getAccounts";
-import { baseUnitToUi, captureError, createAtaIfNeeded, makeFlashLoanTx } from "./helpers";
+import { baseUnitToUi, createAtaIfNeeded, makeFlashLoanTx } from "./helpers";
 import { createCloseAccountInstruction, createSyncNativeInstruction, getAssociatedTokenAddress } from "@solana/spl-token";
 import { Keypair } from "@solana/web3.js";
 import { MarginfiClient, getConfig } from '@mrgnlabs/marginfi-client-v2';
 import { createPriorityFeeInstructions, sendTransactionHandler } from "./transactionSender";
 import { getJupiterSwapIx, getJupiterSwapQuote } from "./jupiter";
 import BigNumber from "bignumber.js";
+import { ShowErrorProps } from "@/context/error-provider";
+import { captureError } from "@/utils/errors";
 
-export const initAccount = async (wallet: AnchorWallet, connection: web3.Connection, showError: (message: string) => void) => {
+export const initAccount = async (wallet: AnchorWallet, connection: web3.Connection, showError: (props: ShowErrorProps) => void) => {
     const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
     setProvider(provider);
     const quartzProgram = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>;
@@ -101,14 +103,14 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
         return signature;
     } catch (error) {
         if (!(error instanceof WalletSignTransactionError)) {
-            captureError(showError, "Could not initialize account", "utils: /instructions.ts", wallet.publicKey, error);
+            captureError(showError, "Could not initialize account", "utils: /instructions.ts", error, wallet.publicKey);
         }
         return null;
     }
 }
 
 
-export const closeAccount = async (wallet: AnchorWallet, connection: web3.Connection, showError: (message: string) => void) => {
+export const closeAccount = async (wallet: AnchorWallet, connection: web3.Connection, showError: (props: ShowErrorProps) => void) => {
     const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
     setProvider(provider);
     const program = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>;
@@ -119,7 +121,7 @@ export const closeAccount = async (wallet: AnchorWallet, connection: web3.Connec
     const driftState = getDriftState();
 
     try {
-        throw new Error("Shit's fucked");
+        throw new Error("Shit is extremely fucked like good lord will someone please fix this jesus christ.");
 
         const ix_closeDriftAccount = await program.methods
             .closeDriftAccount()
@@ -163,14 +165,14 @@ export const closeAccount = async (wallet: AnchorWallet, connection: web3.Connec
         return signature;
     } catch (error) {
         if (!(error instanceof WalletSignTransactionError)) {
-            captureError(showError, "Could not close account", "utils: /instructions.ts", wallet.publicKey, error)
+            captureError(showError, "Could not close account", "utils: /instructions.ts", error, wallet.publicKey)
         }
         return null;
     }
 }
 
 
-export const depositLamports = async (wallet: AnchorWallet, connection: web3.Connection, amountLamports: number, showError: (message: string) => void) => {
+export const depositLamports = async (wallet: AnchorWallet, connection: web3.Connection, amountLamports: number, showError: (props: ShowErrorProps) => void) => {
     const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
     setProvider(provider);
     const program = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>;
@@ -237,14 +239,14 @@ export const depositLamports = async (wallet: AnchorWallet, connection: web3.Con
         return signature;
     } catch (error) {
         if (!(error instanceof WalletSignTransactionError)) {
-            captureError(showError, "Could not deposit SOL", "utils: /instructions.ts", wallet.publicKey, error);
+            captureError(showError, "Could not deposit SOL", "utils: /instructions.ts", error, wallet.publicKey);
         }
         return null;
     }
 }
 
 
-export const withdrawLamports = async (wallet: AnchorWallet, connection: web3.Connection, amountLamports: number, showError: (message: string) => void) => {
+export const withdrawLamports = async (wallet: AnchorWallet, connection: web3.Connection, amountLamports: number, showError: (props: ShowErrorProps) => void) => {
     const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
     setProvider(provider);
     const program = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>;
@@ -306,14 +308,14 @@ export const withdrawLamports = async (wallet: AnchorWallet, connection: web3.Co
         return signature;
     } catch (error) {
         if (!(error instanceof WalletSignTransactionError)) {
-            captureError(showError, "Could not withdraw SOL", "utils: /instructions.ts", wallet.publicKey, error);
+            captureError(showError, "Could not withdraw SOL", "utils: /instructions.ts", error, wallet.publicKey);
         }
         return null;
     }
 }
 
 
-export const depositUsdc = async (wallet: AnchorWallet, connection: Connection, amountMicroCents: number, showError: (message: string) => void) => {
+export const depositUsdc = async (wallet: AnchorWallet, connection: Connection, amountMicroCents: number, showError: (props: ShowErrorProps) => void) => {
     const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
     setProvider(provider);
     const program = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>;
@@ -367,14 +369,14 @@ export const depositUsdc = async (wallet: AnchorWallet, connection: Connection, 
         return signature;
     } catch (error) {
         if (!(error instanceof WalletSignTransactionError)) {
-            captureError(showError, "Could not deposit USDC", "utils: /instructions.ts", wallet.publicKey, error);
+            captureError(showError, "Could not deposit USDC", "utils: /instructions.ts", error, wallet.publicKey);
         }
         return null;
     }
 }
 
 
-export const withdrawUsdc = async (wallet: AnchorWallet, connection: web3.Connection, amountMicroCents: number, showError: (message: string) => void) => {
+export const withdrawUsdc = async (wallet: AnchorWallet, connection: web3.Connection, amountMicroCents: number, showError: (props: ShowErrorProps) => void) => {
     const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
     setProvider(provider);
     const program = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>;
@@ -429,14 +431,14 @@ export const withdrawUsdc = async (wallet: AnchorWallet, connection: web3.Connec
         return signature;
     } catch (error) {
         if (!(error instanceof WalletSignTransactionError)) {
-            captureError(showError, "Could not withdraw USDC", "utils: /instructions.ts", wallet.publicKey, error);
+            captureError(showError, "Could not withdraw USDC", "utils: /instructions.ts", error, wallet.publicKey);
         }
         return null;
     }
 }
 
 
-export const liquidateSol = async (wallet: AnchorWallet, connection: web3.Connection, amountMicroCents: number, showError: (message: string) => void) => {
+export const liquidateSol = async (wallet: AnchorWallet, connection: web3.Connection, amountMicroCents: number, showError: (props: ShowErrorProps) => void) => {
     const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
     setProvider(provider);
     const quartzProgram = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>;
@@ -553,14 +555,14 @@ export const liquidateSol = async (wallet: AnchorWallet, connection: web3.Connec
         return signature;
     } catch (error) {
         if (!(error instanceof WalletSignTransactionError)) {
-            captureError(showError, "Could not withdraw USDC", "utils: /instructions.ts", wallet.publicKey, error);
+            captureError(showError, "Could not withdraw USDC", "utils: /instructions.ts", error, wallet.publicKey);
         }
         return null;
     }
 }
 
 
-const createNewMarginfiAccount = async (showError: (message: string) => void, wallet: AnchorWallet, connection: Connection, provider: AnchorProvider, client: MarginfiClient) => {
+const createNewMarginfiAccount = async (showError: (props: ShowErrorProps) => void, wallet: AnchorWallet, connection: Connection, provider: AnchorProvider, client: MarginfiClient) => {
     console.log("Creating MarginFi account");
     const marginfiProgram = new Program(marginfiIdl as Idl, provider) as unknown as Program<MarginFi>;
     const newAccount = Keypair.generate();

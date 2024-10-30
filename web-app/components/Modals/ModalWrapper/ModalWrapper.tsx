@@ -3,10 +3,11 @@ import styles from "./ModalWrapper.module.css";
 
 interface ModalWrapperProps{
     onClose: () => void;
+    extraClass?: string;
     children: React.ReactNode;
 }
 
-export default function ModalWrapper({onClose, children} : ModalWrapperProps) {
+export default function ModalWrapper({onClose, extraClass, children} : ModalWrapperProps) {
     const handleWrapperClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         if (e.target === e.currentTarget) {
             onClose();
@@ -15,7 +16,10 @@ export default function ModalWrapper({onClose, children} : ModalWrapperProps) {
 
     return (
         <div className={styles.modalWrapper} onClick={handleWrapperClick}>
-            <div className={`glass ${styles.modal}`} onClick={(e) => e.stopPropagation()}>
+            <div 
+                className={`glass ${styles.modal} ${extraClass ? styles[extraClass] : ""}`}
+                onClick={(e) => e.stopPropagation()}
+            >
                 {children}
             </div>
         </div>

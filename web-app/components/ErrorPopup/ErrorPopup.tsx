@@ -5,7 +5,7 @@ import styles from "./ErrorPopup.module.css";
 import { useEffect, useRef, useState } from "react";
 
 export default function ErrorPopup() {
-    const { message, enabled, hideError } = useError();
+    const { propsError, errorEnabled, hideError, showDetails } = useError();
     const TIMEOUT_TIME = 4000;
     const [isMouseEntered, setIsMouseEntered] = useState(false);
     const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
@@ -30,14 +30,17 @@ export default function ErrorPopup() {
             if(!isMouseEntered) hideError();
         }, TIMEOUT_TIME);
     }
-    
-    if (!enabled) return (<></>);
+
+    if (!propsError) return (<></>)
+    const { message } = propsError;
+
+    if (!errorEnabled) return (<></>);
     return (
         <button 
             className={styles.errorPopup} 
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
-            onClick={() => {hideError()}}
+            onClick={() => showDetails(propsError)}
         >
             <div className={styles.heading}>
                 <p className={styles.headingError}>

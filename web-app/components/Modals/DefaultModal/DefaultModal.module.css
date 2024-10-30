@@ -81,3 +81,27 @@
 .offrampBody {
     margin-bottom: 50px;
 }
+
+.errorHeading {
+    color: var(--color-error);
+    margin-bottom: 30px;
+}
+
+.errorButton {
+    border-color: var(--placeholder-glass-icon-error);
+}
+
+.errorBodyWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 36px;
+    margin-bottom: 50px;
+}
+
+.errorBody {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}

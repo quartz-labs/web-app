@@ -6,7 +6,8 @@ import BigNumber from "bignumber.js";
 import { Amount } from "@mrgnlabs/mrgn-common";
 import { BN } from "@coral-xyz/anchor";
 import { RPC_URL } from "./constants";
-import posthog from "posthog-js";
+import { ShowErrorProps } from "@/context/error-provider";
+import { captureError } from "@/utils/errors";
 
 export const isVaultInitialized = async (connection: Connection, wallet: PublicKey) => {
     const vaultPda = getVault(wallet);
@@ -134,7 +135,7 @@ export async function createAtaIfNeeded(
     return oix_createAta;
 }
 
-export async function hasBetaKey(wallet: PublicKey, showError: (message: string) => void) {
+export async function hasBetaKey(wallet: PublicKey, showError: (props: ShowErrorProps) => void) {
     const requireBetaKey = (process.env.NEXT_PUBLIC_REQUIRE_BETA_KEY === "true");
     if (!requireBetaKey) return true;
 
@@ -168,25 +169,4 @@ export async function hasBetaKey(wallet: PublicKey, showError: (message: string)
     }
 
     return false;
-}
-
-export function captureError(
-    showError: (message: string) => void, 
-    errorString: string, 
-    location: string, 
-    wallet?: PublicKey | string, 
-    error?: any
-) {
-    console.error(error ?? errorString);
-
-    const walletString = wallet ? (typeof wallet === 'string' ? wallet : wallet.toBase58()) : 'AddressNotProvided';
-    const errorStack = (error instanceof Error ? error : new Error(errorString)).stack?.split('\n')[1]?.trim() || '';
-    showError(errorString);
-
-    posthog.capture(`Error: ${errorString}`, {
-        error: error,
-        location: location,
-        line: errorStack.toString(),
-        wallet: walletString,
-    })
 }

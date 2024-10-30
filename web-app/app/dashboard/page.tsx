@@ -3,7 +3,7 @@
 import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
-import { captureError, hasBetaKey, isVaultInitialized } from '@/utils/helpers';
+import { hasBetaKey, isVaultInitialized } from '@/utils/helpers';
 import Account from '@/components/Account/Account';
 import MainView from '@/components/MainView/MainView';
 import LoanView from '@/components/LoanView/LoanView';
@@ -14,6 +14,7 @@ import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC } from '@/utils/constan
 import DefaultModal, { DefaultModalProps } from '@/components/Modals/DefaultModal/DefaultModal';
 import posthog from 'posthog-js';
 import { useError } from '@/context/error-provider';
+import { captureError } from '@/utils/errors';
 //import OfframpModal from '@/components/Modals/OfframpModal/OfframpModal';
 
 export interface ViewProps {
@@ -96,7 +97,7 @@ export default function Dashboard() {
             setUsdcDailyRate(await getUsdcDailyBorrowRate());
             return true;
         } catch (error) {
-            captureError(showError, `Unable to fetch Solana price`, "dashboard: /page.tsx", undefined, error);
+            captureError(showError, `Unable to fetch Solana price`, "dashboard: /page.tsx", error, undefined);
             return false;
         }
     }, [showError]);

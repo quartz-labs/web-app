@@ -20,3 +20,7 @@
     flex-direction: column;
     align-items: center;
 }
+
+.modalError {
+    border-color: var(--color-error);
+}

@@ -1,5 +1,6 @@
 import { PublicKey } from "@solana/web3.js";
-import { captureError } from "./helpers";
+import { ShowErrorProps } from "@/context/error-provider";
+import { captureError } from "@/utils/errors";
 
 export const getUsdcAPR = async () => {
     // TODO - Implement pulling real data
@@ -14,7 +15,7 @@ export const getSolAPR = async () => {
 export const getUsdcDailyBorrowRate = async () => await getUsdcAPR() / 365;
 export const getSolDailyEarnRate = async () => await getSolAPR() / 365;
 
-export const fetchDriftData = async (showError: (message: string) => void, vaultAddress: PublicKey, marketIndices: number[]) => {
+export const fetchDriftData = async (showError: (props: ShowErrorProps) => void, vaultAddress: PublicKey, marketIndices: number[]) => {
     try {
         const response = await fetch(`/api/drift-balance?address=${vaultAddress.toBase58()}&marketIndices=${marketIndices}`);
         if (!response.ok) {
@@ -29,7 +30,7 @@ export const fetchDriftData = async (showError: (message: string) => void, vault
         });
         return balances;
     } catch (error) {
-        captureError(showError, "Could not fetch Drift data", "utils: /balance.ts", vaultAddress, error);          
+        captureError(showError, "Could not fetch Drift data", "utils: /balance.ts", error, vaultAddress);          
         return marketIndices.map(() => NaN);
     }
 };
