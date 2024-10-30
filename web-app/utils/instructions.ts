@@ -121,8 +121,6 @@ export const closeAccount = async (wallet: AnchorWallet, connection: web3.Connec
     const driftState = getDriftState();
 
     try {
-        throw new Error("Shit is extremely fucked like good lord will someone please fix this jesus christ.");
-
         const ix_closeDriftAccount = await program.methods
             .closeDriftAccount()
             .accounts({
