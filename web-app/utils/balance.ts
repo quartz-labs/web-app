@@ -14,10 +14,13 @@ export const getSolAPR = async () => {
 export const getUsdcDailyBorrowRate = async () => await getUsdcAPR() / 365;
 export const getSolDailyEarnRate = async () => await getSolAPR() / 365;
 
-export const fetchDriftData = async (vaultAddress: PublicKey, marketIndices: number[]) => {
+export const fetchDriftData = async (showError: (message: string) => void, vaultAddress: PublicKey, marketIndices: number[]) => {
     try {
         const response = await fetch(`/api/drift-balance?address=${vaultAddress.toBase58()}&marketIndices=${marketIndices}`);
-        if (!response.ok) throw new Error('Failed to fetch Drift data');
+        if (!response.ok) {
+            const errorResponse = await response.json();
+            throw new Error(`Failed to fetch Drift data: ${errorResponse.error}`);
+        }
 
         const data = await response.json();
         const balances = marketIndices.map(index => {
@@ -26,8 +29,7 @@ export const fetchDriftData = async (vaultAddress: PublicKey, marketIndices: num
         });
         return balances;
     } catch (error) {
-        console.error('Error fetching Drift data:', error);
-        captureError("Could not fetch Drift data", "utils: /balance.ts", vaultAddress, error);          
+        captureError(showError, "Could not fetch Drift data", "utils: /balance.ts", vaultAddress, error);          
         return marketIndices.map(() => NaN);
     }
 };

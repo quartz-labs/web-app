@@ -5,10 +5,12 @@
     z-index: 1000;
     width: 220px;
 
+    padding: 20px;
+    background-image: var(--glass-background);
+    background-size: 17% auto, auto, auto, auto;
+    backdrop-filter: blur(22px);
     border: var(--glass-border-error) !important;
     border-radius: 18px;
-    padding: 20px;
-    cursor: pointer;
 }
 
 .errorPopup:hover {

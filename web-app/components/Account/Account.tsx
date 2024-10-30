@@ -1,8 +1,9 @@
-import { WalletButton } from "../solana/solana-provider";
+import { WalletButton } from "../../context/solana/solana-provider";
 import Logo from "../Logo/Logo";
 import styles from "./Account.module.css";
 import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import { closeAccount } from "@/utils/instructions";
+import { useError } from "@/context/error-provider";
 
 export interface AccountProps {
     disableCloseAccount?: boolean
@@ -10,11 +11,12 @@ export interface AccountProps {
 
 export default function Account({disableCloseAccount} : AccountProps) {
     const { connection } = useConnection();
+    const { showError } = useError();
     const wallet = useAnchorWallet();
 
     const onCloseAccount = () => {
         if (!connection || !wallet) return;
-        closeAccount(wallet, connection);
+        closeAccount(wallet, connection, showError);
     }
 
     return (

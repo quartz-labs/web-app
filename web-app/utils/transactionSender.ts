@@ -2,11 +2,11 @@ import { AddressLookupTableAccount, ComputeBudgetProgram, Connection, Keypair, P
 import { RPC_URL } from "./constants";
 import { captureError } from "./helpers";
 
-export const sendTransactionHandler = async (connection: Connection, tx: VersionedTransaction) => {
+export const sendTransactionHandler = async (showError: (message: string) => void, connection: Connection, tx: VersionedTransaction) => {
     const simulation = await connection.simulateTransaction(tx);
     if (simulation.value.err) {
         console.error("Transaction simulation failed:", simulation.value.err);
-        captureError("Transaction simulation failed", "transactionSender", tx.signatures[0].toString(), simulation);
+        captureError(showError, "Transaction simulation failed", "transactionSender", tx.signatures[0].toString(), simulation);
         throw new Error("Transaction simulation failed");
     }
 
@@ -77,7 +77,7 @@ export const instructionsIntoV0 = async (connection: Connection, txInstructions:
     return transaction;
 }
 
-export const getTransaction = async (signature: string, wallet: PublicKey) => {
+export const getTransaction = async (showError: (message: string) => void, signature: string, wallet: PublicKey) => {
     const response = await fetch('/api/tx', {
         method: 'POST',
         headers: {
@@ -85,6 +85,11 @@ export const getTransaction = async (signature: string, wallet: PublicKey) => {
         },
         body: JSON.stringify({ signature, wallet }),
     });
+
+    if (!response.ok) {
+      const errorResponse = await response.json();
+      captureError(showError, "Could not fetch Drift data", "utils: /balance.ts", wallet, errorResponse.error);    
+    }
 
     return response.json();
 };

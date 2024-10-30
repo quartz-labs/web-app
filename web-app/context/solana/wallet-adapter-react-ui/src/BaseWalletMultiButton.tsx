@@ -1,8 +1,8 @@
 import { useWalletMultiButton } from '@solana/wallet-adapter-base-ui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { BaseWalletConnectionButton } from './BaseWalletConnectionButton.js';
-import type { ButtonProps } from './Button.js';
-import { useWalletModal } from './useWalletModal.js';
+import { BaseWalletConnectionButton } from './BaseWalletConnectionButton.jsx';
+import type { ButtonProps } from './Button.jsx';
+import { useWalletModal } from './useWalletModal.jsx';
 
 type Props = ButtonProps & {
     labels: Omit<

@@ -1,6 +1,6 @@
 import React from 'react';
-import { BaseWalletMultiButton } from './BaseWalletMultiButton.js';
-import type { ButtonProps } from './Button.js';
+import { BaseWalletMultiButton } from './BaseWalletMultiButton.jsx';
+import type { ButtonProps } from './Button.jsx';
 
 const LABELS = {
     'change-wallet': 'Close account',

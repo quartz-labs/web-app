@@ -1,4 +1,3 @@
-import { captureError } from '@/utils/helpers';
 import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
@@ -6,11 +5,13 @@ export async function GET(request: Request) {
   const address = searchParams.get('address');
   const marketIndicesStr = searchParams.get('marketIndices');
 
-  if (!address || !marketIndicesStr) {
-    const error = "Missing parameter";
-    console.log(error);
-    captureError(error, "route: /drift-balance");
+  if (!address) {
+    const error = "Missing address";
+    return NextResponse.json({ error: error }, { status: 400 });
+  }
 
+  if (!marketIndicesStr) {
+    const error = "Missing market index";
     return NextResponse.json({ error: error }, { status: 400 });
   }
 
@@ -18,9 +19,6 @@ export async function GET(request: Request) {
 
   if (marketIndices.some(isNaN)) {
     const error = "Invalid market index";
-    console.log(error);
-    captureError(error, "route: /drift-balance", address);
-
     return NextResponse.json({ error: error }, { status: 400 });
   }
 
@@ -29,9 +27,6 @@ export async function GET(request: Request) {
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
-    console.error(error);
-    captureError("Unable to fetch Drift balance", "route: /drift-balance", address, error);
-
-    return NextResponse.json({ error: `Unable to fetch Drift balance: ${error}` }, { status: 500 });
+    return NextResponse.json({ error: `Unable to fetch Drift balance from server: ${error}` }, { status: 500 });
   }
 }

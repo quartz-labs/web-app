@@ -1,6 +1,6 @@
 import React from 'react';
-import { BaseWalletDisconnectButton } from './BaseWalletDisconnectButton.js';
-import type { ButtonProps } from './Button.js';
+import { BaseWalletDisconnectButton } from './BaseWalletDisconnectButton.jsx';
+import type { ButtonProps } from './Button.jsx';
 
 const LABELS = {
     disconnecting: 'Disconnecting ...',

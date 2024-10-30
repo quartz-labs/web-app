@@ -134,7 +134,7 @@ export async function createAtaIfNeeded(
     return oix_createAta;
 }
 
-export async function hasBetaKey(connection: Connection, wallet: PublicKey) {
+export async function hasBetaKey(wallet: PublicKey, showError: (message: string) => void) {
     const requireBetaKey = (process.env.NEXT_PUBLIC_REQUIRE_BETA_KEY === "true");
     if (!requireBetaKey) return true;
 
@@ -164,16 +164,24 @@ export async function hasBetaKey(connection: Connection, wallet: PublicKey) {
         }
     } catch (error: any) {
         console.error("Error fetching NFTs:", error);
-        captureError("Could not fetch NFTs", "utils: /helpers.ts", error);
+        captureError(showError, "Could not fetch NFTs", "utils: /helpers.ts", error);
     }
 
     return false;
 }
 
-export function captureError(errorString: string, location: string, wallet?: PublicKey | string, error?: any) {
-    const walletString = wallet ? (typeof wallet === 'string' ? wallet : wallet.toBase58()) : 'AddressNotProvided';
+export function captureError(
+    showError: (message: string) => void, 
+    errorString: string, 
+    location: string, 
+    wallet?: PublicKey | string, 
+    error?: any
+) {
+    console.error(error ?? errorString);
 
+    const walletString = wallet ? (typeof wallet === 'string' ? wallet : wallet.toBase58()) : 'AddressNotProvided';
     const errorStack = (error instanceof Error ? error : new Error(errorString)).stack?.split('\n')[1]?.trim() || '';
+    showError(errorString);
 
     posthog.capture(`Error: ${errorString}`, {
         error: error,

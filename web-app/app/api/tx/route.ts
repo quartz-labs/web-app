@@ -1,4 +1,3 @@
-import { captureError } from '@/utils/helpers';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
@@ -36,12 +35,8 @@ export async function POST(request: NextRequest) {
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
-    console.error(error);
-    const { wallet } = await request.json();
-    captureError("Unable to get transaction from RPC", "route: /tx", wallet, error);
-    
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: `Internal server error: ${error}` },
       { status: 500 }
     );
   }

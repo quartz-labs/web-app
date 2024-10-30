@@ -1,6 +1,6 @@
 import React from 'react';
-import { BaseWalletConnectButton } from './BaseWalletConnectButton.js';
-import type { ButtonProps } from './Button.js';
+import { BaseWalletConnectButton } from './BaseWalletConnectButton.jsx';
+import type { ButtonProps } from './Button.jsx';
 
 const LABELS = {
     connecting: 'Connecting ...',

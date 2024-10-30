@@ -5,11 +5,13 @@ import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { hasBetaKey, isVaultInitialized } from "@/utils/helpers";
-import { WalletButton } from "@/components/solana/solana-provider";
+import { WalletButton } from "@/context/solana/solana-provider";
 import Logo from "@/components/Logo/Logo";
+import { useError } from '@/context/error-provider';
 
 export default function Page() {
   const { connection } = useConnection();
+  const { showError } = useError();
   const wallet = useAnchorWallet();
   const router = useRouter();
 
@@ -18,7 +20,8 @@ export default function Page() {
   useEffect(() => {
     const isLoggedIn = async () => {
       if (wallet) {
-        if (!await hasBetaKey(connection, wallet.publicKey)) {
+        
+        if (!await hasBetaKey(wallet.publicKey, showError)) {
           setMissingBetaKey(true);
           return;
         }
@@ -28,7 +31,7 @@ export default function Page() {
       }
     }
     isLoggedIn();
-  }, [wallet, connection, router]);
+  }, [wallet, connection, router, showError]);
 
   return (
     <main className={"two-col-grid login-grid"}>

@@ -1,4 +1,3 @@
-import { captureError } from '@/utils/helpers';
 import { createContext, useContext } from 'react';
 
 export interface WalletModalContextState {
@@ -15,7 +14,6 @@ const DEFAULT_CONTEXT = {
 Object.defineProperty(DEFAULT_CONTEXT, 'visible', {
     get() {
         console.error(constructMissingProviderErrorMessage('read', 'visible'));
-        captureError("Missing Wallet Provider", "src: /useWalletModal.tsx", undefined, new Error(constructMissingProviderErrorMessage('read', 'visible')), )
         return false;
     },
 });

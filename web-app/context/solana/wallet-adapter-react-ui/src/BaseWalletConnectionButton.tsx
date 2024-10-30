@@ -1,7 +1,7 @@
 import type { WalletName } from '@solana/wallet-adapter-base';
 import React from 'react';
-import { Button } from './Button.js';
-import { WalletIcon } from './WalletIcon.js';
+import { Button } from './Button.jsx';
+import { WalletIcon } from './WalletIcon.jsx';
 
 type Props = React.ComponentProps<typeof Button> & {
     walletIcon?: string;

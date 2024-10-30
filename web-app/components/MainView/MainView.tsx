@@ -7,6 +7,7 @@ import { getSign, truncateToDecimalPlaces, truncateToDecimalPlacesAbsolute, uiTo
 import { PuffLoader } from "react-spinners";
 import React from "react";
 import { DECIMALS_SOL, DECIMALS_USDC } from "@/utils/constants";
+import { useError } from "@/context/error-provider";
 
 export default function MainView({ 
     solPrice, 
@@ -22,6 +23,7 @@ export default function MainView({
     //enableOfframpModal 
 }: ViewProps) {
     const { connection } = useConnection();
+    const { showError } = useError();
     const wallet = useAnchorWallet();
 
     const netSolBalance = ((totalSolBalance * solPrice) - usdcLoanBalance) / solPrice;
@@ -39,7 +41,7 @@ export default function MainView({
                 if (!wallet) return;
 
                 const baseUnits = uiToBaseUnit(amount, DECIMALS_SOL).toNumber();
-                const signature = await depositLamports(wallet, connection, baseUnits);
+                const signature = await depositLamports(wallet, connection, baseUnits, showError);
                 if (!signature) return;
 
                 updateBalance(signature);
@@ -59,7 +61,7 @@ export default function MainView({
                 if (!wallet) return;
 
                 const baseUnits = uiToBaseUnit(amount, DECIMALS_SOL).toNumber();
-                const signature = await withdrawLamports(wallet, connection, baseUnits);
+                const signature = await withdrawLamports(wallet, connection, baseUnits, showError);
                 if (!signature) return;
                 
                 updateBalance(signature);
@@ -80,7 +82,7 @@ export default function MainView({
                 if (!wallet) return;
 
                 const baseUnits = uiToBaseUnit(amount, DECIMALS_USDC).toNumber();
-                const signature = await withdrawUsdc(wallet, connection, baseUnits);
+                const signature = await withdrawUsdc(wallet, connection, baseUnits, showError);
                 if (!signature) return;
 
                 updateBalance(signature);

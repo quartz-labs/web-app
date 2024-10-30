@@ -25,7 +25,7 @@ import { createPriorityFeeInstructions, sendTransactionHandler } from "./transac
 import { getJupiterSwapIx, getJupiterSwapQuote } from "./jupiter";
 import BigNumber from "bignumber.js";
 
-export const initAccount = async (wallet: AnchorWallet, connection: web3.Connection) => {
+export const initAccount = async (wallet: AnchorWallet, connection: web3.Connection, showError: (message: string) => void) => {
     const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
     setProvider(provider);
     const quartzProgram = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>;
@@ -97,19 +97,18 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
 
         const signedTx = await wallet.signTransaction(tx);
         signedTx.sign([marginfiAccount]);
-        const signature = await sendTransactionHandler(connection, signedTx);
+        const signature = await sendTransactionHandler(showError, connection, signedTx);
         return signature;
-    } catch (err) {
-        if (!(err instanceof WalletSignTransactionError)) {
-            console.error(err);
-            captureError("Could not initialize account", "utils: /instructions.ts", wallet.publicKey, err);
+    } catch (error) {
+        if (!(error instanceof WalletSignTransactionError)) {
+            captureError(showError, "Could not initialize account", "utils: /instructions.ts", wallet.publicKey, error);
         }
         return null;
     }
 }
 
 
-export const closeAccount = async (wallet: AnchorWallet, connection: web3.Connection) => {
+export const closeAccount = async (wallet: AnchorWallet, connection: web3.Connection, showError: (message: string) => void) => {
     const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
     setProvider(provider);
     const program = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>;
@@ -120,6 +119,8 @@ export const closeAccount = async (wallet: AnchorWallet, connection: web3.Connec
     const driftState = getDriftState();
 
     try {
+        throw new Error("Shit's fucked");
+
         const ix_closeDriftAccount = await program.methods
             .closeDriftAccount()
             .accounts({
@@ -158,19 +159,18 @@ export const closeAccount = async (wallet: AnchorWallet, connection: web3.Connec
         const tx = new VersionedTransaction(messageV0);
 
         const signedTx = await wallet.signTransaction(tx);
-        const signature = await sendTransactionHandler(connection, signedTx);
+        const signature = await sendTransactionHandler(showError, connection, signedTx);
         return signature;
-    } catch (err) {
-        if (!(err instanceof WalletSignTransactionError)) {
-            console.error(err);
-            captureError("Could not close account", "utils: /instructions.ts", wallet.publicKey, err)
+    } catch (error) {
+        if (!(error instanceof WalletSignTransactionError)) {
+            captureError(showError, "Could not close account", "utils: /instructions.ts", wallet.publicKey, error)
         }
         return null;
     }
 }
 
 
-export const depositLamports = async (wallet: AnchorWallet, connection: web3.Connection, amountLamports: number) => {
+export const depositLamports = async (wallet: AnchorWallet, connection: web3.Connection, amountLamports: number, showError: (message: string) => void) => {
     const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
     setProvider(provider);
     const program = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>;
@@ -233,19 +233,18 @@ export const depositLamports = async (wallet: AnchorWallet, connection: web3.Con
         const tx = new VersionedTransaction(messageV0);
 
         const signedTx = await wallet.signTransaction(tx);
-        const signature = await sendTransactionHandler(connection, signedTx);
+        const signature = await sendTransactionHandler(showError, connection, signedTx);
         return signature;
-    } catch (err) {
-        if (!(err instanceof WalletSignTransactionError)) {
-            console.error(err);
-            captureError("Could not deposit SOL", "utils: /instructions.ts", wallet.publicKey, err);
+    } catch (error) {
+        if (!(error instanceof WalletSignTransactionError)) {
+            captureError(showError, "Could not deposit SOL", "utils: /instructions.ts", wallet.publicKey, error);
         }
         return null;
     }
 }
 
 
-export const withdrawLamports = async (wallet: AnchorWallet, connection: web3.Connection, amountLamports: number) => {
+export const withdrawLamports = async (wallet: AnchorWallet, connection: web3.Connection, amountLamports: number, showError: (message: string) => void) => {
     const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
     setProvider(provider);
     const program = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>;
@@ -303,19 +302,18 @@ export const withdrawLamports = async (wallet: AnchorWallet, connection: web3.Co
         const tx = new VersionedTransaction(messageV0);
 
         const signedTx = await wallet.signTransaction(tx);
-        const signature = await sendTransactionHandler(connection, signedTx);
+        const signature = await sendTransactionHandler(showError, connection, signedTx);
         return signature;
-    } catch (err) {
-        if (!(err instanceof WalletSignTransactionError)) {
-            console.error(err);
-            captureError("Could not withdraw SOL", "utils: /instructions.ts", wallet.publicKey, err);
+    } catch (error) {
+        if (!(error instanceof WalletSignTransactionError)) {
+            captureError(showError, "Could not withdraw SOL", "utils: /instructions.ts", wallet.publicKey, error);
         }
         return null;
     }
 }
 
 
-export const depositUsdc = async (wallet: AnchorWallet, connection: Connection, amountMicroCents: number) => {
+export const depositUsdc = async (wallet: AnchorWallet, connection: Connection, amountMicroCents: number, showError: (message: string) => void) => {
     const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
     setProvider(provider);
     const program = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>;
@@ -365,19 +363,18 @@ export const depositUsdc = async (wallet: AnchorWallet, connection: Connection, 
         const tx = new VersionedTransaction(messageV0);
 
         const signedTx = await wallet.signTransaction(tx);
-        const signature = await sendTransactionHandler(connection, signedTx);
+        const signature = await sendTransactionHandler(showError, connection, signedTx);
         return signature;
-    } catch (err) {
-        if (!(err instanceof WalletSignTransactionError)) {
-            console.error(err);
-            captureError("Could not deposit USDC", "utils: /instructions.ts", wallet.publicKey, err);
+    } catch (error) {
+        if (!(error instanceof WalletSignTransactionError)) {
+            captureError(showError, "Could not deposit USDC", "utils: /instructions.ts", wallet.publicKey, error);
         }
         return null;
     }
 }
 
 
-export const withdrawUsdc = async (wallet: AnchorWallet, connection: web3.Connection, amountMicroCents: number) => {
+export const withdrawUsdc = async (wallet: AnchorWallet, connection: web3.Connection, amountMicroCents: number, showError: (message: string) => void) => {
     const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
     setProvider(provider);
     const program = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>;
@@ -428,19 +425,18 @@ export const withdrawUsdc = async (wallet: AnchorWallet, connection: web3.Connec
         const tx = new VersionedTransaction(messageV0);
 
         const signedTx = await wallet.signTransaction(tx);
-        const signature = await sendTransactionHandler(connection, signedTx);
+        const signature = await sendTransactionHandler(showError, connection, signedTx);
         return signature;
-    } catch (err) {
-        if (!(err instanceof WalletSignTransactionError)) {
-            console.error(err);
-            captureError("Could not withdraw USDC", "utils: /instructions.ts", wallet.publicKey, err);
+    } catch (error) {
+        if (!(error instanceof WalletSignTransactionError)) {
+            captureError(showError, "Could not withdraw USDC", "utils: /instructions.ts", wallet.publicKey, error);
         }
         return null;
     }
 }
 
 
-export const liquidateSol = async (wallet: AnchorWallet, connection: web3.Connection, amountMicroCents: number) => {
+export const liquidateSol = async (wallet: AnchorWallet, connection: web3.Connection, amountMicroCents: number, showError: (message: string) => void) => {
     const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
     setProvider(provider);
     const quartzProgram = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>;
@@ -453,112 +449,118 @@ export const liquidateSol = async (wallet: AnchorWallet, connection: web3.Connec
     const driftUserStats = getDriftUserStats(vaultPda);
     const driftState = getDriftState();
 
-    // Get MarginFi client and bank
-    const marginfiClient = await MarginfiClient.fetch(getConfig(), wallet, connection);
-    const usdcBank = marginfiClient.getBankByTokenSymbol("USDC");
-    if (!usdcBank) throw Error(`${"USDC"} bank not found`);
+    try {
+        // Get MarginFi client and bank
+        const marginfiClient = await MarginfiClient.fetch(getConfig(), wallet, connection);
+        const usdcBank = marginfiClient.getBankByTokenSymbol("USDC");
+        if (!usdcBank) throw Error(`${"USDC"} bank not found`);
 
-    // Init MarginFi Account if not found
-    let marginfiAccounts = await marginfiClient.getMarginfiAccountsForAuthority(wallet.publicKey);
-    if (marginfiAccounts.length === 0) marginfiAccounts = await createNewMarginfiAccount(wallet, connection, provider, marginfiClient);
-    const marginfiAccount = marginfiAccounts[0];
+        // Init MarginFi Account if not found
+        let marginfiAccounts = await marginfiClient.getMarginfiAccountsForAuthority(wallet.publicKey);
+        if (marginfiAccounts.length === 0) marginfiAccounts = await createNewMarginfiAccount(showError, wallet, connection, provider, marginfiClient);
+        const marginfiAccount = marginfiAccounts[0];
 
-    // Get price info for flash loan
-    const jupiterQuote = await getJupiterSwapQuote(WSOL_MINT, USDC_MINT, amountMicroCents, true);
-    const amountLamports = Number(jupiterQuote.inAmount);
-    if (isNaN(amountLamports)) throw Error(`Invalid Jupiter quote`);
+        // Get price info for flash loan
+        const jupiterQuote = await getJupiterSwapQuote(WSOL_MINT, USDC_MINT, amountMicroCents, true);
+        const amountLamports = Number(jupiterQuote.inAmount);
+        if (isNaN(amountLamports)) throw Error(`Invalid Jupiter quote`);
 
-    // -- ADDRESS LOOKUP TABLE
-    const fundsProgramLookupTable = await connection.getAddressLookupTable(FUNDS_PROGRAM_ADDRESS_TABLE).then((res) => res.value);
-    if (!fundsProgramLookupTable) throw Error("Address Lookup Table account not found");
+        // -- ADDRESS LOOKUP TABLE
+        const fundsProgramLookupTable = await connection.getAddressLookupTable(FUNDS_PROGRAM_ADDRESS_TABLE).then((res) => res.value);
+        if (!fundsProgramLookupTable) throw Error("Address Lookup Table account not found");
 
-    // Build instructions
-    const oix_createWSolAta = await createAtaIfNeeded(connection, walletWSol, wallet.publicKey, WSOL_MINT);
+        // Build instructions
+        const oix_createWSolAta = await createAtaIfNeeded(connection, walletWSol, wallet.publicKey, WSOL_MINT);
 
-    const ix_depositUsdc = await quartzProgram.methods
-        .deposit(new BN(amountMicroCents), DRIFT_MARKET_INDEX_USDC, false)
-        .accounts({
-            // @ts-expect-error - IDL issue
-            vault: vaultPda,
-            vaultSpl: getVaultSpl(vaultPda, USDC_MINT),
-            owner: wallet.publicKey,
-            ownerSpl: walletUsdc,
-            driftState: driftState,
-            driftUser: driftUser,
-            driftUserStats: driftUserStats,
-            spotMarketVault: getDriftSpotMarketVault(DRIFT_MARKET_INDEX_USDC),
-            splMint: USDC_MINT,
-            tokenProgram: TOKEN_PROGRAM_ID,
-            associatedTokenProgram: ASSOCIATED_PROGRAM_ID,
-            driftProgram: DRIFT_PROGRAM_ID,
-            systemProgram: SystemProgram.programId
-        })
-        .remainingAccounts([
-            toRemainingAccount(DRIFT_ORACLE_2, false, false),
-            toRemainingAccount(DRIFT_ORACLE_1, false, false),
-            toRemainingAccount(DRIFT_SPOT_MARKET_SOL, true, false),
-            toRemainingAccount(DRIFT_SPOT_MARKET_USDC, true, false)
-        ])
-        .instruction();
+        const ix_depositUsdc = await quartzProgram.methods
+            .deposit(new BN(amountMicroCents), DRIFT_MARKET_INDEX_USDC, false)
+            .accounts({
+                // @ts-expect-error - IDL issue
+                vault: vaultPda,
+                vaultSpl: getVaultSpl(vaultPda, USDC_MINT),
+                owner: wallet.publicKey,
+                ownerSpl: walletUsdc,
+                driftState: driftState,
+                driftUser: driftUser,
+                driftUserStats: driftUserStats,
+                spotMarketVault: getDriftSpotMarketVault(DRIFT_MARKET_INDEX_USDC),
+                splMint: USDC_MINT,
+                tokenProgram: TOKEN_PROGRAM_ID,
+                associatedTokenProgram: ASSOCIATED_PROGRAM_ID,
+                driftProgram: DRIFT_PROGRAM_ID,
+                systemProgram: SystemProgram.programId
+            })
+            .remainingAccounts([
+                toRemainingAccount(DRIFT_ORACLE_2, false, false),
+                toRemainingAccount(DRIFT_ORACLE_1, false, false),
+                toRemainingAccount(DRIFT_SPOT_MARKET_SOL, true, false),
+                toRemainingAccount(DRIFT_SPOT_MARKET_USDC, true, false)
+            ])
+            .instruction();
 
-    const ix_withdrawLamports = await quartzProgram.methods
-        .withdraw(new BN(amountLamports), DRIFT_MARKET_INDEX_SOL, true)
-        .accounts({
-            // @ts-expect-error - IDL issue
-            vault: vaultPda,
-            vaultSpl: getVaultSpl(vaultPda, WSOL_MINT),
-            owner: wallet.publicKey,
-            ownerSpl: walletWSol,
-            driftState: driftState,
-            driftUser: driftUser,
-            driftUserStats: driftUserStats,
-            spotMarketVault: getDriftSpotMarketVault(DRIFT_MARKET_INDEX_SOL),
-            driftSigner: DRIFT_SIGNER,
-            splMint: WSOL_MINT,
-            tokenProgram: TOKEN_PROGRAM_ID,
-            associatedTokenProgram: ASSOCIATED_PROGRAM_ID,
-            driftProgram: DRIFT_PROGRAM_ID,
-            systemProgram: SystemProgram.programId,
-        })
-        .remainingAccounts([
-            toRemainingAccount(DRIFT_ORACLE_2, false, false),
-            toRemainingAccount(DRIFT_ORACLE_1, false, false),
-            toRemainingAccount(DRIFT_SPOT_MARKET_SOL, true, false),
-            toRemainingAccount(DRIFT_SPOT_MARKET_USDC, false, false)
-        ])
-        .instruction();
+        const ix_withdrawLamports = await quartzProgram.methods
+            .withdraw(new BN(amountLamports), DRIFT_MARKET_INDEX_SOL, true)
+            .accounts({
+                // @ts-expect-error - IDL issue
+                vault: vaultPda,
+                vaultSpl: getVaultSpl(vaultPda, WSOL_MINT),
+                owner: wallet.publicKey,
+                ownerSpl: walletWSol,
+                driftState: driftState,
+                driftUser: driftUser,
+                driftUserStats: driftUserStats,
+                spotMarketVault: getDriftSpotMarketVault(DRIFT_MARKET_INDEX_SOL),
+                driftSigner: DRIFT_SIGNER,
+                splMint: WSOL_MINT,
+                tokenProgram: TOKEN_PROGRAM_ID,
+                associatedTokenProgram: ASSOCIATED_PROGRAM_ID,
+                driftProgram: DRIFT_PROGRAM_ID,
+                systemProgram: SystemProgram.programId,
+            })
+            .remainingAccounts([
+                toRemainingAccount(DRIFT_ORACLE_2, false, false),
+                toRemainingAccount(DRIFT_ORACLE_1, false, false),
+                toRemainingAccount(DRIFT_SPOT_MARKET_SOL, true, false),
+                toRemainingAccount(DRIFT_SPOT_MARKET_USDC, false, false)
+            ])
+            .instruction();
 
-    const ix_closeWSolAta = createCloseAccountInstruction(
-        walletWSol,
-        wallet.publicKey,
-        wallet.publicKey
-    );
+        const ix_closeWSolAta = createCloseAccountInstruction(
+            walletWSol,
+            wallet.publicKey,
+            wallet.publicKey
+        );
 
-    const {
-        instructions: jupiterSwap,
-        addressLookupTableAccounts: jupiterLookupTables
-    } = await getJupiterSwapIx(wallet.publicKey, connection, jupiterQuote);
+        const {
+            instructions: jupiterSwap,
+            addressLookupTableAccounts: jupiterLookupTables
+        } = await getJupiterSwapIx(wallet.publicKey, connection, jupiterQuote);
 
-    // Create flash loan and send tx
-    const amountUsdc = new BigNumber(baseUnitToUi(amountMicroCents, DECIMALS_USDC));
-    const { flashloanTx } = await makeFlashLoanTx(
-        marginfiAccount,
-        amountUsdc,
-        usdcBank.address,
-        [...oix_createWSolAta, ix_depositUsdc, ix_withdrawLamports, ...jupiterSwap, ix_closeWSolAta],
-        [fundsProgramLookupTable, ...jupiterLookupTables],
-        0.002,
-        true
-    );
+        // Create flash loan and send tx
+        const amountUsdc = new BigNumber(baseUnitToUi(amountMicroCents, DECIMALS_USDC));
+        const { flashloanTx } = await makeFlashLoanTx(
+            marginfiAccount,
+            amountUsdc,
+            usdcBank.address,
+            [...oix_createWSolAta, ix_depositUsdc, ix_withdrawLamports, ...jupiterSwap, ix_closeWSolAta],
+            [fundsProgramLookupTable, ...jupiterLookupTables],
+            0.002,
+            true
+        );
 
-    const signedTx = await wallet.signTransaction(flashloanTx);
-    const signature = await sendTransactionHandler(connection, signedTx);
-    console.log(signature);
-    return signature;
+        const signedTx = await wallet.signTransaction(flashloanTx);
+        const signature = await sendTransactionHandler(showError, connection, signedTx);
+        return signature;
+    } catch (error) {
+        if (!(error instanceof WalletSignTransactionError)) {
+            captureError(showError, "Could not withdraw USDC", "utils: /instructions.ts", wallet.publicKey, error);
+        }
+        return null;
+    }
 }
 
 
-const createNewMarginfiAccount = async (wallet: AnchorWallet, connection: Connection, provider: AnchorProvider, client: MarginfiClient) => {
+const createNewMarginfiAccount = async (showError: (message: string) => void, wallet: AnchorWallet, connection: Connection, provider: AnchorProvider, client: MarginfiClient) => {
     console.log("Creating MarginFi account");
     const marginfiProgram = new Program(marginfiIdl as Idl, provider) as unknown as Program<MarginFi>;
     const newAccount = Keypair.generate();
@@ -589,7 +591,7 @@ const createNewMarginfiAccount = async (wallet: AnchorWallet, connection: Connec
 
     const signedTx = await wallet.signTransaction(tx);
     signedTx.sign([newAccount]);
-    const signature = await sendTransactionHandler(connection, signedTx);
+    const signature = await sendTransactionHandler(showError, connection, signedTx);
 
     // Wait for tx to be finalized
     await connection.confirmTransaction({ signature, ...(await connection.getLatestBlockhash()) }, "finalized");

@@ -1,4 +1,3 @@
-import { captureError } from '@/utils/helpers';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
@@ -8,9 +7,6 @@ export async function GET() {
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
-    console.error(error);
-    captureError("Unable to fetch Solana price", "route: /solana-price", undefined, error);
-
     return NextResponse.json({ error: `Unable to fetch Solana price: ${error}` }, { status: 500 });
   }
 }

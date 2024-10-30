@@ -1,7 +1,7 @@
 import { useWalletDisconnectButton } from '@solana/wallet-adapter-base-ui';
 import React from 'react';
-import { BaseWalletConnectionButton } from './BaseWalletConnectionButton.js';
-import type { ButtonProps } from './Button.js';
+import { BaseWalletConnectionButton } from './BaseWalletConnectionButton.jsx';
+import type { ButtonProps } from './Button.jsx';
 
 type Props = ButtonProps & {
     labels: { [TButtonState in ReturnType<typeof useWalletDisconnectButton>['buttonState']]: string };

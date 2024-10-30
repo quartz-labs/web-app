@@ -13,6 +13,7 @@ import { getVault } from '@/utils/getAccounts';
 import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC } from '@/utils/constants';
 import DefaultModal, { DefaultModalProps } from '@/components/Modals/DefaultModal/DefaultModal';
 import posthog from 'posthog-js';
+import { useError } from '@/context/error-provider';
 //import OfframpModal from '@/components/Modals/OfframpModal/OfframpModal';
 
 export interface ViewProps {
@@ -31,18 +32,19 @@ export interface ViewProps {
 
 export default function Dashboard() {
     const { connection } = useConnection();
+    const { showError } = useError();
     const wallet = useAnchorWallet();
     const router = useRouter();
 
     useEffect(() => {
         const isLoggedIn = async () => {
-            if (!wallet || !await hasBetaKey(connection, wallet.publicKey)) router.push("/");
+            if (!wallet || !await hasBetaKey(wallet.publicKey, showError)) router.push("/");
             else if (!await isVaultInitialized(connection, wallet.publicKey)) router.push("/onboarding");
         }
         isLoggedIn();
 
         posthog.capture('In Dashboard', { property: 'true' })
-    }, [wallet, connection, router]);
+    }, [wallet, connection, router, showError]);
 
     const [mainView, setMainView] = useState(true);
 
@@ -78,23 +80,26 @@ export default function Dashboard() {
     //     setModalEnabled(false);
     // }
 
-    const updateFinancialData = async () => {
+    const updateFinancialData = useCallback(async () => {
         try {
             const response = await fetch('/api/solana-price');
+            if (!response.ok) {
+                const errorResponse = await response.json();
+                throw new Error(`Failed to fetch Drift data: ${errorResponse.error}`);
+            }
             const responseJson = await response.json();
             const solPrice = Number(responseJson);
-            if (isNaN(solPrice)) throw new Error("Sol price is NaN");
+            if (isNaN(solPrice)) throw new Error(`Sol price is NaN, instead found ${responseJson}`);
 
             setSolPrice(solPrice);
             setSolDailyRate(await getSolDailyEarnRate());
             setUsdcDailyRate(await getUsdcDailyBorrowRate());
             return true;
-        } catch (err) {
-            console.error(`Error fetching SOL price: ${err}`);
-            captureError(`Unable to process Solana price`, "dashboard: /page.tsx", undefined, err);
+        } catch (error) {
+            captureError(showError, `Unable to fetch Solana price`, "dashboard: /page.tsx", undefined, error);
             return false;
         }
-    }
+    }, [showError]);
 
     const updateBalance = useCallback(async (signature?: string) => {
         if (!connection || !wallet || !await isVaultInitialized(connection, wallet.publicKey)) return;
@@ -104,7 +109,7 @@ export default function Dashboard() {
         if (signature) await connection.confirmTransaction({ signature, ...(await connection.getLatestBlockhash()) }, "finalized");
 
         const vault = getVault(wallet.publicKey);
-        const [totalSolBalance, usdcLoanBalance] = await fetchDriftData(vault, [
+        const [totalSolBalance, usdcLoanBalance] = await fetchDriftData(showError, vault, [
             DRIFT_MARKET_INDEX_SOL,
             DRIFT_MARKET_INDEX_USDC
         ]);
@@ -116,14 +121,14 @@ export default function Dashboard() {
 
         const isBalanceLoaded = await updateFinancialData();
         setBalanceLoaded(isBalanceLoaded);
-    }, [connection, wallet]);
+    }, [connection, wallet, updateFinancialData, showError]);
 
     useEffect(() => {
         updateBalance();
 
         const interval = setInterval(updateFinancialData, 10_000);
         return () => clearInterval(interval);
-    }, [updateBalance]);
+    }, [updateBalance, updateFinancialData]);
 
     return (
         <main className={styles.maxHeight}>

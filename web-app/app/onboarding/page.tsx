@@ -8,9 +8,11 @@ import { useEffect, useState } from 'react';
 import { hasBetaKey, isVaultInitialized } from '@/utils/helpers';
 import Account from '@/components/Account/Account';
 import { PuffLoader } from 'react-spinners';
+import { useError } from '@/context/error-provider';
 
 export default function Onboarding() {
     const { connection } = useConnection();
+    const { showError } = useError();
     const wallet = useAnchorWallet();
     const router = useRouter();
 
@@ -18,12 +20,12 @@ export default function Onboarding() {
 
     useEffect(() => {
         const isLoggedIn = async () => {
-            if (!wallet || !await hasBetaKey(connection, wallet.publicKey)) router.push("/");
+            if (!wallet || !await hasBetaKey(wallet.publicKey, showError)) router.push("/");
             else if (await isVaultInitialized(connection, wallet.publicKey)) router.push("/dashboard");
             setUserAuthed(true);
         }
         isLoggedIn();
-    }, [wallet, connection, router]);
+    }, [wallet, connection, router, showError]);
 
     const [awaitingSign, setAwaitingSign] = useState(false);
     const [checkboxes, setCheckboxes] = useState([false, false, false, false]);
@@ -48,12 +50,12 @@ export default function Onboarding() {
         setAttemptFailed(false);
         setAwaitingSign(true);
         
-        const signature = await initAccount(wallet, connection);
+        const signature = await initAccount(wallet, connection, showError);
 
         
         if (signature) router.push("/dashboard");
         else {
-            if (!wallet || !await hasBetaKey(connection, wallet.publicKey)) router.push("/");
+            if (!wallet || !await hasBetaKey(wallet.publicKey, showError)) router.push("/");
             else if (await isVaultInitialized(connection, wallet.publicKey)) router.push("/dashboard");
             else setAwaitingSign(false);
         }

@@ -5,6 +5,7 @@ import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import styles from "./LoanView.module.css";
 import { getSign, truncateToDecimalPlaces, truncateToDecimalPlacesAbsolute, uiToBaseUnit } from "@/utils/helpers";
 import { PuffLoader } from "react-spinners";
+import { useError } from "@/context/error-provider";
 
 export default function LoanView({
     solPrice,
@@ -19,6 +20,7 @@ export default function LoanView({
     updateBalance
 }: ViewProps) {
     const { connection } = useConnection();
+    const { showError } = useError();
     const wallet = useAnchorWallet();
 
     const handleRepayUsdc = () => {
@@ -31,7 +33,7 @@ export default function LoanView({
                 if (!wallet) return;
 
                 const baseUnits = uiToBaseUnit(amount, DECIMALS_USDC).toNumber();
-                const signature = await depositUsdc(wallet, connection, baseUnits);
+                const signature = await depositUsdc(wallet, connection, baseUnits, showError);
                 if (!signature) return;
 
                 updateBalance(signature);
@@ -51,7 +53,7 @@ export default function LoanView({
                 if (!wallet) return;
 
                 const baseUnits = uiToBaseUnit(amount, DECIMALS_USDC).toNumber();
-                const signature = await liquidateSol(wallet, connection, baseUnits);
+                const signature = await liquidateSol(wallet, connection, baseUnits, showError);
                 if (!signature) return;
 
                 updateBalance(signature);
