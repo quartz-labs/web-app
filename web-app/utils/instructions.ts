@@ -99,7 +99,7 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
         const tx = new VersionedTransaction(messageV0);
 
         const signedTx = await wallet.signTransaction(tx);
-        if (marginfiAccounts.length === 0) signedTx.sign([marginfiAccount]);  // Only sign if initing new MarginFi account
+        if (oix_initMarginfiAccount) signedTx.sign([marginfiAccount]);  // Only sign if initing new MarginFi account
         
         const signature = await sendTransactionHandler(connection, signedTx);
         return signature;
