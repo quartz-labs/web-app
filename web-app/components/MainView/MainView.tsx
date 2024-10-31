@@ -1,33 +1,36 @@
 import { ViewProps } from "@/app/dashboard/page";
-import { depositLamports, withdrawLamports, withdrawUsdc } from "@/utils/instructions";
-import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
-import Image from "next/image";
 import styles from "./MainView.module.css";
-import { getSign, truncateToDecimalPlaces, truncateToDecimalPlacesAbsolute, uiToBaseUnit } from "@/utils/helpers";
+import { getSign, truncateToDecimalPlaces, truncateToDecimalPlacesAbsolute } from "@/utils/helpers";
 import { PuffLoader } from "react-spinners";
 import React from "react";
-import { DECIMALS_USDC } from "@/utils/constants";
-import { useError } from "@/context/error-provider";
+
+interface MainViewProps extends ViewProps {
+    handleDepositSol: () => void;
+    handleWithdrawSol: () => void;
+    handleWithdrawUSDC: () => void;
+}
 
 export default function MainView({ 
     solPrice, 
     totalSolBalance, 
     usdcLoanBalance, 
-    solDailyRate, 
-    usdcDailyRate, 
+    solApy, 
+    usdcApr, 
     swapView,
-    //enableOfframpModal 
-}: ViewProps) {
-    const balanceLoaded = (solPrice !== null && totalSolBalance !== null && usdcLoanBalance !== null && solDailyRate !== null && usdcDailyRate !== null);
+    handleDepositSol,
+    handleWithdrawSol,
+    handleWithdrawUSDC
+}: MainViewProps) {
+    const balanceLoaded = (solPrice !== null && totalSolBalance !== null && usdcLoanBalance !== null && solApy !== null && usdcApr !== null);
     solPrice = solPrice ?? 0;
     totalSolBalance = totalSolBalance ?? 0;
     usdcLoanBalance = usdcLoanBalance ?? 0;
-    solDailyRate = solDailyRate ?? 0;
-    usdcDailyRate = usdcDailyRate ?? 0;
+    solApy = solApy ?? 0;
+    usdcApr = usdcApr ?? 0;
 
     const netSolBalance = ((totalSolBalance * solPrice) - usdcLoanBalance) / solPrice;
-    const dailySolChange = totalSolBalance * solDailyRate * solPrice;
-    const dailyUsdcChange = usdcLoanBalance * usdcDailyRate;
+    const dailySolChange = totalSolBalance * (solApy / 365) * solPrice;
+    const dailyUsdcChange = usdcLoanBalance * (usdcApr / 365);
     const dailyNetChange = dailySolChange - dailyUsdcChange;
 
     return (
@@ -64,17 +67,17 @@ export default function MainView({
 
             <div className={styles.buttons}>
                 <div className={styles.buttonsRow}>
-                    <button onClick={handleDeposit} className={"glass-button"}>Deposit SOL</button>
-                    <button onClick={handleWithdraw} className={"glass-button"}>Withdraw SOL</button>
+                    <button onClick={handleDepositSol} className={"glass-button"}>Deposit SOL</button>
+                    <button onClick={handleWithdrawSol} className={"glass-button"}>Withdraw SOL</button>
                 </div>
                 <button onClick={handleWithdrawUSDC} className={"glass-button"}>
                     Withdraw USDC
-                    <Image
+                    {/* <Image
                         src="/arrow.svg"
                         alt=""
                         width={22}
                         height={22}
-                    />
+                    /> */}
                 </button>
                 <button onClick={swapView} className={"glass-button ghost"}>Manage Loans</button>
             </div>

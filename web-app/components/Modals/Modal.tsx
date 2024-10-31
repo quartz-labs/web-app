@@ -8,8 +8,10 @@ import OfframpUSDModal from "./Variations/OfframpUSDModal";
 import OfframpCompleteModal from "./Variations/OfframpCompleteModal";
 import RepayUSDCModal from "./Variations/RepayUSDCModal";
 import RepayUSDCWithCollateralModal from "./Variations/RepayUSDCWithCollateralModal";
+import { BalanceInfo } from "@/utils/balance";
 
 export enum ModalVariation {
+    Disabled,
     DepositSOL,
     WithdrawSOL,
     WithdrawUSDC,
@@ -22,11 +24,14 @@ export enum ModalVariation {
 
 interface ModalProps{
     variation: ModalVariation;
-    onClose: () => void;
+    balanceInfo: BalanceInfo;
+    solApy: number | null;
+    usdcApr: number | null;
+    onClose: (signature?: string) => void;
 }
 
 export default function Modal(
-    {variation, onClose} : ModalProps
+    {variation, balanceInfo, solApy, usdcApr, onClose} : ModalProps
 ) {
     const wallet = useAnchorWallet();
 
@@ -54,25 +59,55 @@ export default function Modal(
                 {(() => {
                     switch (variation) {
                         case ModalVariation.DepositSOL:
-                            return <DepositSOLModal />;
+                            return <DepositSOLModal
+                                balanceInfo={balanceInfo}
+                                isValid={isValid} 
+                                closeModal={onClose}
+                                apy={solApy} 
+                            />;
                             
                         case ModalVariation.WithdrawSOL:
-                            return <WithdrawSOLModal />;
+                            return <WithdrawSOLModal 
+                                balanceInfo={balanceInfo}
+                                isValid={isValid}
+                                closeModal={onClose}
+                            />;
 
                         case ModalVariation.WithdrawUSDC:
-                            return <WithdrawUSDCModal />;
+                            return <WithdrawUSDCModal 
+                                balanceInfo={balanceInfo}
+                                isValid={isValid}
+                                closeModal={onClose}
+                                apr={usdcApr}
+                            />;
 
                         case ModalVariation.OfframpUSD:
-                            return <OfframpUSDModal />;
+                            return <OfframpUSDModal 
+                                balanceInfo={balanceInfo}
+                                isValid={isValid}
+                                closeModal={onClose}
+                                apr={usdcApr}
+                            />;
 
                         case ModalVariation.OfframpComplete:
-                            return <OfframpCompleteModal />;
+                            return <OfframpCompleteModal 
+                                closeModal={onClose}
+                                url={""}
+                            />;
 
                         case ModalVariation.RepayUSDC:
-                            return <RepayUSDCModal />;
+                            return <RepayUSDCModal
+                                balanceInfo={balanceInfo}
+                                isValid={isValid}
+                                closeModal={onClose}
+                            />;
 
                         case ModalVariation.RepayUSDCWithCollateral:
-                            return <RepayUSDCWithCollateralModal />;
+                            return <RepayUSDCWithCollateralModal
+                                balanceInfo={balanceInfo}
+                                isValid={isValid}
+                                closeModal={onClose}
+                            />;
 
                         default:
                             return <></>;

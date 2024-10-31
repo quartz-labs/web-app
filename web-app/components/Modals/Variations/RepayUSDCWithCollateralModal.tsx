@@ -8,16 +8,16 @@ import { useError } from "@/context/error-provider";
 import { DECIMALS_USDC } from "@/utils/constants";
 import { uiToBaseUnit } from "@/utils/helpers";
 import { liquidateSol } from "@/utils/instructions";
+import { BalanceInfo } from "@/utils/balance";
 
 interface RepayUSDCWithCollateralModalProps {
-    maxRepay: number;
-    loanRemaining: number;
+    balanceInfo: BalanceInfo,
     isValid: (amount: number, minAmount: number, maxAmount: number) => string;
     closeModal: (signature?: string) => void;
 }
 
 export default function RepayUSDCWithCollateralModal(
-    {maxRepay, loanRemaining, isValid, closeModal} : RepayUSDCWithCollateralModalProps
+    {balanceInfo, isValid, closeModal} : RepayUSDCWithCollateralModalProps
 ) {
     const { connection } = useConnection();
     const { showError } = useError();
@@ -27,6 +27,12 @@ export default function RepayUSDCWithCollateralModal(
     const [amount, setAmount] = useState(0);
     const [errorText, setErrorText] = useState("");
     const MIN_AMOUNT = 0.000001;
+
+    let maxRepay = 0;
+    if (balanceInfo.solUi !== null && balanceInfo.usdcUi !== null && balanceInfo.solPriceUSD !== null) {
+        const solValue = balanceInfo.solUi * balanceInfo.solPriceUSD;
+        maxRepay = Math.min(balanceInfo.usdcUi, solValue);
+    }
 
     const handleConfirm = async () => {
         const error = isValid(amount, MIN_AMOUNT, maxRepay);
@@ -58,7 +64,9 @@ export default function RepayUSDCWithCollateralModal(
                 setAmount={setAmount}
                 errorText={errorText}
             >
-                <p>Loan remaining: {loanRemaining}</p>
+                {(balanceInfo.usdcUi != null) &&
+                    <p>Loan remaining: {Math.abs(balanceInfo.usdcUi)}</p>
+                }
             </ModalInfoSection>
 
             <ModalButtons 

@@ -8,16 +8,16 @@ import { useError } from "@/context/error-provider";
 import { DECIMALS_SOL } from "@/utils/constants";
 import { uiToBaseUnit } from "@/utils/helpers";
 import { withdrawLamports } from "@/utils/instructions";
+import { BalanceInfo } from "@/utils/balance";
 
 interface WithdrawSOLModalProps {
-    maxWithdraw: number;
-    solPrice: number;
+    balanceInfo: BalanceInfo;
     isValid: (amount: number, minAmount: number, maxAmount: number) => string;
     closeModal: (signature?: string) => void;
 }
 
 export default function WithdrawSOLModal(
-    {maxWithdraw, solPrice, isValid, closeModal} : WithdrawSOLModalProps
+    {balanceInfo, isValid, closeModal} : WithdrawSOLModalProps
 ) {
     const { connection } = useConnection();
     const { showError } = useError();
@@ -27,6 +27,12 @@ export default function WithdrawSOLModal(
     const [amount, setAmount] = useState(0);
     const [errorText, setErrorText] = useState("");
     const MIN_AMOUNT = 0.000001;
+
+    let maxWithdraw = 0;
+    if (balanceInfo.solUi !== null && balanceInfo.usdcUi !== null && balanceInfo.solPriceUSD !== null) {
+        const requiredSol = balanceInfo.usdcUi / (balanceInfo.solUi * balanceInfo.solPriceUSD);
+        maxWithdraw = balanceInfo.solUi - requiredSol;
+    }
 
     const handleConfirm = async () => {
         const error = isValid(amount, MIN_AMOUNT, maxWithdraw);
@@ -58,7 +64,9 @@ export default function WithdrawSOLModal(
                 setAmount={setAmount}
                 errorText={errorText}
             >
-                <p>${(solPrice * amount).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                {(balanceInfo.solPriceUSD !== null) &&
+                    <p>${(balanceInfo.solPriceUSD * amount).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                }
             </ModalInfoSection>
 
             <ModalButtons 

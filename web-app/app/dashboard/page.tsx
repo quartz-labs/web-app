@@ -8,26 +8,22 @@ import Account from '@/components/Account/Account';
 import MainView from '@/components/MainView/MainView';
 import LoanView from '@/components/LoanView/LoanView';
 import styles from "./page.module.css";
-import { fetchDriftData, fetchSolPrice, getSolDailyEarnRate, getUsdcDailyBorrowRate } from '@/utils/balance';
+import { fetchDriftData, fetchSolPrice, getSolApy, getUsdcApr } from '@/utils/balance';
 import { getVault } from '@/utils/getAccounts';
 import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC } from '@/utils/constants';
-import DefaultModal, { DefaultModalProps } from '@/components/Modals/Old/DefaultModal';
 import posthog from 'posthog-js';
 import { useError } from '@/context/error-provider';
 import { captureError } from '@/utils/errors';
+import Modal, { ModalVariation } from '@/components/Modals/Modal';
 //import OfframpModal from '@/components/Modals/OfframpModal/OfframpModal';
 
 export interface ViewProps {
     solPrice: number | null;
     totalSolBalance: number | null;
     usdcLoanBalance: number | null;
-    solDailyRate: number | null;
-    usdcDailyRate: number | null;
+    solApy: number | null;
+    usdcApr: number | null;
     swapView: () => void;
-    enableModal: (data: DefaultModalProps) => void;
-    disableModal: () => void;
-    updateBalance: (signature?: string) => void;
-    //enableOfframpModal: (url: string) => void;
 }
 
 export default function Dashboard() {
@@ -47,37 +43,13 @@ export default function Dashboard() {
     }, [wallet, connection, router, showError]);
 
     const [mainView, setMainView] = useState(true);
-
-    const [modalEnabled, setModalEnabled] = useState(false);
-    const [modalData, setModalData] = useState<DefaultModalProps>({
-        title: "",
-        denomination: "",
-        buttonText: "",
-        minAmount: 0,
-        onConfirm: () => { },
-        onCancel: () => { }
-    });
-
-    //const [offrampModalEnabled, setOfframpModalEnabled] = useState(false);
-    //const [offrampUrl, setOfframpUrl] = useState("");
+    const [modal, setModal] = useState(ModalVariation.Disabled);
 
     const [solPrice, setSolPrice] = useState<number | null>(null);
     const [totalSolBalance, setTotalSolBalance] = useState<number | null>(null);
     const [usdcLoanBalance, setUsdcLoanBalance] = useState<number | null>(null);
-    const [solDailyRate, setSolDailyRate] = useState<number | null>(null);
-    const [usdcDailyRate, setUsdcDailyRate] = useState<number | null>(null);
-
-    const enableModal = (data: DefaultModalProps) => {
-        setModalData(data);
-        setModalEnabled(true);
-    }
-    const disableModal = () => setModalEnabled(false);
-
-    // const enableOfframpModal = (url: string) => {
-    //     setOfframpUrl(url);
-    //     setOfframpModalEnabled(true);
-    //     setModalEnabled(false);
-    // }
+    const [solApy, setSolApy] = useState<number | null>(null);
+    const [usdcApr, setUsdcApr] = useState<number | null>(null);
 
 
     // Fetch Drift Balance
@@ -123,11 +95,11 @@ export default function Dashboard() {
         const updateRates = async() => {
             try {
                 Promise.all([
-                    getSolDailyEarnRate(),
-                    getUsdcDailyBorrowRate()
+                    getSolApy(),
+                    getUsdcApr()
                 ]).then(([solRate, usdcRate]) => {
-                    setSolDailyRate(solRate);
-                    setUsdcDailyRate(usdcRate);
+                    setSolApy(solRate);
+                    setUsdcApr(usdcRate);
                 });
             } catch (error) {
                 captureError(showError, "Could not fetch Drift rates", "./app/dashboard/page.tsx", error, wallet?.publicKey);
@@ -145,16 +117,24 @@ export default function Dashboard() {
         return () => clearInterval(interval);
     }, [showError, wallet, updateBalance]);
 
+    const onModalClose = (signature?: string) => {
+        if (signature) updateBalance(signature);
+        setModal(ModalVariation.DepositSOL);
+    }
 
     return (
         <main className={styles.maxHeight}>
-            {modalEnabled &&
-                <DefaultModal {...modalData} />
-            }
-
-            {/* {offrampModalEnabled &&
-                <OfframpModal url={offrampUrl} closeModal={() => setOfframpModalEnabled(false)} />
-            } */}
+            <Modal 
+                variation={modal}
+                balanceInfo={{
+                    solUi: totalSolBalance,
+                    usdcUi: usdcLoanBalance ? Math.abs(usdcLoanBalance) : null,
+                    solPriceUSD: solPrice
+                }}
+                solApy={solApy}
+                usdcApr={usdcApr}
+                onClose={onModalClose} 
+            />
 
             <div className="two-col-grid">
                 <Account />
@@ -164,13 +144,13 @@ export default function Dashboard() {
                         solPrice={solPrice}
                         totalSolBalance={totalSolBalance}
                         usdcLoanBalance={usdcLoanBalance}
-                        solDailyRate={solDailyRate}
-                        usdcDailyRate={usdcDailyRate}
+                        solApy={solApy}
+                        usdcApr={usdcApr}
                         swapView={() => setMainView(false)}
-                        enableModal={enableModal}
-                        disableModal={disableModal}
-                        updateBalance={updateBalance}
-                    //enableOfframpModal={enableOfframpModal}
+
+                        handleDepositSol={() => setModal(ModalVariation.DepositSOL)}
+                        handleWithdrawSol={() => setModal(ModalVariation.WithdrawSOL)}
+                        handleWithdrawUSDC={() => setModal(ModalVariation.WithdrawUSDC)}
                     />
                 }
 
@@ -179,13 +159,12 @@ export default function Dashboard() {
                         solPrice={solPrice}
                         totalSolBalance={totalSolBalance}
                         usdcLoanBalance={usdcLoanBalance}
-                        solDailyRate={solDailyRate}
-                        usdcDailyRate={usdcDailyRate}
+                        solApy={solApy}
+                        usdcApr={usdcApr}
                         swapView={() => setMainView(true)}
-                        enableModal={enableModal}
-                        disableModal={disableModal}
-                        updateBalance={updateBalance}
-                    //enableOfframpModal={() => { }}
+
+                        handleRepayUsdc={() => setModal(ModalVariation.RepayUSDC)}
+                        handleRepayUsdcWithCollateral={() => setModal(ModalVariation.RepayUSDCWithCollateral)}
                     />
                 }
             </div>

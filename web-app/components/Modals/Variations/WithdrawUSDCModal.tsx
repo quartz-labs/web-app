@@ -8,16 +8,17 @@ import { useError } from "@/context/error-provider";
 import { DECIMALS_USDC } from "@/utils/constants";
 import { uiToBaseUnit } from "@/utils/helpers";
 import { withdrawUsdc } from "@/utils/instructions";
+import { BalanceInfo } from "@/utils/balance";
 
 interface WithdrawUSDCModalProps {
-    maxWithdraw: number;
-    apr: number;
+    balanceInfo: BalanceInfo,
+    apr: number | null;
     isValid: (amount: number, minAmount: number, maxAmount: number) => string;
     closeModal: (signature?: string) => void;
 }
 
 export default function WithdrawUSDCModal(
-    {maxWithdraw, apr, isValid, closeModal} : WithdrawUSDCModalProps
+    {balanceInfo, apr, isValid, closeModal} : WithdrawUSDCModalProps
 ) {
     const { connection } = useConnection();
     const { showError } = useError();
@@ -27,6 +28,12 @@ export default function WithdrawUSDCModal(
     const [amount, setAmount] = useState(0);
     const [errorText, setErrorText] = useState("");
     const MIN_AMOUNT = 0.000001;
+
+    let maxWithdraw = 0;
+    if (balanceInfo.solUi !== null && balanceInfo.usdcUi !== null && balanceInfo.solPriceUSD !== null) {
+        const totalWithdrawable = balanceInfo.solUi * balanceInfo.solPriceUSD * 0.8;
+        maxWithdraw = totalWithdrawable - balanceInfo.usdcUi;
+    }
 
     const handleConfirm = async () => {
         const error = isValid(amount, MIN_AMOUNT, maxWithdraw);
@@ -58,7 +65,11 @@ export default function WithdrawUSDCModal(
                 setAmount={setAmount}
                 errorText={errorText}
             >
-                <p>${amount.toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="tiny-text">({apr * 100}% APR)</span></p>
+                <p>
+                    ${amount.toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {(apr !== null) &&
+                        <span className="tiny-text">({apr * 100}% APR)</span>
+                    }
+                </p>
             </ModalInfoSection>
 
             <ModalButtons 

@@ -1,31 +1,34 @@
 import { ViewProps } from "@/app/dashboard/page";
-import { DECIMALS_USDC } from "@/utils/constants";
-import { depositUsdc, liquidateSol } from "@/utils/instructions";
-import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import styles from "./LoanView.module.css";
-import { getSign, truncateToDecimalPlaces, truncateToDecimalPlacesAbsolute, uiToBaseUnit } from "@/utils/helpers";
+import { getSign, truncateToDecimalPlaces, truncateToDecimalPlacesAbsolute } from "@/utils/helpers";
 import { PuffLoader } from "react-spinners";
-import { useError } from "@/context/error-provider";
+
+interface LoanViewProps extends ViewProps {
+    handleRepayUsdc: () => void;
+    handleRepayUsdcWithCollateral: () => void;
+}
 
 export default function LoanView({
     solPrice,
     totalSolBalance,
     usdcLoanBalance,
-    solDailyRate,
-    usdcDailyRate,
-    swapView
-}: ViewProps) {
+    solApy,
+    usdcApr,
+    swapView,
+    handleRepayUsdc,
+    handleRepayUsdcWithCollateral
+}: LoanViewProps) {
     // TODO - If only daily rates are null, just keep them loading and show balance
-    const balanceLoaded = (solPrice !== null && totalSolBalance !== null && usdcLoanBalance !== null && solDailyRate !== null && usdcDailyRate !== null);
+    const balanceLoaded = (solPrice !== null && totalSolBalance !== null && usdcLoanBalance !== null && solApy !== null && usdcApr !== null);
     solPrice = solPrice ?? 0;
     totalSolBalance = totalSolBalance ?? 0;
     usdcLoanBalance = usdcLoanBalance ?? 0;
-    solDailyRate = solDailyRate ?? 0;
-    usdcDailyRate = usdcDailyRate ?? 0;
+    solApy = solApy ?? 0;
+    usdcApr = usdcApr ?? 0;
 
     const netSolBalance = ((totalSolBalance * solPrice) - usdcLoanBalance) / solPrice;
-    const dailySolChange = totalSolBalance * solDailyRate * solPrice;
-    const dailyUsdcChange = usdcLoanBalance * usdcDailyRate;
+    const dailySolChange = totalSolBalance * (solApy / 365) * solPrice;
+    const dailyUsdcChange = usdcLoanBalance * (usdcApr / 365);
     const dailyNetChange = dailySolChange - dailyUsdcChange;
 
     return (
@@ -108,7 +111,7 @@ export default function LoanView({
             </div>
 
             <div className={styles.buttons}>
-                <button onClick={handleLiquidateForUsdc} className={"glass-button"}>Repay Loan with Collateral</button>
+                <button onClick={handleRepayUsdcWithCollateral} className={"glass-button"}>Repay Loan with Collateral</button>
                 <button onClick={handleRepayUsdc} className={"glass-button"}>Repay Loan with USDC</button>
                 <button onClick={swapView} className={"glass-button ghost"}>Back to Dashboard</button>
             </div>

@@ -1,17 +1,20 @@
 import { PublicKey } from "@solana/web3.js";
 
-export const getUsdcAPR = async () => {
+export interface BalanceInfo {
+  solUi: number | null;
+  usdcUi: number | null;
+  solPriceUSD: number | null;
+}
+
+export const getUsdcApr = async () => {
     // TODO - Implement pulling real data
     return 0.119179;
 }
 
-export const getSolAPR = async () => {
+export const getSolApy = async () => {
     // TODO - Implement pulling real data
     return 0.027134;
 }
-
-export const getUsdcDailyBorrowRate = async () => await getUsdcAPR() / 365;
-export const getSolDailyEarnRate = async () => await getSolAPR() / 365;
 
 export const fetchDriftData = async (vaultAddress: PublicKey, marketIndices: number[]) => {
     const response = await fetch(`/api/drift-balance?address=${vaultAddress.toBase58()}&marketIndices=${marketIndices}`);

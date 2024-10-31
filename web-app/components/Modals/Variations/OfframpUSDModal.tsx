@@ -2,21 +2,28 @@ import { useState } from "react";
 import ModalDefaultContent from "../DefaultLayout/ModalDefaultContent";
 import ModalInfoSection from "../DefaultLayout/ModalInfoSection";
 import ModalButtons from "../DefaultLayout/ModalButtons";
+import { BalanceInfo } from "@/utils/balance";
 
 interface OfframpUSDModalProps {
-    maxWithdraw: number;
-    apr: number;
+    balanceInfo: BalanceInfo,
+    apr: number | null;
     isValid: (amount: number, minAmount: number, maxAmount: number) => string;
     closeModal: (signature?: string) => void;
 }
 
 export default function OfframpUSDModal(
-    {maxWithdraw, apr, isValid, closeModal} : OfframpUSDModalProps
+    {balanceInfo, apr, isValid, closeModal} : OfframpUSDModalProps
 ) {
     const awaitingSign = false;
     const [amount, setAmount] = useState(0);
     const [errorText, setErrorText] = useState("");
     const MIN_AMOUNT = 31;
+
+    let maxWithdraw = 0;
+    if (balanceInfo.solUi !== null && balanceInfo.usdcUi !== null && balanceInfo.solPriceUSD !== null) {
+        const totalWithdrawable = balanceInfo.solUi * balanceInfo.solPriceUSD * 0.8;
+        maxWithdraw = totalWithdrawable - balanceInfo.usdcUi;
+    }
 
     const handleConfirm = async () => {
         const error = isValid(amount, MIN_AMOUNT, maxWithdraw);
@@ -42,7 +49,9 @@ export default function OfframpUSDModal(
                 setAmount={setAmount}
                 errorText={errorText}
             >
-                <p>({apr * 100}% APR)</p>
+                {apr !== null &&
+                    <p>({apr * 100}% APR)</p>
+                }
             </ModalInfoSection>
 
             <ModalButtons 
