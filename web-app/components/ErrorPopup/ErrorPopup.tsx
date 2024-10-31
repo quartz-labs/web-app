@@ -6,9 +6,10 @@ import { useEffect, useRef, useState } from "react";
 
 export default function ErrorPopup() {
     const { propsError, errorEnabled, hideError, showDetails } = useError();
-    const TIMEOUT_TIME = 4000;
     const [isMouseEntered, setIsMouseEntered] = useState(false);
     const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+    
+    const TIMEOUT_TIME = 6_000;
 
     useEffect(() => {
         timeoutRef.current = setTimeout(() => {

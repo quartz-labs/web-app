@@ -14,7 +14,7 @@ import {
     FUNDS_PROGRAM_ADDRESS_TABLE
 } from "./constants";
 import { ASSOCIATED_PROGRAM_ID, TOKEN_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/utils/token";
-import { SystemProgram, VersionedTransaction, TransactionMessage, Connection } from "@solana/web3.js";
+import { SystemProgram, VersionedTransaction, TransactionMessage, Connection, TransactionInstruction } from "@solana/web3.js";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
 import { getDriftSpotMarketVault, getDriftState, getDriftUser, getDriftUserStats, getVault, getVaultSpl, toRemainingAccount } from "./getAccounts";
 import { baseUnitToUi, createAtaIfNeeded, makeFlashLoanTx } from "./helpers";
@@ -68,12 +68,12 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
 
         const computeBudget = 200_000;
         
-
-        const instructions = [ix_initUser, ix_initVaultDriftAccount];
         // Create MarginFi account if user doesn't have one already
+        const oix_initMarginfiAccount: TransactionInstruction[] = [];
         const marginfiAccounts = await marginfiClient.getMarginfiAccountsForAuthority(wallet.publicKey);
         if (marginfiAccounts.length === 0) {
-            const ix_initMarginfiAccount = await marginfiProgram.methods
+            oix_initMarginfiAccount.push(
+                await marginfiProgram.methods
                 .marginfiAccountInitialize()
                 .accounts({
                     marginfiGroup: MARGINFI_GROUP_1,
@@ -82,10 +82,11 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
                     feePayer: wallet.publicKey,
                     systemProgram: SystemProgram.programId
                 })
-                .instruction();
-            instructions.push(ix_initMarginfiAccount);
+                .instruction()
+            )
         }
 
+        const instructions = [ix_initUser, ix_initVaultDriftAccount, ...oix_initMarginfiAccount];
         const ix_priority = await createPriorityFeeInstructions(connection, instructions, computeBudget);
         instructions.unshift(...ix_priority);
 
@@ -93,13 +94,14 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
         const messageV0 = new TransactionMessage({
             payerKey: wallet.publicKey,
             recentBlockhash: latestBlockhash.blockhash,
-            instructions: [...instructions],
+            instructions: instructions,
         }).compileToV0Message();
         const tx = new VersionedTransaction(messageV0);
 
         const signedTx = await wallet.signTransaction(tx);
-        signedTx.sign([marginfiAccount]);
-        const signature = await sendTransactionHandler(showError, connection, signedTx);
+        if (marginfiAccounts.length === 0) signedTx.sign([marginfiAccount]);  // Only sign if initing new MarginFi account
+        
+        const signature = await sendTransactionHandler(connection, signedTx);
         return signature;
     } catch (error) {
         if (!(error instanceof WalletSignTransactionError)) {
@@ -159,7 +161,7 @@ export const closeAccount = async (wallet: AnchorWallet, connection: web3.Connec
         const tx = new VersionedTransaction(messageV0);
 
         const signedTx = await wallet.signTransaction(tx);
-        const signature = await sendTransactionHandler(showError, connection, signedTx);
+        const signature = await sendTransactionHandler(connection, signedTx);
         return signature;
     } catch (error) {
         if (!(error instanceof WalletSignTransactionError)) {
@@ -233,7 +235,7 @@ export const depositLamports = async (wallet: AnchorWallet, connection: web3.Con
         const tx = new VersionedTransaction(messageV0);
 
         const signedTx = await wallet.signTransaction(tx);
-        const signature = await sendTransactionHandler(showError, connection, signedTx);
+        const signature = await sendTransactionHandler(connection, signedTx);
         return signature;
     } catch (error) {
         if (!(error instanceof WalletSignTransactionError)) {
@@ -302,7 +304,7 @@ export const withdrawLamports = async (wallet: AnchorWallet, connection: web3.Co
         const tx = new VersionedTransaction(messageV0);
 
         const signedTx = await wallet.signTransaction(tx);
-        const signature = await sendTransactionHandler(showError, connection, signedTx);
+        const signature = await sendTransactionHandler(connection, signedTx);
         return signature;
     } catch (error) {
         if (!(error instanceof WalletSignTransactionError)) {
@@ -363,7 +365,7 @@ export const depositUsdc = async (wallet: AnchorWallet, connection: Connection, 
         const tx = new VersionedTransaction(messageV0);
 
         const signedTx = await wallet.signTransaction(tx);
-        const signature = await sendTransactionHandler(showError, connection, signedTx);
+        const signature = await sendTransactionHandler(connection, signedTx);
         return signature;
     } catch (error) {
         if (!(error instanceof WalletSignTransactionError)) {
@@ -425,7 +427,7 @@ export const withdrawUsdc = async (wallet: AnchorWallet, connection: web3.Connec
         const tx = new VersionedTransaction(messageV0);
 
         const signedTx = await wallet.signTransaction(tx);
-        const signature = await sendTransactionHandler(showError, connection, signedTx);
+        const signature = await sendTransactionHandler(connection, signedTx);
         return signature;
     } catch (error) {
         if (!(error instanceof WalletSignTransactionError)) {
@@ -549,7 +551,7 @@ export const liquidateSol = async (wallet: AnchorWallet, connection: web3.Connec
         );
 
         const signedTx = await wallet.signTransaction(flashloanTx);
-        const signature = await sendTransactionHandler(showError, connection, signedTx);
+        const signature = await sendTransactionHandler(connection, signedTx);
         return signature;
     } catch (error) {
         if (!(error instanceof WalletSignTransactionError)) {
@@ -591,7 +593,7 @@ const createNewMarginfiAccount = async (showError: (props: ShowErrorProps) => vo
 
     const signedTx = await wallet.signTransaction(tx);
     signedTx.sign([newAccount]);
-    const signature = await sendTransactionHandler(showError, connection, signedTx);
+    const signature = await sendTransactionHandler(connection, signedTx);
 
     // Wait for tx to be finalized
     await connection.confirmTransaction({ signature, ...(await connection.getLatestBlockhash()) }, "finalized");

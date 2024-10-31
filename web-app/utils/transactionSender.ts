@@ -3,12 +3,10 @@ import { RPC_URL } from "./constants";
 import { captureError } from "@/utils/errors";
 import { ShowErrorProps } from "@/context/error-provider";
 
-export const sendTransactionHandler = async (showError: (props: ShowErrorProps) => void, connection: Connection, tx: VersionedTransaction) => {
+export const sendTransactionHandler = async (connection: Connection, tx: VersionedTransaction) => {
     const simulation = await connection.simulateTransaction(tx);
     if (simulation.value.err) {
-        console.error("Transaction simulation failed:", simulation.value.err);
-        captureError(showError, "Transaction simulation failed", "transactionSender", simulation, new PublicKey(tx.signatures[0]));
-        throw new Error("Transaction simulation failed");
+        throw new Error(`Transaction simulation failed: ${simulation.value.err} | ${simulation.value.logs}`)
     }
 
     const signature = await connection.sendRawTransaction(tx.serialize());
