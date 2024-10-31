@@ -30,7 +30,12 @@ export const roundToDecimalPlaces = (num: number, place: number) => {
     return Math.round(num * multiplier + Number.EPSILON) / multiplier; // Add epsilon to help with floating points
 }
 
-export const getSign = (num: number) => {
+export const getSign = (num: number, decimalPrecision: number) => {
+    // Return + if number will be displayed as 0
+    const minNumber = 1 / 10 ** decimalPrecision;
+    if (Math.abs(num) < minNumber) return "+";
+
+    // Otherwise display the true sign
     if (num < 0) return "-";
     else return "+"
 }

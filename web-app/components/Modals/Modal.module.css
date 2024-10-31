@@ -21,6 +21,7 @@
     align-items: center;
 }
 
-.modalError {
-    border-color: var(--color-error);
+.errorModal {
+    z-index: 9999;
+    border-color: var(--placeholder-glass-stroke-error)
 }

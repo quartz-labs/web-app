@@ -12,7 +12,7 @@ export const metadata = {
 import { Inter } from 'next/font/google';
 import ErrorPopup from '@/components/ErrorPopup/ErrorPopup';
 import { ErrorProvider } from '@/context/error-provider';
-import ErrorModal from '@/components/Modals/ErrorModal/ErrorModal';
+import ErrorModal from '@/components/Modals/Variations/ErrorModal';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -21,8 +21,6 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  
-
   return (
     <html lang="en" className={inter.className}>
       <body>

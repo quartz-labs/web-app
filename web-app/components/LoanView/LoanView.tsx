@@ -1,79 +1,37 @@
 import { ViewProps } from "@/app/dashboard/page";
-import { DECIMALS_USDC } from "@/utils/constants";
-import { depositUsdc, liquidateSol } from "@/utils/instructions";
-import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import styles from "./LoanView.module.css";
-import { getSign, truncateToDecimalPlaces, truncateToDecimalPlacesAbsolute, uiToBaseUnit } from "@/utils/helpers";
+import { getSign, truncateToDecimalPlaces, truncateToDecimalPlacesAbsolute } from "@/utils/helpers";
 import { PuffLoader } from "react-spinners";
-import { useError } from "@/context/error-provider";
+
+interface LoanViewProps extends ViewProps {
+    handleRepayUsdc: () => void;
+    handleRepayUsdcWithCollateral: () => void;
+}
 
 export default function LoanView({
     solPrice,
     totalSolBalance,
     usdcLoanBalance,
-    solDailyRate,
-    usdcDailyRate,
+    solApy,
+    usdcApr,
     swapView,
-    enableModal,
-    disableModal,
-    updateBalance
-}: ViewProps) {
-    const { connection } = useConnection();
-    const { showError } = useError();
-    const wallet = useAnchorWallet();
-
-    const handleRepayUsdc = () => {
-        enableModal({
-            title: "Repay USDC Loan",
-            denomination: "USDC",
-            buttonText: "Repay",
-            minAmount: 0,
-            onConfirm: async (amount: number) => {
-                if (!wallet) return;
-
-                const baseUnits = uiToBaseUnit(amount, DECIMALS_USDC).toNumber();
-                const signature = await depositUsdc(wallet, connection, baseUnits, showError);
-                if (!signature) return;
-
-                updateBalance(signature);
-                disableModal();
-            },
-            onCancel: () => { disableModal(); }
-        })
-    }
-
-    const handleLiquidateForUsdc = () => {
-        enableModal({
-            title: "Repay USDC Loan with SOL Deposits",
-            denomination: "USDC",
-            buttonText: "Repay",
-            minAmount: 0,
-            onConfirm: async (amount: number) => {
-                if (!wallet) return;
-
-                const baseUnits = uiToBaseUnit(amount, DECIMALS_USDC).toNumber();
-                const signature = await liquidateSol(wallet, connection, baseUnits, showError);
-                if (!signature) return;
-
-                updateBalance(signature);
-                disableModal();
-            },
-            onCancel: () => { disableModal(); }
-        })
-    }
-
+    handleRepayUsdc,
+    handleRepayUsdcWithCollateral
+}: LoanViewProps) {
     // TODO - If only daily rates are null, just keep them loading and show balance
-    const balanceLoaded = (solPrice !== null && totalSolBalance !== null && usdcLoanBalance !== null && solDailyRate !== null && usdcDailyRate !== null);
+    const balanceLoaded = (solPrice !== null && totalSolBalance !== null && usdcLoanBalance !== null && solApy !== null && usdcApr !== null);
     solPrice = solPrice ?? 0;
     totalSolBalance = totalSolBalance ?? 0;
     usdcLoanBalance = usdcLoanBalance ?? 0;
-    solDailyRate = solDailyRate ?? 0;
-    usdcDailyRate = usdcDailyRate ?? 0;
+    solApy = solApy ?? 0;
+    usdcApr = usdcApr ?? 0;
 
     const netSolBalance = ((totalSolBalance * solPrice) - usdcLoanBalance) / solPrice;
-    const dailySolChange = totalSolBalance * solDailyRate * solPrice;
-    const dailyUsdcChange = usdcLoanBalance * usdcDailyRate;
+    const dailySolChange = totalSolBalance * (solApy / 365) * solPrice;
+    const dailyUsdcChange = usdcLoanBalance * (usdcApr / 365);
     const dailyNetChange = dailySolChange - dailyUsdcChange;
+
+    const CHANGE_DECIMAL_PRECISION = 4;
 
     return (
         <div className="dashboard-wrapper">
@@ -97,7 +55,7 @@ export default function LoanView({
                                 ${(totalSolBalance * solPrice).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </p>
                             <p className={styles.subBalance}>
-                                {truncateToDecimalPlaces(totalSolBalance, 5)} SOL ({getSign(dailySolChange)}${truncateToDecimalPlacesAbsolute(dailySolChange, 4)} /day)
+                                {truncateToDecimalPlaces(totalSolBalance, 5)} SOL ({getSign(dailySolChange, CHANGE_DECIMAL_PRECISION)}${truncateToDecimalPlacesAbsolute(dailySolChange, CHANGE_DECIMAL_PRECISION)} /day)
                             </p>
                         </div>
                     }
@@ -122,7 +80,7 @@ export default function LoanView({
                                 ${usdcLoanBalance.toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </p>
                             <p className={styles.subBalance}>
-                                USDC ({getSign(dailyUsdcChange)}${truncateToDecimalPlacesAbsolute(dailyUsdcChange, 4)} /day)
+                                USDC ({getSign(dailyUsdcChange, CHANGE_DECIMAL_PRECISION)}${truncateToDecimalPlacesAbsolute(dailyUsdcChange, CHANGE_DECIMAL_PRECISION)} /day)
                             </p>
                         </div>
                     }
@@ -147,7 +105,7 @@ export default function LoanView({
                                 ${(netSolBalance * solPrice).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </p>
                             <p className={styles.subBalance}>
-                                After outstanding loans ({getSign(dailyNetChange)}${truncateToDecimalPlacesAbsolute(dailyNetChange, 4)} /day)
+                                After outstanding loans ({getSign(dailyNetChange, CHANGE_DECIMAL_PRECISION)}${truncateToDecimalPlacesAbsolute(dailyNetChange, CHANGE_DECIMAL_PRECISION)} /day)
                             </p>
                         </div>
                     }
@@ -155,7 +113,7 @@ export default function LoanView({
             </div>
 
             <div className={styles.buttons}>
-                <button onClick={handleLiquidateForUsdc} className={"glass-button"}>Repay Loan with Collateral</button>
+                <button onClick={handleRepayUsdcWithCollateral} className={"glass-button"}>Repay Loan with Collateral</button>
                 <button onClick={handleRepayUsdc} className={"glass-button"}>Repay Loan with USDC</button>
                 <button onClick={swapView} className={"glass-button ghost"}>Back to Dashboard</button>
             </div>
