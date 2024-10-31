@@ -57,11 +57,13 @@ export default function WithdrawUSDCModal(
                 title="Withdraw USDC"
                 denomination="USDC"
                 amount={amount}
+                maxAmount={maxWithdraw}
                 setAmount={setAmount}
             />
 
             <ModalInfoSection 
                 maxAmount={maxWithdraw} 
+                minDecimals={2} 
                 setAmount={setAmount}
                 errorText={errorText}
             >

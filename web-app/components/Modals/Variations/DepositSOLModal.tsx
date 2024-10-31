@@ -9,6 +9,7 @@ import { DECIMALS_SOL } from "@/utils/constants";
 import { uiToBaseUnit } from "@/utils/helpers";
 import { depositLamports } from "@/utils/instructions";
 import { BalanceInfo } from "@/utils/balance";
+import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 
 interface DepositSOLModalProps {
     balanceInfo: BalanceInfo
@@ -34,7 +35,7 @@ export default function DepositSOLModal(
         const fetchMaxDeposit = async () => {
             if (!wallet) return;
             const balance = await connection.getBalance(wallet?.publicKey);
-            setMaxDeposit(balance);
+            setMaxDeposit(balance / LAMPORTS_PER_SOL);
         }
         fetchMaxDeposit();
     }, [connection, wallet])
@@ -61,11 +62,13 @@ export default function DepositSOLModal(
                 title="Deposit SOL"
                 denomination="SOL"
                 amount={amount}
+                maxAmount={maxDeposit}
                 setAmount={setAmount}
             />
 
             <ModalInfoSection 
-                maxAmount={maxDeposit} 
+                maxAmount={maxDeposit}
+                minDecimals={0} 
                 setAmount={setAmount}
                 errorText={errorText}
             >

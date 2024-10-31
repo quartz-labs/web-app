@@ -56,11 +56,13 @@ export default function RepayUSDCWithCollateralModal(
                 title="Repay USDC Loan with SOL Collateral"
                 denomination="USDC"
                 amount={amount}
+                maxAmount={maxRepay}
                 setAmount={setAmount}
             />
 
             <ModalInfoSection 
                 maxAmount={maxRepay} 
+                minDecimals={2} 
                 setAmount={setAmount}
                 errorText={errorText}
             >

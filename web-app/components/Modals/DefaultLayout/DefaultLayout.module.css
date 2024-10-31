@@ -1,5 +1,5 @@
 .contentWrapper {
-    max-width: var(--modal-content-width);
+    width: var(--modal-content-width);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -9,15 +9,26 @@
 
 .heading {
     font-size: var(--text-size-h2);
-    margin-bottom: 45px;
+    margin-bottom: 50px;
+}
+
+.stretchWidth {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .inputSection {
     width: 100%;
     margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
 }
 
 .inputFieldWrapper {
+    width: 100%;
     display: flex;
     gap: 10px;
     margin-top: 8px;
@@ -34,11 +45,11 @@
 }
 
 .infoSection {
+    margin-bottom: 50px;
+}
+
+.infoSectionWrapper {
     width: var(--modal-content-width);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 45px;
 }
 
 .infoValue {
@@ -72,6 +83,11 @@
     width: 100%;
     padding: 15px 30px;
     border-radius: 15px;
+}
+
+.errorModal {
+    z-index: 9999;
+    border-color: var(--placeholder-glass-stroke-error)
 }
 
 .errorHeading {

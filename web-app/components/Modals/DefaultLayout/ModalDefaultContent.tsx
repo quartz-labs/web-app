@@ -4,18 +4,30 @@ interface ModalDefaultContentProps {
     title: string;
     denomination: string;
     amount: number;
+    maxAmount: number;
     setAmount: (amount: number) => void;
 }
 
 export default function ModalDefaultContent(
-    {title, denomination, amount, setAmount} : ModalDefaultContentProps
+    {title, denomination, amount, maxAmount, setAmount} : ModalDefaultContentProps
 ) {
     return (
         <div className={styles.contentWrapper}>
             <h2 className={styles.heading}>{title}</h2>
         
             <div className={styles.inputSection}>
-                <p>Amount</p>
+                <div className={styles.stretchWidth}>
+                    <p>Amount</p>
+
+                    <div className={styles.infoBalances}>
+                        <button className={`glass-button ghost ${styles.balanceButton}`} onClick={() => setAmount(maxAmount / 2)}>
+                            Half
+                        </button>
+                        <button className={`glass-button ghost ${styles.balanceButton}`} onClick={() => setAmount(maxAmount)}>
+                            Max
+                        </button>
+                    </div>
+                </div>
 
                 <div className={styles.inputFieldWrapper}>
                     <input 

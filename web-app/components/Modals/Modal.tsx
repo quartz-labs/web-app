@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import styles from "./ModalWrapper.module.css";
+import styles from "./Modal.module.css";
 import DepositSOLModal from "./Variations/DepositSOLModal";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import WithdrawSOLModal from "./Variations/WithdrawSOLModal";
@@ -18,8 +18,7 @@ export enum ModalVariation {
     OfframpUSD,
     OfframpComplete,
     RepayUSDC,
-    RepayUSDCWithCollateral,
-    Error
+    RepayUSDCWithCollateral
 }
 
 interface ModalProps{
@@ -50,6 +49,8 @@ export default function Modal(
     }
 
     // TODO - Make Error modal red and higher z index
+    if (variation === ModalVariation.Disabled) return (<></>);
+
     return (
         <div className={styles.modalWrapper} onClick={handleWrapperClick}>
             <div 

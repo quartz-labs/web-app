@@ -119,7 +119,7 @@ export default function Dashboard() {
 
     const onModalClose = (signature?: string) => {
         if (signature) updateBalance(signature);
-        setModal(ModalVariation.DepositSOL);
+        setModal(ModalVariation.Disabled);
     }
 
     return (

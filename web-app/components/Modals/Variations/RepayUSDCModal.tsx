@@ -67,11 +67,13 @@ export default function RepayUSDCModal(
                 title="Repay USDC Loan"
                 denomination="USDC"
                 amount={amount}
+                maxAmount={maxRepay}
                 setAmount={setAmount}
             />
 
             <ModalInfoSection 
                 maxAmount={maxRepay} 
+                minDecimals={2} 
                 setAmount={setAmount}
                 errorText={errorText}
             >

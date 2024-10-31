@@ -56,11 +56,13 @@ export default function WithdrawSOLModal(
                 title="Withdraw SOL"
                 denomination="SOL"
                 amount={amount}
+                maxAmount={maxWithdraw}
                 setAmount={setAmount}
             />
 
             <ModalInfoSection 
                 maxAmount={maxWithdraw} 
+                minDecimals={0} 
                 setAmount={setAmount}
                 errorText={errorText}
             >
