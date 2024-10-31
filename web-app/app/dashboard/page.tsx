@@ -11,7 +11,7 @@ import styles from "./page.module.css";
 import { fetchDriftData, fetchSolPrice, getSolDailyEarnRate, getUsdcDailyBorrowRate } from '@/utils/balance';
 import { getVault } from '@/utils/getAccounts';
 import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC } from '@/utils/constants';
-import DefaultModal, { DefaultModalProps } from '@/components/Modals/DefaultModal/DefaultModal';
+import DefaultModal, { DefaultModalProps } from '@/components/Modals/Old/DefaultModal';
 import posthog from 'posthog-js';
 import { useError } from '@/context/error-provider';
 import { captureError } from '@/utils/errors';

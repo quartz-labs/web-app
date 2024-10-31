@@ -1,7 +1,4 @@
-"use client";
-
-import styles from "../DefaultModal/DefaultModal.module.css";
-import Modal from "../Modal";
+import styles from "../DefaultLayout/DefaultLayout.module.css";
 import { useError } from "@/context/error-provider";
 
 export default function ErrorModal() {
@@ -15,10 +12,10 @@ export default function ErrorModal() {
 
     if (!detailsEnabled) return (<></>);
     return (
-        <Modal onClose={hideDetails} extraClass={"modalError"}>
+        <>
             <div className={styles.contentWrapper}>
                 <h2 className={`${styles.heading} ${styles.errorHeading}`}>Error</h2>
-
+            
                 <div className={styles.errorBodyWrapper}>
                     <div className={styles.errorBody}>
                         <p>{message}</p>
@@ -33,12 +30,12 @@ export default function ErrorModal() {
 
             <div className={styles.buttons}>
                 <button 
-                    className={`glass-button ghost ${styles.modalButton} ${styles.errorButton}`}
+                    className={`glass-button ghost ${styles.mainButton}`}
                     onClick={hideDetails}
                 >
                     Close
-                </button>     
-            </div>  
-        </Modal>
+                </button>
+            </div>
+        </>
     )
 }

@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import styles from "./ModalWrapper.module.css";
-import DepositSOLModal from "./DepositSOLModal/DepositSOLModal";
+import DepositSOLModal from "./Variations/DepositSOLModal";
+import { useAnchorWallet } from "@solana/wallet-adapter-react";
 
 export enum ModalVariation {
     DepositSOL,
@@ -21,14 +22,23 @@ interface ModalProps{
 export default function Modal(
     {variation, onClose} : ModalProps
 ) {
+    const wallet = useAnchorWallet();
+
     const handleWrapperClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         if (e.target === e.currentTarget) {
             onClose();
         }
     }, [onClose]);
 
+    const isValid = (amount: number, minAmount: number, maxAmount: number) => {
+        if (amount < minAmount) return "Minimum amount: " + minAmount;
+        if (amount > maxAmount) return "Maximum amount: " + maxAmount;
+        if (!wallet) return "Wallet not connected";
+        
+        return "";
+    }
 
-    // TODO - Make Error modal red
+    // TODO - Make Error modal red and higher z index
     return (
         <div className={styles.modalWrapper} onClick={handleWrapperClick}>
             <div 

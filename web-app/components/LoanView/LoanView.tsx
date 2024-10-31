@@ -13,59 +13,8 @@ export default function LoanView({
     usdcLoanBalance,
     solDailyRate,
     usdcDailyRate,
-    swapView,
-    enableModal,
-    disableModal,
-    updateBalance
+    swapView
 }: ViewProps) {
-    const { connection } = useConnection();
-    const { showError } = useError();
-    const wallet = useAnchorWallet();
-
-    const handleRepayUsdc = () => {
-        enableModal({
-            title: "Repay USDC Loan",
-            denomination: "USDC",
-            buttonText: "Repay",
-            minAmount: 0,
-            maxAmount: null,
-            onConfirm: async (amount: number) => {
-                if (!wallet) return;
-
-                const baseUnits = uiToBaseUnit(amount, DECIMALS_USDC).toNumber();
-                const signature = await depositUsdc(wallet, connection, baseUnits, showError);
-                if (!signature) return;
-
-                updateBalance(signature);
-                disableModal();
-            },
-            onCancel: () => { disableModal(); },
-            extraInfo: <p className="small-text light-text">Loan remaining: {usdcLoanBalance}</p>
-        })
-    }
-
-    const handleLiquidateForUsdc = () => {
-        enableModal({
-            title: "Repay USDC Loan with SOL Deposits",
-            denomination: "USDC",
-            buttonText: "Repay",
-            minAmount: 0,
-            maxAmount: null,
-            onConfirm: async (amount: number) => {
-                if (!wallet) return;
-
-                const baseUnits = uiToBaseUnit(amount, DECIMALS_USDC).toNumber();
-                const signature = await liquidateSol(wallet, connection, baseUnits, showError);
-                if (!signature) return;
-
-                updateBalance(signature);
-                disableModal();
-            },
-            onCancel: () => { disableModal(); },
-            extraInfo: <p className="small-text light-text">Loan remaining: {usdcLoanBalance} USDC</p>
-        })
-    }
-
     // TODO - If only daily rates are null, just keep them loading and show balance
     const balanceLoaded = (solPrice !== null && totalSolBalance !== null && usdcLoanBalance !== null && solDailyRate !== null && usdcDailyRate !== null);
     solPrice = solPrice ?? 0;

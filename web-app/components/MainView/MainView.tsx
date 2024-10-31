@@ -6,7 +6,7 @@ import styles from "./MainView.module.css";
 import { getSign, truncateToDecimalPlaces, truncateToDecimalPlacesAbsolute, uiToBaseUnit } from "@/utils/helpers";
 import { PuffLoader } from "react-spinners";
 import React from "react";
-import { DECIMALS_SOL, DECIMALS_USDC } from "@/utils/constants";
+import { DECIMALS_USDC } from "@/utils/constants";
 import { useError } from "@/context/error-provider";
 
 export default function MainView({ 
@@ -15,16 +15,9 @@ export default function MainView({
     usdcLoanBalance, 
     solDailyRate, 
     usdcDailyRate, 
-    swapView, 
-    enableModal, 
-    disableModal, 
-    updateBalance,
+    swapView,
     //enableOfframpModal 
 }: ViewProps) {
-    const { connection } = useConnection();
-    const { showError } = useError();
-    const wallet = useAnchorWallet();
-
     const balanceLoaded = (solPrice !== null && totalSolBalance !== null && usdcLoanBalance !== null && solDailyRate !== null && usdcDailyRate !== null);
     solPrice = solPrice ?? 0;
     totalSolBalance = totalSolBalance ?? 0;
@@ -36,71 +29,6 @@ export default function MainView({
     const dailySolChange = totalSolBalance * solDailyRate * solPrice;
     const dailyUsdcChange = usdcLoanBalance * usdcDailyRate;
     const dailyNetChange = dailySolChange - dailyUsdcChange;
-
-    const handleDeposit = () => {
-        enableModal({
-            title: "Deposit SOL",
-            denomination: "SOL",
-            buttonText: "Deposit",
-            minAmount: 0,
-            maxAmount: null,
-            onConfirm: async (amount: number) => {
-                if (!wallet) return;
-
-                const baseUnits = uiToBaseUnit(amount, DECIMALS_SOL).toNumber();
-                const signature = await depositLamports(wallet, connection, baseUnits, showError);
-                if (!signature) return;
-
-                updateBalance(signature);
-                disableModal();
-            },
-            onCancel: () => { disableModal(); },
-            extraInfo: 
-        })
-    }
-
-    const handleWithdraw = () => {
-        enableModal({
-            title: "Withdraw SOL",
-            denomination: "SOL",
-            buttonText: "Withdraw",
-            minAmount: 0,
-            maxAmount: null,
-            onConfirm: async (amount: number) => {
-                if (!wallet) return;
-
-                const baseUnits = uiToBaseUnit(amount, DECIMALS_SOL).toNumber();
-                const signature = await withdrawLamports(wallet, connection, baseUnits, showError);
-                if (!signature) return;
-                
-                updateBalance(signature);
-                disableModal();
-            },
-            onCancel: () => { disableModal(); },
-            onSetMax: () => {return netSolBalance.toString()}
-        })
-    }
-
-    const handleWithdrawUSDC = () => {
-        enableModal({
-            title: "Withdraw USDC",
-            denomination: "USDC",
-            buttonText: "Withdraw",
-            minAmount: 0,
-            maxAmount: null,
-            onConfirm: async (amount: number) => {
-                if (!wallet) return;
-
-                const baseUnits = uiToBaseUnit(amount, DECIMALS_USDC).toNumber();
-                const signature = await withdrawUsdc(wallet, connection, baseUnits, showError);
-                if (!signature) return;
-
-                updateBalance(signature);
-                disableModal();
-            },
-            onCancel: () => { disableModal(); }
-        })
-    }
 
     return (
         <div className="dashboard-wrapper">
