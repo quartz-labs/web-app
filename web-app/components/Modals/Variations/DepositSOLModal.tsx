@@ -26,8 +26,10 @@ export default function DepositSOLModal(
     const wallet = useAnchorWallet();
 
     const [awaitingSign, setAwaitingSign] = useState(false);
-    const [amount, setAmount] = useState(0);
     const [errorText, setErrorText] = useState("");
+    const [amountStr, setAmountStr] = useState("");
+    const amount = Number(amountStr);
+
     const MIN_AMOUNT = 0.000001;
 
     const [maxDeposit, setMaxDeposit] = useState(0);
@@ -41,7 +43,7 @@ export default function DepositSOLModal(
     }, [connection, wallet])
 
     const handleConfirm = async () => {
-        const error = isValid(amount, MIN_AMOUNT, maxDeposit);
+        const error = isValid(Number(amountStr), MIN_AMOUNT, maxDeposit);
         if (error) {
             setErrorText(error);
             return;
@@ -61,15 +63,15 @@ export default function DepositSOLModal(
             <ModalDefaultContent
                 title="Deposit SOL"
                 denomination="SOL"
-                amount={amount}
+                amountStr={amountStr}
                 maxAmount={maxDeposit}
-                setAmount={setAmount}
+                maxDecimals={DECIMALS_SOL}
+                setAmountStr={setAmountStr}
             />
 
             <ModalInfoSection 
                 maxAmount={maxDeposit}
                 minDecimals={0} 
-                setAmount={setAmount}
                 errorText={errorText}
             >
                 {(balanceInfo.solPriceUSD !== null && apy !== null) &&

@@ -1,16 +1,20 @@
+import { truncateToDecimalPlaces } from "@/utils/helpers";
 import styles from "./DefaultLayout.module.css";
 
 interface ModalDefaultContentProps {
     title: string;
     denomination: string;
-    amount: number;
+    amountStr: string;
     maxAmount: number;
-    setAmount: (amount: number) => void;
+    maxDecimals: number;
+    setAmountStr: (amount: string) => void;
 }
 
 export default function ModalDefaultContent(
-    {title, denomination, amount, maxAmount, setAmount} : ModalDefaultContentProps
+    {title, denomination, amountStr, maxAmount, maxDecimals, setAmountStr} : ModalDefaultContentProps
 ) {
+    const halfMax = truncateToDecimalPlaces((maxAmount / 2), maxDecimals);
+
     return (
         <div className={styles.contentWrapper}>
             <h2 className={styles.heading}>{title}</h2>
@@ -19,11 +23,11 @@ export default function ModalDefaultContent(
                 <div className={styles.stretchWidth}>
                     <p>Amount</p>
 
-                    <div className={styles.infoBalances}>
-                        <button className={`glass-button ghost ${styles.balanceButton}`} onClick={() => setAmount(maxAmount / 2)}>
+                    <div className={styles.amountButtons}>
+                        <button className={`glass-button ghost ${styles.balanceButton}`} onClick={() => setAmountStr(halfMax.toString())}>
                             Half
                         </button>
-                        <button className={`glass-button ghost ${styles.balanceButton}`} onClick={() => setAmount(maxAmount)}>
+                        <button className={`glass-button ghost ${styles.balanceButton}`} onClick={() => setAmountStr(maxAmount.toString())}>
                             Max
                         </button>
                     </div>
@@ -34,9 +38,9 @@ export default function ModalDefaultContent(
                         className={styles.inputField}
                         type="text" 
                         placeholder={"0.0 " + denomination} 
-                        value={amount} 
+                        value={amountStr} 
                         onChange={(e) => 
-                            setAmount(Number(e.target.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1')))
+                            setAmountStr(e.target.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1'))
                         }
                     />
                 </div>

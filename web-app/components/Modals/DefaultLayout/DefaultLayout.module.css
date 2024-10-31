@@ -57,15 +57,16 @@
     align-items: baseline;
 }
 
-.infoBalances {
+.amountButtons {
     display: flex;
     align-items: center;
     gap: 10px;
+    margin-bottom: 5px;
 }
 
 .balanceButton {
     padding: 8px 10px;
-    font-size: var(--text-size-small);
+    font-size: var(--text-size-tiny);
 }
 
 .errorText {
@@ -83,11 +84,6 @@
     width: 100%;
     padding: 15px 30px;
     border-radius: 15px;
-}
-
-.errorModal {
-    z-index: 9999;
-    border-color: var(--placeholder-glass-stroke-error)
 }
 
 .errorHeading {

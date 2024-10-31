@@ -6,7 +6,7 @@ import { useConnection } from "@solana/wallet-adapter-react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useError } from "@/context/error-provider";
 import { DECIMALS_USDC, USDC_MINT } from "@/utils/constants";
-import { uiToBaseUnit } from "@/utils/helpers";
+import { truncateToDecimalPlaces, uiToBaseUnit } from "@/utils/helpers";
 import { depositUsdc } from "@/utils/instructions";
 import { BalanceInfo } from "@/utils/balance";
 import { getAssociatedTokenAddress } from "@solana/spl-token";
@@ -25,14 +25,17 @@ export default function RepayUSDCModal(
     const wallet = useAnchorWallet();
 
     const [awaitingSign, setAwaitingSign] = useState(false);
-    const [amount, setAmount] = useState(0);
     const [errorText, setErrorText] = useState("");
+    const [amountStr, setAmountStr] = useState("");
+    const amount = Number(amountStr);
+
     const MIN_AMOUNT = 0.000001;
 
     const [usdcWalletBalance, setUsdcWalletBalance] = useState(0);
     let maxRepay = 0;
     if (balanceInfo.solUi !== null && balanceInfo.usdcUi !== null && balanceInfo.solPriceUSD !== null) {
-        maxRepay = Math.min(balanceInfo.usdcUi, usdcWalletBalance);
+        const rawMaxRepay = Math.min(balanceInfo.usdcUi, usdcWalletBalance);
+        maxRepay = truncateToDecimalPlaces(rawMaxRepay, DECIMALS_USDC);
     }
 
     useEffect(() => {
@@ -66,15 +69,15 @@ export default function RepayUSDCModal(
             <ModalDefaultContent
                 title="Repay USDC Loan"
                 denomination="USDC"
-                amount={amount}
+                amountStr={amountStr}
                 maxAmount={maxRepay}
-                setAmount={setAmount}
+                maxDecimals={DECIMALS_USDC}
+                setAmountStr={setAmountStr}
             />
 
             <ModalInfoSection 
                 maxAmount={maxRepay} 
                 minDecimals={2} 
-                setAmount={setAmount}
                 errorText={errorText}
             >
                 {balanceInfo.usdcUi &&

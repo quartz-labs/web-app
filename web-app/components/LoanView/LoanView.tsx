@@ -31,6 +31,8 @@ export default function LoanView({
     const dailyUsdcChange = usdcLoanBalance * (usdcApr / 365);
     const dailyNetChange = dailySolChange - dailyUsdcChange;
 
+    const CHANGE_DECIMAL_PRECISION = 4;
+
     return (
         <div className="dashboard-wrapper">
             <div className={styles.balanceWrapper}>
@@ -53,7 +55,7 @@ export default function LoanView({
                                 ${(totalSolBalance * solPrice).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </p>
                             <p className={styles.subBalance}>
-                                {truncateToDecimalPlaces(totalSolBalance, 5)} SOL ({getSign(dailySolChange)}${truncateToDecimalPlacesAbsolute(dailySolChange, 4)} /day)
+                                {truncateToDecimalPlaces(totalSolBalance, 5)} SOL ({getSign(dailySolChange, CHANGE_DECIMAL_PRECISION)}${truncateToDecimalPlacesAbsolute(dailySolChange, CHANGE_DECIMAL_PRECISION)} /day)
                             </p>
                         </div>
                     }
@@ -78,7 +80,7 @@ export default function LoanView({
                                 ${usdcLoanBalance.toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </p>
                             <p className={styles.subBalance}>
-                                USDC ({getSign(dailyUsdcChange)}${truncateToDecimalPlacesAbsolute(dailyUsdcChange, 4)} /day)
+                                USDC ({getSign(dailyUsdcChange, CHANGE_DECIMAL_PRECISION)}${truncateToDecimalPlacesAbsolute(dailyUsdcChange, CHANGE_DECIMAL_PRECISION)} /day)
                             </p>
                         </div>
                     }
@@ -103,7 +105,7 @@ export default function LoanView({
                                 ${(netSolBalance * solPrice).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </p>
                             <p className={styles.subBalance}>
-                                After outstanding loans ({getSign(dailyNetChange)}${truncateToDecimalPlacesAbsolute(dailyNetChange, 4)} /day)
+                                After outstanding loans ({getSign(dailyNetChange, CHANGE_DECIMAL_PRECISION)}${truncateToDecimalPlacesAbsolute(dailyNetChange, CHANGE_DECIMAL_PRECISION)} /day)
                             </p>
                         </div>
                     }

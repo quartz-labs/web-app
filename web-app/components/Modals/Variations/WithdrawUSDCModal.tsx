@@ -6,7 +6,7 @@ import { useConnection } from "@solana/wallet-adapter-react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useError } from "@/context/error-provider";
 import { DECIMALS_USDC } from "@/utils/constants";
-import { uiToBaseUnit } from "@/utils/helpers";
+import { truncateToDecimalPlaces, uiToBaseUnit } from "@/utils/helpers";
 import { withdrawUsdc } from "@/utils/instructions";
 import { BalanceInfo } from "@/utils/balance";
 
@@ -25,14 +25,17 @@ export default function WithdrawUSDCModal(
     const wallet = useAnchorWallet();
 
     const [awaitingSign, setAwaitingSign] = useState(false);
-    const [amount, setAmount] = useState(0);
     const [errorText, setErrorText] = useState("");
+    const [amountStr, setAmountStr] = useState("");
+    const amount = Number(amountStr);
+
     const MIN_AMOUNT = 0.000001;
 
     let maxWithdraw = 0;
     if (balanceInfo.solUi !== null && balanceInfo.usdcUi !== null && balanceInfo.solPriceUSD !== null) {
         const totalWithdrawable = balanceInfo.solUi * balanceInfo.solPriceUSD * 0.8;
-        maxWithdraw = totalWithdrawable - balanceInfo.usdcUi;
+        const rawMaxWithdraw = totalWithdrawable - balanceInfo.usdcUi;
+        maxWithdraw = truncateToDecimalPlaces(rawMaxWithdraw, DECIMALS_USDC);
     }
 
     const handleConfirm = async () => {
@@ -56,15 +59,15 @@ export default function WithdrawUSDCModal(
             <ModalDefaultContent
                 title="Withdraw USDC"
                 denomination="USDC"
-                amount={amount}
+                amountStr={amountStr}
                 maxAmount={maxWithdraw}
-                setAmount={setAmount}
+                maxDecimals={DECIMALS_USDC}
+                setAmountStr={setAmountStr}
             />
 
             <ModalInfoSection 
                 maxAmount={maxWithdraw} 
                 minDecimals={2} 
-                setAmount={setAmount}
                 errorText={errorText}
             >
                 <p>

@@ -33,6 +33,8 @@ export default function MainView({
     const dailyUsdcChange = usdcLoanBalance * (usdcApr / 365);
     const dailyNetChange = dailySolChange - dailyUsdcChange;
 
+    const CHANGE_DECIMAL_PRECISION = 4;
+
     return (
         <div className="dashboard-wrapper">
             {!balanceLoaded &&
@@ -59,7 +61,7 @@ export default function MainView({
                             ${(netSolBalance * solPrice).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
                         <p className={styles.subBalance}>
-                            {getSign(dailyNetChange)}${truncateToDecimalPlacesAbsolute(dailyNetChange, 4)} /day
+                            {getSign(dailyNetChange, CHANGE_DECIMAL_PRECISION)}${truncateToDecimalPlacesAbsolute(dailyNetChange, CHANGE_DECIMAL_PRECISION)} /day
                         </p>
                     </div>
                 </div>

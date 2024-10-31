@@ -5,7 +5,6 @@ interface ModalInfoSection {
     maxAmount: number;
     minDecimals: number;
     errorText: string;
-    setAmount: (amount: number) => void;
     children: React.ReactNode;
 }
 

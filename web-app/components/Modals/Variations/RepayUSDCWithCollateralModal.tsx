@@ -6,7 +6,7 @@ import { useConnection } from "@solana/wallet-adapter-react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useError } from "@/context/error-provider";
 import { DECIMALS_USDC } from "@/utils/constants";
-import { uiToBaseUnit } from "@/utils/helpers";
+import { truncateToDecimalPlaces, uiToBaseUnit } from "@/utils/helpers";
 import { liquidateSol } from "@/utils/instructions";
 import { BalanceInfo } from "@/utils/balance";
 
@@ -24,14 +24,17 @@ export default function RepayUSDCWithCollateralModal(
     const wallet = useAnchorWallet();
 
     const [awaitingSign, setAwaitingSign] = useState(false);
-    const [amount, setAmount] = useState(0);
     const [errorText, setErrorText] = useState("");
+    const [amountStr, setAmountStr] = useState("");
+    const amount = Number(amountStr);
+
     const MIN_AMOUNT = 0.000001;
 
     let maxRepay = 0;
     if (balanceInfo.solUi !== null && balanceInfo.usdcUi !== null && balanceInfo.solPriceUSD !== null) {
         const solValue = balanceInfo.solUi * balanceInfo.solPriceUSD;
-        maxRepay = Math.min(balanceInfo.usdcUi, solValue);
+        const rawMaxRepay = Math.min(balanceInfo.usdcUi, solValue);
+        maxRepay = truncateToDecimalPlaces(rawMaxRepay, DECIMALS_USDC);
     }
 
     const handleConfirm = async () => {
@@ -55,15 +58,15 @@ export default function RepayUSDCWithCollateralModal(
             <ModalDefaultContent
                 title="Repay USDC Loan with SOL Collateral"
                 denomination="USDC"
-                amount={amount}
+                amountStr={amountStr}
                 maxAmount={maxRepay}
-                setAmount={setAmount}
+                maxDecimals={DECIMALS_USDC}
+                setAmountStr={setAmountStr}
             />
 
             <ModalInfoSection 
                 maxAmount={maxRepay} 
-                minDecimals={2} 
-                setAmount={setAmount}
+                minDecimals={2}
                 errorText={errorText}
             >
                 {(balanceInfo.usdcUi != null) &&

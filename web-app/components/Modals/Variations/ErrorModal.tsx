@@ -1,13 +1,15 @@
+"use client";
+
 import { useCallback } from "react";
-import styles from "../DefaultLayout/DefaultLayout.module.css";
+import defaultStyles from "../DefaultLayout/DefaultLayout.module.css";
+import wrapperStyles from "../Modal.module.css";
 import { useError } from "@/context/error-provider";
 
 export default function ErrorModal() {
-    console.log(useError);
-    // const { propsDetails, detailsEnabled, hideDetails } = useError();
-    const propsDetails = null;
-    const detailsEnabled = false;
-    const hideDetails = () => {};
+    const { propsDetails, detailsEnabled, hideDetails } = useError();
+    // const propsDetails = null;
+    // const detailsEnabled = false;
+    // const hideDetails = () => {};
 
     const handleWrapperClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         if (e.target === e.currentTarget) {
@@ -22,17 +24,19 @@ export default function ErrorModal() {
     const email = `mailto:iarla@quartzpay.io?subject=Error%20Report:%20${id}`;
 
     if (!detailsEnabled) return (<></>);
+
+    console.log("enabled");
     return (
-        <div className={styles.modalWrapper} onClick={handleWrapperClick}>
+        <div className={wrapperStyles.modalWrapper} onClick={handleWrapperClick}>
             <div 
-                className={`glass ${styles.modal} ${styles.errorModal}`}
+                className={`glass ${wrapperStyles.modal} ${wrapperStyles.errorModal}`}
                 onClick={(e) => e.stopPropagation()}
             >
-                <div className={styles.contentWrapper}>
-                    <h2 className={`${styles.heading} ${styles.errorHeading}`}>Error</h2>
+                <div className={defaultStyles.contentWrapper}>
+                    <h2 className={`${defaultStyles.heading} ${defaultStyles.errorHeading}`}>Error</h2>
                 
-                    <div className={styles.errorBodyWrapper}>
-                        <div className={styles.errorBody}>
+                    <div className={defaultStyles.errorBodyWrapper}>
+                        <div className={defaultStyles.errorBody}>
                             <p>{message}</p>
                             <p>{limitedBody}</p>
                         </div>
@@ -43,9 +47,9 @@ export default function ErrorModal() {
                     </div>
                 </div>
 
-                <div className={styles.buttons}>
+                <div className={defaultStyles.buttons}>
                     <button 
-                        className={`glass-button ghost ${styles.mainButton}`}
+                        className={`glass-button ghost ${defaultStyles.mainButton}`}
                         onClick={hideDetails}
                     >
                         Close

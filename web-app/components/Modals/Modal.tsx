@@ -41,6 +41,7 @@ export default function Modal(
     }, [onClose]);
 
     const isValid = (amount: number, minAmount: number, maxAmount: number) => {
+        if (isNaN(amount)) return "Invalid input";
         if (amount < minAmount) return "Minimum amount: " + minAmount;
         if (amount > maxAmount) return "Maximum amount: " + maxAmount;
         if (!wallet) return "Wallet not connected";
@@ -48,9 +49,7 @@ export default function Modal(
         return "";
     }
 
-    // TODO - Make Error modal red and higher z index
     if (variation === ModalVariation.Disabled) return (<></>);
-
     return (
         <div className={styles.modalWrapper} onClick={handleWrapperClick}>
             <div 

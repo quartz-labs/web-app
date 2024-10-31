@@ -128,7 +128,7 @@ export default function Dashboard() {
                 variation={modal}
                 balanceInfo={{
                     solUi: totalSolBalance,
-                    usdcUi: usdcLoanBalance ? Math.abs(usdcLoanBalance) : null,
+                    usdcUi: (usdcLoanBalance !== null) ? Math.abs(usdcLoanBalance) : null,
                     solPriceUSD: solPrice
                 }}
                 solApy={solApy}
