@@ -2,6 +2,12 @@ import { useCallback } from "react";
 import styles from "./ModalWrapper.module.css";
 import DepositSOLModal from "./Variations/DepositSOLModal";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
+import WithdrawSOLModal from "./Variations/WithdrawSOLModal";
+import WithdrawUSDCModal from "./Variations/WithdrawUSDCModal";
+import OfframpUSDModal from "./Variations/OfframpUSDModal";
+import OfframpCompleteModal from "./Variations/OfframpCompleteModal";
+import RepayUSDCModal from "./Variations/RepayUSDCModal";
+import RepayUSDCWithCollateralModal from "./Variations/RepayUSDCWithCollateralModal";
 
 export enum ModalVariation {
     DepositSOL,
@@ -49,18 +55,25 @@ export default function Modal(
                     switch (variation) {
                         case ModalVariation.DepositSOL:
                             return <DepositSOLModal />;
+                            
                         case ModalVariation.WithdrawSOL:
                             return <WithdrawSOLModal />;
+
                         case ModalVariation.WithdrawUSDC:
                             return <WithdrawUSDCModal />;
+
                         case ModalVariation.OfframpUSD:
                             return <OfframpUSDModal />;
+
                         case ModalVariation.OfframpComplete:
                             return <OfframpCompleteModal />;
+
                         case ModalVariation.RepayUSDC:
                             return <RepayUSDCModal />;
+
                         case ModalVariation.RepayUSDCWithCollateral:
                             return <RepayUSDCWithCollateralModal />;
+
                         default:
                             return <></>;
                     }
