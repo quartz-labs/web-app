@@ -8,12 +8,12 @@ export interface BalanceInfo {
 
 export const getUsdcApr = async () => {
     // TODO - Implement pulling real data
-    return 0.119179;
+    return 0.147359;
 }
 
 export const getSolApy = async () => {
     // TODO - Implement pulling real data
-    return 0.027134;
+    return 0.009712;
 }
 
 export const fetchDriftData = async (vaultAddress: PublicKey, marketIndices: number[]) => {
