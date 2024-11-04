@@ -1,7 +1,8 @@
-import { AddressLookupTableAccount, ComputeBudgetProgram, Connection, Keypair, PublicKey, Signer, Transaction, TransactionInstruction, TransactionMessage, VersionedTransaction } from "@solana/web3.js";
+import { AddressLookupTableAccount, ComputeBudgetProgram, Connection, PublicKey, Signer, TransactionInstruction, TransactionMessage, VersionedTransaction } from "@solana/web3.js";
 import { RPC_URL } from "./constants";
 import { captureError } from "@/utils/errors";
 import { ShowErrorProps } from "@/context/error-provider";
+import { getAccountsFromInstructions } from "./helpers";
 
 export const sendTransactionHandler = async (connection: Connection, tx: VersionedTransaction) => {
     const simulation = await connection.simulateTransaction(tx);
@@ -95,13 +96,7 @@ export const getTransaction = async (showError: (props: ShowErrorProps) => void,
 
 
 export const createPriorityFeeInstructions = async (connection: Connection, instructions: TransactionInstruction[], computeBudget: number) => {
-    const tx = new Transaction();
-    instructions.forEach(ix => tx.add(ix));
-    tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
-    tx.feePayer = Keypair.generate().publicKey;
-
-    const accounts = tx.compileMessage().accountKeys;
-    const accountKeys = accounts.map(key => key.toBase58());
+    const accountKeys = await getAccountsFromInstructions(connection, instructions);
 
     const computeLimitIx = ComputeBudgetProgram.setComputeUnitLimit({
         units: computeBudget,
@@ -113,7 +108,7 @@ export const createPriorityFeeInstructions = async (connection: Connection, inst
     return [computeLimitIx, computePriceIx];
 }
 
-const getPriorityFeeEstimate = async (accounts: string[]) => {
+export const getPriorityFeeEstimate = async (accounts: string[]) => {
     return 1_000_000;
 
     try {

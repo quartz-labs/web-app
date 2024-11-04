@@ -58,7 +58,7 @@ export default function OfframpUSDModal(
                 errorText={errorText}
             >
                 {apr !== null &&
-                    <p>({apr * 100}% APR)</p>
+                    <p>({(apr * 100).toFixed(4)}% APR)</p>
                 }
             </ModalInfoSection>
 

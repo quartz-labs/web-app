@@ -5,11 +5,14 @@ import ModalButtons from "../DefaultLayout/ModalButtons";
 import { useConnection } from "@solana/wallet-adapter-react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useError } from "@/context/error-provider";
-import { DECIMALS_SOL } from "@/utils/constants";
-import { uiToBaseUnit } from "@/utils/helpers";
-import { depositLamports } from "@/utils/instructions";
+import { DECIMALS_SOL, MICRO_LAMPORTS_PER_LAMPORT } from "@/utils/constants";
+import { getAccountsFromInstructions, uiToBaseUnit } from "@/utils/helpers";
+import { depositLamports, makeDepositLamportsInstructions } from "@/utils/instructions";
 import { BalanceInfo } from "@/utils/balance";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { captureError } from "@/utils/errors";
+import { getPriorityFeeEstimate } from "@/utils/transactionSender";
+import { AccountLayout } from "@solana/spl-token";
 
 interface DepositSOLModalProps {
     balanceInfo: BalanceInfo
@@ -36,11 +39,28 @@ export default function DepositSOLModal(
     useEffect(() => {
         const fetchMaxDeposit = async () => {
             if (!wallet) return;
-            const balance = await connection.getBalance(wallet?.publicKey);
-            setMaxDeposit(balance / LAMPORTS_PER_SOL);
+            const balanceLamports = await connection.getBalance(wallet?.publicKey);
+
+            const ataSize = AccountLayout.span;
+            const wSolAtaRent = await connection.getMinimumBalanceForRentExemption(ataSize);
+            
+            try {
+                const depositIxs = await makeDepositLamportsInstructions(wallet, connection, balanceLamports, showError);
+                const accountKeys = await getAccountsFromInstructions(connection, depositIxs);
+
+                const computeUnitPriceMicroLamports = await getPriorityFeeEstimate(accountKeys);
+                const baseSignerFeeLamports = 5000;
+                const priorityFeeLamports = (computeUnitPriceMicroLamports * 200_000 ) / MICRO_LAMPORTS_PER_LAMPORT;
+                const maxDeposit = balanceLamports - (wSolAtaRent * 2) - (baseSignerFeeLamports + priorityFeeLamports);
+
+                setMaxDeposit(maxDeposit / LAMPORTS_PER_SOL);
+            } catch (error) {
+                captureError(showError, "Could not calculate max SOL deposit value", "/DepositSOLModal.tsx", error, wallet.publicKey);
+                setMaxDeposit(0);
+            }
         }
         fetchMaxDeposit();
-    }, [connection, wallet])
+    }, [connection, wallet, showError])
 
     const handleConfirm = async () => {
         const error = isValid(Number(amountStr), MIN_AMOUNT, maxDeposit);
@@ -75,7 +95,7 @@ export default function DepositSOLModal(
                 errorText={errorText}
             >
                 {(balanceInfo.solPriceUSD !== null && apy !== null) &&
-                    <p>${(balanceInfo.solPriceUSD * amount).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="tiny-text">({apy * 100}% APY)</span></p>
+                    <p>${(balanceInfo.solPriceUSD * amount).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="tiny-text">({(apy * 100).toFixed(4)}% APY)</span></p>
                 }
             </ModalInfoSection>
 

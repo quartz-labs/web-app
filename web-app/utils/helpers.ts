@@ -1,4 +1,4 @@
-import { AddressLookupTableAccount, PublicKey, TransactionInstruction, Connection } from "@solana/web3.js";
+import { AddressLookupTableAccount, PublicKey, TransactionInstruction, Connection, Keypair, Transaction } from "@solana/web3.js";
 import { getVault } from "./getAccounts";
 import { createAssociatedTokenAccountInstruction } from "@solana/spl-token";
 import { Bank, MarginfiAccountWrapper, MarginfiClient } from "@mrgnlabs/marginfi-client-v2";
@@ -174,4 +174,16 @@ export async function hasBetaKey(wallet: PublicKey, showError: (props: ShowError
     }
 
     return false;
+}
+
+export async function getAccountsFromInstructions(connection: Connection, instructions: TransactionInstruction[]) {
+    const tx = new Transaction();
+    instructions.forEach(ix => tx.add(ix));
+    
+    tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+    tx.feePayer = Keypair.generate().publicKey;
+
+    const accounts = tx.compileMessage().accountKeys;
+    const accountKeys = accounts.map(key => key.toBase58());
+    return accountKeys;
 }

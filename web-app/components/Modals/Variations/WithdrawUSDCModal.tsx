@@ -72,7 +72,7 @@ export default function WithdrawUSDCModal(
             >
                 <p>
                     ${amount.toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {(apr !== null) &&
-                        <span className="tiny-text">({apr * 100}% APR)</span>
+                        <span className="tiny-text">({(apr * 100).toFixed(4)}% APR)</span>
                     }
                 </p>
             </ModalInfoSection>

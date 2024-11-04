@@ -172,7 +172,7 @@ export const closeAccount = async (wallet: AnchorWallet, connection: web3.Connec
 }
 
 
-export const depositLamports = async (wallet: AnchorWallet, connection: web3.Connection, amountLamports: number, showError: (props: ShowErrorProps) => void) => {
+export const makeDepositLamportsInstructions = async (wallet: AnchorWallet, connection: web3.Connection, amountLamports: number, showError: (props: ShowErrorProps) => void) => {
     const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
     setProvider(provider);
     const program = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>;
@@ -221,8 +221,22 @@ export const depositLamports = async (wallet: AnchorWallet, connection: web3.Con
             wallet.publicKey
         );
 
-        const computeBudget = 200_000;
         const instructions = [...oix_createWSolAta, ix_wrapSol, ix_syncNative, ix_deposit, ix_closeWSolAta];
+        return instructions;
+    } catch (error) {
+        if (!(error instanceof WalletSignTransactionError)) {
+            captureError(showError, "Could not create Deposit SOL Instruction", "utils: /instructions.ts", error, wallet.publicKey);
+        }
+        return [];
+    }
+}
+
+
+export const depositLamports = async (wallet: AnchorWallet, connection: web3.Connection, amountLamports: number, showError: (props: ShowErrorProps) => void) => {
+    try {
+        const instructions = await makeDepositLamportsInstructions(wallet, connection, amountLamports, showError);
+
+        const computeBudget = 200_000;
         const ix_priority = await createPriorityFeeInstructions(connection, instructions, computeBudget);
         instructions.unshift(...ix_priority);
 
