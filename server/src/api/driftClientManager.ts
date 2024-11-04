@@ -1,14 +1,34 @@
 import { Connection, Keypair, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
-import { Wallet, DriftClient, User as DriftUser } from "@drift-labs/sdk";
+import { Wallet, DriftClient, User as DriftUser, calculateDepositRate, calculateBorrowRate } from "@drift-labs/sdk";
 import { DRIFT_MARKET_INDEX_SOL, HELIUS_RPC_URL, LOCAL_SECRET, MICRO_CENTS_PER_USDC } from "../config.js";
+import { bnToDecimal } from "../helpers.js";
 
 export async function getDriftBalances(address: string, marketIndicesParam: string, driftClientManager: DriftClientManager) {
-    if (!address || !marketIndicesParam) {
-      throw new Error('Missing address or marketIndices parameter');
-    }
     const marketIndices = marketIndicesParam.split(',').map(Number).filter(n => !isNaN(n));
-    return await driftClientManager.getUserBalances(address, marketIndices);
-  }
+    const balances = await driftClientManager.getUserBalances(address, marketIndices);
+    return balances;
+}
+
+
+export async function getDriftRates(marketIndicesParam: string, driftClientManager: DriftClientManager) {
+    const marketIndices = marketIndicesParam.split(',').map(Number).filter(n => !isNaN(n));
+
+    const spotMarketPromises = marketIndices.map(async (index) => {
+        const spotMarket = await driftClientManager.getSpotMarketAccount(index);
+        if (!spotMarket) throw new Error(`Could not find spot market for index ${index}`);
+    
+        const depositRateBN = calculateDepositRate(spotMarket);
+        const borrowRateBN = calculateBorrowRate(spotMarket);
+    
+        return {
+            depositRate: bnToDecimal(depositRateBN, 6),
+            borrowRate: bnToDecimal(borrowRateBN, 6)
+        };
+    });
+    
+    const rates = await Promise.all(spotMarketPromises);
+    return rates;
+}
   
 
 export class DriftClientManager {
@@ -79,6 +99,10 @@ export class DriftClientManager {
             console.error('Error getting user balance:', error);
             throw error;
         }
+    }
+
+    public async getSpotMarketAccount(marketIndex: number) {
+        return await this.driftClient.getSpotMarketAccount(marketIndex);
     }
 }
 

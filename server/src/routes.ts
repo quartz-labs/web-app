@@ -1,5 +1,5 @@
 import { Express, Request, Response } from 'express';
-import { DriftClientManager, getDriftBalances } from './api/driftClientManager.js';
+import { DriftClientManager, getDriftBalances, getDriftRates } from './api/driftClientManager.js';
 import { getPriceData } from './api/getPrice.js';
 
 // Initialize cache with a default TTL of 60 seconds
@@ -14,14 +14,24 @@ export function setupRoutes(app: Express, driftClientManager: DriftClientManager
     const address = req.query.address as string;
     const marketIndicesParam = req.query.marketIndices as string;
 
-    console.log("drift-balance for: ", address, " called by:", req.ip);
-
     try {
       const balances = await getDriftBalances(address, marketIndicesParam, driftClientManager);
       res.status(200).json(balances);
     } catch (error) {
       console.error('Error fetching drift balances:', error);
       res.status(500).json({ error: 'Failed to retrieve balances' });
+    }
+  });
+
+  app.get('/drift-rates', async (req: Request, res: Response) => {
+    const marketIndicesParam = req.query.marketIndices as string;
+
+    try {
+      const rates = await getDriftRates(marketIndicesParam, driftClientManager);
+      res.status(200).json(rates);
+    } catch (error) {
+      console.error('Error fetching drift rates:', error);
+      res.status(500).json({ error: 'Failed to retrieve rates' });
     }
   });
 

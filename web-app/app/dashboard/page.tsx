@@ -8,7 +8,7 @@ import Account from '@/components/Account/Account';
 import MainView from '@/components/MainView/MainView';
 import LoanView from '@/components/LoanView/LoanView';
 import styles from "./page.module.css";
-import { fetchDriftData, fetchSolPrice, getSolApy, getUsdcApr } from '@/utils/balance';
+import { fetchDriftBalance, fetchDriftRates, fetchSolPrice, getSolApy, getUsdcApr } from '@/utils/balance';
 import { getVault } from '@/utils/getAccounts';
 import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC } from '@/utils/constants';
 import posthog from 'posthog-js';
@@ -63,7 +63,7 @@ export default function Dashboard() {
 
         let totalSolBalance, usdcLoanBalance;
         try {
-            [totalSolBalance, usdcLoanBalance] = await fetchDriftData(
+            [totalSolBalance, usdcLoanBalance] = await fetchDriftBalance(
                 getVault(wallet.publicKey), 
                 [
                     DRIFT_MARKET_INDEX_SOL,
@@ -94,6 +94,12 @@ export default function Dashboard() {
         // Fetch Drift APR & APY
         const updateRates = async() => {
             try {
+                const rates = await fetchDriftRates([
+                    DRIFT_MARKET_INDEX_SOL,
+                    DRIFT_MARKET_INDEX_USDC
+                ]);
+                console.log(rates);
+
                 Promise.all([
                     getSolApy(),
                     getUsdcApr()
@@ -113,7 +119,7 @@ export default function Dashboard() {
         const interval = setInterval(() => {
             updatePrice();
             updateRates();
-        }, 10_000);
+        }, 30_000);
         return () => clearInterval(interval);
     }, [showError, wallet, updateBalance]);
 

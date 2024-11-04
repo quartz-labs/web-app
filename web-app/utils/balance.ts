@@ -16,11 +16,22 @@ export const getSolApy = async () => {
     return 0.009712;
 }
 
-export const fetchDriftData = async (vaultAddress: PublicKey, marketIndices: number[]) => {
+export const fetchDriftRates = async (marketIndices: number[]) => {
+    const response = await fetch(`/api/drift-rates?marketIndices=${marketIndices}`);
+    if (!response.ok) {
+        const errorResponse = await response.json();
+        throw new Error(`Failed to fetch Drift rates: ${errorResponse.error}`);
+    }
+
+    const data = await response.json();
+    return data;
+}
+
+export const fetchDriftBalance = async (vaultAddress: PublicKey, marketIndices: number[]) => {
     const response = await fetch(`/api/drift-balance?address=${vaultAddress.toBase58()}&marketIndices=${marketIndices}`);
     if (!response.ok) {
         const errorResponse = await response.json();
-        throw new Error(`Failed to fetch Drift data: ${errorResponse.error}`);
+        throw new Error(`Failed to fetch Drift balance: ${errorResponse.error}`);
     }
 
     const data = await response.json();
