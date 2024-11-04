@@ -12,6 +12,10 @@
     align-items: center;
 }
 
+.errorModalWrapper {
+    z-index: 9999;
+}
+
 .modal {
     width: var(--modal-width);
     padding: 80px 0px;
@@ -22,6 +26,5 @@
 }
 
 .errorModal {
-    z-index: 9999;
     border-color: var(--placeholder-glass-stroke-error)
 }

@@ -27,7 +27,7 @@ export default function ErrorModal() {
 
     console.log("enabled");
     return (
-        <div className={wrapperStyles.modalWrapper} onClick={handleWrapperClick}>
+        <div className={`${wrapperStyles.modalWrapper} ${wrapperStyles.errorModalWrapper}`} onClick={handleWrapperClick}>
             <div 
                 className={`glass ${wrapperStyles.modal} ${wrapperStyles.errorModal}`}
                 onClick={(e) => e.stopPropagation()}
