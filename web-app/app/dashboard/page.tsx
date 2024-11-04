@@ -8,7 +8,7 @@ import Account from '@/components/Account/Account';
 import MainView from '@/components/MainView/MainView';
 import LoanView from '@/components/LoanView/LoanView';
 import styles from "./page.module.css";
-import { fetchDriftBalance, fetchDriftRates, fetchSolPrice, getSolApy, getUsdcApr } from '@/utils/balance';
+import { fetchDriftBalance, fetchDriftRates, fetchSolPrice } from '@/utils/balance';
 import { getVault } from '@/utils/getAccounts';
 import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC } from '@/utils/constants';
 import posthog from 'posthog-js';
@@ -50,7 +50,6 @@ export default function Dashboard() {
     const [usdcLoanBalance, setUsdcLoanBalance] = useState<number | null>(null);
     const [solApy, setSolApy] = useState<number | null>(null);
     const [usdcApr, setUsdcApr] = useState<number | null>(null);
-
 
     // Fetch Drift Balance
     const updateBalance = useCallback(async (signature?: string) => {
@@ -98,15 +97,12 @@ export default function Dashboard() {
                     DRIFT_MARKET_INDEX_SOL,
                     DRIFT_MARKET_INDEX_USDC
                 ]);
-                console.log(rates);
 
-                Promise.all([
-                    getSolApy(),
-                    getUsdcApr()
-                ]).then(([solRate, usdcRate]) => {
-                    setSolApy(solRate);
-                    setUsdcApr(usdcRate);
-                });
+                const solDepositRate = rates[0].depositRate;
+                const usdcBorrowRate = rates[1].borrowRate;
+
+                setSolApy(solDepositRate);
+                setUsdcApr(usdcBorrowRate);
             } catch (error) {
                 captureError(showError, "Could not fetch Drift rates", "./app/dashboard/page.tsx", error, wallet?.publicKey);
             }

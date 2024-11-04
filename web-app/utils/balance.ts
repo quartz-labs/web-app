@@ -6,16 +6,6 @@ export interface BalanceInfo {
   solPriceUSD: number | null;
 }
 
-export const getUsdcApr = async () => {
-    // TODO - Implement pulling real data
-    return 0.147359;
-}
-
-export const getSolApy = async () => {
-    // TODO - Implement pulling real data
-    return 0.009712;
-}
-
 export const fetchDriftRates = async (marketIndices: number[]) => {
     const response = await fetch(`/api/drift-rates?marketIndices=${marketIndices}`);
     if (!response.ok) {

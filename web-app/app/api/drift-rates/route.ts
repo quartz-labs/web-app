@@ -17,8 +17,8 @@ export async function GET(request: Request) {
   }
 
   try {
-    const response = await fetch(`http://localhost:8080/drift-rates?marketIndices=${marketIndices}`);
-    // const response = await fetch(`https://quartz-server-puoxw.ondigitalocean.app/drift-rates?marketIndices=${marketIndices}`);
+    // const response = await fetch(`http://localhost:8080/drift-rates?marketIndices=${marketIndices}`);
+    const response = await fetch(`https://quartz-server-puoxw.ondigitalocean.app/drift-rates?marketIndices=${marketIndices}`);
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
