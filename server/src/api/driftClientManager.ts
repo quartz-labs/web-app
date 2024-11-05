@@ -29,6 +29,11 @@ export async function getDriftRates(marketIndicesParam: string, driftClientManag
     const rates = await Promise.all(spotMarketPromises);
     return rates;
 }
+
+export async function getDriftHealth(address: string, driftClientManager: DriftClientManager) {
+    const health = await driftClientManager.getUserHealth(address);
+    return health;
+}
   
 
 export class DriftClientManager {
@@ -86,8 +91,8 @@ export class DriftClientManager {
 
     public async getUserBalances(address: string, marketIndices: number[]): Promise<any> {
         try {
-            await this.driftClient.emulateAccount(new PublicKey(address));
-            const user = this.driftClient.getUser();
+            await this.emulateAccount(new PublicKey(address));
+            const user = this.getUser();
 
             const balances = marketIndices.reduce((acc, marketIndex) => {
                 acc[marketIndex] = queryDriftBalance(user, marketIndex);
@@ -101,8 +106,48 @@ export class DriftClientManager {
         }
     }
 
+    public async getUserHealth(address: string) {
+        await this.emulateAccount(new PublicKey(address));
+        const user = this.getUser();
+        return user.getHealth();
+    }
+
+    public async getHealthComponents(address: string) {
+        await this.emulateAccount(new PublicKey(address));
+        const user = this.getUser();
+        const healthComponents = await user.getHealthComponents({marginCategory: 'Maintenance'});
+        
+        // Convert BN objects to decimal numbers
+        return {
+            deposits: healthComponents.deposits.map(d => ({
+                marketIndex: d.marketIndex,
+                size: d.size.toNumber(),
+                value: d.value.toNumber(),
+                weight: d.weight.toNumber(),
+                weightedValue: d.weightedValue.toNumber()
+            })),
+            borrows: healthComponents.borrows.map(b => ({
+                marketIndex: b.marketIndex,
+                size: -Math.abs(b.size.toNumber()), // Keep negative for borrows
+                value: b.value.toNumber(),
+                weight: b.weight.toNumber(),
+                weightedValue: b.weightedValue.toNumber()
+            })),
+            perpPositions: healthComponents.perpPositions,
+            perpPnl: healthComponents.perpPnl
+        };
+    }
+
     public async getSpotMarketAccount(marketIndex: number) {
         return await this.driftClient.getSpotMarketAccount(marketIndex);
+    }
+
+    getUser(): DriftUser {
+        return this.driftClient.getUser();
+    }
+
+    async emulateAccount(address: PublicKey) {
+        await this.driftClient.emulateAccount(address);
     }
 }
 

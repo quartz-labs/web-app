@@ -1,5 +1,5 @@
 import { Express, Request, Response } from 'express';
-import { DriftClientManager, getDriftBalances, getDriftRates } from './api/driftClientManager.js';
+import { DriftClientManager, getDriftBalances, getDriftHealth, getDriftRates } from './api/driftClientManager.js';
 import { getPriceData } from './api/getPrice.js';
 
 // Initialize cache with a default TTL of 60 seconds
@@ -32,6 +32,18 @@ export function setupRoutes(app: Express, driftClientManager: DriftClientManager
     } catch (error) {
       console.error('Error fetching drift rates:', error);
       res.status(500).json({ error: 'Failed to retrieve rates' });
+    }
+  });
+
+  app.get('/drift-health', async (req: Request, res: Response) => {
+    const address = req.query.address as string;
+
+    try {
+      const health = await getDriftHealth(address, driftClientManager)
+      res.status(200).json({health});
+    } catch (error) {
+      console.error('Error fetching drift health:', error);
+      res.status(500).json({ error: 'Failed to retrieve health' });
     }
   });
 

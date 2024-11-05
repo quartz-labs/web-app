@@ -4,7 +4,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "tsx src/index.ts",
+    "dev": "tsx src/index.ts",
     "start": "tsc -p tsconfig.json && node build/index.js"
   },
   "keywords": [],
