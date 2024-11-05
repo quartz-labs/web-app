@@ -34,6 +34,20 @@ export async function getDriftHealth(address: string, driftClientManager: DriftC
     const health = await driftClientManager.getUserHealth(address);
     return health;
 }
+
+export async function getDriftWithdrawalLimit(address: string, marketIndicesParam: string, driftClientManager: DriftClientManager) {
+    const marketIndices = marketIndicesParam.split(',').map(Number).filter(n => !isNaN(n));
+
+    const withdrawalLimitPromises = marketIndices.map(async (index) => {
+        const withdrawalLimit = await driftClientManager.getWithdrawalLimit(address, index);
+        if (!withdrawalLimit) throw new Error(`Could not find withdrawal limit for market index ${index}`);
+    
+        return withdrawalLimit;
+    });
+
+    const withdrawalLimits = await Promise.all(withdrawalLimitPromises);
+    return withdrawalLimits;
+}
   
 
 export class DriftClientManager {
@@ -140,6 +154,12 @@ export class DriftClientManager {
 
     public async getSpotMarketAccount(marketIndex: number) {
         return await this.driftClient.getSpotMarketAccount(marketIndex);
+    }
+
+    public async getWithdrawalLimit(address: string, marketIndex: number) {
+        await this.emulateAccount(new PublicKey(address));
+        const user = this.getUser();
+        return user.getWithdrawalLimit(marketIndex, false).toNumber();
     }
 
     getUser(): DriftUser {

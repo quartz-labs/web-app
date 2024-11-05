@@ -1,5 +1,5 @@
 import { Express, Request, Response } from 'express';
-import { DriftClientManager, getDriftBalances, getDriftHealth, getDriftRates } from './api/driftClientManager.js';
+import { DriftClientManager, getDriftBalances, getDriftHealth, getDriftRates, getDriftWithdrawalLimit } from './api/driftClientManager.js';
 import { getPriceData } from './api/getPrice.js';
 
 // Initialize cache with a default TTL of 60 seconds
@@ -44,6 +44,19 @@ export function setupRoutes(app: Express, driftClientManager: DriftClientManager
     } catch (error) {
       console.error('Error fetching drift health:', error);
       res.status(500).json({ error: 'Failed to retrieve health' });
+    }
+  });
+
+  app.get('/drift-withdrawal-limit', async (req: Request, res: Response) => {
+    const address = req.query.address as string;
+    const marketIndicesParam = req.query.marketIndices as string;
+
+    try {
+      const withdrawalLimits = await getDriftWithdrawalLimit(address, marketIndicesParam, driftClientManager);
+      res.status(200).json({withdrawalLimits});
+    } catch (error) {
+      console.error('Error fetching drift withdrawal limits:', error);
+      res.status(500).json({ error: 'Failed to retrieve withdrawal limits' });
     }
   });
 
