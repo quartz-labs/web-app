@@ -6,11 +6,13 @@
 
 This repository provides a source-available view of Quartz's Solana programs, web app, mobile app, SDKs and more.
 
-Development started for the Colosseum Radar hackathon and is still in early stages. Docs will be available soon.
+Development started for the Colosseum Radar hackathon and is still in early stages.
 
 ## Links
 
 Website and waitlist: [quartzpay.io](https://quartzpay.io/)
+
+Docs: [docs.quartzpay.io](https://docs.quartzpay.io/)
 
 X: [@quartzpay](https://x.com/quartzpay)
 
