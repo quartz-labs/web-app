@@ -50,14 +50,48 @@ export async function getDriftWithdrawalLimit(address: string, marketIndicesPara
 }
 
 export async function getDriftData(address: string, marketIndices: number[], driftClientManager: DriftClientManager) {
-    
+    const balancePromise = driftClientManager.getUserBalances(address, marketIndices);
 
-    const withdrawalLimitPromises = marketIndices.map(async (index) => {
-        const withdrawalLimit = await driftClientManager.getWithdrawalLimit(address, index);
-        if (!withdrawalLimit) throw new Error(`Could not find withdrawal limit for market index ${index}`);
+    const getWithdrawLimitPromise = async () => {
+        const promises = marketIndices.map(async (index) => {
+            const withdrawalLimit = await driftClientManager.getWithdrawalLimit(address, index);
+            if (!withdrawalLimit) throw new Error(`Could not find withdrawal limit for market index ${index}`);
+        
+            return withdrawalLimit;
+        });
+        return await Promise.all(promises);
+    }
+
+    const getRatePromise = async() => {
+        const promises = marketIndices.map(async (index) => {
+            const spotMarket = await driftClientManager.getSpotMarketAccount(index);
+            if (!spotMarket) throw new Error(`Could not find spot market for index ${index}`);
+        
+            const depositRateBN = calculateDepositRate(spotMarket);
+            const borrowRateBN = calculateBorrowRate(spotMarket);
+        
+            return {
+                depositRate: bnToDecimal(depositRateBN, 6),
+                borrowRate: bnToDecimal(borrowRateBN, 6)
+            };
+        });
+        return await Promise.all(promises);
+    };
+
+    const healthPromise = driftClientManager.getUserHealth(address);
+
+
+    const [balances, withdrawLimits, rates, health] = await Promise.all([
+        balancePromise, getWithdrawLimitPromise(), getRatePromise(), healthPromise
+    ]);
     
-        return withdrawalLimit;
-    });
+    
+    return {
+        balances,
+        withdrawLimits,
+        rates,
+        health
+    }
 }
   
 
@@ -115,20 +149,14 @@ export class DriftClientManager {
     }
 
     public async getUserBalances(address: string, marketIndices: number[]): Promise<any> {
-        try {
-            await this.emulateAccount(new PublicKey(address));
-            const user = this.getUser();
+        await this.emulateAccount(new PublicKey(address));
+        const user = this.getUser();
 
-            const balances = marketIndices.reduce((acc, marketIndex) => {
-                acc[marketIndex] = queryDriftBalance(user, marketIndex);
-                return acc;
-            }, {} as { [key: number]: number });
+        const balances = marketIndices.map((index) => {
+            return Number(user.getTokenAmount(index));
+        });
 
-            return balances;
-        } catch (error) {
-            console.error('Error getting user balance:', error);
-            throw error;
-        }
+        return balances;
     }
 
     public async getUserHealth(address: string) {
