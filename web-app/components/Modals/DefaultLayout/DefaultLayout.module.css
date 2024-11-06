@@ -44,6 +44,45 @@
     font-size: var(--text-size-h4);
 }
 
+.addressCopyLabel {
+    color: var(--color-text-light);
+    font-size: var(--text-size-tiny);
+    margin-left: 3px;
+}
+
+.addressCopyButton {
+    width: 100%;
+    min-height: var(--address-copy-button-height);
+
+    margin-top: 8px;
+    background: var(--color-background);
+    padding: 16px 18px;
+    border-radius: 14px;
+    border: 1px solid var(--placeholder-glass-stroke);
+    font-size: var(--text-size-small);
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.addressCopyButton:hover {
+    background: 
+        var(--overlay), 
+        var(--color-background);
+}
+
+.addressCopyButton:active {
+    background: 
+        var(--overlay), 
+        var(--overlay), 
+        var(--color-background);
+}
+
+.centerContent {
+    justify-content: center;
+}
+
 .infoSection {
     margin-bottom: 50px;
 }

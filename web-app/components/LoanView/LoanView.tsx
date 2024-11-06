@@ -7,6 +7,7 @@ import { DECIMALS_SOL, DECIMALS_USDC } from "@/utils/constants";
 interface LoanViewProps extends ViewProps {
     handleRepayUsdc: () => void;
     handleRepayUsdcWithCollateral: () => void;
+    handleTelegram: () => void;
 }
 
 export default function LoanView({
@@ -15,6 +16,7 @@ export default function LoanView({
     swapView,
     handleRepayUsdc,
     handleRepayUsdcWithCollateral,
+    handleTelegram
 }: LoanViewProps) {
     solPrice = solPrice ?? 0;
 
@@ -112,8 +114,11 @@ export default function LoanView({
             </div>
 
             <div className={styles.buttons}>
-                <button onClick={handleRepayUsdcWithCollateral} className={"glass-button"}>Repay Loan with Collateral</button>
-                <button onClick={handleRepayUsdc} className={"glass-button"}>Repay Loan with USDC</button>
+                <div className={styles.buttonsRow}>
+                    <button onClick={handleRepayUsdcWithCollateral} className={"glass-button"}>Collateral Repay</button>
+                    <button onClick={handleRepayUsdc} className={"glass-button"}>USDC Repay</button>
+                </div>
+                <button onClick={handleTelegram} className={"glass-button"}>Account Health Notifications</button>
                 <button onClick={swapView} className={"glass-button ghost"}>Back to Dashboard</button>
             </div>
         </div>

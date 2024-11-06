@@ -10,7 +10,7 @@ export const metadata = {
 };
 
 import { Inter } from 'next/font/google';
-import ErrorPopup from '@/components/ErrorPopup/ErrorPopup';
+import ErrorPopup from '@/components/Popup/ErrorPopup/ErrorPopup';
 import { ErrorProvider } from '@/context/error-provider';
 import ErrorModal from '@/components/Modals/Variations/ErrorModal';
 

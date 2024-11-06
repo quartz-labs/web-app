@@ -1,7 +1,7 @@
 "use client";
 
 import { useError } from "@/context/error-provider";
-import styles from "./ErrorPopup.module.css";
+import styles from "../Popup.module.css";
 import { useEffect, useRef, useState } from "react";
 
 export default function ErrorPopup() {

@@ -140,7 +140,7 @@ a:hover {
     radial-gradient(circle at 80% 20%, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%),
     linear-gradient(#ffffff03, #ffffff03),
     linear-gradient(#0B111D99, #0B111D99),
-    linear-gradient(#080c14, #080c14); /* TODO - Remove this and get background blur or fallback working on mobile */
+    linear-gradient(#060910, #060910); /* TODO - Remove this and get background blur or fallback working on mobile */
 
   --background-linear-gradient: linear-gradient(var(--color-background), var(--color-background));
 
@@ -152,9 +152,10 @@ a:hover {
 
   --logo-width: 360px;
   --logo-margin: 80px;
-  --modal-width: 600px;
-  --modal-content-width: 70%;
+  --modal-width: 650px;
+  --modal-content-width: 75%;
   --input-field-height: 80px;
+  --address-copy-button-height: 57px;
 
   --text-size-h1-base: 50.16px;
   --text-size-h2-base: 41.8px;
@@ -180,7 +181,7 @@ a:hover {
     --logo-width: 288px;
     --logo-margin: 45px;
     --modal-width: 90%;
-    --modal-content-width: 75%;
+    --modal-content-width: 80%;
 
     --text-size-h1: calc(0.9 * var(--text-size-h1-base));
     --text-size-h2: calc(0.9 * var(--text-size-h2-base));
@@ -219,6 +220,7 @@ a:hover {
     --logo-margin: 40px;
     --modal-content-width: 90%;
     --input-field-height: 75px;
+    --address-copy-button-height: 53.4px;
 
     --text-size-h1: calc(0.8 * var(--text-size-h1-base));
     --text-size-h2: calc(0.8 * var(--text-size-h2-base));
@@ -244,6 +246,7 @@ a:hover {
     --logo-width: 208px;
     --logo-margin: 30px;
     --input-field-height: 65px;
+    --address-copy-button-height: 46.3px;
   }
 
   .two-col-grid {

@@ -134,6 +134,7 @@ export default function Dashboard() {
 
                         handleRepayUsdc={() => setModal(ModalVariation.RepayUSDC)}
                         handleRepayUsdcWithCollateral={() => setModal(ModalVariation.RepayUSDCWithCollateral)}
+                        handleTelegram={() => setModal(ModalVariation.Telegram)}
                     />
                 }
             </div>

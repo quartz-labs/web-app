@@ -9,6 +9,7 @@ import OfframpCompleteModal from "./Variations/OfframpCompleteModal";
 import RepayUSDCModal from "./Variations/RepayUSDCModal";
 import RepayUSDCWithCollateralModal from "./Variations/RepayUSDCWithCollateralModal";
 import { AccountData } from "@/utils/driftData";
+import TelegramModal from "./Variations/TelegramModal";
 
 export enum ModalVariation {
     Disabled,
@@ -18,7 +19,8 @@ export enum ModalVariation {
     OfframpUSD,
     OfframpComplete,
     RepayUSDC,
-    RepayUSDCWithCollateral
+    RepayUSDCWithCollateral,
+    Telegram
 }
 
 interface ModalProps{
@@ -107,6 +109,11 @@ export default function Modal(
                                 isValid={isValid}
                                 closeModal={onClose}
                             />;
+
+                        case ModalVariation.Telegram:
+                            return <TelegramModal
+                                closeModal={onClose}
+                            />
 
                         default:
                             return <></>;
