@@ -9,6 +9,7 @@ export async function getDriftData(address: string, marketIndices: number[], dri
     const getWithdrawLimitPromise = async () => {
         const promises = marketIndices.map(async (index) => {
             const withdrawalLimit = await driftClientManager.getWithdrawalLimit(address, index);
+            console.log(withdrawalLimit);
             if (withdrawalLimit !== null) throw new Error(`Could not find withdrawal limit for market index ${index}`);
         
             return withdrawalLimit;
