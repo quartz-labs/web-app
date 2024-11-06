@@ -19,14 +19,14 @@ export default function TelegramModal(
     const openTelegram = () => {
         if (!wallet) return;
         const username = "QuartzLTVBot";
-        const message = encodeURIComponent(wallet.publicKey.toString());
 
         const isMobile = /Android|iPhone|iPad|iPod/i.test(
             navigator.userAgent
         );
         
         if (isMobile) {
-            window.location.href = `tg://resolve?domain=${username}&text=${message}`;
+            // window.location.href = `tg://resolve?domain=${username}`;
+            window.open(`https://telegram.me/${username}`, '_blank');
         } else {
             window.open(`https://telegram.me/${username}`, '_blank');
         }
