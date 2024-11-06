@@ -6,6 +6,7 @@ import { PuffLoader } from "react-spinners";
 interface LoanViewProps extends ViewProps {
     handleRepayUsdc: () => void;
     handleRepayUsdcWithCollateral: () => void;
+    accountHealth: number | null;
 }
 
 export default function LoanView({
@@ -16,7 +17,8 @@ export default function LoanView({
     usdcApr,
     swapView,
     handleRepayUsdc,
-    handleRepayUsdcWithCollateral
+    handleRepayUsdcWithCollateral,
+    accountHealth
 }: LoanViewProps) {
     // TODO - If only daily rates are null, just keep them loading and show balance
     const balanceLoaded = (solPrice !== null && totalSolBalance !== null && usdcLoanBalance !== null && solApy !== null && usdcApr !== null);
@@ -62,7 +64,7 @@ export default function LoanView({
                 </div>
 
                 <div>
-                    <p className={styles.title}>Loans</p>
+                    <p className={styles.title}>Loans {(accountHealth !== null) && <span>(Account Health: {accountHealth})</span>}</p>
 
                     {!balanceLoaded &&
                         <PuffLoader

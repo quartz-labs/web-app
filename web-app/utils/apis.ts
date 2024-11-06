@@ -31,6 +31,28 @@ export const fetchDriftBalance = async (vaultAddress: PublicKey, marketIndices: 
     return balances;
 };
 
+export const fetchDriftWithdrawLimit = async (vaultAddress: PublicKey, marketIndices: number[]) => {
+    const response = await fetch(`/api/drift-withdraw-limit?address=${vaultAddress.toBase58()}&marketIndices=${marketIndices}`);
+    if (!response.ok) {
+        const errorResponse = await response.json();
+        throw new Error(`Failed to fetch Drift withdrawal limit: ${errorResponse.error}`);
+    }
+
+    const data = await response.json();
+    return data;
+}
+
+export const fetchDriftHealth = async (vaultAddress: PublicKey) => {
+    const response = await fetch(`/api/drift-health?address=${vaultAddress.toBase58()}`);
+    if (!response.ok) {
+        const errorResponse = await response.json();
+        throw new Error(`Failed to fetch Drift health: ${errorResponse.error}`);
+    }
+
+    const data = await response.json();
+    return data;
+}
+
 export const fetchSolPrice = async() => {
     const response = await fetch('/api/solana-price');
     if (!response.ok) {

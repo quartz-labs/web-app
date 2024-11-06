@@ -10,7 +10,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    //const response = await fetch(`http://localhost:8080/drift-health?address=${address}`);
+    // const response = await fetch(`http://localhost:8080/drift-health?address=${address}`);
     const response = await fetch(`https://quartz-server-puoxw.ondigitalocean.app/drift-health?address=${address}`);
     const data = await response.json();
     return NextResponse.json(data);

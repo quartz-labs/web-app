@@ -8,14 +8,14 @@ import Account from '@/components/Account/Account';
 import MainView from '@/components/MainView/MainView';
 import LoanView from '@/components/LoanView/LoanView';
 import styles from "./page.module.css";
-import { fetchDriftBalance, fetchDriftRates, fetchSolPrice } from '@/utils/balance';
+import { fetchDriftBalance, fetchDriftRates, fetchSolPrice } from '@/utils/apis';
 import { getVault } from '@/utils/getAccounts';
 import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC } from '@/utils/constants';
 import posthog from 'posthog-js';
 import { useError } from '@/context/error-provider';
 import { captureError } from '@/utils/errors';
 import Modal, { ModalVariation } from '@/components/Modals/Modal';
-//import OfframpModal from '@/components/Modals/OfframpModal/OfframpModal';
+import { fetchDriftHealth } from '@/utils/apis';
 
 export interface ViewProps {
     solPrice: number | null;
@@ -45,6 +45,7 @@ export default function Dashboard() {
     const [mainView, setMainView] = useState(true);
     const [modal, setModal] = useState(ModalVariation.Disabled);
 
+    const [accountHealth, setAccountHealth] = useState<number | null>(null);
     const [solPrice, setSolPrice] = useState<number | null>(null);
     const [totalSolBalance, setTotalSolBalance] = useState<number | null>(null);
     const [usdcLoanBalance, setUsdcLoanBalance] = useState<number | null>(null);
@@ -108,13 +109,25 @@ export default function Dashboard() {
             }
         }
 
+        const updateHealth = async() => {
+            try {
+                if(!wallet) return;
+                const health = await fetchDriftHealth(getVault(wallet.publicKey));
+                setAccountHealth(health);
+            } catch (error) {
+                captureError(showError, "Could not fetch Drift account health", "./app/dashboard/page.tsx", error, wallet?.publicKey);
+            }
+        }
+
         updateBalance();
         updatePrice();
         updateRates();
+        updateHealth();
         
         const interval = setInterval(() => {
             updatePrice();
             updateRates();
+            updateHealth();
         }, 30_000);
         return () => clearInterval(interval);
     }, [showError, wallet, updateBalance]);
@@ -167,6 +180,7 @@ export default function Dashboard() {
 
                         handleRepayUsdc={() => setModal(ModalVariation.RepayUSDC)}
                         handleRepayUsdcWithCollateral={() => setModal(ModalVariation.RepayUSDCWithCollateral)}
+                        accountHealth={accountHealth}
                     />
                 }
             </div>
