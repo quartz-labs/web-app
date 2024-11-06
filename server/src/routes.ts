@@ -40,7 +40,7 @@ export function setupRoutes(app: Express, driftClientManager: DriftClientManager
 
     try {
       const health = await getDriftHealth(address, driftClientManager)
-      res.status(200).json({health});
+      res.status(200).json(health);
     } catch (error) {
       console.error('Error fetching drift health:', error);
       res.status(500).json({ error: 'Failed to retrieve health' });
@@ -53,7 +53,7 @@ export function setupRoutes(app: Express, driftClientManager: DriftClientManager
 
     try {
       const withdrawalLimits = await getDriftWithdrawalLimit(address, marketIndicesParam, driftClientManager);
-      res.status(200).json({withdrawalLimits});
+      res.status(200).json(withdrawalLimits);
     } catch (error) {
       console.error('Error fetching drift withdrawal limits:', error);
       res.status(500).json({ error: 'Failed to retrieve withdrawal limits' });
