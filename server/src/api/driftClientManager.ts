@@ -1,6 +1,6 @@
-import { Connection, Keypair, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
+import { Connection, Keypair, PublicKey } from "@solana/web3.js";
 import { Wallet, DriftClient, User as DriftUser, calculateDepositRate, calculateBorrowRate } from "@drift-labs/sdk";
-import { DRIFT_MARKET_INDEX_SOL, HELIUS_RPC_URL, LOCAL_SECRET, MICRO_CENTS_PER_USDC } from "../config.js";
+import { HELIUS_RPC_URL, LOCAL_SECRET } from "../config.js";
 import { bnToDecimal } from "../helpers.js";
 
 export async function getDriftData(address: string, marketIndices: number[], driftClientManager: DriftClientManager) {
@@ -9,7 +9,6 @@ export async function getDriftData(address: string, marketIndices: number[], dri
     const getWithdrawLimitPromise = async () => {
         const promises = marketIndices.map(async (index) => {
             const withdrawalLimit = await driftClientManager.getWithdrawalLimit(address, index);
-            console.log(withdrawalLimit);
             if (withdrawalLimit === null) throw new Error(`Could not find withdrawal limit for market index ${index}`);
         
             return withdrawalLimit;

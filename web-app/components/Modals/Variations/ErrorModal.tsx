@@ -24,8 +24,6 @@ export default function ErrorModal() {
     const email = `mailto:iarla@quartzpay.io?subject=Error%20Report:%20${id}`;
 
     if (!detailsEnabled) return (<></>);
-
-    console.log("enabled");
     return (
         <div className={`${wrapperStyles.modalWrapper} ${wrapperStyles.errorModalWrapper}`} onClick={handleWrapperClick}>
             <div 

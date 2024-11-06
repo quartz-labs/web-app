@@ -162,7 +162,6 @@ export async function hasBetaKey(wallet: PublicKey, showError: (props: ShowError
         });
         const { result } = await response.json();
 
-        console.log("Compressed NFTs:", result);
         for (const asset of result.items) {
             if (asset.content.metadata.name && asset.content.metadata.name.includes("Quartz Pin")) {
                 return true;
