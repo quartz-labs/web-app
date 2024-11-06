@@ -2,18 +2,18 @@ import { useState } from "react";
 import ModalDefaultContent from "../DefaultLayout/ModalDefaultContent";
 import ModalInfoSection from "../DefaultLayout/ModalInfoSection";
 import ModalButtons from "../DefaultLayout/ModalButtons";
-import { BalanceInfo } from "@/utils/balance";
-import { truncateToDecimalPlaces } from "@/utils/helpers";
+import { baseUnitToUi } from "@/utils/helpers";
+import { AccountData } from "@/utils/driftData";
+import { DECIMALS_USDC } from "@/utils/constants";
 
 interface OfframpUSDModalProps {
-    balanceInfo: BalanceInfo,
-    apr: number | null;
+    accountData: AccountData | null,
     isValid: (amount: number, minAmount: number, maxAmount: number) => string;
     closeModal: (signature?: string) => void;
 }
 
 export default function OfframpUSDModal(
-    {balanceInfo, apr, isValid, closeModal} : OfframpUSDModalProps
+    {accountData, isValid, closeModal} : OfframpUSDModalProps
 ) {
     const awaitingSign = false;
     const [errorText, setErrorText] = useState("");
@@ -21,16 +21,12 @@ export default function OfframpUSDModal(
     const amount = Number(amountStr);
 
     const MIN_AMOUNT = 31;
-
-    let maxWithdraw = 0;
-    if (balanceInfo.solUi !== null && balanceInfo.usdcUi !== null && balanceInfo.solPriceUSD !== null) {
-        const totalWithdrawable = balanceInfo.solUi * balanceInfo.solPriceUSD * 0.8;
-        const rawMaxWithdraw = totalWithdrawable - balanceInfo.usdcUi;
-        maxWithdraw = truncateToDecimalPlaces(rawMaxWithdraw, 2);
-    }
+    const maxAmount = (accountData !== null)
+        ? Number(baseUnitToUi(accountData.usdcWithdrawLimitBaseUnits, DECIMALS_USDC))
+        : 0;
 
     const handleConfirm = async () => {
-        const error = isValid(amount, MIN_AMOUNT, maxWithdraw);
+        const error = isValid(amount, MIN_AMOUNT, maxAmount);
         if (error) {
             setErrorText(error);
             return
@@ -47,18 +43,18 @@ export default function OfframpUSDModal(
                 title="Off-ramp USD"
                 denomination="USD"
                 amountStr={amountStr}
-                maxAmount={maxWithdraw}
+                maxAmount={maxAmount}
                 maxDecimals={2}
                 setAmountStr={setAmountStr}
             />
 
             <ModalInfoSection 
-                maxAmount={maxWithdraw} 
+                maxAmount={maxAmount} 
                 minDecimals={2} 
                 errorText={errorText}
             >
-                {apr !== null &&
-                    <p>({(apr * 100).toFixed(4)}% APR)</p>
+                {accountData !== null &&
+                    <p>({(accountData.usdcRate * 100).toFixed(4)}% APR)</p>
                 }
             </ModalInfoSection>
 

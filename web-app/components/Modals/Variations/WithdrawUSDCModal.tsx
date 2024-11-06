@@ -6,19 +6,18 @@ import { useConnection } from "@solana/wallet-adapter-react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useError } from "@/context/error-provider";
 import { DECIMALS_USDC } from "@/utils/constants";
-import { truncateToDecimalPlaces, uiToBaseUnit } from "@/utils/helpers";
+import { baseUnitToUi, uiToBaseUnit } from "@/utils/helpers";
 import { withdrawUsdc } from "@/utils/instructions";
-import { BalanceInfo } from "@/utils/balance";
+import { AccountData } from "@/utils/driftData";
 
 interface WithdrawUSDCModalProps {
-    balanceInfo: BalanceInfo,
-    apr: number | null;
+    accountData: AccountData | null;
     isValid: (amount: number, minAmount: number, maxAmount: number) => string;
     closeModal: (signature?: string) => void;
 }
 
 export default function WithdrawUSDCModal(
-    {balanceInfo, apr, isValid, closeModal} : WithdrawUSDCModalProps
+    {accountData, isValid, closeModal} : WithdrawUSDCModalProps
 ) {
     const { connection } = useConnection();
     const { showError } = useError();
@@ -30,16 +29,12 @@ export default function WithdrawUSDCModal(
     const amount = Number(amountStr);
 
     const MIN_AMOUNT = 0.000001;
-
-    let maxWithdraw = 0;
-    if (balanceInfo.solUi !== null && balanceInfo.usdcUi !== null && balanceInfo.solPriceUSD !== null) {
-        const totalWithdrawable = balanceInfo.solUi * balanceInfo.solPriceUSD * 0.8;
-        const rawMaxWithdraw = totalWithdrawable - balanceInfo.usdcUi;
-        maxWithdraw = truncateToDecimalPlaces(rawMaxWithdraw, DECIMALS_USDC);
-    }
+    const maxAmount = (accountData !== null)
+        ? Number(baseUnitToUi(accountData.usdcWithdrawLimitBaseUnits, DECIMALS_USDC))
+        : 0;
 
     const handleConfirm = async () => {
-        const error = isValid(amount, MIN_AMOUNT, maxWithdraw);
+        const error = isValid(amount, MIN_AMOUNT, maxAmount);
         if (error) {
             setErrorText(error);
             return
@@ -60,19 +55,19 @@ export default function WithdrawUSDCModal(
                 title="Withdraw USDC"
                 denomination="USDC"
                 amountStr={amountStr}
-                maxAmount={maxWithdraw}
+                maxAmount={maxAmount}
                 maxDecimals={DECIMALS_USDC}
                 setAmountStr={setAmountStr}
             />
 
             <ModalInfoSection 
-                maxAmount={maxWithdraw} 
+                maxAmount={maxAmount} 
                 minDecimals={2} 
                 errorText={errorText}
             >
                 <p>
-                    ${amount.toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {(apr !== null) &&
-                        <span className="tiny-text">({(apr * 100).toFixed(4)}% APR)</span>
+                    ${amount.toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {(accountData !== null) &&
+                        <span className="tiny-text">({(accountData.usdcRate * 100).toFixed(4)}% APR)</span>
                     }
                 </p>
             </ModalInfoSection>

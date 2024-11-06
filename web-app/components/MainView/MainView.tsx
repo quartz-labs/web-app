@@ -1,8 +1,9 @@
 import { ViewProps } from "@/app/dashboard/page";
 import styles from "./MainView.module.css";
-import { getSign, truncateToDecimalPlaces, truncateToDecimalPlacesAbsolute } from "@/utils/helpers";
+import { baseUnitToUi, getSign, truncateToDecimalPlaces, truncateToDecimalPlacesAbsolute } from "@/utils/helpers";
 import { PuffLoader } from "react-spinners";
 import React from "react";
+import { DECIMALS_SOL, DECIMALS_USDC } from "@/utils/constants";
 
 interface MainViewProps extends ViewProps {
     handleDepositSol: () => void;
@@ -12,32 +13,31 @@ interface MainViewProps extends ViewProps {
 
 export default function MainView({ 
     solPrice, 
-    totalSolBalance, 
-    usdcLoanBalance, 
-    solApy, 
-    usdcApr, 
+    accountData,
     swapView,
     handleDepositSol,
     handleWithdrawSol,
     handleWithdrawUSDC
 }: MainViewProps) {
-    const balanceLoaded = (solPrice !== null && totalSolBalance !== null && usdcLoanBalance !== null && solApy !== null && usdcApr !== null);
     solPrice = solPrice ?? 0;
-    totalSolBalance = totalSolBalance ?? 0;
-    usdcLoanBalance = usdcLoanBalance ?? 0;
-    solApy = solApy ?? 0;
-    usdcApr = usdcApr ?? 0;
 
-    const netSolBalance = ((totalSolBalance * solPrice) - usdcLoanBalance) / solPrice;
-    const dailySolChange = totalSolBalance * (solApy / 365) * solPrice;
-    const dailyUsdcChange = usdcLoanBalance * (usdcApr / 365);
+    let netSolBalance = 0;
+    let dailySolChange = 0;
+    let dailyUsdcChange = 0;
+
+    if (accountData) {
+        netSolBalance = ((Number(baseUnitToUi(accountData.solBalanceBaseUnits, DECIMALS_SOL)) * solPrice) - Number(baseUnitToUi(accountData.usdcBalanceBaseUnits, DECIMALS_USDC))) / solPrice;
+        dailySolChange = Number(baseUnitToUi(accountData.solBalanceBaseUnits, DECIMALS_SOL)) * (accountData.solRate / 365) * solPrice;
+        dailyUsdcChange = Number(baseUnitToUi(accountData.usdcBalanceBaseUnits, DECIMALS_USDC)) * (accountData.usdcRate / 365);
+    }
+
     const dailyNetChange = dailySolChange - dailyUsdcChange;
 
     const CHANGE_DECIMAL_PRECISION = 4;
 
     return (
         <div className="dashboard-wrapper">
-            {!balanceLoaded &&
+            {!accountData &&
                 <div className={styles.balanceWrapper}>
                     <div className={styles.loadingBalance}>
                         <p className={`${styles.fiatAmount} ${styles.smallMargin}`}>$</p>
@@ -51,7 +51,7 @@ export default function MainView({
                 </div>
             }
 
-            {balanceLoaded &&
+            {accountData &&
                 <div className={styles.balanceWrapper}>
                     <p className={styles.title}>
                         {truncateToDecimalPlaces(netSolBalance, 5)} SOL

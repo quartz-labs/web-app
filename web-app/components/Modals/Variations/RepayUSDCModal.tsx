@@ -6,19 +6,19 @@ import { useConnection } from "@solana/wallet-adapter-react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useError } from "@/context/error-provider";
 import { DECIMALS_USDC, USDC_MINT } from "@/utils/constants";
-import { truncateToDecimalPlaces, uiToBaseUnit } from "@/utils/helpers";
+import { baseUnitToUi, uiToBaseUnit } from "@/utils/helpers";
 import { depositUsdc } from "@/utils/instructions";
-import { BalanceInfo } from "@/utils/balance";
 import { getAssociatedTokenAddress } from "@solana/spl-token";
+import { AccountData } from "@/utils/driftData";
 
 interface RepayUSDCModalProps {
-    balanceInfo: BalanceInfo,
+    accountData: AccountData | null,
     isValid: (amount: number, minAmount: number, maxAmount: number) => string;
     closeModal: (signature?: string) => void;
 }
 
 export default function RepayUSDCModal(
-    {balanceInfo, isValid, closeModal} : RepayUSDCModalProps
+    {accountData, isValid, closeModal} : RepayUSDCModalProps
 ) {
     const { connection } = useConnection();
     const { showError } = useError();
@@ -33,9 +33,9 @@ export default function RepayUSDCModal(
 
     const [usdcWalletBalance, setUsdcWalletBalance] = useState(0);
     let maxRepay = 0;
-    if (balanceInfo.solUi !== null && balanceInfo.usdcUi !== null && balanceInfo.solPriceUSD !== null) {
-        const rawMaxRepay = Math.min(balanceInfo.usdcUi, usdcWalletBalance);
-        maxRepay = truncateToDecimalPlaces(rawMaxRepay, DECIMALS_USDC);
+    if (accountData !== null) {
+        const rawMaxRepay = Math.min(accountData.usdcBalanceBaseUnits, usdcWalletBalance);
+        maxRepay = Number(baseUnitToUi(rawMaxRepay, DECIMALS_USDC));
     }
 
     useEffect(() => {
@@ -43,7 +43,7 @@ export default function RepayUSDCModal(
             if (!wallet) return;
             const tokenAccount = await getAssociatedTokenAddress(USDC_MINT, wallet.publicKey);
             const balance = await connection.getTokenAccountBalance(tokenAccount);
-            setUsdcWalletBalance(Number(balance.value.amount) * DECIMALS_USDC);
+            setUsdcWalletBalance(Number(balance.value.amount));
         }
         fetchUsdcWalletBalance();
     }, [connection, wallet])
@@ -80,8 +80,8 @@ export default function RepayUSDCModal(
                 minDecimals={2} 
                 errorText={errorText}
             >
-                {balanceInfo.usdcUi &&
-                    <p>Loan remaining: {Math.abs(balanceInfo.usdcUi)}</p>
+                {accountData &&
+                    <p>Loan remaining: {baseUnitToUi(accountData.usdcBalanceBaseUnits, DECIMALS_USDC)}</p>
                 }
             </ModalInfoSection>
 

@@ -23,16 +23,16 @@ export async function GET(request: Request) {
   }
 
   try {
-    // const response = await fetch(`http://localhost:8080/drift-withdrawal-limit?address=${address}&marketIndices=${marketIndices}`);
-    const response = await fetch(`https://quartz-server-puoxw.ondigitalocean.app/drift-withdrawal-limit?address=${address}&marketIndices=${marketIndices}`);
+    const response = await fetch(`http://localhost:8080/drift-data?address=${address}&marketIndices=${marketIndices}`);
+    // const response = await fetch(`https://quartz-server-puoxw.ondigitalocean.app/drift-data?address=${address}&marketIndices=${marketIndices}`);
     if (!response.ok) {
       const errorResponse = await response.json();
-      return NextResponse.json({ error: `Unable to fetch Drift limits from server: ${errorResponse}` }, { status: 500 });
+      throw new Error(errorResponse);
     }
 
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
-    return NextResponse.json({ error: `Unable to fetch Drift limits from server: ${error}` }, { status: 500 });
+    return NextResponse.json({ error: `Unable to fetch Drift balance from server: ${error}` }, { status: 500 });
   }
 }

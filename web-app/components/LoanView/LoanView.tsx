@@ -1,36 +1,33 @@
 import { ViewProps } from "@/app/dashboard/page";
 import styles from "./LoanView.module.css";
-import { getSign, truncateToDecimalPlaces, truncateToDecimalPlacesAbsolute } from "@/utils/helpers";
+import { baseUnitToUi, getSign, truncateToDecimalPlaces, truncateToDecimalPlacesAbsolute } from "@/utils/helpers";
 import { PuffLoader } from "react-spinners";
+import { DECIMALS_SOL, DECIMALS_USDC } from "@/utils/constants";
 
 interface LoanViewProps extends ViewProps {
     handleRepayUsdc: () => void;
     handleRepayUsdcWithCollateral: () => void;
-    accountHealth: number | null;
 }
 
 export default function LoanView({
     solPrice,
-    totalSolBalance,
-    usdcLoanBalance,
-    solApy,
-    usdcApr,
+    accountData,
     swapView,
     handleRepayUsdc,
     handleRepayUsdcWithCollateral,
-    accountHealth
 }: LoanViewProps) {
-    // TODO - If only daily rates are null, just keep them loading and show balance
-    const balanceLoaded = (solPrice !== null && totalSolBalance !== null && usdcLoanBalance !== null && solApy !== null && usdcApr !== null);
     solPrice = solPrice ?? 0;
-    totalSolBalance = totalSolBalance ?? 0;
-    usdcLoanBalance = usdcLoanBalance ?? 0;
-    solApy = solApy ?? 0;
-    usdcApr = usdcApr ?? 0;
 
-    const netSolBalance = ((totalSolBalance * solPrice) - usdcLoanBalance) / solPrice;
-    const dailySolChange = totalSolBalance * (solApy / 365) * solPrice;
-    const dailyUsdcChange = usdcLoanBalance * (usdcApr / 365);
+    let netSolBalance = 0;
+    let dailySolChange = 0;
+    let dailyUsdcChange = 0;
+
+    if (accountData) {
+        netSolBalance = ((Number(baseUnitToUi(accountData.solBalanceBaseUnits, DECIMALS_SOL)) * solPrice) - Number(baseUnitToUi(accountData.usdcBalanceBaseUnits, DECIMALS_USDC))) / solPrice;
+        dailySolChange = Number(baseUnitToUi(accountData.solBalanceBaseUnits, DECIMALS_SOL)) * (accountData.solRate / 365) * solPrice;
+        dailyUsdcChange = Number(baseUnitToUi(accountData.usdcBalanceBaseUnits, DECIMALS_USDC)) * (accountData.usdcRate / 365);
+    }
+
     const dailyNetChange = dailySolChange - dailyUsdcChange;
 
     const CHANGE_DECIMAL_PRECISION = 4;
@@ -41,7 +38,7 @@ export default function LoanView({
                 <div>
                     <p className={styles.title}>Total Assets</p>
 
-                    {!balanceLoaded &&
+                    {!accountData &&
                         <PuffLoader
                             color={"#ffffff"}
                             size={50}
@@ -51,22 +48,22 @@ export default function LoanView({
                         />
                     }
 
-                    {balanceLoaded &&
+                    {accountData &&
                         <div>
                             <p className={styles.fiatAmount}>
-                                ${(totalSolBalance * solPrice).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                ${(Number(baseUnitToUi(accountData.solBalanceBaseUnits, DECIMALS_SOL)) * solPrice).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </p>
                             <p className={styles.subBalance}>
-                                {truncateToDecimalPlaces(totalSolBalance, 5)} SOL ({getSign(dailySolChange, CHANGE_DECIMAL_PRECISION)}${truncateToDecimalPlacesAbsolute(dailySolChange, CHANGE_DECIMAL_PRECISION)} /day)
+                                {truncateToDecimalPlaces(Number(baseUnitToUi(accountData.solBalanceBaseUnits, DECIMALS_SOL)), 5)} SOL ({getSign(dailySolChange, CHANGE_DECIMAL_PRECISION)}${truncateToDecimalPlacesAbsolute(dailySolChange, CHANGE_DECIMAL_PRECISION)} /day)
                             </p>
                         </div>
                     }
                 </div>
 
                 <div>
-                    <p className={styles.title}>Loans {(accountHealth !== null) && <span>(Account Health: {accountHealth})</span>}</p>
+                    <p className={styles.title}>Loans {(accountData !== null) && <span>(Health: {accountData.health}%)</span>}</p>
 
-                    {!balanceLoaded &&
+                    {!accountData &&
                         <PuffLoader
                             color={"#ffffff"}
                             size={50}
@@ -76,10 +73,10 @@ export default function LoanView({
                         />
                     }
 
-                    {balanceLoaded &&
+                    {accountData &&
                         <div>
                             <p className={styles.fiatAmount}>
-                                ${usdcLoanBalance.toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                ${Number(baseUnitToUi(accountData.usdcBalanceBaseUnits, DECIMALS_USDC)).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </p>
                             <p className={styles.subBalance}>
                                 USDC ({getSign(dailyUsdcChange, CHANGE_DECIMAL_PRECISION)}${truncateToDecimalPlacesAbsolute(dailyUsdcChange, CHANGE_DECIMAL_PRECISION)} /day)
@@ -91,7 +88,7 @@ export default function LoanView({
                 <div>
                     <p className={styles.title}>Net Balance</p>
 
-                    {!balanceLoaded &&
+                    {!accountData &&
                         <PuffLoader
                             color={"#ffffff"}
                             size={50}
@@ -101,7 +98,7 @@ export default function LoanView({
                         />
                     }
 
-                    {balanceLoaded &&
+                    {accountData &&
                         <div>
                             <p className={styles.fiatAmount}>
                                 ${(netSolBalance * solPrice).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}

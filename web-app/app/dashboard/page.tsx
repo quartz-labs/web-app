@@ -2,27 +2,21 @@
 
 import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { hasBetaKey, isVaultInitialized } from '@/utils/helpers';
 import Account from '@/components/Account/Account';
 import MainView from '@/components/MainView/MainView';
 import LoanView from '@/components/LoanView/LoanView';
 import styles from "./page.module.css";
-import { fetchDriftBalance, fetchDriftRates, fetchSolPrice } from '@/utils/apis';
-import { getVault } from '@/utils/getAccounts';
-import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC } from '@/utils/constants';
+import { fetchDriftData, AccountData } from '@/utils/driftData';
 import posthog from 'posthog-js';
 import { useError } from '@/context/error-provider';
 import { captureError } from '@/utils/errors';
 import Modal, { ModalVariation } from '@/components/Modals/Modal';
-import { fetchDriftHealth } from '@/utils/apis';
 
 export interface ViewProps {
     solPrice: number | null;
-    totalSolBalance: number | null;
-    usdcLoanBalance: number | null;
-    solApy: number | null;
-    usdcApr: number | null;
+    accountData: AccountData | null;
     swapView: () => void;
 }
 
@@ -45,95 +39,56 @@ export default function Dashboard() {
     const [mainView, setMainView] = useState(true);
     const [modal, setModal] = useState(ModalVariation.Disabled);
 
-    const [accountHealth, setAccountHealth] = useState<number | null>(null);
     const [solPrice, setSolPrice] = useState<number | null>(null);
-    const [totalSolBalance, setTotalSolBalance] = useState<number | null>(null);
-    const [usdcLoanBalance, setUsdcLoanBalance] = useState<number | null>(null);
-    const [solApy, setSolApy] = useState<number | null>(null);
-    const [usdcApr, setUsdcApr] = useState<number | null>(null);
+    const [driftData, setDriftData] = useState<AccountData | null>(null);
 
-    // Fetch Drift Balance
-    const updateBalance = useCallback(async (signature?: string) => {
-        if (!connection || !wallet || !await isVaultInitialized(connection, wallet.publicKey)) return;
+    const updateDriftData = useCallback(async (signature?: string) => {
+        if(!wallet) return;
 
-        setTotalSolBalance(null);
-        setUsdcLoanBalance(null);
-
-        if (signature) await connection.confirmTransaction({ signature, ...(await connection.getLatestBlockhash()) }, "finalized");
-
-        let totalSolBalance, usdcLoanBalance;
-        try {
-            [totalSolBalance, usdcLoanBalance] = await fetchDriftBalance(
-                getVault(wallet.publicKey), 
-                [
-                    DRIFT_MARKET_INDEX_SOL,
-                    DRIFT_MARKET_INDEX_USDC
-                ]
-            );
-        } catch (error) {
-            captureError(showError, "Could not fetch Drift deposits balance", "./app/dashboard/page.tsx", error, wallet?.publicKey);
-            // TODO - Retry for a set amount of times
-            return;
+        if (signature) {
+            setDriftData(null);
+            await connection.confirmTransaction({ signature, ...(await connection.getLatestBlockhash()) }, "finalized");
         }
 
-        setTotalSolBalance(Math.abs(totalSolBalance));
-        setUsdcLoanBalance(Math.abs(usdcLoanBalance));
-    }, [connection, wallet, showError]);
-
-
+        try {
+            const data = await fetchDriftData(wallet.publicKey)
+            setDriftData(data);
+        } catch (error) {
+            captureError(showError, "Could not fetch Drift rates", "./app/dashboard/page.tsx", error, wallet?.publicKey);
+        }
+    }, [showError, wallet, connection]);
+    
     useEffect(() => {
-        // Fetch SOL price
-        const updatePrice = async() => {
+        const updateSolPrice = async() => {
             try {
-                setSolPrice(await fetchSolPrice());
+                const response = await fetch('/api/solana-price');
+                if (!response.ok) {
+                    const errorResponse = await response.json();
+                    throw new Error(`Failed to fetch Drift data: ${errorResponse.error}`);
+                }
+                const responseJson = await response.json();
+
+                const solPrice = Number(responseJson);
+                if (isNaN(solPrice)) throw new Error(`Sol price is NaN, instead found ${responseJson}`);
+
+                setSolPrice(solPrice);
             } catch (error) {
                 captureError(showError, "Could not fetch SOL price", "./app/dashboard/page.tsx", error, wallet?.publicKey);
             }
         }
 
-        // Fetch Drift APR & APY
-        const updateRates = async() => {
-            try {
-                const rates = await fetchDriftRates([
-                    DRIFT_MARKET_INDEX_SOL,
-                    DRIFT_MARKET_INDEX_USDC
-                ]);
+        updateSolPrice();
+        updateDriftData();
 
-                const solDepositRate = rates[0].depositRate;
-                const usdcBorrowRate = rates[1].borrowRate;
-
-                setSolApy(solDepositRate);
-                setUsdcApr(usdcBorrowRate);
-            } catch (error) {
-                captureError(showError, "Could not fetch Drift rates", "./app/dashboard/page.tsx", error, wallet?.publicKey);
-            }
-        }
-
-        const updateHealth = async() => {
-            try {
-                if(!wallet) return;
-                const health = await fetchDriftHealth(getVault(wallet.publicKey));
-                setAccountHealth(health);
-            } catch (error) {
-                captureError(showError, "Could not fetch Drift account health", "./app/dashboard/page.tsx", error, wallet?.publicKey);
-            }
-        }
-
-        updateBalance();
-        updatePrice();
-        updateRates();
-        updateHealth();
-        
         const interval = setInterval(() => {
-            updatePrice();
-            updateRates();
-            updateHealth();
+            updateSolPrice();
+            updateDriftData();
         }, 30_000);
         return () => clearInterval(interval);
-    }, [showError, wallet, updateBalance]);
+    }, [showError, wallet, updateDriftData]);
 
     const onModalClose = (signature?: string) => {
-        if (signature) updateBalance(signature);
+        if (signature) updateDriftData(signature);
         setModal(ModalVariation.Disabled);
     }
 
@@ -141,13 +96,8 @@ export default function Dashboard() {
         <main className={styles.maxHeight}>
             <Modal 
                 variation={modal}
-                balanceInfo={{
-                    solUi: totalSolBalance,
-                    usdcUi: (usdcLoanBalance !== null) ? Math.abs(usdcLoanBalance) : null,
-                    solPriceUSD: solPrice
-                }}
-                solApy={solApy}
-                usdcApr={usdcApr}
+                accountData={driftData}
+                solPriceUSD={solPrice}
                 onClose={onModalClose} 
             />
 
@@ -157,10 +107,7 @@ export default function Dashboard() {
                 {mainView &&
                     <MainView
                         solPrice={solPrice}
-                        totalSolBalance={totalSolBalance}
-                        usdcLoanBalance={usdcLoanBalance}
-                        solApy={solApy}
-                        usdcApr={usdcApr}
+                        accountData={driftData}
                         swapView={() => setMainView(false)}
 
                         handleDepositSol={() => setModal(ModalVariation.DepositSOL)}
@@ -172,15 +119,11 @@ export default function Dashboard() {
                 {!mainView &&
                     <LoanView
                         solPrice={solPrice}
-                        totalSolBalance={totalSolBalance}
-                        usdcLoanBalance={usdcLoanBalance}
-                        solApy={solApy}
-                        usdcApr={usdcApr}
+                        accountData={driftData}
                         swapView={() => setMainView(true)}
 
                         handleRepayUsdc={() => setModal(ModalVariation.RepayUSDC)}
                         handleRepayUsdcWithCollateral={() => setModal(ModalVariation.RepayUSDCWithCollateral)}
-                        accountHealth={accountHealth}
                     />
                 }
             </div>

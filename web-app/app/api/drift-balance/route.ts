@@ -24,6 +24,11 @@ export async function GET(request: Request) {
 
   try {
     const response = await fetch(`https://quartz-server-puoxw.ondigitalocean.app/drift-balance?address=${address}&marketIndices=${marketIndices}`);
+    if (!response.ok) {
+      const errorResponse = await response.json();
+      return NextResponse.json({ error: `Unable to fetch Drift balance from server: ${errorResponse}` }, { status: 500 });
+    }
+
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {

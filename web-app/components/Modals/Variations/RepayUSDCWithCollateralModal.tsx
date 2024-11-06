@@ -5,19 +5,20 @@ import ModalButtons from "../DefaultLayout/ModalButtons";
 import { useConnection } from "@solana/wallet-adapter-react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useError } from "@/context/error-provider";
-import { DECIMALS_USDC } from "@/utils/constants";
-import { truncateToDecimalPlaces, uiToBaseUnit } from "@/utils/helpers";
+import { DECIMALS_SOL, DECIMALS_USDC } from "@/utils/constants";
+import { baseUnitToUi, truncateToDecimalPlaces, uiToBaseUnit } from "@/utils/helpers";
 import { liquidateSol } from "@/utils/instructions";
-import { BalanceInfo } from "@/utils/balance";
+import { AccountData } from "@/utils/driftData";
 
 interface RepayUSDCWithCollateralModalProps {
-    balanceInfo: BalanceInfo,
+    accountData: AccountData | null,
+    solPriceUSD: number | null,
     isValid: (amount: number, minAmount: number, maxAmount: number) => string;
     closeModal: (signature?: string) => void;
 }
 
 export default function RepayUSDCWithCollateralModal(
-    {balanceInfo, isValid, closeModal} : RepayUSDCWithCollateralModalProps
+    {accountData, solPriceUSD, isValid, closeModal} : RepayUSDCWithCollateralModalProps
 ) {
     const { connection } = useConnection();
     const { showError } = useError();
@@ -31,9 +32,9 @@ export default function RepayUSDCWithCollateralModal(
     const MIN_AMOUNT = 0.000001;
 
     let maxRepay = 0;
-    if (balanceInfo.solUi !== null && balanceInfo.usdcUi !== null && balanceInfo.solPriceUSD !== null) {
-        const solValue = balanceInfo.solUi * balanceInfo.solPriceUSD;
-        const rawMaxRepay = Math.min(balanceInfo.usdcUi, solValue);
+    if (accountData !== null && solPriceUSD !== null) {
+        const solValue = Number(baseUnitToUi(accountData.solBalanceBaseUnits, DECIMALS_SOL)) * solPriceUSD;
+        const rawMaxRepay = Math.min(Number(baseUnitToUi(accountData.usdcBalanceBaseUnits, DECIMALS_USDC)), solValue);
         maxRepay = truncateToDecimalPlaces(rawMaxRepay, DECIMALS_USDC);
     }
 
@@ -69,8 +70,8 @@ export default function RepayUSDCWithCollateralModal(
                 minDecimals={2}
                 errorText={errorText}
             >
-                {(balanceInfo.usdcUi != null) &&
-                    <p>Loan remaining: {Math.abs(balanceInfo.usdcUi)}</p>
+                {(accountData != null) &&
+                    <p>Loan remaining: {baseUnitToUi(accountData.usdcBalanceBaseUnits, DECIMALS_USDC)}</p>
                 }
             </ModalInfoSection>
 

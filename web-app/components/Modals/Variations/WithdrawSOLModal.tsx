@@ -6,18 +6,19 @@ import { useConnection } from "@solana/wallet-adapter-react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useError } from "@/context/error-provider";
 import { DECIMALS_SOL } from "@/utils/constants";
-import { truncateToDecimalPlaces, uiToBaseUnit } from "@/utils/helpers";
+import { baseUnitToUi, uiToBaseUnit } from "@/utils/helpers";
 import { withdrawLamports } from "@/utils/instructions";
-import { BalanceInfo } from "@/utils/balance";
+import { AccountData } from "@/utils/driftData";
 
 interface WithdrawSOLModalProps {
-    balanceInfo: BalanceInfo;
+    accountData: AccountData | null;
+    solPriceUSD: number | null;
     isValid: (amount: number, minAmount: number, maxAmount: number) => string;
     closeModal: (signature?: string) => void;
 }
 
 export default function WithdrawSOLModal(
-    {balanceInfo, isValid, closeModal} : WithdrawSOLModalProps
+    {accountData, solPriceUSD, isValid, closeModal} : WithdrawSOLModalProps
 ) {
     const { connection } = useConnection();
     const { showError } = useError();
@@ -29,16 +30,12 @@ export default function WithdrawSOLModal(
     const amount = Number(amountStr);
 
     const MIN_AMOUNT = 0.000001;
-
-    let maxWithdraw = 0;
-    if (balanceInfo.solUi !== null && balanceInfo.usdcUi !== null && balanceInfo.solPriceUSD !== null) {
-        const requiredSol = balanceInfo.usdcUi / (balanceInfo.solUi * balanceInfo.solPriceUSD);
-        const rawMaxWithdraw = balanceInfo.solUi - requiredSol;
-        maxWithdraw = truncateToDecimalPlaces(rawMaxWithdraw, DECIMALS_SOL);
-    }
-
+    const maxAmount = (accountData !== null)
+        ? Number(baseUnitToUi(accountData.solWithdrawLimitBaseUnits, DECIMALS_SOL))
+        : 0;
+    
     const handleConfirm = async () => {
-        const error = isValid(amount, MIN_AMOUNT, maxWithdraw);
+        const error = isValid(amount, MIN_AMOUNT, maxAmount);
         if (error) {
             setErrorText(error);
             return
@@ -59,18 +56,18 @@ export default function WithdrawSOLModal(
                 title="Withdraw SOL"
                 denomination="SOL"
                 amountStr={amountStr}
-                maxAmount={maxWithdraw}
+                maxAmount={maxAmount}
                 maxDecimals={DECIMALS_SOL}
                 setAmountStr={setAmountStr}
             />
 
             <ModalInfoSection 
-                maxAmount={maxWithdraw} 
+                maxAmount={maxAmount} 
                 minDecimals={0} 
                 errorText={errorText}
             >
-                {(balanceInfo.solPriceUSD !== null) &&
-                    <p>${(balanceInfo.solPriceUSD * amount).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                {(solPriceUSD !== null) &&
+                    <p>${(solPriceUSD * amount).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                 }
             </ModalInfoSection>
 

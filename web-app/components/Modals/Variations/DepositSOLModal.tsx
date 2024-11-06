@@ -8,21 +8,21 @@ import { useError } from "@/context/error-provider";
 import { DECIMALS_SOL, MICRO_LAMPORTS_PER_LAMPORT } from "@/utils/constants";
 import { getAccountsFromInstructions, uiToBaseUnit } from "@/utils/helpers";
 import { depositLamports, makeDepositLamportsInstructions } from "@/utils/instructions";
-import { BalanceInfo } from "@/utils/balance";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { captureError } from "@/utils/errors";
 import { getPriorityFeeEstimate } from "@/utils/transactionSender";
 import { AccountLayout } from "@solana/spl-token";
+import { AccountData } from "@/utils/driftData";
 
 interface DepositSOLModalProps {
-    balanceInfo: BalanceInfo
-    apy: number | null;
+    solPriceUSD: number | null;
+    accountData: AccountData | null;
     isValid: (amount: number, minAmount: number, maxAmount: number) => string;
     closeModal: (signature?: string) => void;
 }
 
 export default function DepositSOLModal(
-    {balanceInfo, apy, isValid, closeModal} : DepositSOLModalProps
+    {accountData, solPriceUSD, isValid, closeModal} : DepositSOLModalProps
 ) {
     const { connection } = useConnection();
     const { showError } = useError();
@@ -60,7 +60,7 @@ export default function DepositSOLModal(
             }
         }
         fetchMaxDeposit();
-    }, [connection, wallet, showError])
+    }, [connection, wallet, showError]);
 
     const handleConfirm = async () => {
         const error = isValid(Number(amountStr), MIN_AMOUNT, maxDeposit);
@@ -94,8 +94,8 @@ export default function DepositSOLModal(
                 minDecimals={0} 
                 errorText={errorText}
             >
-                {(balanceInfo.solPriceUSD !== null && apy !== null) &&
-                    <p>${(balanceInfo.solPriceUSD * amount).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="tiny-text">({(apy * 100).toFixed(4)}% APY)</span></p>
+                {(solPriceUSD !== null && accountData !== null) &&
+                    <p>${(solPriceUSD * amount).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="tiny-text">({(accountData.solRate * 100).toFixed(4)}% APY)</span></p>
                 }
             </ModalInfoSection>
 
