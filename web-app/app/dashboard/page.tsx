@@ -13,6 +13,7 @@ import posthog from 'posthog-js';
 import { useError } from '@/context/error-provider';
 import { captureError } from '@/utils/errors';
 import Modal, { ModalVariation } from '@/components/Modals/Modal';
+import { getVault } from '@/utils/getAccounts';
 
 export interface ViewProps {
     solPrice: number | null;
@@ -51,7 +52,16 @@ export default function Dashboard() {
         }
 
         try {
-            const data = await fetchDriftData(wallet.publicKey)
+            const rawData = await fetchDriftData(getVault(wallet.publicKey));
+            const data: AccountData = {
+                solBalanceBaseUnits: rawData.balances[0],
+                usdcBalanceBaseUnits: Math.abs(rawData.balances[1]),
+                solWithdrawLimitBaseUnits: rawData.withdrawLimits[0],
+                usdcWithdrawLimitBaseUnits: rawData.withdrawLimits[1],
+                solRate: rawData.rates[0].depositRate,
+                usdcRate: rawData.rates[1].borrowRate,
+                health: rawData.health
+            }
             setDriftData(data);
         } catch (error) {
             captureError(showError, "Could not fetch Drift rates", "./app/dashboard/page.tsx", error, wallet?.publicKey);

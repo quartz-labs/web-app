@@ -3,52 +3,6 @@ import { Wallet, DriftClient, User as DriftUser, calculateDepositRate, calculate
 import { DRIFT_MARKET_INDEX_SOL, HELIUS_RPC_URL, LOCAL_SECRET, MICRO_CENTS_PER_USDC } from "../config.js";
 import { bnToDecimal } from "../helpers.js";
 
-export async function getDriftBalances(address: string, marketIndicesParam: string, driftClientManager: DriftClientManager) {
-    const marketIndices = marketIndicesParam.split(',').map(Number).filter(n => !isNaN(n));
-    const balances = await driftClientManager.getUserBalances(address, marketIndices);
-    return balances;
-}
-
-
-export async function getDriftRates(marketIndicesParam: string, driftClientManager: DriftClientManager) {
-    const marketIndices = marketIndicesParam.split(',').map(Number).filter(n => !isNaN(n));
-
-    const spotMarketPromises = marketIndices.map(async (index) => {
-        const spotMarket = await driftClientManager.getSpotMarketAccount(index);
-        if (!spotMarket) throw new Error(`Could not find spot market for index ${index}`);
-    
-        const depositRateBN = calculateDepositRate(spotMarket);
-        const borrowRateBN = calculateBorrowRate(spotMarket);
-    
-        return {
-            depositRate: bnToDecimal(depositRateBN, 6),
-            borrowRate: bnToDecimal(borrowRateBN, 6)
-        };
-    });
-    
-    const rates = await Promise.all(spotMarketPromises);
-    return rates;
-}
-
-export async function getDriftHealth(address: string, driftClientManager: DriftClientManager) {
-    const health = await driftClientManager.getUserHealth(address);
-    return health;
-}
-
-export async function getDriftWithdrawalLimit(address: string, marketIndicesParam: string, driftClientManager: DriftClientManager) {
-    const marketIndices = marketIndicesParam.split(',').map(Number).filter(n => !isNaN(n));
-
-    const withdrawalLimitPromises = marketIndices.map(async (index) => {
-        const withdrawalLimit = await driftClientManager.getWithdrawalLimit(address, index);
-        if (!withdrawalLimit) throw new Error(`Could not find withdrawal limit for market index ${index}`);
-    
-        return withdrawalLimit;
-    });
-
-    const withdrawalLimits = await Promise.all(withdrawalLimitPromises);
-    return withdrawalLimits;
-}
-
 export async function getDriftData(address: string, marketIndices: number[], driftClientManager: DriftClientManager) {
     const balancePromise = driftClientManager.getUserBalances(address, marketIndices);
 
@@ -165,32 +119,6 @@ export class DriftClientManager {
         return user.getHealth();
     }
 
-    public async getHealthComponents(address: string) {
-        await this.emulateAccount(new PublicKey(address));
-        const user = this.getUser();
-        const healthComponents = await user.getHealthComponents({marginCategory: 'Maintenance'});
-        
-        // Convert BN objects to decimal numbers
-        return {
-            deposits: healthComponents.deposits.map(d => ({
-                marketIndex: d.marketIndex,
-                size: d.size.toNumber(),
-                value: d.value.toNumber(),
-                weight: d.weight.toNumber(),
-                weightedValue: d.weightedValue.toNumber()
-            })),
-            borrows: healthComponents.borrows.map(b => ({
-                marketIndex: b.marketIndex,
-                size: -Math.abs(b.size.toNumber()), // Keep negative for borrows
-                value: b.value.toNumber(),
-                weight: b.weight.toNumber(),
-                weightedValue: b.weightedValue.toNumber()
-            })),
-            perpPositions: healthComponents.perpPositions,
-            perpPnl: healthComponents.perpPnl
-        };
-    }
-
     public async getSpotMarketAccount(marketIndex: number) {
         return await this.driftClient.getSpotMarketAccount(marketIndex);
     }
@@ -208,17 +136,4 @@ export class DriftClientManager {
     async emulateAccount(address: PublicKey) {
         await this.driftClient.emulateAccount(address);
     }
-}
-
-function queryDriftBalance(user: DriftUser, marketIndex: number) {
-    const rawBalance = user.getTokenAmount(marketIndex);
-    const decimalPlaces = getDecimalPlaces(marketIndex);
-    const formattedBalance = Number(rawBalance.toString(10)) / decimalPlaces;
-    return formattedBalance;
-}
-
-function getDecimalPlaces(marketIndex: number) {
-    //TODO: logic that gets decimal places based on the market index, either from data base or from drift client
-    const decimalPlaces = (marketIndex === DRIFT_MARKET_INDEX_SOL) ? LAMPORTS_PER_SOL : MICRO_CENTS_PER_USDC;
-    return decimalPlaces;
 }
