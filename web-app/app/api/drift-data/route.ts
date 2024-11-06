@@ -33,6 +33,6 @@ export async function GET(request: Request) {
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
-    return NextResponse.json({ error: `Unable to fetch Drift balance from server: ${error}` }, { status: 500 });
+    return NextResponse.json({ error: `Unable to fetch Drift data: ${error}` }, { status: 500 });
   }
 }

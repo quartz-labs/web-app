@@ -64,7 +64,7 @@ export default function Dashboard() {
             }
             setDriftData(data);
         } catch (error) {
-            captureError(showError, "Could not fetch Drift rates", "./app/dashboard/page.tsx", error, wallet?.publicKey);
+            captureError(showError, "Could not fetch Drift data", "./app/dashboard/page.tsx", error, wallet?.publicKey);
         }
     }, [showError, wallet, connection]);
     

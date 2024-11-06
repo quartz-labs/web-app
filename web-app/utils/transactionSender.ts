@@ -5,11 +5,6 @@ import { ShowErrorProps } from "@/context/error-provider";
 import { getAccountsFromInstructions } from "./helpers";
 
 export const sendTransactionHandler = async (connection: Connection, tx: VersionedTransaction) => {
-    const simulation = await connection.simulateTransaction(tx);
-    if (simulation.value.err) {
-        throw new Error(`Transaction simulation failed: ${simulation.value.err} | ${simulation.value.logs}`)
-    }
-
     const signature = await connection.sendRawTransaction(tx.serialize());
     return signature;
 

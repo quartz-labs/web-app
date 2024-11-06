@@ -569,7 +569,7 @@ export const liquidateSol = async (wallet: AnchorWallet, connection: web3.Connec
         return signature;
     } catch (error) {
         if (!(error instanceof WalletSignTransactionError)) {
-            captureError(showError, "Could not withdraw USDC", "utils: /instructions.ts", error, wallet.publicKey);
+            captureError(showError, "Could not liquidate loan", "utils: /instructions.ts", error, wallet.publicKey);
         }
         return null;
     }
