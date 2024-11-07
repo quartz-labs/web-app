@@ -1,5 +1,5 @@
 import { Express, Request, Response } from 'express';
-import { DriftClientManager, getDriftData } from './api/driftClientManager.js';
+import { DriftClientManager, getDriftApy, getDriftData } from './api/driftClientManager.js';
 import { getPriceData } from './api/getPrice.js';
 
 // Initialize cache with a default TTL of 60 seconds
@@ -15,6 +15,16 @@ export function setupRoutes(app: Express, driftClientManager: DriftClientManager
     } catch (error) {
       console.error('Error fetching Data data:', error);
       res.status(500).json({ error: 'Failed to retrieve Drift data' });
+    }
+  });
+
+  app.get("/get-apy", async (req: Request, res: Response) => {
+    try {
+      const apy = await getDriftApy(driftClientManager);
+      res.status(200).json(apy);
+    } catch (error) {
+      console.error('Error fetching Data apy:', error);
+      res.status(500).json({ error: 'Failed to retrieve Drift apy' });
     }
   });
 

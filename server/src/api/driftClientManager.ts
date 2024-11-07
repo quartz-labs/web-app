@@ -47,6 +47,18 @@ export async function getDriftData(address: string, marketIndices: number[], dri
         health
     }
 }
+
+
+export async function getDriftApy(driftClientManager: DriftClientManager) {
+    const USDC_MARKET_INDEX = 0;
+
+    const spotMarket = await driftClientManager.getSpotMarketAccount(USDC_MARKET_INDEX);
+    if (!spotMarket) throw new Error(`Could not find spot market for index ${USDC_MARKET_INDEX}`);
+
+    const depositRateBN = calculateDepositRate(spotMarket);
+    const apy = bnToDecimal(depositRateBN, 6);
+    return apy;
+}
   
 
 export class DriftClientManager {
