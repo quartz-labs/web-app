@@ -2,6 +2,7 @@ import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import styles from "../DefaultLayout/DefaultLayout.module.css";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { getDisplayWalletAddress } from "@/utils/helpers";
 
 interface TelegramModalProps {
     closeModal: () => void;
@@ -11,7 +12,30 @@ export default function TelegramModal(
     {closeModal} : TelegramModalProps
 ) {
     const wallet = useAnchorWallet();
-    const publicKey = wallet ? wallet.publicKey.toString() : "";
+
+    const [publicKey, setPublicKey] = useState("");
+    const [publicKeyClass, setPublicKeyClass] = useState(styles.addressCopyText);
+
+    useEffect(() => {
+        const updatePublicKey = () => {
+            if (!wallet) return;
+    
+            if (window.innerWidth >= 400) {
+                setPublicKey(wallet.publicKey.toString());
+                setPublicKeyClass(styles.addressCopyText);
+            } else {
+                setPublicKey(getDisplayWalletAddress(wallet.publicKey.toString()));
+                setPublicKeyClass("");
+            }
+        };
+
+        updatePublicKey();
+
+        window.addEventListener("resize", updatePublicKey);
+        return () => {
+            window.removeEventListener("resize", updatePublicKey);
+        };
+    }, [wallet]);
 
     const [displayCopied, setDisplayCopied] = useState(false);
     const COPIED_DURATION = 1200;
@@ -76,7 +100,7 @@ export default function TelegramModal(
 
                         {!displayCopied &&
                             <>  
-                                <p>{publicKey}</p>
+                                <p className={publicKeyClass}>{publicKey}</p>
                                 <Image
                                     src="/copy.svg"
                                     alt="Copy"

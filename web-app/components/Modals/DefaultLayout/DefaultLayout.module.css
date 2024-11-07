@@ -59,11 +59,20 @@
     padding: 16px 18px;
     border-radius: 14px;
     border: 1px solid var(--placeholder-glass-stroke);
-    font-size: var(--text-size-small);
 
     display: flex;
     align-items: center;
     justify-content: space-between;
+}
+
+.addressCopyText {
+    font-size: var(--text-size-small);
+}
+
+@media only screen and (max-width: 450px) {
+    .addressCopyText {
+        font-size: var(--text-size-tiny);
+    }
 }
 
 .addressCopyButton:hover {

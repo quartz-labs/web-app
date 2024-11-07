@@ -1,5 +1,6 @@
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import styles from "../DefaultLayout/DefaultLayout.module.css";
+import { getDisplayWalletAddress } from "@/utils/helpers";
 
 interface OfframpCompleteModalProps {
     url: string;
@@ -10,9 +11,7 @@ export default function OfframpCompleteModal(
     {url, closeModal} : OfframpCompleteModalProps
 ) {
     const wallet = useAnchorWallet();
-    const walletkey = wallet 
-        ? ` (${wallet.publicKey.toString().slice(0, 4)}...${wallet.publicKey.toString().slice(-4)})` 
-        : "";
+    const walletkey = wallet ? getDisplayWalletAddress(wallet.publicKey.toString()) : "";
 
     return (
         <>

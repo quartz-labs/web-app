@@ -186,3 +186,7 @@ export async function getAccountsFromInstructions(connection: Connection, instru
     const accountKeys = accounts.map(key => key.toBase58());
     return accountKeys;
 }
+
+export function getDisplayWalletAddress(address: string) {
+    return `(${address.slice(0, 4)}...${address.slice(-4)})` 
+}
