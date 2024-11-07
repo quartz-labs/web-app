@@ -42,7 +42,7 @@ a:hover {
   align-items: center;
 
   gap: 15px;
-  padding: 14px 26px;
+  padding: 14px 16px;
   background: var(--gradient-glass-stroke);
 
   font-size: var(--text-size-p);

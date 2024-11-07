@@ -52,11 +52,11 @@
 
 .addressCopyButton {
     width: 100%;
-    min-height: var(--address-copy-button-height);
+    height: var(--address-copy-button-height);
 
     margin-top: 8px;
     background: var(--color-background);
-    padding: 16px 18px;
+    padding: 0px 18px;
     border-radius: 14px;
     border: 1px solid var(--placeholder-glass-stroke);
 

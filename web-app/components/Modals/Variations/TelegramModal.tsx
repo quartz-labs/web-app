@@ -40,22 +40,6 @@ export default function TelegramModal(
     const [displayCopied, setDisplayCopied] = useState(false);
     const COPIED_DURATION = 1200;
 
-    const openTelegram = () => {
-        if (!wallet) return;
-        const username = "QuartzLTVBot";
-
-        const isMobile = /Android|iPhone|iPad|iPod/i.test(
-            navigator.userAgent
-        );
-        
-        if (isMobile) {
-            // window.location.href = `tg://resolve?domain=${username}`;
-            window.open(`https://telegram.me/${username}`, '_blank');
-        } else {
-            window.open(`https://telegram.me/${username}`, '_blank');
-        }
-    }
-
     // Copy address and display feedback for set time
     useEffect(() => {
         let timer: NodeJS.Timeout;
@@ -118,7 +102,7 @@ export default function TelegramModal(
             <div className={styles.buttons}>
                 <button 
                     className={`glass-button ${styles.mainButton}`}
-                    onClick={openTelegram}
+                    onClick={() => {window.open(`https://telegram.me/QuartzLTVBot`, '_blank');}}
                 >
                     Open Telegram
                 </button>

@@ -23,7 +23,7 @@
     font-size: var(--text-size-large);
     display: flex;
     flex-direction: column;
-    gap: 22px;
+    gap: 20px;
 }
 
 .buttons button {
@@ -33,7 +33,7 @@
 .buttonsRow {
     width: 100%;
     display: flex;
-    gap: 22px;
+    gap: 20px;
 }
 
 @media only screen and (max-width: 428px) {
