@@ -2,8 +2,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-export const LOCAL_SECRET = process.env.SECRET;
-export const HELIUS_RPC_URL = process.env.HELIUS_RPC_URL;
+export const RPC_URL = process.env.RPC_URL || 'https://api.mainnet-beta.solana.com';
 export const PORT = process.env.PORT || 3000;
 
 export const DRIFT_MARKET_INDEX_USDC = 0;

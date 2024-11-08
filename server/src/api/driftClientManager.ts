@@ -1,6 +1,6 @@
 import { Connection, Keypair, PublicKey } from "@solana/web3.js";
 import { Wallet, DriftClient, User as DriftUser, calculateDepositRate, calculateBorrowRate } from "@drift-labs/sdk";
-import { HELIUS_RPC_URL, LOCAL_SECRET } from "../config.js";
+import { RPC_URL } from "../config.js";
 import { bnToDecimal } from "../helpers.js";
 
 export async function getDriftData(address: string, marketIndices: number[], driftClientManager: DriftClientManager) {
@@ -75,16 +75,10 @@ export class DriftClientManager {
 
     private async initializeDriftClient() {
         try {
-            this.connection = new Connection(HELIUS_RPC_URL || 'https://api.mainnet-beta.solana.com');
+            this.connection = new Connection(RPC_URL);
  
-            const secret = JSON.parse(LOCAL_SECRET ?? "") as number[]
-            const secretKey = Uint8Array.from(secret)
-            const keypair = Keypair.fromSecretKey(secretKey)
-
-            this.wallet = new Wallet(keypair);
-
-            console.log("wallet created with keypair:", this.wallet.publicKey.toBase58());
-
+            this.wallet = new Wallet(Keypair.generate());
+            console.log("Wallet created with keypair:", this.wallet.publicKey.toBase58());
 
             this.driftClient = new DriftClient({
                 connection: this.connection,
