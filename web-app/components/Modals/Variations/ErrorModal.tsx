@@ -18,10 +18,10 @@ export default function ErrorModal() {
     }, [hideDetails]);
 
     if (!propsDetails) return (<></>)
-    const { message, body, id } = propsDetails;
+    const { message, body, errorId } = propsDetails;
 
     const limitedBody = body.length > 500 ? `${body.substring(0, 500)}...` : body;
-    const email = `mailto:iarla@quartzpay.io?subject=Error%20Report:%20${id}`;
+    const email = `mailto:iarla@quartzpay.io?subject=Error%20Report:%20${errorId}`;
 
     if (!detailsEnabled) return (<></>);
     return (
@@ -40,7 +40,7 @@ export default function ErrorModal() {
                         </div>
                         
                         <p className="small-text light-text">
-                            Contact support through <a href="https://discord.gg/K3byNmnKNm" target="_blank">Discord</a> or <a href={email} target="_blank">email</a> with the following <span className="no-wrap">Error ID: {id}</span>
+                            Contact support through <a href="https://discord.gg/K3byNmnKNm" target="_blank">Discord</a> or <a href={email} target="_blank">email</a> with the following <span className="no-wrap">Error ID: {errorId}</span>
                         </p>
                     </div>
                 </div>
