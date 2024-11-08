@@ -1,5 +1,5 @@
 import { ViewProps } from "@/app/dashboard/page";
-import styles from "./LoanView.module.css";
+import styles from "./View.module.css";
 import { baseUnitToUi, getSign, truncateToDecimalPlaces, truncateToDecimalPlacesAbsolute } from "@/utils/helpers";
 import { PuffLoader } from "react-spinners";
 import { DECIMALS_SOL, DECIMALS_USDC } from "@/utils/constants";
@@ -36,7 +36,7 @@ export default function LoanView({
 
     return (
         <div className="dashboard-wrapper">
-            <div className={styles.balanceWrapper}>
+            <div className={`${styles.balanceWrapper} ${styles.loanViewWrapper}`}>
                 <div>
                     <p className={styles.title}>Total Assets</p>
 

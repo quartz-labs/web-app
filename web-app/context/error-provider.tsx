@@ -5,7 +5,7 @@ import React, { createContext, useContext, useState } from 'react';
 export interface ShowErrorProps {
   message: string;
   body: string;
-  id: string;
+  errorId: string;
 }
 
 interface ErrorContextProps {

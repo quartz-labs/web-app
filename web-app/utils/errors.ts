@@ -18,12 +18,12 @@ export function captureError(
     showError({
         message: errorString,
         body: error.toString(),
-        id: id
+        errorId: id
     });
 
     posthog.capture(`Error: ${errorString}`, {
         error: error,
-        id: id,
+        errorId: id,
         location: location,
         line: errorStack.toString(),
         wallet: walletString,

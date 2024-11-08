@@ -37,7 +37,7 @@ export default function ErrorPopup() {
     if (!errorEnabled) return (<></>);
     return (
         <button 
-            className={styles.errorPopup} 
+            className={styles.popup} 
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             onClick={() => showDetails(propsError)}

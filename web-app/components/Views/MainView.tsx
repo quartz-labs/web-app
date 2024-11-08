@@ -1,5 +1,5 @@
 import { ViewProps } from "@/app/dashboard/page";
-import styles from "./MainView.module.css";
+import styles from "./View.module.css";
 import { baseUnitToUi, getSign, truncateToDecimalPlaces, truncateToDecimalPlacesAbsolute } from "@/utils/helpers";
 import { PuffLoader } from "react-spinners";
 import React from "react";
@@ -53,16 +53,18 @@ export default function MainView({
 
             {accountData &&
                 <div className={styles.balanceWrapper}>
-                    <p className={styles.title}>
-                        {truncateToDecimalPlaces(netSolBalance, 5)} SOL
-                    </p>
-                    <div className={styles.mainBalance}>
-                        <p className={styles.fiatAmount}>
-                            ${(netSolBalance * solPrice).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    <div>
+                        <p className={styles.title}>
+                            {truncateToDecimalPlaces(netSolBalance, 5)} SOL
                         </p>
-                        <p className={styles.subBalance}>
-                            {getSign(dailyNetChange, CHANGE_DECIMAL_PRECISION)}${truncateToDecimalPlacesAbsolute(dailyNetChange, CHANGE_DECIMAL_PRECISION)} /day
-                        </p>
+                        <div className={styles.mainBalance}>
+                            <p className={styles.fiatAmount}>
+                                ${(netSolBalance * solPrice).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </p>
+                            <p className={styles.subBalance}>
+                                {getSign(dailyNetChange, CHANGE_DECIMAL_PRECISION)}${truncateToDecimalPlacesAbsolute(dailyNetChange, CHANGE_DECIMAL_PRECISION)} /day
+                            </p>
+                        </div>
                     </div>
                 </div>
             }

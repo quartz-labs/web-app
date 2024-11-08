@@ -1,4 +1,4 @@
-.errorPopup {
+.popup {
     position: fixed;
     bottom: 50px;
     left: 100px;
@@ -13,13 +13,13 @@
     border-radius: 18px;
 }
 
-.errorPopup:hover {
+button.popup:hover {
     background-image: 
         var(--overlay), 
         var(--glass-background) !important;
 }
 
-.errorPopup:active {
+button.popup:active {
     background-image: 
         var(--overlay), 
         var(--overlay), 
