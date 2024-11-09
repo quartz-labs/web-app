@@ -34,13 +34,14 @@ button.popup:active {
 
 .message {
     display: flex;
-    gap: 10px;
+    gap: 7px;
     align-items: center;
     justify-content: flex-start;
 
     color: var(--color-text-light);
     font-size: var(--text-size-tiny);
     width: 100%;
+    min-height: 25px;
     text-align: left;
 }
 
