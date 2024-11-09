@@ -18,12 +18,16 @@ export default function TxStatusPopup() {
         waitForSx();
     }, [props, connection, hideTxStatus])
 
-    if (!props || !enabled) return (<></>)
+    if (!props || !enabled) return (<></>);
+
+    const explorerUrl = `https://solscan.io/tx/${props.signature}`;
     return (
         <div className={styles.popup}>
             <div className={styles.heading}>
-                <p className="large-text">Processing transaction...</p>
+                <p>Processing transaction...</p>
             </div>
+
+            <a className={styles.message} href={explorerUrl} target="_blank">View on Solscan</a>
         </div>
     );
 }

@@ -3,9 +3,9 @@
     bottom: 50px;
     left: 100px;
     z-index: 9998;
-    width: 220px;
+    width: 235px;
 
-    padding: 20px;
+    padding: 17px 20px;
     background-image: var(--glass-background);
     background-size: 17% auto, auto, auto, auto;
     backdrop-filter: blur(22px);
