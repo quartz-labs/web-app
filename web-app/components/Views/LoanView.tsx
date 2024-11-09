@@ -63,7 +63,7 @@ export default function LoanView({
                 </div>
 
                 <div>
-                    <p className={styles.title}>Loans {(accountData !== null) && <span>(Health: {accountData.health}%)</span>}</p>
+                    <p className={styles.title}>Loans {accountData && <span>(Health: {accountData.health}%)</span>}</p>
 
                     {!accountData &&
                         <PuffLoader

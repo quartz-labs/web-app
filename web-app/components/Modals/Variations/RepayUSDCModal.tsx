@@ -9,10 +9,10 @@ import { DECIMALS_USDC, USDC_MINT } from "@/utils/constants";
 import { baseUnitToUi, uiToBaseUnit } from "@/utils/helpers";
 import { depositUsdc } from "@/utils/instructions";
 import { getAssociatedTokenAddress } from "@solana/spl-token";
-import { AccountData } from "@/utils/driftData";
+import { AccountData } from "@/utils/accountData";
 
 interface RepayUSDCModalProps {
-    accountData: AccountData | null,
+    accountData: AccountData | undefined;
     isValid: (amount: number, minAmount: number, maxAmount: number) => string;
     closeModal: (signature?: string) => void;
 }
@@ -33,7 +33,7 @@ export default function RepayUSDCModal(
 
     const [usdcWalletBalance, setUsdcWalletBalance] = useState(0);
     let maxRepay = 0;
-    if (accountData !== null) {
+    if (accountData) {
         const rawMaxRepay = Math.min(accountData.usdcBalanceBaseUnits, usdcWalletBalance);
         maxRepay = Number(baseUnitToUi(rawMaxRepay, DECIMALS_USDC));
     }

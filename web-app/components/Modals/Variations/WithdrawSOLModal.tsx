@@ -8,11 +8,11 @@ import { useError } from "@/context/error-provider";
 import { DECIMALS_SOL } from "@/utils/constants";
 import { baseUnitToUi, uiToBaseUnit } from "@/utils/helpers";
 import { withdrawLamports } from "@/utils/instructions";
-import { AccountData } from "@/utils/driftData";
+import { AccountData } from "@/utils/accountData";
 
 interface WithdrawSOLModalProps {
-    accountData: AccountData | null;
-    solPriceUSD: number | null;
+    accountData: AccountData | undefined;
+    solPriceUSD: number | undefined;
     isValid: (amount: number, minAmount: number, maxAmount: number) => string;
     closeModal: (signature?: string) => void;
 }
@@ -30,7 +30,7 @@ export default function WithdrawSOLModal(
     const amount = Number(amountStr);
 
     const MIN_AMOUNT = 0.00001;
-    const maxAmount = (accountData !== null)
+    const maxAmount = (accountData)
         ? Number(baseUnitToUi(accountData.solWithdrawLimitBaseUnits, DECIMALS_SOL))
         : 0;
     
@@ -66,7 +66,7 @@ export default function WithdrawSOLModal(
                 minDecimals={0} 
                 errorText={errorText}
             >
-                {(solPriceUSD !== null) &&
+                {(solPriceUSD !== undefined) &&
                     <p>${(solPriceUSD * amount).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                 }
             </ModalInfoSection>

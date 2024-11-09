@@ -8,11 +8,11 @@ import { useError } from "@/context/error-provider";
 import { DECIMALS_SOL, DECIMALS_USDC } from "@/utils/constants";
 import { baseUnitToUi, truncateToDecimalPlaces, uiToBaseUnit } from "@/utils/helpers";
 import { liquidateSol } from "@/utils/instructions";
-import { AccountData } from "@/utils/driftData";
+import { AccountData } from "@/utils/accountData";
 
 interface RepayUSDCWithCollateralModalProps {
-    accountData: AccountData | null,
-    solPriceUSD: number | null,
+    accountData: AccountData | undefined,
+    solPriceUSD: number | undefined,
     isValid: (amount: number, minAmount: number, maxAmount: number) => string;
     closeModal: (signature?: string) => void;
 }
@@ -32,7 +32,7 @@ export default function RepayUSDCWithCollateralModal(
     const MIN_AMOUNT = 0.01;
 
     let maxRepay = 0;
-    if (accountData !== null && solPriceUSD !== null) {
+    if (accountData && solPriceUSD !== undefined) {
         const solValue = Number(baseUnitToUi(accountData.solBalanceBaseUnits, DECIMALS_SOL)) * solPriceUSD;
         const rawMaxRepay = Math.min(Number(baseUnitToUi(accountData.usdcBalanceBaseUnits, DECIMALS_USDC)), solValue);
         maxRepay = truncateToDecimalPlaces(rawMaxRepay, DECIMALS_USDC);

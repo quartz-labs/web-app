@@ -3,11 +3,11 @@ import ModalDefaultContent from "../DefaultLayout/ModalDefaultContent";
 import ModalInfoSection from "../DefaultLayout/ModalInfoSection";
 import ModalButtons from "../DefaultLayout/ModalButtons";
 import { baseUnitToUi } from "@/utils/helpers";
-import { AccountData } from "@/utils/driftData";
+import { AccountData } from "@/utils/accountData";
 import { DECIMALS_USDC } from "@/utils/constants";
 
 interface OfframpUSDModalProps {
-    accountData: AccountData | null,
+    accountData: AccountData | undefined,
     isValid: (amount: number, minAmount: number, maxAmount: number) => string;
     closeModal: (signature?: string) => void;
 }
@@ -21,7 +21,7 @@ export default function OfframpUSDModal(
     const amount = Number(amountStr);
 
     const MIN_AMOUNT = 31;
-    const maxAmount = (accountData !== null)
+    const maxAmount = (accountData)
         ? Number(baseUnitToUi(accountData.usdcWithdrawLimitBaseUnits, DECIMALS_USDC))
         : 0;
 
@@ -53,7 +53,7 @@ export default function OfframpUSDModal(
                 minDecimals={2} 
                 errorText={errorText}
             >
-                {accountData !== null &&
+                {accountData &&
                     <p>({(accountData.usdcRate * 100).toFixed(4)}% APR)</p>
                 }
             </ModalInfoSection>

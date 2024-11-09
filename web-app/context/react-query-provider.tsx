@@ -9,7 +9,9 @@ export function ReactQueryProvider({ children }: { children: ReactNode }) {
 
   return (
     <QueryClientProvider client={client}>
-      <ReactQueryStreamedHydration>{children}</ReactQueryStreamedHydration>
+      <ReactQueryStreamedHydration>
+        {children}  
+      </ReactQueryStreamedHydration>
     </QueryClientProvider>
   );
 }

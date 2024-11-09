@@ -8,7 +8,7 @@ import OfframpUSDModal from "./Variations/OfframpUSDModal";
 import OfframpCompleteModal from "./Variations/OfframpCompleteModal";
 import RepayUSDCModal from "./Variations/RepayUSDCModal";
 import RepayUSDCWithCollateralModal from "./Variations/RepayUSDCWithCollateralModal";
-import { AccountData } from "@/utils/driftData";
+import { AccountData } from "@/utils/accountData";
 import TelegramModal from "./Variations/TelegramModal";
 
 export enum ModalVariation {
@@ -25,8 +25,8 @@ export enum ModalVariation {
 
 interface ModalProps{
     variation: ModalVariation;
-    accountData: AccountData | null;
-    solPriceUSD: number | null;
+    accountData: AccountData | undefined;
+    solPriceUSD: number | undefined;
     onClose: (signature?: string) => void;
 }
 

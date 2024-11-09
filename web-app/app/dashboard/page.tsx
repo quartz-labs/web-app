@@ -2,28 +2,31 @@
 
 import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react';
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { hasBetaKey, isVaultInitialized } from '@/utils/helpers';
 import Account from '@/components/Account/Account';
 import MainView from '@/components/Views/MainView';
 import LoanView from '@/components/Views/LoanView';
 import styles from "./page.module.css";
-import { fetchDriftData, AccountData } from '@/utils/driftData';
+import { AccountData } from '@/utils/accountData';
 import posthog from 'posthog-js';
 import { useError } from '@/context/error-provider';
 import { captureError } from '@/utils/errors';
 import Modal, { ModalVariation } from '@/components/Modals/Modal';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { DRIFT_MARKET_INDEX_USDC, DRIFT_MARKET_INDEX_SOL } from '@/utils/constants';
 import { getVault } from '@/utils/getAccounts';
 
 export interface ViewProps {
-    solPrice: number | null;
-    accountData: AccountData | null;
+    solPrice: number | undefined;
+    accountData: AccountData | undefined;
     swapView: () => void;
 }
 
 export default function Dashboard() {
     const { connection } = useConnection();
     const { showError } = useError();
+    const queryClient = useQueryClient();
     const wallet = useAnchorWallet();
     const router = useRouter();
 
@@ -40,62 +43,59 @@ export default function Dashboard() {
     const [mainView, setMainView] = useState(true);
     const [modal, setModal] = useState(ModalVariation.Disabled);
 
-    const [solPrice, setSolPrice] = useState<number | null>(null);
-    const [driftData, setDriftData] = useState<AccountData | null>(null);
 
-    const updateDriftData = useCallback(async (signature?: string) => {
+    const { error: priceError, data: solPrice } = useQuery({
+        queryKey: ['solPrice'],
+        queryFn: async () => {
+            const response = await fetch("/api/solana-price");
+            return await response.json();
+        },
+        refetchInterval: 45_000
+    });
+    useEffect(() => {
+        if (priceError) {
+            captureError(showError, "Could not fetch SOL price", "./app/dashboard/page.tsx", priceError, wallet?.publicKey);
+        }
+    }, [priceError, showError, wallet]);
+
+
+    const { error: driftError, data: driftData } = useQuery({
+        queryKey: ['driftData'],
+        queryFn: async () => {
+            if (!wallet) return;
+
+            const marketIndices = [DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC];
+            const vault = getVault(wallet.publicKey);
+
+            const response = await fetch(`/api/drift-data?address=${vault}&marketIndices=${marketIndices}`)
+            const responseJson = await response.json();
+            const data: AccountData = {
+                solBalanceBaseUnits: responseJson.balances[0],
+                usdcBalanceBaseUnits: Math.abs(responseJson.balances[1]),
+                solWithdrawLimitBaseUnits: responseJson.withdrawLimits[0],
+                usdcWithdrawLimitBaseUnits: responseJson.withdrawLimits[1],
+                solRate: responseJson.rates[0].depositRate,
+                usdcRate: responseJson.rates[1].borrowRate,
+                health: responseJson.health
+                };
+            return data;
+        },
+        retry: 5,
+        refetchInterval: 45_000
+    })
+    useEffect(() => {
+        if (driftError) captureError(showError, "Could not fetch Drift data", "./app/dashboard/page.tsx", driftError, wallet?.publicKey);
+    }, [driftError, showError, wallet]);
+
+
+    const updateDriftData = async (signature?: string) => {
         if(!wallet) return;
 
-        if (signature) {
-            setDriftData(null);
-            await connection.confirmTransaction({ signature, ...(await connection.getLatestBlockhash()) }, "finalized");
-        }
+        if (signature) await connection.confirmTransaction({ signature, ...(await connection.getLatestBlockhash()) }, "finalized");
 
-        try {
-            const rawData = await fetchDriftData(getVault(wallet.publicKey));
-            const data: AccountData = {
-                solBalanceBaseUnits: rawData.balances[0],
-                usdcBalanceBaseUnits: Math.abs(rawData.balances[1]),
-                solWithdrawLimitBaseUnits: rawData.withdrawLimits[0],
-                usdcWithdrawLimitBaseUnits: rawData.withdrawLimits[1],
-                solRate: rawData.rates[0].depositRate,
-                usdcRate: rawData.rates[1].borrowRate,
-                health: rawData.health
-            }
-            setDriftData(data);
-        } catch (error) {
-            captureError(showError, "Could not fetch Drift data", "./app/dashboard/page.tsx", error, wallet?.publicKey);
-        }
-    }, [showError, wallet, connection]);
+        queryClient.invalidateQueries({ queryKey: ['driftData'] });
+    };
     
-    useEffect(() => {
-        const updateSolPrice = async() => {
-            try {
-                const response = await fetch('/api/solana-price');
-                if (!response.ok) {
-                    const errorResponse = await response.json();
-                    throw new Error(`Failed to fetch Drift data: ${errorResponse.error}`);
-                }
-                const responseJson = await response.json();
-
-                const solPrice = Number(responseJson);
-                if (isNaN(solPrice)) throw new Error(`Sol price is NaN, instead found ${responseJson}`);
-
-                setSolPrice(solPrice);
-            } catch (error) {
-                captureError(showError, "Could not fetch SOL price", "./app/dashboard/page.tsx", error, wallet?.publicKey);
-            }
-        }
-
-        updateSolPrice();
-        updateDriftData();
-
-        const interval = setInterval(() => {
-            updateSolPrice();
-            updateDriftData();
-        }, 30_000);
-        return () => clearInterval(interval);
-    }, [showError, wallet, updateDriftData]);
 
     const onModalClose = (signature?: string) => {
         if (signature) updateDriftData(signature);

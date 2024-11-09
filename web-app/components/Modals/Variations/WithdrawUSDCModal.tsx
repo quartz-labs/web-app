@@ -8,10 +8,10 @@ import { useError } from "@/context/error-provider";
 import { DECIMALS_USDC } from "@/utils/constants";
 import { baseUnitToUi, uiToBaseUnit } from "@/utils/helpers";
 import { withdrawUsdc } from "@/utils/instructions";
-import { AccountData } from "@/utils/driftData";
+import { AccountData } from "@/utils/accountData";
 
 interface WithdrawUSDCModalProps {
-    accountData: AccountData | null;
+    accountData: AccountData | undefined;
     isValid: (amount: number, minAmount: number, maxAmount: number) => string;
     closeModal: (signature?: string) => void;
 }
@@ -29,7 +29,7 @@ export default function WithdrawUSDCModal(
     const amount = Number(amountStr);
 
     const MIN_AMOUNT = 0.01;
-    const maxAmount = (accountData !== null)
+    const maxAmount = (accountData)
         ? Number(baseUnitToUi(accountData.usdcWithdrawLimitBaseUnits, DECIMALS_USDC))
         : 0;
 
@@ -66,7 +66,7 @@ export default function WithdrawUSDCModal(
                 errorText={errorText}
             >
                 <p>
-                    ${amount.toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {(accountData !== null) &&
+                    ${amount.toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {accountData &&
                         <span className="tiny-text">({(accountData.usdcRate * 100).toFixed(4)}% APR)</span>
                     }
                 </p>

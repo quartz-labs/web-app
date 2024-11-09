@@ -12,11 +12,11 @@ import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { captureError } from "@/utils/errors";
 import { getPriorityFeeEstimate } from "@/utils/transactionSender";
 import { AccountLayout } from "@solana/spl-token";
-import { AccountData } from "@/utils/driftData";
+import { AccountData } from "@/utils/accountData";
 
 interface DepositSOLModalProps {
-    solPriceUSD: number | null;
-    accountData: AccountData | null;
+    solPriceUSD: number | undefined;
+    accountData: AccountData | undefined;
     isValid: (amount: number, minAmount: number, maxAmount: number) => string;
     closeModal: (signature?: string) => void;
 }
@@ -94,7 +94,7 @@ export default function DepositSOLModal(
                 minDecimals={0} 
                 errorText={errorText}
             >
-                {(solPriceUSD !== null && accountData !== null) &&
+                {(solPriceUSD !== undefined && accountData) &&
                     <p>${(solPriceUSD * amount).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="tiny-text">({(accountData.solRate * 100).toFixed(4)}% APY)</span></p>
                 }
             </ModalInfoSection>
