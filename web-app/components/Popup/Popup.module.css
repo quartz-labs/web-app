@@ -2,8 +2,9 @@
     position: fixed;
     bottom: 50px;
     left: 100px;
-    z-index: 9998;
+    z-index: 9997;
     width: 235px;
+    min-height: 100px;
 
     padding: 17px 20px;
     background-image: var(--glass-background);
@@ -14,7 +15,8 @@
 }
 
 .popup.error {
-    border: var(--glass-border-popup);
+    border: var(--glass-border-error);
+    z-index: 9998;
 }
 
 button.popup:hover {
