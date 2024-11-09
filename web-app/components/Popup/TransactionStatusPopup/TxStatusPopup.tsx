@@ -4,6 +4,7 @@ import { useTxStatus } from "@/context/tx-status-provider";
 import styles from "../Popup.module.css";
 import { useConnection } from "@solana/wallet-adapter-react";
 import { useEffect } from "react";
+import { TailSpin } from "react-loader-spinner";
 
 export default function TxStatusPopup() {
     const { props, enabled, hideTxStatus } = useTxStatus();
@@ -27,7 +28,15 @@ export default function TxStatusPopup() {
                 <p>Processing transaction...</p>
             </div>
 
-            <a className={styles.message} href={explorerUrl} target="_blank">View on Solscan</a>
+            <div className={styles.message}>
+                <TailSpin
+                    height="20"
+                    width="20"
+                    color="#ffffffA5"
+                    ariaLabel="loading-spinner"
+                />
+                <a href={explorerUrl} target="_blank">View on Solscan</a>
+            </div>
         </div>
     );
 }
