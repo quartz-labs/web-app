@@ -13,6 +13,7 @@ import { captureError } from "@/utils/errors";
 import { getPriorityFeeEstimate } from "@/utils/transactionSender";
 import { AccountLayout } from "@solana/spl-token";
 import { AccountData } from "@/utils/accountData";
+import { useTxStatus } from "@/context/tx-status-provider";
 
 interface DepositSOLModalProps {
     solPriceUSD: number | undefined;
@@ -26,6 +27,7 @@ export default function DepositSOLModal(
 ) {
     const { connection } = useConnection();
     const { showError } = useError();
+    const { showTxStatus } = useTxStatus();
     const wallet = useAnchorWallet();
 
     const [awaitingSign, setAwaitingSign] = useState(false);
@@ -72,7 +74,7 @@ export default function DepositSOLModal(
 
         setAwaitingSign(true);
         const baseUnits = uiToBaseUnit(amount, DECIMALS_SOL).toNumber();
-        const signature = await depositLamports(wallet, connection, baseUnits, showError);
+        const signature = await depositLamports(wallet, connection, baseUnits, showError, showTxStatus);
         setAwaitingSign(false);
 
         if (signature) closeModal(signature);

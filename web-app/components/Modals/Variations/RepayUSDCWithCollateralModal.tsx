@@ -9,6 +9,7 @@ import { DECIMALS_SOL, DECIMALS_USDC } from "@/utils/constants";
 import { baseUnitToUi, truncateToDecimalPlaces, uiToBaseUnit } from "@/utils/helpers";
 import { liquidateSol } from "@/utils/instructions";
 import { AccountData } from "@/utils/accountData";
+import { useTxStatus } from "@/context/tx-status-provider";
 
 interface RepayUSDCWithCollateralModalProps {
     accountData: AccountData | undefined,
@@ -22,6 +23,7 @@ export default function RepayUSDCWithCollateralModal(
 ) {
     const { connection } = useConnection();
     const { showError } = useError();
+    const { showTxStatus } = useTxStatus();
     const wallet = useAnchorWallet();
 
     const [awaitingSign, setAwaitingSign] = useState(false);
@@ -48,7 +50,7 @@ export default function RepayUSDCWithCollateralModal(
 
         setAwaitingSign(true);
         const baseUnits = uiToBaseUnit(amount, DECIMALS_USDC).toNumber();
-        const signature = await liquidateSol(wallet, connection, baseUnits, showError);
+        const signature = await liquidateSol(wallet, connection, baseUnits, showError, showTxStatus);
         setAwaitingSign(false);
 
         if (signature) closeModal(signature);

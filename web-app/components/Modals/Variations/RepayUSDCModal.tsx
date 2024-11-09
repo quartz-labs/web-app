@@ -10,6 +10,7 @@ import { baseUnitToUi, uiToBaseUnit } from "@/utils/helpers";
 import { depositUsdc } from "@/utils/instructions";
 import { getAssociatedTokenAddress } from "@solana/spl-token";
 import { AccountData } from "@/utils/accountData";
+import { useTxStatus } from "@/context/tx-status-provider";
 
 interface RepayUSDCModalProps {
     accountData: AccountData | undefined;
@@ -22,6 +23,7 @@ export default function RepayUSDCModal(
 ) {
     const { connection } = useConnection();
     const { showError } = useError();
+    const { showTxStatus } = useTxStatus();
     const wallet = useAnchorWallet();
 
     const [awaitingSign, setAwaitingSign] = useState(false);
@@ -58,7 +60,7 @@ export default function RepayUSDCModal(
 
         setAwaitingSign(true);
         const baseUnits = uiToBaseUnit(amount, DECIMALS_USDC).toNumber();
-        const signature = await depositUsdc(wallet, connection, baseUnits, showError);
+        const signature = await depositUsdc(wallet, connection, baseUnits, showError, showTxStatus);
         setAwaitingSign(false);
 
         if (signature) closeModal(signature);

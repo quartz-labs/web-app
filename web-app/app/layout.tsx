@@ -27,20 +27,20 @@ export default function RootLayout({
     <html lang="en" className={inter.className}>
       <body>
         <ErrorProvider>
-          <TxStatusProvider>
-            <CSPostHogProvider>
-              <ReactQueryProvider>
-                <ClusterProvider>
-                  <SolanaProvider>
+          <CSPostHogProvider>
+            <ReactQueryProvider>
+              <ClusterProvider>
+                <SolanaProvider>
+                  <TxStatusProvider>
                     <ErrorPopup/>
                     <ErrorModal/>
                     <TxStatusPopup/>
                     {children}
-                  </SolanaProvider>
-                </ClusterProvider>
-              </ReactQueryProvider>
-            </CSPostHogProvider>
-          </TxStatusProvider>
+                  </TxStatusProvider>
+                </SolanaProvider>
+              </ClusterProvider>
+            </ReactQueryProvider>
+          </CSPostHogProvider>
         </ErrorProvider>
       </body>
     </html>

@@ -26,8 +26,14 @@ import { getJupiterSwapIx, getJupiterSwapQuote } from "./jupiter";
 import BigNumber from "bignumber.js";
 import { ShowErrorProps } from "@/context/error-provider";
 import { captureError } from "@/utils/errors";
+import { TxStatusProps } from "@/context/tx-status-provider";
 
-export const initAccount = async (wallet: AnchorWallet, connection: web3.Connection, showError: (props: ShowErrorProps) => void) => {
+export const initAccount = async (
+    wallet: AnchorWallet, 
+    connection: web3.Connection, 
+    showError: (props: ShowErrorProps) => void,
+    trackTx: (props: TxStatusProps) => void
+) => {
     const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
     setProvider(provider);
     const quartzProgram = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>;
@@ -101,7 +107,7 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
         const signedTx = await wallet.signTransaction(tx);
         if (oix_initMarginfiAccount) signedTx.sign([marginfiAccount]);  // Only sign if initing new MarginFi account
         
-        const signature = await sendTransactionHandler(connection, signedTx);
+        const signature = await sendTransactionHandler(trackTx, connection, signedTx);
         return signature;
     } catch (error) {
         if (!(error instanceof WalletSignTransactionError)) {
@@ -112,7 +118,12 @@ export const initAccount = async (wallet: AnchorWallet, connection: web3.Connect
 }
 
 
-export const closeAccount = async (wallet: AnchorWallet, connection: web3.Connection, showError: (props: ShowErrorProps) => void) => {
+export const closeAccount = async (
+    wallet: AnchorWallet, 
+    connection: web3.Connection, 
+    showError: (props: ShowErrorProps) => void,
+    trackTx: (props: TxStatusProps) => void
+) => {
     const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
     setProvider(provider);
     const program = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>;
@@ -161,7 +172,7 @@ export const closeAccount = async (wallet: AnchorWallet, connection: web3.Connec
         const tx = new VersionedTransaction(messageV0);
 
         const signedTx = await wallet.signTransaction(tx);
-        const signature = await sendTransactionHandler(connection, signedTx);
+        const signature = await sendTransactionHandler(trackTx, connection, signedTx);
         return signature;
     } catch (error) {
         if (!(error instanceof WalletSignTransactionError)) {
@@ -232,7 +243,13 @@ export const makeDepositLamportsInstructions = async (wallet: AnchorWallet, conn
 }
 
 
-export const depositLamports = async (wallet: AnchorWallet, connection: web3.Connection, amountLamports: number, showError: (props: ShowErrorProps) => void) => {
+export const depositLamports = async (
+    wallet: AnchorWallet, 
+    connection: web3.Connection, 
+    amountLamports: number, 
+    showError: (props: ShowErrorProps) => void,
+    trackTx: (props: TxStatusProps) => void
+) => {
     try {
         const instructions = await makeDepositLamportsInstructions(wallet, connection, amountLamports, showError);
 
@@ -249,7 +266,7 @@ export const depositLamports = async (wallet: AnchorWallet, connection: web3.Con
         const tx = new VersionedTransaction(messageV0);
 
         const signedTx = await wallet.signTransaction(tx);
-        const signature = await sendTransactionHandler(connection, signedTx);
+        const signature = await sendTransactionHandler(trackTx, connection, signedTx);
         return signature;
     } catch (error) {
         if (!(error instanceof WalletSignTransactionError)) {
@@ -260,7 +277,13 @@ export const depositLamports = async (wallet: AnchorWallet, connection: web3.Con
 }
 
 
-export const withdrawLamports = async (wallet: AnchorWallet, connection: web3.Connection, amountLamports: number, showError: (props: ShowErrorProps) => void) => {
+export const withdrawLamports = async (
+    wallet: AnchorWallet, 
+    connection: web3.Connection, 
+    amountLamports: number, 
+    showError: (props: ShowErrorProps) => void,
+    trackTx: (props: TxStatusProps) => void
+) => {
     const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
     setProvider(provider);
     const program = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>;
@@ -318,7 +341,7 @@ export const withdrawLamports = async (wallet: AnchorWallet, connection: web3.Co
         const tx = new VersionedTransaction(messageV0);
 
         const signedTx = await wallet.signTransaction(tx);
-        const signature = await sendTransactionHandler(connection, signedTx);
+        const signature = await sendTransactionHandler(trackTx, connection, signedTx);
         return signature;
     } catch (error) {
         if (!(error instanceof WalletSignTransactionError)) {
@@ -329,7 +352,13 @@ export const withdrawLamports = async (wallet: AnchorWallet, connection: web3.Co
 }
 
 
-export const depositUsdc = async (wallet: AnchorWallet, connection: Connection, amountMicroCents: number, showError: (props: ShowErrorProps) => void) => {
+export const depositUsdc = async (
+    wallet: AnchorWallet, 
+    connection: Connection, 
+    amountMicroCents: number, 
+    showError: (props: ShowErrorProps) => void,
+    trackTx: (props: TxStatusProps) => void
+) => {
     const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
     setProvider(provider);
     const program = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>;
@@ -379,7 +408,7 @@ export const depositUsdc = async (wallet: AnchorWallet, connection: Connection, 
         const tx = new VersionedTransaction(messageV0);
 
         const signedTx = await wallet.signTransaction(tx);
-        const signature = await sendTransactionHandler(connection, signedTx);
+        const signature = await sendTransactionHandler(trackTx, connection, signedTx);
         return signature;
     } catch (error) {
         if (!(error instanceof WalletSignTransactionError)) {
@@ -391,7 +420,13 @@ export const depositUsdc = async (wallet: AnchorWallet, connection: Connection, 
 
 
 
-export const withdrawUsdc = async (wallet: AnchorWallet, connection: web3.Connection, amountMicroCents: number, showError: (props: ShowErrorProps) => void) => {
+export const withdrawUsdc = async (
+    wallet: AnchorWallet, 
+    connection: web3.Connection, 
+    amountMicroCents: number, 
+    showError: (props: ShowErrorProps) => void,
+    trackTx: (props: TxStatusProps) => void,
+) => {
     const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
     setProvider(provider);
     const program = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>;
@@ -442,7 +477,7 @@ export const withdrawUsdc = async (wallet: AnchorWallet, connection: web3.Connec
         const tx = new VersionedTransaction(messageV0);
 
         const signedTx = await wallet.signTransaction(tx);
-        const signature = await sendTransactionHandler(connection, signedTx);
+        const signature = await sendTransactionHandler(trackTx, connection, signedTx);
         return signature;
     } catch (error) {
         if (!(error instanceof WalletSignTransactionError)) {
@@ -453,7 +488,13 @@ export const withdrawUsdc = async (wallet: AnchorWallet, connection: web3.Connec
 }
 
 
-export const liquidateSol = async (wallet: AnchorWallet, connection: web3.Connection, amountMicroCents: number, showError: (props: ShowErrorProps) => void) => {
+export const liquidateSol = async (
+    wallet: AnchorWallet, 
+    connection: web3.Connection, 
+    amountMicroCents: number, 
+    showError: (props: ShowErrorProps) => void,
+    trackTx: (props: TxStatusProps) => void
+) => {
     const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
     setProvider(provider);
     const quartzProgram = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>;
@@ -474,7 +515,7 @@ export const liquidateSol = async (wallet: AnchorWallet, connection: web3.Connec
 
         // Init MarginFi Account if not found
         let marginfiAccounts = await marginfiClient.getMarginfiAccountsForAuthority(wallet.publicKey);
-        if (marginfiAccounts.length === 0) marginfiAccounts = await createNewMarginfiAccount(showError, wallet, connection, provider, marginfiClient);
+        if (marginfiAccounts.length === 0) marginfiAccounts = await createNewMarginfiAccount(trackTx, wallet, connection, provider, marginfiClient);
         const marginfiAccount = marginfiAccounts[0];
 
         // Get price info for flash loan
@@ -566,7 +607,7 @@ export const liquidateSol = async (wallet: AnchorWallet, connection: web3.Connec
         );
 
         const signedTx = await wallet.signTransaction(flashloanTx);
-        const signature = await sendTransactionHandler(connection, signedTx);
+        const signature = await sendTransactionHandler(trackTx, connection, signedTx);
         return signature;
     } catch (error) {
         if (!(error instanceof WalletSignTransactionError)) {
@@ -577,7 +618,13 @@ export const liquidateSol = async (wallet: AnchorWallet, connection: web3.Connec
 }
 
 
-const createNewMarginfiAccount = async (showError: (props: ShowErrorProps) => void, wallet: AnchorWallet, connection: Connection, provider: AnchorProvider, client: MarginfiClient) => {
+const createNewMarginfiAccount = async (
+    trackTx: (props: TxStatusProps) => void, 
+    wallet: AnchorWallet, 
+    connection: Connection,
+    provider: AnchorProvider, 
+    client: MarginfiClient
+) => {
     console.log("Creating MarginFi account");
     const marginfiProgram = new Program(marginfiIdl as Idl, provider) as unknown as Program<MarginFi>;
     const newAccount = Keypair.generate();
@@ -608,7 +655,7 @@ const createNewMarginfiAccount = async (showError: (props: ShowErrorProps) => vo
 
     const signedTx = await wallet.signTransaction(tx);
     signedTx.sign([newAccount]);
-    const signature = await sendTransactionHandler(connection, signedTx);
+    const signature = await sendTransactionHandler(trackTx, connection, signedTx);
 
     // Wait for tx to be finalized
     await connection.confirmTransaction({ signature, ...(await connection.getLatestBlockhash()) }, "finalized");

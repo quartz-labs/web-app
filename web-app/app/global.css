@@ -27,12 +27,16 @@ a:hover {
   color: var(--color-text-light);
 }
 
+.large-text {
+  font-size: var(--text-size-large);
+}
+
 .small-text {
   font-size: var(--text-size-small);
 }
 
 .tiny-text {
-  font-size: var(--text-size-small);
+  font-size: var(--text-size-tiny);
 }
 
 .glass-button {
@@ -135,6 +139,7 @@ a:hover {
 
   --glass-border: 2px solid var(--placeholder-glass-stroke); /* TODO: Make gradient */
   --glass-border-error: 1.5px solid var(--placeholder-glass-stroke-error);
+  --glass-border-popup: 1.5px solid var(--placeholder-glass-stroke);
   --glass-background: 
     url("/noise.png"),
     radial-gradient(circle at 80% 20%, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%),

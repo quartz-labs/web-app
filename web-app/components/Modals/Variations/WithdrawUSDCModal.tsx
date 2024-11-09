@@ -9,6 +9,7 @@ import { DECIMALS_USDC } from "@/utils/constants";
 import { baseUnitToUi, uiToBaseUnit } from "@/utils/helpers";
 import { withdrawUsdc } from "@/utils/instructions";
 import { AccountData } from "@/utils/accountData";
+import { useTxStatus } from "@/context/tx-status-provider";
 
 interface WithdrawUSDCModalProps {
     accountData: AccountData | undefined;
@@ -21,6 +22,7 @@ export default function WithdrawUSDCModal(
 ) {
     const { connection } = useConnection();
     const { showError } = useError();
+    const { showTxStatus } = useTxStatus();
     const wallet = useAnchorWallet();
 
     const [awaitingSign, setAwaitingSign] = useState(false);
@@ -43,7 +45,7 @@ export default function WithdrawUSDCModal(
 
         setAwaitingSign(true);
         const baseUnits = uiToBaseUnit(amount, DECIMALS_USDC).toNumber();
-        const signature = await withdrawUsdc(wallet, connection, baseUnits, showError);
+        const signature = await withdrawUsdc(wallet, connection, baseUnits, showError, showTxStatus);
         setAwaitingSign(false);
 
         if (signature) closeModal(signature);

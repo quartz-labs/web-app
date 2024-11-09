@@ -9,6 +9,7 @@ import { DECIMALS_SOL } from "@/utils/constants";
 import { baseUnitToUi, uiToBaseUnit } from "@/utils/helpers";
 import { withdrawLamports } from "@/utils/instructions";
 import { AccountData } from "@/utils/accountData";
+import { useTxStatus } from "@/context/tx-status-provider";
 
 interface WithdrawSOLModalProps {
     accountData: AccountData | undefined;
@@ -22,6 +23,7 @@ export default function WithdrawSOLModal(
 ) {
     const { connection } = useConnection();
     const { showError } = useError();
+    const { showTxStatus } = useTxStatus();
     const wallet = useAnchorWallet();
 
     const [awaitingSign, setAwaitingSign] = useState(false);
@@ -44,7 +46,7 @@ export default function WithdrawSOLModal(
 
         setAwaitingSign(true);
         const baseUnits = uiToBaseUnit(amount, DECIMALS_SOL).toNumber();
-        const signature = await withdrawLamports(wallet, connection, baseUnits, showError);
+        const signature = await withdrawLamports(wallet, connection, baseUnits, showError, showTxStatus);
         setAwaitingSign(false);
 
         if (signature) closeModal(signature);

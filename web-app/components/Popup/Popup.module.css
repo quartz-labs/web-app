@@ -9,8 +9,12 @@
     background-image: var(--glass-background);
     background-size: 17% auto, auto, auto, auto;
     backdrop-filter: blur(22px);
-    border: var(--glass-border-error);
+    border: var(--glass-border-popup);
     border-radius: 18px;
+}
+
+.popup.error {
+    border: var(--glass-border-popup);
 }
 
 button.popup:hover {

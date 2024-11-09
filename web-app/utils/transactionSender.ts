@@ -3,9 +3,15 @@ import { RPC_URL } from "./constants";
 import { captureError } from "@/utils/errors";
 import { ShowErrorProps } from "@/context/error-provider";
 import { getAccountsFromInstructions } from "./helpers";
+import { TxStatusProps } from "@/context/tx-status-provider";
 
-export const sendTransactionHandler = async (connection: Connection, tx: VersionedTransaction) => {
+export const sendTransactionHandler = async (
+  trackTx: (props: TxStatusProps) => void,
+  connection: Connection, 
+  tx: VersionedTransaction, 
+) => {
     const signature = await connection.sendRawTransaction(tx.serialize());
+    trackTx({signature});
     return signature;
 
     // const DELAY = 1_000;

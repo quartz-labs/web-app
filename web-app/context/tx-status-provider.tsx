@@ -7,8 +7,8 @@ export interface TxStatusProps {
 }
 
 interface TxStatusContextProps {
-  show: (props: TxStatusProps) => void;
-  hide: () => void;
+  showTxStatus: (props: TxStatusProps) => void;
+  hideTxStatus: () => void;
   props: TxStatusProps | null;
   enabled: boolean;
 }
@@ -19,18 +19,18 @@ export function TxStatusProvider({ children }: { children: React.ReactNode }) {
   const [props, setProps] = useState<TxStatusProps | null>(null);
   const [enabled, setEnabled] = useState(false);
 
-  const show = (props: TxStatusProps) => {
+  const showTxStatus = (props: TxStatusProps) => {
     setProps(props);
     setEnabled(true);
   };
 
-  const hide = () => {
+  const hideTxStatus = () => {
     setEnabled(false);
     setProps(null);
   };
 
   return (
-    <TxStatusContext.Provider value={{ show, hide, props, enabled }}>
+    <TxStatusContext.Provider value={{ showTxStatus, hideTxStatus, props, enabled }}>
       {children}
     </TxStatusContext.Provider>
   );
