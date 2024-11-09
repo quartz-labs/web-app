@@ -14,11 +14,14 @@ interface MainViewProps extends ViewProps {
 export default function MainView({ 
     solPrice, 
     accountData,
+    accountStale,
     swapView,
     handleDepositSol,
     handleWithdrawSol,
     handleWithdrawUSDC
 }: MainViewProps) {
+    const loading = (!accountData || accountStale);
+
     solPrice = solPrice ?? 0;
 
     let netSolBalance = 0;
@@ -37,7 +40,7 @@ export default function MainView({
 
     return (
         <div className="dashboard-wrapper">
-            {!accountData &&
+            {loading &&
                 <div className={styles.balanceWrapper}>
                     <div className={styles.loadingBalance}>
                         <p className={`${styles.fiatAmount} ${styles.smallMargin}`}>$</p>
@@ -51,7 +54,7 @@ export default function MainView({
                 </div>
             }
 
-            {accountData &&
+            {!loading &&
                 <div className={styles.balanceWrapper}>
                     <div>
                         <p className={styles.title}>

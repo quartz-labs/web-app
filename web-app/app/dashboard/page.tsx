@@ -20,6 +20,7 @@ import { getVault } from '@/utils/getAccounts';
 export interface ViewProps {
     solPrice: number | undefined;
     accountData: AccountData | undefined;
+    accountStale: boolean;
     swapView: () => void;
 }
 
@@ -59,7 +60,7 @@ export default function Dashboard() {
     }, [priceError, showError, wallet]);
 
 
-    const { error: driftError, data: driftData } = useQuery({
+    const { isStale: driftStale, error: driftError, data: driftData } = useQuery({
         queryKey: ['driftData'],
         queryFn: async () => {
             if (!wallet) return;
@@ -81,7 +82,8 @@ export default function Dashboard() {
             return data;
         },
         retry: 5,
-        refetchInterval: 45_000
+        refetchInterval: 10_000,
+        staleTime: Infinity
     })
     useEffect(() => {
         if (driftError) captureError(showError, "Could not fetch Drift data", "./app/dashboard/page.tsx", driftError, wallet?.publicKey);
@@ -118,6 +120,7 @@ export default function Dashboard() {
                     <MainView
                         solPrice={solPrice}
                         accountData={driftData}
+                        accountStale={driftStale}
                         swapView={() => setMainView(false)}
 
                         handleDepositSol={() => setModal(ModalVariation.DepositSOL)}
@@ -130,6 +133,7 @@ export default function Dashboard() {
                     <LoanView
                         solPrice={solPrice}
                         accountData={driftData}
+                        accountStale={driftStale}
                         swapView={() => setMainView(true)}
 
                         handleRepayUsdc={() => setModal(ModalVariation.RepayUSDC)}
