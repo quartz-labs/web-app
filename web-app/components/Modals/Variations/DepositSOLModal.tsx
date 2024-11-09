@@ -33,7 +33,7 @@ export default function DepositSOLModal(
     const [amountStr, setAmountStr] = useState("");
     const amount = Number(amountStr);
 
-    const MIN_AMOUNT = 0.000001;
+    const MIN_AMOUNT = 0.00001;
 
     const [maxDeposit, setMaxDeposit] = useState(0);
     useEffect(() => {

@@ -29,7 +29,7 @@ export default function RepayUSDCModal(
     const [amountStr, setAmountStr] = useState("");
     const amount = Number(amountStr);
 
-    const MIN_AMOUNT = 0.000001;
+    const MIN_AMOUNT = 0.01;
 
     const [usdcWalletBalance, setUsdcWalletBalance] = useState(0);
     let maxRepay = 0;
@@ -67,7 +67,8 @@ export default function RepayUSDCModal(
     return (
         <>
             <ModalDefaultContent
-                title="Repay USDC Loan"
+                title="Repay Loan with USDC"
+                subtitle="Deposit USDC from your wallet to pay off your loan"
                 denomination="USDC"
                 amountStr={amountStr}
                 maxAmount={maxRepay}

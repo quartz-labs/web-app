@@ -29,7 +29,7 @@ export default function WithdrawSOLModal(
     const [amountStr, setAmountStr] = useState("");
     const amount = Number(amountStr);
 
-    const MIN_AMOUNT = 0.000001;
+    const MIN_AMOUNT = 0.00001;
     const maxAmount = (accountData !== null)
         ? Number(baseUnitToUi(accountData.solWithdrawLimitBaseUnits, DECIMALS_SOL))
         : 0;

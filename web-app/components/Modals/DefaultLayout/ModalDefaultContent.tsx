@@ -3,6 +3,7 @@ import styles from "./DefaultLayout.module.css";
 
 interface ModalDefaultContentProps {
     title: string;
+    subtitle?: string;
     denomination: string;
     amountStr: string;
     maxAmount: number;
@@ -11,13 +12,17 @@ interface ModalDefaultContentProps {
 }
 
 export default function ModalDefaultContent(
-    {title, denomination, amountStr, maxAmount, maxDecimals, setAmountStr} : ModalDefaultContentProps
+    {title, subtitle, denomination, amountStr, maxAmount, maxDecimals, setAmountStr} : ModalDefaultContentProps
 ) {
     const halfMax = truncateToDecimalPlaces((maxAmount / 2), maxDecimals);
 
     return (
         <div className={styles.contentWrapper}>
             <h2 className={styles.heading}>{title}</h2>
+
+            {(subtitle !== undefined) &&
+                <h3 className={styles.subheading}>{subtitle}</h3>
+            }
         
             <div className={styles.inputSection}>
                 <div className={styles.stretchWidth}>

@@ -29,7 +29,7 @@ export default function RepayUSDCWithCollateralModal(
     const [amountStr, setAmountStr] = useState("");
     const amount = Number(amountStr);
 
-    const MIN_AMOUNT = 0.000001;
+    const MIN_AMOUNT = 0.01;
 
     let maxRepay = 0;
     if (accountData !== null && solPriceUSD !== null) {
@@ -57,7 +57,8 @@ export default function RepayUSDCWithCollateralModal(
     return (
         <>
             <ModalDefaultContent
-                title="Repay USDC Loan with SOL Collateral"
+                title="Repay Loan with Collateral"
+                subtitle="Repay your USDC loan using the SOL you have deposited as collateral"
                 denomination="USDC"
                 amountStr={amountStr}
                 maxAmount={maxRepay}

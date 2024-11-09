@@ -28,7 +28,7 @@ export default function WithdrawUSDCModal(
     const [amountStr, setAmountStr] = useState("");
     const amount = Number(amountStr);
 
-    const MIN_AMOUNT = 0.000001;
+    const MIN_AMOUNT = 0.01;
     const maxAmount = (accountData !== null)
         ? Number(baseUnitToUi(accountData.usdcWithdrawLimitBaseUnits, DECIMALS_USDC))
         : 0;
