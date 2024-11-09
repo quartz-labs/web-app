@@ -390,6 +390,7 @@ export const depositUsdc = async (wallet: AnchorWallet, connection: Connection, 
 }
 
 
+
 export const withdrawUsdc = async (wallet: AnchorWallet, connection: web3.Connection, amountMicroCents: number, showError: (props: ShowErrorProps) => void) => {
     const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
     setProvider(provider);
@@ -614,3 +615,71 @@ const createNewMarginfiAccount = async (showError: (props: ShowErrorProps) => vo
     const accounts = await client.getMarginfiAccountsForAuthority(wallet.publicKey);
     return accounts;
 }
+
+// export const createLookupTable = async (wallet: AnchorWallet, connection: web3.Connection) => {
+//     // Convert address strings to PublicKeys
+//     const newAddresses = [
+//         "6JjHXLheGSNvvexgzMthEcgjkcirDrGduc3HAKB2P1v2",
+//         "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+//         "So11111111111111111111111111111111111111112",
+//         "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+//         "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL",
+//         "dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH",
+//         "BAtFj4kQttZRVep3UZS2aZRDixkGYgWsbqTBVDbnSsPF",
+//         "En8hkHLkRe9d9DraYmBTrus518BvmVH448YcvmrFM6Ce",
+//         "3x85u7SWkmmr7YQGYhtjARgxwegTLJgkSLRprfXod6rh",
+//         "6gMq3mRCKf8aP3ttTyYhuijVZ2LGi14oDsBbkgubfLB3",
+//         "11111111111111111111111111111111",
+//         "GXWqPpjQpdz7KZw9p7f5PX2eGxHAhvpNXiviFkAB8zXg",
+//         "DfYCNezifxAEsQbAJ1b3j6PX3JVBe8fu11KBhxsbw5d2",
+//         "JCNCMFXo5M5qwUPg2Utu1u6YWp3MbygxqBsBeXXJfrw",
+//         "4qp6Fx6tnZkY5Wropq9wUYgtFxXKwE6viZxFHg3rdAG8",
+//         "2s37akK2eyBbp8DZgCm7RtsaEz8eJP3Nxd4urLHQv7yB",
+//         "3uxNepDbmkDNq6JhRja5Z8QwbTrfmkKP8AKZV5chYDGG",
+//         "7jaiZR5Sk8hdYN9MxTpczTcwbWpb5WEoxSANuUwveuat",
+//         "Dpw1EAVrSB1ibxiDQyTAW6Zip3J4Btk2x4SgApQCeFbX",
+//         "CCKtUs6Cgwo4aaQUmBPmyoApH2gUDErxNZCAntD6LYGh",
+//         "7UVimffxr9ow1uXYxsr4LHAcV58mLzhmwaeKvJ1pjLiE",
+//         "Sysvar1nstructions1111111111111111111111111",
+//         "MFv2hWf31Z9kbCa1snEPYctwafyhdvnV7FZnsebVacA",
+//         "ComputeBudget111111111111111111111111111111"
+//     ];
+//     const addresses = newAddresses.map(addr => new PublicKey(addr));
+
+//     const [createLookupTableIx, lookupTableAddress] = AddressLookupTableProgram.createLookupTable({
+//         authority: wallet.publicKey,
+//         payer: wallet.publicKey,
+//         recentSlot: await connection.getSlot(),
+//     });
+
+//     const extendLookupTableIx = AddressLookupTableProgram.extendLookupTable({
+//         lookupTable: lookupTableAddress, // Address of the newly created table
+//         authority: wallet.publicKey,
+//         payer: wallet.publicKey,
+//         addresses: addresses,
+//     });
+
+//     const freezeLookupTableIx = AddressLookupTableProgram.freezeLookupTable({
+//         lookupTable: lookupTableAddress,
+//         authority: wallet.publicKey,
+//     });
+    
+
+//     // Get latest blockhash
+//     const { blockhash } = await connection.getLatestBlockhash();
+
+//     // Create versioned transaction
+//     const messageV0 = new TransactionMessage({
+//         payerKey: wallet.publicKey,
+//         recentBlockhash: blockhash,
+//         instructions: [createLookupTableIx, extendLookupTableIx, freezeLookupTableIx],
+//     }).compileToV0Message();
+
+//     const transaction = new VersionedTransaction(messageV0);
+
+//     // Sign transaction
+//     const signedTx = await wallet.signTransaction(transaction);
+//     const signature = await sendTransactionHandler(connection, signedTx);
+//     console.log(signature);
+//     return signature;
+// }

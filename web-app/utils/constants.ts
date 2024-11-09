@@ -1,7 +1,7 @@
 import { PublicKey } from "@solana/web3.js";
 
 export const FUNDS_PROGRAM_ID = new PublicKey("6JjHXLheGSNvvexgzMthEcgjkcirDrGduc3HAKB2P1v2");
-export const FUNDS_PROGRAM_ADDRESS_TABLE = new PublicKey("3ND9hEwC75yqtYbXY6ZLZXsqB9q6zn7VX4u7LVMofqcA");
+export const FUNDS_PROGRAM_ADDRESS_TABLE = new PublicKey("96BmeKKVGX3LKYSKo3FCEom1YpNY11kCnGscKq6ouxLx");
 
 export const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL ?? "https://janella-g42vor-fast-mainnet.helius-rpc.com";
 
