@@ -4,6 +4,7 @@ import styles from "./Account.module.css";
 import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import { closeAccount } from "@/utils/instructions";
 import { useError } from "@/context/error-provider";
+import { useTxStatus } from "@/context/tx-status-provider";
 
 export interface AccountProps {
     disableCloseAccount?: boolean
@@ -12,11 +13,12 @@ export interface AccountProps {
 export default function Account({disableCloseAccount} : AccountProps) {
     const { connection } = useConnection();
     const { showError } = useError();
+    const { showTxStatus } = useTxStatus();
     const wallet = useAnchorWallet();
 
     const onCloseAccount = () => {
         if (!connection || !wallet) return;
-        closeAccount(wallet, connection, showError);
+        closeAccount(wallet, connection, showError, showTxStatus);
     }
 
     return (

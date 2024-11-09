@@ -9,10 +9,12 @@ import { hasBetaKey, isVaultInitialized } from '@/utils/helpers';
 import Account from '@/components/Account/Account';
 import { PuffLoader } from 'react-spinners';
 import { useError } from '@/context/error-provider';
+import { useTxStatus } from '@/context/tx-status-provider';
 
 export default function Onboarding() {
     const { connection } = useConnection();
     const { showError } = useError();
+    const { showTxStatus } = useTxStatus();
     const wallet = useAnchorWallet();
     const router = useRouter();
 
@@ -50,7 +52,7 @@ export default function Onboarding() {
         setAttemptFailed(false);
         setAwaitingSign(true);
         
-        const signature = await initAccount(wallet, connection, showError);
+        const signature = await initAccount(wallet, connection, showError, showTxStatus);
 
         
         if (signature) router.push("/dashboard");
