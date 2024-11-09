@@ -58,7 +58,7 @@ export default function RepayUSDCWithCollateralModal(
         <>
             <ModalDefaultContent
                 title="Repay Loan with Collateral"
-                subtitle="Repay your USDC loan using the SOL you have deposited as collateral"
+                subtitle="Repay your USDC loan using your existing SOL deposits"
                 denomination="USDC"
                 amountStr={amountStr}
                 maxAmount={maxRepay}
