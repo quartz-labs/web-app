@@ -55,7 +55,7 @@ export default function DepositSOLModal(
                 const priorityFeeLamports = (computeUnitPriceMicroLamports * 200_000 ) / MICRO_LAMPORTS_PER_LAMPORT;
                 const maxDeposit = balanceLamports - (wSolAtaRent * 2) - (baseSignerFeeLamports + priorityFeeLamports);
 
-                setMaxDeposit(maxDeposit / LAMPORTS_PER_SOL);
+                setMaxDeposit(Math.max(maxDeposit, 0) / LAMPORTS_PER_SOL);
             } catch (error) {
                 captureError(showError, "Could not calculate max SOL deposit value", "/DepositSOLModal.tsx", error, wallet.publicKey);
                 setMaxDeposit(0);
