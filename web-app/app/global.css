@@ -161,6 +161,8 @@ a:hover {
   --modal-content-width: 75%;
   --input-field-height: 80px;
   --address-copy-button-height: 57px;
+  --popup-position-bottom: 50px;
+  --popup-position-left: 100px;
 
   --text-size-h1-base: 50.16px;
   --text-size-h2-base: 41.8px;

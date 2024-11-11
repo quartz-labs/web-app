@@ -1,10 +1,10 @@
 .popup {
     position: fixed;
-    bottom: 50px;
-    left: 100px;
     z-index: 9997;
     width: 235px;
     min-height: 100px;
+    bottom: 50px;
+    left: 100px;
 
     padding: 17px 20px;
     background-image: var(--glass-background);
@@ -12,6 +12,20 @@
     backdrop-filter: blur(22px);
     border: var(--glass-border-popup);
     border-radius: 18px;
+}
+
+@media only screen and (max-width: 800px) {
+    .popup {
+        bottom: 5%;
+        left: 10%;
+    }
+}
+
+@media only screen and (max-width: 568px) {
+    .popup {
+        left: 50%;
+        transform: translate(-50%, 0%);
+    }
 }
 
 .popup.error {

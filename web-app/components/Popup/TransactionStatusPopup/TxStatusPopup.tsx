@@ -15,7 +15,7 @@ export default function TxStatusPopup() {
     const { props, enabled, hideTxStatus } = useTxStatus();
     const { showError } = useError();
     const wallet = useAnchorWallet();
-    const [status, setStatus] = useState(props ? props.status : TxStatus.NONE);
+    const [status, setStatus] = useState(TxStatus.NONE);
 
     const TIMEOUT_TIME = 4_000;
     const TIMEOUT_TIME_ERROR = 8_000;
