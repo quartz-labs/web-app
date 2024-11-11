@@ -52,7 +52,9 @@ export default function ErrorPopup() {
                 </p>
             </div>
 
-            <p className={styles.message}>{message}</p>
+            <div className={styles.message}>
+                <p >{message}</p>
+            </div>
         </button>
     );
 }
