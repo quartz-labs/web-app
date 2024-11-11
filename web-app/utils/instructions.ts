@@ -26,7 +26,7 @@ import { getJupiterSwapIx, getJupiterSwapQuote } from "./jupiter";
 import BigNumber from "bignumber.js";
 import { ShowErrorProps } from "@/context/error-provider";
 import { captureError } from "@/utils/errors";
-import { TxStatusProps } from "@/context/tx-status-provider";
+import { TxStatus, TxStatusProps } from "@/context/tx-status-provider";
 
 export const initAccount = async (
     wallet: AnchorWallet, 
@@ -104,13 +104,15 @@ export const initAccount = async (
         }).compileToV0Message();
         const tx = new VersionedTransaction(messageV0);
 
+        trackTx({status: TxStatus.SIGNING});
         const signedTx = await wallet.signTransaction(tx);
         if (oix_initMarginfiAccount) signedTx.sign([marginfiAccount]);  // Only sign if initing new MarginFi account
         
         const signature = await sendTransactionHandler(trackTx, connection, signedTx);
         return signature;
     } catch (error) {
-        if (!(error instanceof WalletSignTransactionError)) {
+        if (error instanceof WalletSignTransactionError) trackTx({status: TxStatus.SIGN_REJECTED});
+        else {
             captureError(showError, "Could not initialize account", "utils: /instructions.ts", error, wallet.publicKey);
         }
         return null;
@@ -171,11 +173,13 @@ export const closeAccount = async (
         }).compileToV0Message();
         const tx = new VersionedTransaction(messageV0);
 
+        trackTx({status: TxStatus.SIGNING});
         const signedTx = await wallet.signTransaction(tx);
         const signature = await sendTransactionHandler(trackTx, connection, signedTx);
         return signature;
     } catch (error) {
-        if (!(error instanceof WalletSignTransactionError)) {
+        if (error instanceof WalletSignTransactionError) trackTx({status: TxStatus.SIGN_REJECTED});
+        else {
             captureError(showError, "Could not close account", "utils: /instructions.ts", error, wallet.publicKey)
         }
         return null;
@@ -265,11 +269,13 @@ export const depositLamports = async (
         }).compileToV0Message();
         const tx = new VersionedTransaction(messageV0);
 
+        trackTx({status: TxStatus.SIGNING});
         const signedTx = await wallet.signTransaction(tx);
         const signature = await sendTransactionHandler(trackTx, connection, signedTx);
         return signature;
     } catch (error) {
-        if (!(error instanceof WalletSignTransactionError)) {
+        if (error instanceof WalletSignTransactionError) trackTx({status: TxStatus.SIGN_REJECTED});
+        else {
             captureError(showError, "Could not deposit SOL", "utils: /instructions.ts", error, wallet.publicKey);
         }
         return null;
@@ -340,11 +346,13 @@ export const withdrawLamports = async (
         }).compileToV0Message();
         const tx = new VersionedTransaction(messageV0);
 
+        trackTx({status: TxStatus.SIGNING});
         const signedTx = await wallet.signTransaction(tx);
         const signature = await sendTransactionHandler(trackTx, connection, signedTx);
         return signature;
     } catch (error) {
-        if (!(error instanceof WalletSignTransactionError)) {
+        if (error instanceof WalletSignTransactionError) trackTx({status: TxStatus.SIGN_REJECTED});
+        else {
             captureError(showError, "Could not withdraw SOL", "utils: /instructions.ts", error, wallet.publicKey);
         }
         return null;
@@ -407,11 +415,13 @@ export const depositUsdc = async (
         }).compileToV0Message();
         const tx = new VersionedTransaction(messageV0);
 
+        trackTx({status: TxStatus.SIGNING});
         const signedTx = await wallet.signTransaction(tx);
         const signature = await sendTransactionHandler(trackTx, connection, signedTx);
         return signature;
     } catch (error) {
-        if (!(error instanceof WalletSignTransactionError)) {
+        if (error instanceof WalletSignTransactionError) trackTx({status: TxStatus.SIGN_REJECTED});
+        else {
             captureError(showError, "Could not deposit USDC", "utils: /instructions.ts", error, wallet.publicKey);
         }
         return null;
@@ -476,11 +486,13 @@ export const withdrawUsdc = async (
         }).compileToV0Message();
         const tx = new VersionedTransaction(messageV0);
 
+        trackTx({status: TxStatus.SIGNING});
         const signedTx = await wallet.signTransaction(tx);
         const signature = await sendTransactionHandler(trackTx, connection, signedTx);
         return signature;
     } catch (error) {
-        if (!(error instanceof WalletSignTransactionError)) {
+        if (error instanceof WalletSignTransactionError) trackTx({status: TxStatus.SIGN_REJECTED});
+        else {
             captureError(showError, "Could not withdraw USDC", "utils: /instructions.ts", error, wallet.publicKey);
         }
         return null;
@@ -513,10 +525,8 @@ export const liquidateSol = async (
         const usdcBank = marginfiClient.getBankByTokenSymbol("USDC");
         if (!usdcBank) throw Error(`${"USDC"} bank not found`);
 
-        // Init MarginFi Account if not found
-        let marginfiAccounts = await marginfiClient.getMarginfiAccountsForAuthority(wallet.publicKey);
-        if (marginfiAccounts.length === 0) marginfiAccounts = await createNewMarginfiAccount(trackTx, wallet, connection, provider, marginfiClient);
-        const marginfiAccount = marginfiAccounts[0];
+        const [ marginfiAccount ] = await marginfiClient.getMarginfiAccountsForAuthority(wallet.publicKey);
+        if (marginfiAccount === undefined) throw new Error("Flash loan MarginFi account not found");
 
         // Get price info for flash loan
         const jupiterQuote = await getJupiterSwapQuote(WSOL_MINT, USDC_MINT, amountMicroCents, true);
@@ -606,61 +616,17 @@ export const liquidateSol = async (
             true
         );
 
+        trackTx({status: TxStatus.SIGNING});
         const signedTx = await wallet.signTransaction(flashloanTx);
         const signature = await sendTransactionHandler(trackTx, connection, signedTx);
         return signature;
     } catch (error) {
-        if (!(error instanceof WalletSignTransactionError)) {
+        if (error instanceof WalletSignTransactionError) trackTx({status: TxStatus.SIGN_REJECTED});
+        else {
             captureError(showError, "Could not liquidate loan", "utils: /instructions.ts", error, wallet.publicKey);
         }
         return null;
     }
-}
-
-
-const createNewMarginfiAccount = async (
-    trackTx: (props: TxStatusProps) => void, 
-    wallet: AnchorWallet, 
-    connection: Connection,
-    provider: AnchorProvider, 
-    client: MarginfiClient
-) => {
-    console.log("Creating MarginFi account");
-    const marginfiProgram = new Program(marginfiIdl as Idl, provider) as unknown as Program<MarginFi>;
-    const newAccount = Keypair.generate();
-
-    const ix_createAccount = await marginfiProgram.methods
-        .marginfiAccountInitialize()
-        .accounts({
-            marginfiGroup: MARGINFI_GROUP_1,
-            marginfiAccount: newAccount.publicKey,
-            authority: wallet.publicKey,
-            feePayer: wallet.publicKey,
-            systemProgram: SystemProgram.programId
-        })
-        .instruction();
-
-    const computeBudget = 200_000;
-    const instructions = [ix_createAccount];
-    const ix_priority = await createPriorityFeeInstructions(connection, instructions, computeBudget);
-    instructions.unshift(...ix_priority);
-
-    const latestBlockhash = await connection.getLatestBlockhash();
-    const messageV0 = new TransactionMessage({
-        payerKey: wallet.publicKey,
-        recentBlockhash: latestBlockhash.blockhash,
-        instructions: instructions,
-    }).compileToV0Message();
-    const tx = new VersionedTransaction(messageV0);
-
-    const signedTx = await wallet.signTransaction(tx);
-    signedTx.sign([newAccount]);
-    const signature = await sendTransactionHandler(trackTx, connection, signedTx);
-
-    // Wait for tx to be finalized
-    await connection.confirmTransaction({ signature, ...(await connection.getLatestBlockhash()) }, "finalized");
-    const accounts = await client.getMarginfiAccountsForAuthority(wallet.publicKey);
-    return accounts;
 }
 
 // export const createLookupTable = async (wallet: AnchorWallet, connection: web3.Connection) => {
@@ -725,8 +691,8 @@ const createNewMarginfiAccount = async (
 //     const transaction = new VersionedTransaction(messageV0);
 
 //     // Sign transaction
+//     trackTx({status: TxStatus.SIGNING});    
 //     const signedTx = await wallet.signTransaction(transaction);
 //     const signature = await sendTransactionHandler(connection, signedTx);
-//     console.log(signature);
 //     return signature;
 // }

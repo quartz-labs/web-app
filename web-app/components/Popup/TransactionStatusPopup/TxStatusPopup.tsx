@@ -18,17 +18,18 @@ export default function TxStatusPopup() {
     const [status, setStatus] = useState(props ? props.status : TxStatus.NONE);
 
     const TIMEOUT_TIME = 4_000;
+    const TIMEOUT_TIME_ERROR = 8_000;
 
     useEffect(() => {
-        const waitForSx = async() => {
-            if (!props || props.signature === undefined) return;
+        const trackSignature = async(signature: string) => {
+            if (!props) return;
             if (!wallet) return captureError(showError, "No wallet connected", "/TxStatusPopup.tsx", "Could not find wallet");
 
             try {
-                await connection.confirmTransaction({ signature: props.signature, ...(await connection.getLatestBlockhash()) }, "confirmed");
+                await connection.confirmTransaction({ signature, ...(await connection.getLatestBlockhash()) }, "confirmed");
                 setStatus(TxStatus.CONFIRMED);
 
-                await connection.confirmTransaction({ signature: props.signature, ...(await connection.getLatestBlockhash()) }, "finalized");
+                await connection.confirmTransaction({ signature, ...(await connection.getLatestBlockhash()) }, "finalized");
                 setStatus(TxStatus.FINALIZED);
 
                 setTimeout(() => {
@@ -42,14 +43,25 @@ export default function TxStatusPopup() {
                 setTimeout(() => {
                     hideTxStatus();
                     setStatus(TxStatus.NONE);
-                }, TIMEOUT_TIME * 2);
+                }, TIMEOUT_TIME_ERROR);
             }
         }
-        waitForSx();
-    }, [props, connection, hideTxStatus, showError, wallet]);
+
+        setStatus(props ? props.status : TxStatus.NONE);
+
+        if (props?.signature !== undefined) {
+            trackSignature(props.signature);
+        } 
+        else if (props?.status === TxStatus.SIGN_REJECTED) {
+            setTimeout(() => {
+                hideTxStatus();
+                setStatus(TxStatus.NONE);
+            }, TIMEOUT_TIME);
+        }
+    }, [props, enabled, connection, hideTxStatus, showError, wallet]);
 
 
-    if (!props || !enabled) return (<></>);
+    if (!props || !enabled || status === TxStatus.NONE) return (<></>);
 
     const explorerUrl = `https://solscan.io/tx/${props.signature}`;
 
@@ -66,6 +78,40 @@ export default function TxStatusPopup() {
             </div>
         </div>
     );
+
+
+    if (status === TxStatus.SIGNING) return (
+        <div className={styles.popup}>
+            <div className={styles.heading}>
+                <p>Waiting for signature...</p>
+            </div>
+
+            <div className={styles.message}>
+                <Image
+                    height="20"
+                    width="20"
+                    alt=""
+                    src="/wallet.svg"
+                    style={{marginRight: "5px"}}
+                />
+                <p>Waiting for wallet to sign transaction</p>
+            </div>
+        </div>
+    );
+
+
+    if (status === TxStatus.SIGN_REJECTED) return (
+        <div className={styles.popup}>
+            <div className={styles.heading}>
+                <p>Wallet signing rejected</p>
+            </div>
+
+            <div className={styles.message}>
+                <p>User rejected the request. Refresh browser if the problem persists.</p>
+            </div>
+        </div>
+    );
+
 
     if (status === TxStatus.FINALIZED) return (
         <div className={styles.popup}>
@@ -88,7 +134,7 @@ export default function TxStatusPopup() {
     return (
         <div className={styles.popup}>
             <div className={styles.heading}>
-                {(status !== TxStatus.CONFIRMED) &&
+                {(status === TxStatus.SENT) &&
                     <p>Processing transaction...</p>
                 }
 
