@@ -15,10 +15,14 @@ import { ErrorProvider } from '@/context/error-provider';
 import ErrorModal from '@/components/Modals/Variations/ErrorModal';
 import { TxStatusProvider } from '@/context/tx-status-provider';
 import TxStatusPopup from '@/components/Popup/TransactionStatusPopup/TxStatusPopup';
-import PostHogPageView from '@/context/posthog/PostHogPageView';
 import { ReactQueryProvider } from '@/context/react-query-provider';
+import dynamic from 'next/dynamic';
 
 const inter = Inter({ subsets: ['latin'] });
+
+const PostHogPageView = dynamic(() => import('@/context/posthog/PostHogPageView'), {
+  ssr: false,
+});
 
 export default function RootLayout({
   children,

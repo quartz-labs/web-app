@@ -1,4 +1,3 @@
-// app/PostHogPageView.tsx
 'use client'
 
 import { usePathname, useSearchParams } from "next/navigation";
@@ -23,7 +22,7 @@ export default function PostHogPageView() : null {
         }
       )
     }
-  }, [pathname, searchParams, posthog])
+  }, [pathname, searchParams, posthog]);
   
-  return null
+  return null;
 }

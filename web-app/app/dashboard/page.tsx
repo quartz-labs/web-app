@@ -9,7 +9,6 @@ import MainView from '@/components/Views/MainView';
 import LoanView from '@/components/Views/LoanView';
 import styles from "./page.module.css";
 import { AccountData } from '@/utils/accountData';
-import posthog from 'posthog-js';
 import { useError } from '@/context/error-provider';
 import { captureError } from '@/utils/errors';
 import Modal, { ModalVariation } from '@/components/Modals/Modal';
