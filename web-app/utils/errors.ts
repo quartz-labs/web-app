@@ -8,6 +8,7 @@ export function captureError(
     location: string, 
     error: any,
     wallet?: PublicKey, 
+    silentError: boolean = false,
 ) {
     console.error(error);
 
@@ -15,11 +16,14 @@ export function captureError(
     const errorStack = (error instanceof Error ? error : new Error(errorString)).stack?.split('\n')[1]?.trim() || '';
 
     const id = generateErrorId();
-    showError({
-        message: errorString,
-        body: error.toString(),
-        errorId: id
-    });
+
+    if (!silentError) {
+        showError({
+            message: errorString,
+            body: error.toString(),
+            errorId: id
+        });
+    }
 
     posthog.capture(`Error: ${errorString}`, {
         error: error,

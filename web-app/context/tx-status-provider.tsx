@@ -2,8 +2,19 @@
 
 import React, { createContext, useContext, useState } from 'react';
 
+export enum TxStatus {
+  NONE,
+  SIGNING,
+  SIGN_REJECTED,
+  SENT,
+  CONFIRMED,
+  FINALIZED,
+  TIMEOUT
+}
+
 export interface TxStatusProps {
-  signature: string;
+  signature?: string;
+  status: TxStatus;
 }
 
 interface TxStatusContextProps {

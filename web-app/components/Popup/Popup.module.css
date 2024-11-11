@@ -37,12 +37,19 @@ button.popup:active {
     gap: 7px;
     align-items: center;
     justify-content: flex-start;
-
-    color: var(--color-text-light);
-    font-size: var(--text-size-tiny);
     width: 100%;
     min-height: 25px;
+}
+
+.message p,
+.message a {
+    color: var(--color-text-light);
+    font-size: var(--text-size-tiny);
     text-align: left;
+}
+
+.message a:hover {
+    color: var(--color-link-hover);
 }
 
 .heading {
