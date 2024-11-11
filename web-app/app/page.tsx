@@ -20,13 +20,11 @@ export default function Page() {
   useEffect(() => {
     const isLoggedIn = async () => {
       if (wallet) {
-        
         if (!await hasBetaKey(wallet.publicKey, showError)) {
           setMissingBetaKey(true);
           return;
         }
-
-        if (await isVaultInitialized(connection, wallet.publicKey)) router.push("/dashboard");
+        else if (await isVaultInitialized(connection, wallet.publicKey)) router.push("/dashboard");
         else router.push("/onboarding");
       }
     }

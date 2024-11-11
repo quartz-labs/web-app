@@ -19,10 +19,11 @@ export default function Onboarding() {
     const router = useRouter();
 
     const [userAuthed, setUserAuthed] = useState(false);
-
+    
     useEffect(() => {
         const isLoggedIn = async () => {
-            if (!wallet || !await hasBetaKey(wallet.publicKey, showError)) router.push("/");
+            if (!wallet) router.push("/");
+            else if (!await hasBetaKey(wallet.publicKey, showError)) router.push("/");
             else if (await isVaultInitialized(connection, wallet.publicKey)) router.push("/dashboard");
             setUserAuthed(true);
         }

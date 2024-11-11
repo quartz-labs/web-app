@@ -1,8 +1,8 @@
 import './global.css';
 import { ClusterProvider } from '@/context/solana/cluster-data-access';
 import { SolanaProvider } from '@/context/solana/solana-provider';
-import { ReactQueryProvider } from '../context/react-query-provider';
-import { CSPostHogProvider } from '../context/posthog-provider'
+import { PostHogClient } from '../context/posthog/posthog-provider';
+
 
 export const metadata = {
   title: 'Quartz App',
@@ -15,6 +15,8 @@ import { ErrorProvider } from '@/context/error-provider';
 import ErrorModal from '@/components/Modals/Variations/ErrorModal';
 import { TxStatusProvider } from '@/context/tx-status-provider';
 import TxStatusPopup from '@/components/Popup/TransactionStatusPopup/TxStatusPopup';
+import PostHogPageView from '@/context/posthog/PostHogPageView';
+import { ReactQueryProvider } from '@/context/react-query-provider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -27,20 +29,21 @@ export default function RootLayout({
     <html lang="en" className={inter.className}>
       <body>
         <ErrorProvider>
-          <CSPostHogProvider>
-            <ReactQueryProvider>
+          <ReactQueryProvider>
+            <PostHogClient>
               <ClusterProvider>
                 <SolanaProvider>
                   <TxStatusProvider>
                     <ErrorPopup/>
                     <ErrorModal/>
                     <TxStatusPopup/>
+                    <PostHogPageView/>
                     {children}
                   </TxStatusProvider>
                 </SolanaProvider>
               </ClusterProvider>
-            </ReactQueryProvider>
-          </CSPostHogProvider>
+            </PostHogClient>
+          </ReactQueryProvider>
         </ErrorProvider>
       </body>
     </html>

@@ -1,5 +1,5 @@
 {
-  "extends": ["next/core-web-vitals", "next/typescript"],
+  "extends": ["next/core-web-vitals", "next/typescript", "plugin:@tanstack/query/recommended"],
   "ignorePatterns": ["components/solana/wallet-adapter-react-ui/**"],
   "rules": {
     "@typescript-eslint/no-explicit-any": "off"

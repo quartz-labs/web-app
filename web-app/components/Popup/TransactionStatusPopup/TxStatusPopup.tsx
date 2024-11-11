@@ -91,7 +91,7 @@ export default function TxStatusPopup() {
                     height="20"
                     width="20"
                     alt=""
-                    src="/wallet.svg"
+                    src="/wallet-grey.svg"
                     style={{marginRight: "5px"}}
                 />
                 <p>Waiting for wallet to sign transaction</p>
