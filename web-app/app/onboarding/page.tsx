@@ -31,8 +31,8 @@ export default function Onboarding() {
     }, [wallet, connection, router, showError]);
 
     const [awaitingSign, setAwaitingSign] = useState(false);
-    const [checkboxes, setCheckboxes] = useState([false, false, false, false]);
-    const [missingCheckboxes, setMissingCheckboxes] = useState([false, false, false, false]);
+    const [checkboxes, setCheckboxes] = useState([false, false, false]);
+    const [missingCheckboxes, setMissingCheckboxes] = useState([false, false, false]);
     const [attemptFailed, setAttemptFailed] = useState(false);
 
     const handleCheckboxChange = (index: number) => {
@@ -70,8 +70,7 @@ export default function Onboarding() {
 
             <div>
                 <h1 className={styles.heading}>Acknowledge Terms</h1>
-                <p className={styles.subheading}>We use Drift&apos;s lending protocol for yield and borrowing.</p>
-                <p className={styles.rentInfo}>Creating an account requires ~0.052 SOL for rent which can be reclaimed if you ever decide to close your account.</p>
+                <p className={styles.subheading}>Creating an account requires 0.053 SOL for rent which can be reclaimed if you ever decide to close your account.</p>
 
                 <ul className={styles.checkboxes}>
                     <li>
@@ -82,7 +81,7 @@ export default function Onboarding() {
                                 onChange={() => handleCheckboxChange(0)} 
                             />
                             <span className={styles.checkboxText}>
-                                I agree to <a href="https://docs.drift.trade/legal-and-regulations/terms-of-use" target="_blank">Drift&apos;s terms and conditions</a>
+                                I accept the <a href="https://docs.quartzpay.io/terms-and-conditions" target="_blank">terms and conditions</a>.
                             </span>
                         </label>
                     </li>
@@ -95,20 +94,7 @@ export default function Onboarding() {
                                 onChange={() => handleCheckboxChange(1)} 
                             />
                             <span className={styles.checkboxText}>
-                                I have read and understood <a href="https://docs.drift.trade/legal-and-regulations/disclaimer" target="_blank">Drift&apos;s protocol disclaimer</a>
-                            </span>
-                        </label>
-                    </li>
-
-                    <li>
-                        <label className={missingCheckboxes[3] ? styles.missingLabel : ""}>
-                            <input 
-                                type="checkbox" 
-                                checked={checkboxes[3]} 
-                                onChange={() => handleCheckboxChange(3)} 
-                            />
-                            <span className={styles.checkboxText}>
-                                I have read and understood the <a href="https://docs.quartzpay.io/legal/risks" target="_blank">Quartz protocol disclaimer</a>
+                                I accept the <a href="https://docs.quartzpay.io/privacy-policy" target="_blank">privacy policy</a>.
                             </span>
                         </label>
                     </li>
@@ -121,7 +107,7 @@ export default function Onboarding() {
                                 onChange={() => handleCheckboxChange(2)} 
                             />
                             <span className={styles.checkboxText}>
-                                I understand that my SOL deposits will liquidate for USDC if their value drops below 80% of the loan value
+                                I have read and understood the <a href="https://docs.quartzpay.io/legal/risks" target="_blank">protocol disclaimer</a>
                             </span>
                         </label>
                     </li>

@@ -10,7 +10,6 @@ import LoanView from '@/components/Views/LoanView';
 import styles from "./page.module.css";
 import { AccountData } from '@/utils/accountData';
 import { useError } from '@/context/error-provider';
-import { captureError } from '@/utils/errors';
 import Modal, { ModalVariation } from '@/components/Modals/Modal';
 import { useQueryClient } from '@tanstack/react-query';
 import { useDriftDataQuery, useSolPriceQuery } from '@/utils/queries';
@@ -32,6 +31,8 @@ export default function Dashboard() {
     const [mainView, setMainView] = useState(true);
     const [modal, setModal] = useState(ModalVariation.Disabled);
 
+    const { data: solPrice } = useSolPriceQuery();
+    const { isPending: driftPending, isStale: driftStale, data: driftData } = useDriftDataQuery();
 
     useEffect(() => {
         const isLoggedIn = async () => {
@@ -40,23 +41,11 @@ export default function Dashboard() {
             else if (!await isVaultInitialized(connection, wallet.publicKey)) router.push("/onboarding");
         }
         isLoggedIn();
-    }, [wallet, connection, router, showError]);
+    }, [wallet, connection, router, showError, queryClient]); 
 
-
-    // Fetch SOL price
-    const { error: priceError, data: solPrice } = useSolPriceQuery();
     useEffect(() => {
-        if (priceError) captureError(showError, "Could not fetch SOL price", "./app/dashboard/page.tsx", priceError, wallet?.publicKey);
-    }, [priceError, showError, wallet]);
-    
-    // Fetch Drift data
-    const { 
-        isPending: driftPending, isStale: driftStale, error: driftError, data: driftData 
-    } = useDriftDataQuery(wallet?.publicKey);
-    useEffect(() => {
-        if (driftError) captureError(showError, "Could not fetch Drift data", "./app/dashboard/page.tsx", driftError, wallet?.publicKey);
-    }, [driftError, showError, wallet]);
-
+        if (wallet?.publicKey) queryClient.invalidateQueries({ queryKey: ['driftData'] });
+    }, [wallet?.publicKey, queryClient]);
 
     const updateDriftData = async (signature?: string) => {
         if(!wallet) return;
@@ -65,13 +54,11 @@ export default function Dashboard() {
 
         queryClient.invalidateQueries({ queryKey: ['driftData'] });
     };
-
     
     const onModalClose = (signature?: string) => {
         if (signature) updateDriftData(signature);
         setModal(ModalVariation.Disabled);
     }
-
 
     return (
         <main className={styles.maxHeight}>

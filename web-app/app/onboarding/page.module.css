@@ -4,15 +4,9 @@
 }
 
 .subheading {
-    margin-bottom: 15px;
-    text-align: center;
-}
-
-.rentInfo {
-    color: var(--color-text-light);
-    font-size: var(--text-size-small);
-    text-align: center;
     margin-bottom: 80px;
+    text-align: center;
+    color: var(--color-text-light);
 }
 
 .checkboxes {
