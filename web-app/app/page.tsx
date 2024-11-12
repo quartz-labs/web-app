@@ -4,7 +4,7 @@ import styles from './page.module.css';
 import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { hasBetaKey, isVaultInitialized } from "@/utils/helpers";
+import { hasBetaKey, isVaultClosed, isVaultInitialized } from "@/utils/helpers";
 import { WalletButton } from "@/context/solana/solana-provider";
 import Logo from "@/components/Logo/Logo";
 import { useError } from '@/context/error-provider';
@@ -20,10 +20,8 @@ export default function Page() {
   useEffect(() => {
     const isLoggedIn = async () => {
       if (wallet) {
-        if (!await hasBetaKey(wallet.publicKey, showError)) {
-          setMissingBetaKey(true);
-          return;
-        }
+        if (!await hasBetaKey(wallet.publicKey, showError)) setMissingBetaKey(true);
+        else if (await isVaultClosed(connection, wallet.publicKey)) router.push("/account-closed");
         else if (await isVaultInitialized(connection, wallet.publicKey)) router.push("/dashboard");
         else router.push("/onboarding");
       }

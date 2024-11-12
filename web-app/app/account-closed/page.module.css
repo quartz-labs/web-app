@@ -1,0 +1,16 @@
+.accountClosedContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    gap: calc(var(--logo-margin) * 0.75);
+}
+
+.messageWrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: var(--logo-margin);
+}

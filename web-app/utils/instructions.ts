@@ -114,6 +114,7 @@ export const initAccount = async (
         if (error instanceof WalletSignTransactionError) trackTx({status: TxStatus.SIGN_REJECTED});
         else {
             captureError(showError, "Could not initialize account", "utils: /instructions.ts", error, wallet.publicKey);
+            trackTx({status: TxStatus.NONE});
         }
         return null;
     }
@@ -180,7 +181,8 @@ export const closeAccount = async (
     } catch (error) {
         if (error instanceof WalletSignTransactionError) trackTx({status: TxStatus.SIGN_REJECTED});
         else {
-            captureError(showError, "Could not close account", "utils: /instructions.ts", error, wallet.publicKey)
+            captureError(showError, "Could not close account", "utils: /instructions.ts", error, wallet.publicKey);
+            trackTx({status: TxStatus.NONE});
         }
         return null;
     }
@@ -277,6 +279,7 @@ export const depositLamports = async (
         if (error instanceof WalletSignTransactionError) trackTx({status: TxStatus.SIGN_REJECTED});
         else {
             captureError(showError, "Could not deposit SOL", "utils: /instructions.ts", error, wallet.publicKey);
+            trackTx({status: TxStatus.NONE});
         }
         return null;
     }
@@ -354,6 +357,7 @@ export const withdrawLamports = async (
         if (error instanceof WalletSignTransactionError) trackTx({status: TxStatus.SIGN_REJECTED});
         else {
             captureError(showError, "Could not withdraw SOL", "utils: /instructions.ts", error, wallet.publicKey);
+            trackTx({status: TxStatus.NONE});
         }
         return null;
     }
@@ -423,6 +427,7 @@ export const depositUsdc = async (
         if (error instanceof WalletSignTransactionError) trackTx({status: TxStatus.SIGN_REJECTED});
         else {
             captureError(showError, "Could not deposit USDC", "utils: /instructions.ts", error, wallet.publicKey);
+            trackTx({status: TxStatus.NONE});
         }
         return null;
     }
@@ -494,6 +499,7 @@ export const withdrawUsdc = async (
         if (error instanceof WalletSignTransactionError) trackTx({status: TxStatus.SIGN_REJECTED});
         else {
             captureError(showError, "Could not withdraw USDC", "utils: /instructions.ts", error, wallet.publicKey);
+            trackTx({status: TxStatus.NONE});
         }
         return null;
     }
@@ -624,6 +630,7 @@ export const liquidateSol = async (
         if (error instanceof WalletSignTransactionError) trackTx({status: TxStatus.SIGN_REJECTED});
         else {
             captureError(showError, "Could not liquidate loan", "utils: /instructions.ts", error, wallet.publicKey);
+            trackTx({status: TxStatus.NONE});
         }
         return null;
     }

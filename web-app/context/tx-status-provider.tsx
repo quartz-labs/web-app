@@ -31,6 +31,8 @@ export function TxStatusProvider({ children }: { children: React.ReactNode }) {
   const [enabled, setEnabled] = useState(false);
 
   const showTxStatus = (props: TxStatusProps) => {
+    if (props.status === TxStatus.NONE) return hideTxStatus();
+
     setProps(props);
     setEnabled(true);
   };

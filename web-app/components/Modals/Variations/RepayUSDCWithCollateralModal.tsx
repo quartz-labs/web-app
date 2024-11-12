@@ -5,21 +5,20 @@ import ModalButtons from "../DefaultLayout/ModalButtons";
 import { useConnection } from "@solana/wallet-adapter-react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useError } from "@/context/error-provider";
-import { DECIMALS_SOL, DECIMALS_USDC } from "@/utils/constants";
-import { baseUnitToUi, truncateToDecimalPlaces, uiToBaseUnit } from "@/utils/helpers";
+import { DECIMALS_USDC, MICRO_CENTS_PER_USDC } from "@/utils/constants";
+import { baseUnitToUi, uiToBaseUnit } from "@/utils/helpers";
 import { liquidateSol } from "@/utils/instructions";
 import { AccountData } from "@/utils/accountData";
 import { useTxStatus } from "@/context/tx-status-provider";
 
 interface RepayUSDCWithCollateralModalProps {
     accountData: AccountData | undefined,
-    solPriceUSD: number | undefined,
-    isValid: (amount: number, minAmount: number, maxAmount: number) => string;
+    isValid: (amountBaseUnits: number, minAmountBaseUnits: number, maxAmountBaseUnits: number, minAmountUi: string, maxAmountUi: string) => string;
     closeModal: (signature?: string) => void;
 }
 
 export default function RepayUSDCWithCollateralModal(
-    {accountData, solPriceUSD, isValid, closeModal} : RepayUSDCWithCollateralModalProps
+    {accountData, isValid, closeModal} : RepayUSDCWithCollateralModalProps
 ) {
     const { connection } = useConnection();
     const { showError } = useError();
@@ -31,17 +30,19 @@ export default function RepayUSDCWithCollateralModal(
     const [amountStr, setAmountStr] = useState("");
     const amount = Number(amountStr);
 
-    const MIN_AMOUNT = 0.01;
-
-    let maxRepay = 0;
-    if (accountData && solPriceUSD !== undefined) {
-        const solValue = Number(baseUnitToUi(accountData.solBalanceBaseUnits, DECIMALS_SOL)) * solPriceUSD;
-        const rawMaxRepay = Math.min(Number(baseUnitToUi(accountData.usdcBalanceBaseUnits, DECIMALS_USDC)), solValue);
-        maxRepay = truncateToDecimalPlaces(rawMaxRepay, DECIMALS_USDC);
-    }
+    const MIN_AMOUNT_BASE_UNITS = 0.01 * MICRO_CENTS_PER_USDC;
+    const maxAmountBaseUnits = accountData?.usdcBalanceBaseUnits ?? 0;
 
     const handleConfirm = async () => {
-        const error = isValid(amount, MIN_AMOUNT, maxRepay);
+        const amountBaseUnits = uiToBaseUnit(amount, DECIMALS_USDC).toNumber();
+        const error = isValid(
+            amountBaseUnits, 
+            MIN_AMOUNT_BASE_UNITS, 
+            maxAmountBaseUnits, 
+            baseUnitToUi(MIN_AMOUNT_BASE_UNITS, DECIMALS_USDC), 
+            baseUnitToUi(maxAmountBaseUnits, DECIMALS_USDC)
+        );
+        
         if (error) {
             setErrorText(error);
             return
@@ -63,13 +64,13 @@ export default function RepayUSDCWithCollateralModal(
                 subtitle="Repay your USDC loan using your existing SOL deposits"
                 denomination="USDC"
                 amountStr={amountStr}
-                maxAmount={maxRepay}
-                maxDecimals={DECIMALS_USDC}
                 setAmountStr={setAmountStr}
+                setMaxAmount={() => setAmountStr(baseUnitToUi(maxAmountBaseUnits, DECIMALS_USDC))}
+                setHalfAmount={() => setAmountStr(baseUnitToUi(Math.trunc(maxAmountBaseUnits / 2), DECIMALS_USDC))}
             />
 
             <ModalInfoSection 
-                maxAmount={maxRepay} 
+                maxAmountUi={Number(baseUnitToUi(maxAmountBaseUnits, DECIMALS_USDC))} 
                 minDecimals={2}
                 errorText={errorText}
             >

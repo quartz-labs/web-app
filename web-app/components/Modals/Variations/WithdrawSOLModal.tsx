@@ -6,15 +6,17 @@ import { useConnection } from "@solana/wallet-adapter-react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useError } from "@/context/error-provider";
 import { DECIMALS_SOL } from "@/utils/constants";
-import { baseUnitToUi, uiToBaseUnit } from "@/utils/helpers";
 import { withdrawLamports } from "@/utils/instructions";
 import { AccountData } from "@/utils/accountData";
 import { useTxStatus } from "@/context/tx-status-provider";
+import { uiToBaseUnit } from "@/utils/helpers";
+import { baseUnitToUi } from "@/utils/helpers";
+import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 
 interface WithdrawSOLModalProps {
     accountData: AccountData | undefined;
     solPriceUSD: number | undefined;
-    isValid: (amount: number, minAmount: number, maxAmount: number) => string;
+    isValid: (amountBaseUnits: number, minAmountBaseUnits: number, maxAmountBaseUnits: number, minAmountUi: string, maxAmountUi: string) => string;
     closeModal: (signature?: string) => void;
 }
 
@@ -31,17 +33,20 @@ export default function WithdrawSOLModal(
     const [amountStr, setAmountStr] = useState("");
     const amount = Number(amountStr);
 
-    const MIN_AMOUNT = 0.00001;
-    const maxAmount = (accountData)
-        ? Number(baseUnitToUi(accountData.solWithdrawLimitBaseUnits, DECIMALS_SOL))
-        : 0;
+    const MIN_AMOUNT_BASE_UNITS = 0.00001 * LAMPORTS_PER_SOL;
+    const maxAmountBaseUnits = accountData?.solWithdrawLimitBaseUnits ?? 0;
     
     const handleConfirm = async () => {
-        const error = isValid(amount, MIN_AMOUNT, maxAmount);
-        if (error) {
-            setErrorText(error);
-            return
-        };
+        const amountBaseUnits = uiToBaseUnit(amount, DECIMALS_SOL).toNumber();
+        const error = isValid(
+            amountBaseUnits, 
+            MIN_AMOUNT_BASE_UNITS, 
+            maxAmountBaseUnits, 
+            baseUnitToUi(MIN_AMOUNT_BASE_UNITS, DECIMALS_SOL), 
+            baseUnitToUi(maxAmountBaseUnits, DECIMALS_SOL)
+        );
+        
+        if (error) return setErrorText(error);
         if (!wallet) return;
 
         setAwaitingSign(true);
@@ -58,13 +63,13 @@ export default function WithdrawSOLModal(
                 title="Withdraw SOL"
                 denomination="SOL"
                 amountStr={amountStr}
-                maxAmount={maxAmount}
-                maxDecimals={DECIMALS_SOL}
                 setAmountStr={setAmountStr}
+                setMaxAmount={() => setAmountStr(baseUnitToUi(maxAmountBaseUnits, DECIMALS_SOL))}
+                setHalfAmount={() => setAmountStr(baseUnitToUi(Math.trunc(maxAmountBaseUnits / 2), DECIMALS_SOL))}
             />
 
             <ModalInfoSection 
-                maxAmount={maxAmount} 
+                maxAmountUi={Number(baseUnitToUi(maxAmountBaseUnits, DECIMALS_SOL))} 
                 minDecimals={0} 
                 errorText={errorText}
             >

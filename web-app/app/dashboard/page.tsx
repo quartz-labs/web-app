@@ -3,7 +3,7 @@
 import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { hasBetaKey, isVaultInitialized } from '@/utils/helpers';
+import { hasBetaKey, isVaultClosed, isVaultInitialized } from '@/utils/helpers';
 import Account from '@/components/Account/Account';
 import MainView from '@/components/Views/MainView';
 import LoanView from '@/components/Views/LoanView';
@@ -38,6 +38,7 @@ export default function Dashboard() {
         const isLoggedIn = async () => {
             if (!wallet) router.push("/");
             else if (!await hasBetaKey(wallet.publicKey, showError)) router.push("/");
+            else if (await isVaultClosed(connection, wallet.publicKey)) router.push("/account-closed");
             else if (!await isVaultInitialized(connection, wallet.publicKey)) router.push("/onboarding");
         }
         isLoggedIn();
@@ -48,14 +49,20 @@ export default function Dashboard() {
     }, [wallet?.publicKey, queryClient]);
 
     const updateDriftData = async (signature?: string) => {
-        if(!wallet) return;
-
         if (signature) await connection.confirmTransaction({ signature, ...(await connection.getLatestBlockhash()) }, "finalized");
-
         queryClient.invalidateQueries({ queryKey: ['driftData'] });
     };
+
+    const handleCloseAccount = async (signature: string) => {
+        await connection.confirmTransaction({ signature, ...(await connection.getLatestBlockhash()) }, "finalized");
+        router.push("/account-closed");
+    }
     
-    const onModalClose = (signature?: string) => {
+    const onModalClose = (signature?: string, accountClosed?: boolean) => {
+        if (accountClosed) {
+            if (signature) handleCloseAccount(signature);
+            return;
+        }
         if (signature) updateDriftData(signature);
         setModal(ModalVariation.Disabled);
     }
@@ -70,7 +77,7 @@ export default function Dashboard() {
             />
 
             <div className="two-col-grid">
-                <Account />
+                <Account onCloseAccount={() => setModal(ModalVariation.CloseAccount)} />
 
                 {mainView &&
                     <MainView

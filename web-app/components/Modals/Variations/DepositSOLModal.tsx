@@ -6,7 +6,7 @@ import { useConnection } from "@solana/wallet-adapter-react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useError } from "@/context/error-provider";
 import { DECIMALS_SOL, MICRO_LAMPORTS_PER_LAMPORT } from "@/utils/constants";
-import { getAccountsFromInstructions, uiToBaseUnit } from "@/utils/helpers";
+import { baseUnitToUi, getAccountsFromInstructions, uiToBaseUnit } from "@/utils/helpers";
 import { depositLamports, makeDepositLamportsInstructions } from "@/utils/instructions";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { captureError } from "@/utils/errors";
@@ -18,7 +18,7 @@ import { useTxStatus } from "@/context/tx-status-provider";
 interface DepositSOLModalProps {
     solPriceUSD: number | undefined;
     accountData: AccountData | undefined;
-    isValid: (amount: number, minAmount: number, maxAmount: number) => string;
+    isValid: (amountBaseUnits: number, minAmountBaseUnits: number, maxAmountBaseUnits: number, minAmountUi: string, maxAmountUi: string) => string;
     closeModal: (signature?: string) => void;
 }
 
@@ -35,9 +35,9 @@ export default function DepositSOLModal(
     const [amountStr, setAmountStr] = useState("");
     const amount = Number(amountStr);
 
-    const MIN_AMOUNT = 0.00001;
+    const MIN_AMOUNT_BASE_UNITS = 0.00001 * LAMPORTS_PER_SOL;
 
-    const [maxDeposit, setMaxDeposit] = useState(0);
+    const [maxAmountBaseUnits, setMaxDepositBaseUnits] = useState(0);
     useEffect(() => {
         const fetchMaxDeposit = async () => {
             if (!wallet) return;
@@ -55,17 +55,25 @@ export default function DepositSOLModal(
                 const priorityFeeLamports = (computeUnitPriceMicroLamports * 200_000 ) / MICRO_LAMPORTS_PER_LAMPORT;
                 const maxDeposit = balanceLamports - (wSolAtaRent * 2) - (baseSignerFeeLamports + priorityFeeLamports);
 
-                setMaxDeposit(Math.max(maxDeposit, 0) / LAMPORTS_PER_SOL);
+                setMaxDepositBaseUnits(Math.max(maxDeposit, 0));
             } catch (error) {
                 captureError(showError, "Could not calculate max SOL deposit value", "/DepositSOLModal.tsx", error, wallet.publicKey);
-                setMaxDeposit(0);
+                setMaxDepositBaseUnits(0);
             }
         }
         fetchMaxDeposit();
     }, [connection, wallet, showError]);
 
     const handleConfirm = async () => {
-        const error = isValid(Number(amountStr), MIN_AMOUNT, maxDeposit);
+        const amountBaseUnits = uiToBaseUnit(amount, DECIMALS_SOL).toNumber();
+        const error = isValid(
+            amountBaseUnits, 
+            MIN_AMOUNT_BASE_UNITS, 
+            maxAmountBaseUnits, 
+            baseUnitToUi(MIN_AMOUNT_BASE_UNITS, DECIMALS_SOL), 
+            baseUnitToUi(maxAmountBaseUnits, DECIMALS_SOL)
+        );
+
         if (error) {
             setErrorText(error);
             return;
@@ -86,18 +94,20 @@ export default function DepositSOLModal(
                 title="Deposit SOL"
                 denomination="SOL"
                 amountStr={amountStr}
-                maxAmount={maxDeposit}
-                maxDecimals={DECIMALS_SOL}
                 setAmountStr={setAmountStr}
+                setMaxAmount={() => setAmountStr(baseUnitToUi(maxAmountBaseUnits, DECIMALS_SOL))}
+                setHalfAmount={() => setAmountStr(baseUnitToUi(Math.trunc(maxAmountBaseUnits / 2), DECIMALS_SOL))}
             />
 
             <ModalInfoSection 
-                maxAmount={maxDeposit}
+                maxAmountUi={Number(baseUnitToUi(maxAmountBaseUnits, DECIMALS_SOL))}
                 minDecimals={0} 
                 errorText={errorText}
             >
-                {(solPriceUSD !== undefined && accountData) &&
-                    <p>${(solPriceUSD * amount).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="tiny-text">({(accountData.solRate * 100).toFixed(4)}% APY)</span></p>
+                {(solPriceUSD !== undefined) &&
+                    <p>${(solPriceUSD * amount).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {accountData &&
+                        <span className="tiny-text">({(accountData.solRate * 100).toFixed(4)}% APY)</span>
+                    }</p>
                 }
             </ModalInfoSection>
 

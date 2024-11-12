@@ -12,7 +12,20 @@ import { captureError } from "@/utils/errors";
 export const isVaultInitialized = async (connection: Connection, wallet: PublicKey) => {
     const vaultPda = getVault(wallet);
     const vaultPdaAccount = await connection.getAccountInfo(vaultPda);
+    console.log(vaultPdaAccount);
     return (vaultPdaAccount !== null);
+}
+
+export const isVaultClosed = async (connection: Connection, wallet: PublicKey) => {
+    const vaultPda = getVault(wallet);
+    
+    const vaultPdaAccount = await connection.getAccountInfo(vaultPda);
+    if (vaultPdaAccount !== null) return false;
+    
+    // If account doesn't exist, check signature history. If we find some, it used to exist.
+    const signatures = await connection.getSignaturesForAddress(vaultPda);
+    const isSignatureHistory = (signatures.length > 0);
+    return isSignatureHistory;
 }
 
 export const truncateToDecimalPlaces = (num: number, place: number) => {

@@ -5,7 +5,7 @@ import styles from './page.module.css';
 import { useRouter } from 'next/navigation';
 import { initAccount } from '@/utils/instructions';
 import { useEffect, useState } from 'react';
-import { hasBetaKey, isVaultInitialized } from '@/utils/helpers';
+import { hasBetaKey, isVaultClosed, isVaultInitialized } from '@/utils/helpers';
 import Account from '@/components/Account/Account';
 import { PuffLoader } from 'react-spinners';
 import { useError } from '@/context/error-provider';
@@ -19,21 +19,21 @@ export default function Onboarding() {
     const router = useRouter();
 
     const [userAuthed, setUserAuthed] = useState(false);
+    const [awaitingSign, setAwaitingSign] = useState(false);
+    const [checkboxes, setCheckboxes] = useState([false, false, false]);
+    const [missingCheckboxes, setMissingCheckboxes] = useState([false, false, false]);
+    const [attemptFailed, setAttemptFailed] = useState(false);
     
     useEffect(() => {
         const isLoggedIn = async () => {
             if (!wallet) router.push("/");
             else if (!await hasBetaKey(wallet.publicKey, showError)) router.push("/");
+            else if (await isVaultClosed(connection, wallet.publicKey)) router.push("/account-closed");
             else if (await isVaultInitialized(connection, wallet.publicKey)) router.push("/dashboard");
             setUserAuthed(true);
         }
         isLoggedIn();
     }, [wallet, connection, router, showError]);
-
-    const [awaitingSign, setAwaitingSign] = useState(false);
-    const [checkboxes, setCheckboxes] = useState([false, false, false]);
-    const [missingCheckboxes, setMissingCheckboxes] = useState([false, false, false]);
-    const [attemptFailed, setAttemptFailed] = useState(false);
 
     const handleCheckboxChange = (index: number) => {
         const newCheckboxes = [...checkboxes];
@@ -66,7 +66,7 @@ export default function Onboarding() {
     
     return (
         <main className={"two-col-grid"}>
-            <Account disableCloseAccount={true} />
+            <Account />
 
             <div>
                 <h1 className={styles.heading}>Acknowledge Terms</h1>

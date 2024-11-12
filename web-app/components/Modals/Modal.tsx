@@ -10,6 +10,7 @@ import RepayUSDCModal from "./Variations/RepayUSDCModal";
 import RepayUSDCWithCollateralModal from "./Variations/RepayUSDCWithCollateralModal";
 import { AccountData } from "@/utils/accountData";
 import TelegramModal from "./Variations/TelegramModal";
+import CloseAccountModal from "./Variations/CloseAccountModal";
 
 export enum ModalVariation {
     Disabled,
@@ -20,14 +21,15 @@ export enum ModalVariation {
     OfframpComplete,
     RepayUSDC,
     RepayUSDCWithCollateral,
-    Telegram
+    Telegram,
+    CloseAccount
 }
 
 interface ModalProps{
     variation: ModalVariation;
     accountData: AccountData | undefined;
     solPriceUSD: number | undefined;
-    onClose: (signature?: string) => void;
+    onClose: (signature?: string, accountClosed?: boolean) => void;
 }
 
 export default function Modal(
@@ -41,10 +43,16 @@ export default function Modal(
         }
     }, [onClose]);
 
-    const isValid = (amount: number, minAmount: number, maxAmount: number) => {
-        if (isNaN(amount)) return "Invalid input";
-        if (amount < minAmount) return "Minimum amount: " + minAmount;
-        if (amount > maxAmount) return "Maximum amount: " + maxAmount;
+    const isValid = (
+        amountBaseUnits: number, 
+        minAmountBaseUnits: number, 
+        maxAmountBaseUnits: number, 
+        minAmountUi: string,
+        maxAmountUi: string
+    ) => {
+        if (isNaN(amountBaseUnits)) return "Invalid input";
+        if (amountBaseUnits < minAmountBaseUnits) return "Minimum amount: " + minAmountUi;
+        if (amountBaseUnits > maxAmountBaseUnits) return "Maximum amount: " + maxAmountUi;
         if (!wallet) return "Wallet not connected";
         
         return "";
@@ -54,7 +62,7 @@ export default function Modal(
     return (
         <div className={styles.modalWrapper} onClick={handleWrapperClick}>
             <div 
-                className={`glass ${styles.modal}`}
+                className={`glass ${styles.modal} ${variation === ModalVariation.CloseAccount ? styles.errorModal : ""}`}
                 onClick={(e) => e.stopPropagation()}
             >
                 {(() => {
@@ -105,13 +113,17 @@ export default function Modal(
                         case ModalVariation.RepayUSDCWithCollateral:
                             return <RepayUSDCWithCollateralModal
                                 accountData={accountData} 
-                                solPriceUSD={solPriceUSD}
                                 isValid={isValid}
                                 closeModal={onClose}
                             />;
 
                         case ModalVariation.Telegram:
                             return <TelegramModal
+                                closeModal={onClose}
+                            />
+
+                        case ModalVariation.CloseAccount:
+                            return <CloseAccountModal
                                 closeModal={onClose}
                             />
 

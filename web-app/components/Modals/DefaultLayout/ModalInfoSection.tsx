@@ -2,13 +2,13 @@ import React from "react";
 import styles from "./DefaultLayout.module.css";
 
 interface ModalInfoSection {
-    maxAmount: number;
+    maxAmountUi: number;
     minDecimals: number;
     errorText: string;
     children: React.ReactNode;
 }
 
-export default function ModalInfoSection({maxAmount, minDecimals, errorText, children} : ModalInfoSection) {
+export default function ModalInfoSection({maxAmountUi, minDecimals, errorText, children} : ModalInfoSection) {
     return (
         <div className={styles.infoSectionWrapper}>
             <div className={`${styles.infoSection} ${styles.stretchWidth}`}>
@@ -16,7 +16,7 @@ export default function ModalInfoSection({maxAmount, minDecimals, errorText, chi
                     {children}
                 </div>
 
-                <p className="small-text light-text">Available: {maxAmount.toLocaleString('en-IE', { minimumFractionDigits: minDecimals, maximumFractionDigits: 6 })}</p>
+                <p className="small-text light-text">Available: {maxAmountUi.toLocaleString('en-IE', { minimumFractionDigits: minDecimals, maximumFractionDigits: 6 })}</p>
             </div>
 
             {errorText &&

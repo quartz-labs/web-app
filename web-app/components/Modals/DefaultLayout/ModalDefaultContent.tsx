@@ -1,4 +1,3 @@
-import { truncateToDecimalPlaces } from "@/utils/helpers";
 import styles from "./DefaultLayout.module.css";
 
 interface ModalDefaultContentProps {
@@ -6,16 +5,14 @@ interface ModalDefaultContentProps {
     subtitle?: string;
     denomination: string;
     amountStr: string;
-    maxAmount: number;
-    maxDecimals: number;
     setAmountStr: (amount: string) => void;
+    setMaxAmount: () => void;
+    setHalfAmount: () => void;
 }
 
 export default function ModalDefaultContent(
-    {title, subtitle, denomination, amountStr, maxAmount, maxDecimals, setAmountStr} : ModalDefaultContentProps
+    {title, subtitle, denomination, amountStr, setAmountStr, setMaxAmount, setHalfAmount} : ModalDefaultContentProps
 ) {
-    const halfMax = truncateToDecimalPlaces((maxAmount / 2), maxDecimals);
-
     return (
         <div className={styles.contentWrapper}>
             <h2 className={styles.heading}>{title}</h2>
@@ -29,10 +26,10 @@ export default function ModalDefaultContent(
                     <p>Amount</p>
 
                     <div className={styles.amountButtons}>
-                        <button className={`glass-button ghost ${styles.balanceButton}`} onClick={() => setAmountStr(halfMax.toString())}>
+                        <button className={`glass-button ghost ${styles.balanceButton}`} onClick={setHalfAmount}>
                             Half
                         </button>
-                        <button className={`glass-button ghost ${styles.balanceButton}`} onClick={() => setAmountStr(maxAmount.toString())}>
+                        <button className={`glass-button ghost ${styles.balanceButton}`} onClick={setMaxAmount}>
                             Max
                         </button>
                     </div>
