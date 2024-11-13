@@ -1,6 +1,7 @@
 use anchor_lang::prelude::*;
 
 mod state;
+mod cpi_programs;
 mod errors;
 mod constants;
 mod instructions;
@@ -62,27 +63,19 @@ pub mod funds_program {
         withdraw_handler(ctx, amount_base_units, drift_market_index, reduce_only)
     }
 
-    pub fn test_pda(ctx: Context<TestPda>, drift_market_index: u16) -> Result<()> {
-        let (expected_pda, _bump) = Pubkey::find_program_address(
-            &[
-                b"spot_market_vault".as_ref(),
-                drift_market_index.to_le_bytes().as_ref()
-            ],
-            &ctx.accounts.drift_program.key()
-        );
-        
-        msg!("Market Index: {}", drift_market_index);
-        msg!("Bytes: {:?}", drift_market_index.to_le_bytes());
-        msg!("Derived PDA: {}", expected_pda);
-        
-        Ok(())
+    pub fn repay_loan_with_collateral<'info>(
+        ctx: Context<'_, '_, '_, 'info, RepayLoanWithCollateral<'info>>,
+        amount_collateral_base_units: u64,
+        amount_loan_base_units: u64,
+        drift_market_index_collateral: u16,
+        drift_market_index_loan: u16,
+    ) -> Result<()> {
+        repay_loan_with_collateral_handler(
+            ctx, 
+            amount_collateral_base_units, 
+            amount_loan_base_units, 
+            drift_market_index_collateral, 
+            drift_market_index_loan
+        )
     }
-}
-
-
-#[derive(Accounts)]
-#[instruction(drift_market_index: u16)]
-pub struct TestPda<'info> {
-    /// CHECK: no check
-    pub drift_program: AccountInfo<'info>,
 }

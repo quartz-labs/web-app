@@ -2,20 +2,12 @@ use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::AssociatedToken, token::{self, Mint, Token, TokenAccount}
 };
-use drift_cpi::{
-    cpi::deposit, 
+use drift::{
+    cpi::deposit as drift_deposit, 
     Deposit as DriftDeposit
 };
-use drift_accounts::{
-    State as DriftState,
-    User as DriftUser,
-    UserStats as DriftUserStats
-};
-use crate::{
-    constants::DRIFT_PROGRAM_ID, 
-    errors::ErrorCode, 
-    state::Vault
-};
+use crate::cpi_programs::Drift;
+use crate::state::Vault;
 
 #[derive(Accounts)]
 #[instruction(
@@ -50,53 +42,44 @@ pub struct Deposit<'info> {
     )]
     pub owner_spl: Box<Account<'info, TokenAccount>>,
 
-    #[account(
-        mut,
-        seeds = [b"drift_state".as_ref()],
-        seeds::program = drift_program.key(),
-        bump
-    )]
-    pub drift_state: Box<Account<'info, DriftState>>,
+    pub spl_mint: Box<Account<'info, Mint>>,
 
+    /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
         mut,
         seeds = [b"user".as_ref(), vault.key().as_ref(), (0u16).to_le_bytes().as_ref()],
         seeds::program = drift_program.key(),
         bump
     )]
-    pub drift_user: AccountLoader<'info, DriftUser>,
+    pub drift_user: UncheckedAccount<'info>,
     
+    /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
         mut,
         seeds = [b"user_stats".as_ref(), vault.key().as_ref()],
         seeds::program = drift_program.key(),
         bump
     )]
-    pub drift_user_stats: AccountLoader<'info, DriftUserStats>,
+    pub drift_user_stats: UncheckedAccount<'info>,
+
+    /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
+    #[account(
+        mut,
+        seeds = [b"drift_state".as_ref()],
+        seeds::program = drift_program.key(),
+        bump
+    )]
+    pub drift_state: UncheckedAccount<'info>,
     
-    // #[account(
-    //     mut,
-    //     seeds = [b"spot_market_vault".as_ref(), drift_market_index.to_le_bytes().as_ref()],
-    //     seeds::program = drift_program.key(),
-    //     token::mint = spl_mint,
-    //     bump,
-    // )]
-    // pub spot_market_vault: Box<Account<'info, TokenAccount>>,
-    /// CHECK: Had seed issues checking this account, so leaving unchecked for now. Still safe as is only used for CPI, where Drift performs checks.
+    /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(mut)]
     pub spot_market_vault: UncheckedAccount<'info>,
-
-    pub spl_mint: Box<Account<'info, Mint>>,
 
     pub token_program: Program<'info, Token>,
 
     pub associated_token_program: Program<'info, AssociatedToken>,
 
-    /// CHECK: Account is safe once the address is correct
-    #[account(
-        constraint = drift_program.key() == DRIFT_PROGRAM_ID @ ErrorCode::InvalidDriftProgram
-    )]
-    pub drift_program: UncheckedAccount<'info>,
+    pub drift_program: Program<'info, Drift>,
 
     pub system_program: Program<'info, System>,
 }
@@ -148,7 +131,7 @@ pub fn deposit_handler<'info>(
 
     cpi_ctx.remaining_accounts = ctx.remaining_accounts.to_vec();
 
-    deposit(cpi_ctx, drift_market_index, amount_base_units, reduce_only)?;
+    drift_deposit(cpi_ctx, drift_market_index, amount_base_units, reduce_only)?;
 
     // Close vault's ATA
 
