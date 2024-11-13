@@ -3,7 +3,6 @@
 import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { hasBetaKey, isVaultClosed, isVaultInitialized } from '@/utils/helpers';
 import Account from '@/components/Account/Account';
 import MainView from '@/components/Views/MainView';
 import LoanView from '@/components/Views/LoanView';
@@ -36,10 +35,13 @@ export default function Dashboard() {
 
     useEffect(() => {
         const isLoggedIn = async () => {
-            if (!wallet) router.push("/");
-            else if (!await hasBetaKey(wallet.publicKey, showError)) router.push("/");
-            else if (await isVaultClosed(connection, wallet.publicKey)) router.push("/account-closed");
-            else if (!await isVaultInitialized(connection, wallet.publicKey)) router.push("/onboarding");
+            router.push("/");
+            return;
+
+            // if (!wallet) router.push("/");
+            // else if (!await hasBetaKey(wallet.publicKey, showError)) router.push("/");
+            // else if (await isVaultClosed(connection, wallet.publicKey)) router.push("/account-closed");
+            // else if (!await isVaultInitialized(connection, wallet.publicKey)) router.push("/onboarding");
         }
         isLoggedIn();
     }, [wallet, connection, router, showError, queryClient]); 
