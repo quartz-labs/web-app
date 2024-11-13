@@ -12,6 +12,7 @@ import { useError } from '@/context/error-provider';
 import Modal, { ModalVariation } from '@/components/Modals/Modal';
 import { useQueryClient } from '@tanstack/react-query';
 import { useDriftDataQuery, useSolPriceQuery } from '@/utils/queries';
+import { hasBetaKey, isVaultInitialized, isVaultClosed } from '@/utils/helpers';
 
 export interface ViewProps {
     solPrice: number | undefined;
@@ -35,13 +36,10 @@ export default function Dashboard() {
 
     useEffect(() => {
         const isLoggedIn = async () => {
-            router.push("/");
-            return;
-
-            // if (!wallet) router.push("/");
-            // else if (!await hasBetaKey(wallet.publicKey, showError)) router.push("/");
-            // else if (await isVaultClosed(connection, wallet.publicKey)) router.push("/account-closed");
-            // else if (!await isVaultInitialized(connection, wallet.publicKey)) router.push("/onboarding");
+            if (!wallet) router.push("/");
+            else if (!await hasBetaKey(wallet.publicKey, showError)) router.push("/");
+            else if (await isVaultClosed(connection, wallet.publicKey)) router.push("/account-closed");
+            else if (!await isVaultInitialized(connection, wallet.publicKey)) router.push("/onboarding");
         }
         isLoggedIn();
     }, [wallet, connection, router, showError, queryClient]); 

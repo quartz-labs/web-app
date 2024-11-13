@@ -534,38 +534,91 @@ export const repayUsdcWithSol = async (
         // Build instructions
         const oix_createWSolAta = await createAtaIfNeeded(connection, walletWSol, wallet.publicKey, WSOL_MINT); // USDC ATA is already created by MarginFi flash loan
 
-        const ix_repayLoanWithCollateral = await quartzProgram.methods
-            .repayLoanWithCollateral(
-                new BN(amountLamports), 
-                new BN(amountMicroCents), 
-                DRIFT_MARKET_INDEX_SOL, 
-                DRIFT_MARKET_INDEX_USDC
-            )
+        // const ix_repayLoanWithCollateral = await quartzProgram.methods
+        //     .repayLoanWithCollateral(
+        //         new BN(amountLamports), 
+        //         new BN(amountMicroCents), 
+        //         DRIFT_MARKET_INDEX_SOL, 
+        //         DRIFT_MARKET_INDEX_USDC
+        //     )
+        //     .accounts({
+        //         // @ts-expect-error - IDL issue
+        //         vault: vaultPda,
+        //         vaultCollateral: getVaultSpl(vaultPda, WSOL_MINT),
+        //         vaultLoan: getVaultSpl(vaultPda, USDC_MINT),
+        //         ownerCollateral: walletWSol,
+        //         ownerLoan: walletUsdc,
+        //         mintCollateral: WSOL_MINT,
+        //         mintLoan: USDC_MINT,
+        //         driftUser: getDriftUser(vaultPda),
+        //         driftUserStats: getDriftUserStats(vaultPda),
+        //         driftState: getDriftState(),
+        //         spotMarketVaultCollateral: getDriftSpotMarketVault(DRIFT_MARKET_INDEX_SOL),
+        //         spotMarketVaultLoan: getDriftSpotMarketVault(DRIFT_MARKET_INDEX_USDC),
+        //         driftSigner: DRIFT_SIGNER,
+        //         driftProgram: DRIFT_PROGRAM_ID,
+        //         tokenProgram: TOKEN_PROGRAM_ID,
+        //         associatedTokenProgram: ASSOCIATED_PROGRAM_ID,
+        //         systemProgram: SystemProgram.programId,
+        //     })
+        //     .remainingAccounts([
+        //         toRemainingAccount(DRIFT_ORACLE_2, false, false),
+        //         toRemainingAccount(DRIFT_ORACLE_1, false, false),
+        //         toRemainingAccount(DRIFT_SPOT_MARKET_SOL, true, false),
+        //         toRemainingAccount(DRIFT_SPOT_MARKET_USDC, true, false)
+        //     ])
+        //     .instruction();
+
+        const ix_deposit_usdc = await quartzProgram.methods
+            .deposit(new BN(amountMicroCents), DRIFT_MARKET_INDEX_USDC, true)
             .accounts({
                 // @ts-expect-error - IDL issue
                 vault: vaultPda,
-                vaultCollateral: getVaultSpl(vaultPda, WSOL_MINT),
-                vaultLoan: getVaultSpl(vaultPda, USDC_MINT),
-                ownerCollateral: walletWSol,
-                ownerLoan: walletUsdc,
-                mintCollateral: WSOL_MINT,
-                mintLoan: USDC_MINT,
+                vaultSpl: getVaultSpl(vaultPda, USDC_MINT),
+                owner: wallet.publicKey,
+                ownerSpl: walletUsdc,
+                splMint: USDC_MINT,
                 driftUser: getDriftUser(vaultPda),
                 driftUserStats: getDriftUserStats(vaultPda),
                 driftState: getDriftState(),
-                spotMarketVaultCollateral: getDriftSpotMarketVault(DRIFT_MARKET_INDEX_SOL),
-                spotMarketVaultLoan: getDriftSpotMarketVault(DRIFT_MARKET_INDEX_USDC),
-                driftSigner: DRIFT_SIGNER,
-                driftProgram: DRIFT_PROGRAM_ID,
+                spotMarketVault: getDriftSpotMarketVault(DRIFT_MARKET_INDEX_USDC),
                 tokenProgram: TOKEN_PROGRAM_ID,
                 associatedTokenProgram: ASSOCIATED_PROGRAM_ID,
-                systemProgram: SystemProgram.programId,
+                driftProgram: DRIFT_PROGRAM_ID,
+                systemProgram: SystemProgram.programId
             })
             .remainingAccounts([
                 toRemainingAccount(DRIFT_ORACLE_2, false, false),
                 toRemainingAccount(DRIFT_ORACLE_1, false, false),
                 toRemainingAccount(DRIFT_SPOT_MARKET_SOL, true, false),
                 toRemainingAccount(DRIFT_SPOT_MARKET_USDC, true, false)
+            ])
+            .instruction();
+
+        const ix_withdraw_lamports = await quartzProgram.methods
+            .withdraw(new BN(amountLamports), DRIFT_MARKET_INDEX_SOL, true)
+            .accounts({
+                // @ts-expect-error - IDL issue
+                vault: vaultPda,
+                vaultSpl: getVaultSpl(vaultPda, WSOL_MINT),
+                owner: wallet.publicKey,
+                ownerSpl: walletWSol,
+                splMint: WSOL_MINT,
+                driftUser: getDriftUser(vaultPda),
+                driftUserStats: getDriftUserStats(vaultPda),
+                driftState: getDriftState(),
+                spotMarketVault: getDriftSpotMarketVault(DRIFT_MARKET_INDEX_SOL),
+                driftSigner: DRIFT_SIGNER,
+                tokenProgram: TOKEN_PROGRAM_ID,
+                associatedTokenProgram: ASSOCIATED_PROGRAM_ID,
+                driftProgram: DRIFT_PROGRAM_ID,
+                systemProgram: SystemProgram.programId,
+            })
+            .remainingAccounts([
+                toRemainingAccount(DRIFT_ORACLE_2, false, false),
+                toRemainingAccount(DRIFT_ORACLE_1, false, false),
+                toRemainingAccount(DRIFT_SPOT_MARKET_SOL, true, false),
+                toRemainingAccount(DRIFT_SPOT_MARKET_USDC, false, false)
             ])
             .instruction();
 
@@ -586,7 +639,7 @@ export const repayUsdcWithSol = async (
             marginfiAccount,
             amountUsdc,
             usdcBank.address,
-            [...oix_createWSolAta, ix_repayLoanWithCollateral, ...jupiterSwap, ix_closeWSolAta],
+            [...oix_createWSolAta, ix_deposit_usdc, ix_withdraw_lamports, ...jupiterSwap, ix_closeWSolAta],
             [fundsProgramLookupTable, ...jupiterLookupTables],
             0.002,
             true

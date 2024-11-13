@@ -5,7 +5,7 @@ import styles from './page.module.css';
 import { useRouter } from 'next/navigation';
 import { initAccount } from '@/utils/instructions';
 import { useEffect, useState } from 'react';
-import { hasBetaKey, isVaultInitialized } from '@/utils/helpers';
+import { hasBetaKey, isVaultClosed, isVaultInitialized } from '@/utils/helpers';
 import Account from '@/components/Account/Account';
 import { PuffLoader } from 'react-spinners';
 import { useError } from '@/context/error-provider';
@@ -26,15 +26,11 @@ export default function Onboarding() {
     
     useEffect(() => {
         const isLoggedIn = async () => {
-            router.push("/");
-            console.log(setUserAuthed);
-            return;
-
-            // if (!wallet) router.push("/");
-            // else if (!await hasBetaKey(wallet.publicKey, showError)) router.push("/");
-            // else if (await isVaultClosed(connection, wallet.publicKey)) router.push("/account-closed");
-            // else if (await isVaultInitialized(connection, wallet.publicKey)) router.push("/dashboard");
-            // setUserAuthed(true);
+            if (!wallet) router.push("/");
+            else if (!await hasBetaKey(wallet.publicKey, showError)) router.push("/");
+            else if (await isVaultClosed(connection, wallet.publicKey)) router.push("/account-closed");
+            else if (await isVaultInitialized(connection, wallet.publicKey)) router.push("/dashboard");
+            setUserAuthed(true);
         }
         isLoggedIn();
     }, [wallet, connection, router, showError]);
