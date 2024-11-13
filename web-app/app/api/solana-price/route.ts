@@ -6,7 +6,7 @@ export async function GET() {
     const response = await fetch('https://quartz-server-puoxw.ondigitalocean.app/get-price?asset=solana');
     if (!response.ok) {
       const errorResponse = await response.json();
-      throw new Error(errorResponse);
+      throw new Error(errorResponse.error || "An unknown error occurred");
     }
 
     const data = await response.json();

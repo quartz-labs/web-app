@@ -27,7 +27,7 @@ export async function GET(request: Request) {
     const response = await fetch(`https://quartz-server-puoxw.ondigitalocean.app/drift-data?address=${address}&marketIndices=${marketIndices}`);
     if (!response.ok) {
       const errorResponse = await response.json();
-      throw new Error(errorResponse);
+      throw new Error(errorResponse.error || "An unknown error occurred");
     }
 
     const data = await response.json();
