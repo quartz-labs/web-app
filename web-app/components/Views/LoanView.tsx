@@ -41,7 +41,7 @@ export default function LoanView({
         <div className="dashboard-wrapper">
             <div className={`${styles.balanceWrapper} ${styles.loanViewWrapper}`}>
                 <div>
-                    <p className={styles.title}>Total Assets</p>
+                    <p className={styles.title}>Total Asset Value</p>
 
                     {loading &&
                         <PuffLoader
