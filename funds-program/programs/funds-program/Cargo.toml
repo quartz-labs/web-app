@@ -1,6 +1,6 @@
 [package]
 name = "funds-program"
-version = "0.0.2"
+version = "0.1.0"
 description = "Quartz funds program"
 edition = "2021"
 
@@ -22,5 +22,4 @@ devnet = []
 anchor-lang = "0.30.1"
 anchor-spl = "0.30.1"
 solana-security-txt = "1.1.1"
-drift-cpi = { path = "../../deps/drift-cpi" }
-drift-accounts = { path = "../../deps/drift-accounts" }
+drift = { path = "../../deps/drift" }

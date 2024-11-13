@@ -41,9 +41,6 @@ export const initAccount = async (
     const marginfiClient = await MarginfiClient.fetch(getConfig(), wallet, connection);
 
     const vaultPda = getVault(wallet.publicKey);
-    const driftUser = getDriftUser(vaultPda);
-    const driftUserStats = getDriftUserStats(vaultPda);
-    const driftState = getDriftState();
     const marginfiAccount = Keypair.generate();
 
     try {
@@ -60,12 +57,11 @@ export const initAccount = async (
         const ix_initVaultDriftAccount = await quartzProgram.methods
             .initDriftAccount()
             .accounts({
-                // @ts-expect-error - IDL issue
                 vault: vaultPda,
                 owner: wallet.publicKey,
-                driftUser: driftUser,
-                driftUserStats: driftUserStats,
-                driftState: driftState,
+                driftUser: getDriftUser(vaultPda),
+                driftUserStats: getDriftUserStats(vaultPda),
+                driftState: getDriftState(),
                 driftProgram: DRIFT_PROGRAM_ID,
                 rent: web3.SYSVAR_RENT_PUBKEY,
                 systemProgram: SystemProgram.programId,
@@ -132,20 +128,16 @@ export const closeAccount = async (
     const program = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>;
 
     const vaultPda = getVault(wallet.publicKey);
-    const driftUser = getDriftUser(vaultPda);
-    const driftUserStats = getDriftUserStats(vaultPda);
-    const driftState = getDriftState();
 
     try {
         const ix_closeDriftAccount = await program.methods
             .closeDriftAccount()
             .accounts({
-                // @ts-expect-error - IDL issue
                 vault: vaultPda,
                 owner: wallet.publicKey,
-                driftUser: driftUser,
-                driftUserStats: driftUserStats,
-                driftState: driftState,
+                driftUser: getDriftUser(vaultPda),
+                driftUserStats: getDriftUserStats(vaultPda),
+                driftState: getDriftState(),
                 driftProgram: DRIFT_PROGRAM_ID
             })
             .instruction();
@@ -216,11 +208,11 @@ export const makeDepositLamportsInstructions = async (wallet: AnchorWallet, conn
                 vaultSpl: getVaultSpl(vaultPda, WSOL_MINT),
                 owner: wallet.publicKey,
                 ownerSpl: walletWSol,
-                driftState: getDriftState(),
+                splMint: WSOL_MINT,
                 driftUser: getDriftUser(vaultPda),
                 driftUserStats: getDriftUserStats(vaultPda),
+                driftState: getDriftState(),
                 spotMarketVault: getDriftSpotMarketVault(DRIFT_MARKET_INDEX_SOL),
-                splMint: WSOL_MINT,
                 tokenProgram: TOKEN_PROGRAM_ID,
                 associatedTokenProgram: ASSOCIATED_PROGRAM_ID,
                 driftProgram: DRIFT_PROGRAM_ID,
@@ -311,12 +303,12 @@ export const withdrawLamports = async (
                 vaultSpl: getVaultSpl(vaultPda, WSOL_MINT),
                 owner: wallet.publicKey,
                 ownerSpl: walletWSol,
-                driftState: getDriftState(),
+                splMint: WSOL_MINT,
                 driftUser: getDriftUser(vaultPda),
                 driftUserStats: getDriftUserStats(vaultPda),
+                driftState: getDriftState(),
                 spotMarketVault: getDriftSpotMarketVault(DRIFT_MARKET_INDEX_SOL),
                 driftSigner: DRIFT_SIGNER,
-                splMint: WSOL_MINT,
                 tokenProgram: TOKEN_PROGRAM_ID,
                 associatedTokenProgram: ASSOCIATED_PROGRAM_ID,
                 driftProgram: DRIFT_PROGRAM_ID,
@@ -374,25 +366,25 @@ export const depositUsdc = async (
     const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
     setProvider(provider);
     const program = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>;
+    
     const vaultPda = getVault(wallet.publicKey);
-
     const walletUsdc = await getAssociatedTokenAddress(USDC_MINT, wallet.publicKey);
     if (!walletUsdc) throw new Error("No USDC account found on connected wallet");
 
     try {
         const ix_deposit = await program.methods
-            .deposit(new BN(amountMicroCents), DRIFT_MARKET_INDEX_USDC, false)
+            .deposit(new BN(amountMicroCents), DRIFT_MARKET_INDEX_USDC, true)
             .accounts({
                 // @ts-expect-error - IDL issue
                 vault: vaultPda,
                 vaultSpl: getVaultSpl(vaultPda, USDC_MINT),
                 owner: wallet.publicKey,
                 ownerSpl: walletUsdc,
-                driftState: getDriftState(),
+                splMint: USDC_MINT,
                 driftUser: getDriftUser(vaultPda),
                 driftUserStats: getDriftUserStats(vaultPda),
+                driftState: getDriftState(),
                 spotMarketVault: getDriftSpotMarketVault(DRIFT_MARKET_INDEX_USDC),
-                splMint: USDC_MINT,
                 tokenProgram: TOKEN_PROGRAM_ID,
                 associatedTokenProgram: ASSOCIATED_PROGRAM_ID,
                 driftProgram: DRIFT_PROGRAM_ID,
@@ -445,6 +437,7 @@ export const withdrawUsdc = async (
     const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
     setProvider(provider);
     const program = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>;
+    
     const vaultPda = getVault(wallet.publicKey);
     const walletUsdc = await getAssociatedTokenAddress(USDC_MINT, wallet.publicKey);
 
@@ -459,12 +452,12 @@ export const withdrawUsdc = async (
                 vaultSpl: getVaultSpl(vaultPda, USDC_MINT),
                 owner: wallet.publicKey,
                 ownerSpl: walletUsdc,
-                driftState: getDriftState(),
+                splMint: USDC_MINT,
                 driftUser: getDriftUser(vaultPda),
                 driftUserStats: getDriftUserStats(vaultPda),
+                driftState: getDriftState(),
                 spotMarketVault: getDriftSpotMarketVault(DRIFT_MARKET_INDEX_USDC),
                 driftSigner: DRIFT_SIGNER,
-                splMint: USDC_MINT,
                 tokenProgram: TOKEN_PROGRAM_ID,
                 associatedTokenProgram: ASSOCIATED_PROGRAM_ID,
                 driftProgram: DRIFT_PROGRAM_ID,
@@ -506,7 +499,7 @@ export const withdrawUsdc = async (
 }
 
 
-export const liquidateSol = async (
+export const repayUsdcWithSol = async (
     wallet: AnchorWallet, 
     connection: web3.Connection, 
     amountMicroCents: number, 
@@ -517,15 +510,14 @@ export const liquidateSol = async (
     setProvider(provider);
     const quartzProgram = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>;
 
+    const vaultPda = getVault(wallet.publicKey);
     const walletUsdc = await getAssociatedTokenAddress(USDC_MINT, wallet.publicKey);
     const walletWSol = await getAssociatedTokenAddress(WSOL_MINT, wallet.publicKey);
 
-    const vaultPda = getVault(wallet.publicKey);
-    const driftUser = getDriftUser(vaultPda);
-    const driftUserStats = getDriftUserStats(vaultPda);
-    const driftState = getDriftState();
-
     try {
+        const fundsProgramLookupTable = await connection.getAddressLookupTable(FUNDS_PROGRAM_ADDRESS_TABLE).then((res) => res.value);
+        if (!fundsProgramLookupTable) throw Error("Address Lookup Table account not found");
+
         // Get MarginFi client and bank
         const marginfiClient = await MarginfiClient.fetch(getConfig(), wallet, connection);
         const usdcBank = marginfiClient.getBankByTokenSymbol("USDC");
@@ -539,30 +531,35 @@ export const liquidateSol = async (
         const amountLamports = Number(jupiterQuote.inAmount);
         if (isNaN(amountLamports)) throw Error(`Invalid Jupiter quote`);
 
-        // -- ADDRESS LOOKUP TABLE
-        const fundsProgramLookupTable = await connection.getAddressLookupTable(FUNDS_PROGRAM_ADDRESS_TABLE).then((res) => res.value);
-        if (!fundsProgramLookupTable) throw Error("Address Lookup Table account not found");
-
         // Build instructions
-        const oix_createWSolAta = await createAtaIfNeeded(connection, walletWSol, wallet.publicKey, WSOL_MINT);
+        const oix_createWSolAta = await createAtaIfNeeded(connection, walletWSol, wallet.publicKey, WSOL_MINT); // USDC ATA is already created by MarginFi flash loan
 
-        const ix_depositUsdc = await quartzProgram.methods
-            .deposit(new BN(amountMicroCents), DRIFT_MARKET_INDEX_USDC, false)
+        const ix_repayLoanWithCollateral = await quartzProgram.methods
+            .repayLoanWithCollateral(
+                new BN(amountLamports), 
+                new BN(amountMicroCents), 
+                DRIFT_MARKET_INDEX_SOL, 
+                DRIFT_MARKET_INDEX_USDC
+            )
             .accounts({
                 // @ts-expect-error - IDL issue
                 vault: vaultPda,
-                vaultSpl: getVaultSpl(vaultPda, USDC_MINT),
-                owner: wallet.publicKey,
-                ownerSpl: walletUsdc,
-                driftState: driftState,
-                driftUser: driftUser,
-                driftUserStats: driftUserStats,
-                spotMarketVault: getDriftSpotMarketVault(DRIFT_MARKET_INDEX_USDC),
-                splMint: USDC_MINT,
+                vaultCollateral: getVaultSpl(vaultPda, WSOL_MINT),
+                vaultLoan: getVaultSpl(vaultPda, USDC_MINT),
+                ownerCollateral: walletWSol,
+                ownerLoan: walletUsdc,
+                mintCollateral: WSOL_MINT,
+                mintLoan: USDC_MINT,
+                driftUser: getDriftUser(vaultPda),
+                driftUserStats: getDriftUserStats(vaultPda),
+                driftState: getDriftState(),
+                spotMarketVaultCollateral: getDriftSpotMarketVault(DRIFT_MARKET_INDEX_SOL),
+                spotMarketVaultLoan: getDriftSpotMarketVault(DRIFT_MARKET_INDEX_USDC),
+                driftSigner: DRIFT_SIGNER,
+                driftProgram: DRIFT_PROGRAM_ID,
                 tokenProgram: TOKEN_PROGRAM_ID,
                 associatedTokenProgram: ASSOCIATED_PROGRAM_ID,
-                driftProgram: DRIFT_PROGRAM_ID,
-                systemProgram: SystemProgram.programId
+                systemProgram: SystemProgram.programId,
             })
             .remainingAccounts([
                 toRemainingAccount(DRIFT_ORACLE_2, false, false),
@@ -572,32 +569,10 @@ export const liquidateSol = async (
             ])
             .instruction();
 
-        const ix_withdrawLamports = await quartzProgram.methods
-            .withdraw(new BN(amountLamports), DRIFT_MARKET_INDEX_SOL, true)
-            .accounts({
-                // @ts-expect-error - IDL issue
-                vault: vaultPda,
-                vaultSpl: getVaultSpl(vaultPda, WSOL_MINT),
-                owner: wallet.publicKey,
-                ownerSpl: walletWSol,
-                driftState: driftState,
-                driftUser: driftUser,
-                driftUserStats: driftUserStats,
-                spotMarketVault: getDriftSpotMarketVault(DRIFT_MARKET_INDEX_SOL),
-                driftSigner: DRIFT_SIGNER,
-                splMint: WSOL_MINT,
-                tokenProgram: TOKEN_PROGRAM_ID,
-                associatedTokenProgram: ASSOCIATED_PROGRAM_ID,
-                driftProgram: DRIFT_PROGRAM_ID,
-                systemProgram: SystemProgram.programId,
-            })
-            .remainingAccounts([
-                toRemainingAccount(DRIFT_ORACLE_2, false, false),
-                toRemainingAccount(DRIFT_ORACLE_1, false, false),
-                toRemainingAccount(DRIFT_SPOT_MARKET_SOL, true, false),
-                toRemainingAccount(DRIFT_SPOT_MARKET_USDC, false, false)
-            ])
-            .instruction();
+        const {
+            instructions: jupiterSwap,
+            addressLookupTableAccounts: jupiterLookupTables
+        } = await getJupiterSwapIx(wallet.publicKey, connection, jupiterQuote);
 
         const ix_closeWSolAta = createCloseAccountInstruction(
             walletWSol,
@@ -605,18 +580,13 @@ export const liquidateSol = async (
             wallet.publicKey
         );
 
-        const {
-            instructions: jupiterSwap,
-            addressLookupTableAccounts: jupiterLookupTables
-        } = await getJupiterSwapIx(wallet.publicKey, connection, jupiterQuote);
-
         // Create flash loan and send tx
         const amountUsdc = new BigNumber(baseUnitToUi(amountMicroCents, DECIMALS_USDC));
         const { flashloanTx } = await makeFlashLoanTx(
             marginfiAccount,
             amountUsdc,
             usdcBank.address,
-            [...oix_createWSolAta, ix_depositUsdc, ix_withdrawLamports, ...jupiterSwap, ix_closeWSolAta],
+            [...oix_createWSolAta, ix_repayLoanWithCollateral, ...jupiterSwap, ix_closeWSolAta],
             [fundsProgramLookupTable, ...jupiterLookupTables],
             0.002,
             true

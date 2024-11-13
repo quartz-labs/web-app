@@ -1,12 +1,12 @@
 [package]
-name = "drift-cpi"
+name = "drift"
 version = "2.92.0"
 description = "Created with IDLGen"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "drift_cpi"
+name = "drift"
 
 [features]
 rpc = []

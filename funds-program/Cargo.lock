@@ -1092,17 +1092,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "drift-accounts"
-version = "2.92.0"
-dependencies = [
- "anchor-lang 0.30.1",
- "borsh 0.10.3",
- "bytemuck",
- "solana-program",
-]
-
-[[package]]
-name = "drift-cpi"
+name = "drift"
 version = "2.92.0"
 dependencies = [
  "anchor-i11n",
@@ -1185,12 +1175,11 @@ checksum = "3f9eec918d3f24069decb9af1554cad7c880e2da24a9afd88aca000531ab82c1"
 
 [[package]]
 name = "funds-program"
-version = "0.0.2"
+version = "0.1.0"
 dependencies = [
  "anchor-lang 0.30.1",
  "anchor-spl",
- "drift-accounts",
- "drift-cpi",
+ "drift",
  "solana-security-txt",
 ]
 
