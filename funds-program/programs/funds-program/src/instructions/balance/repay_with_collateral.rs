@@ -3,6 +3,7 @@ use anchor_spl::{
     associated_token::AssociatedToken, token::{self, Mint, Token, TokenAccount}
 };
 use drift::{
+    Drift,
     cpi::{
         deposit as drift_deposit, 
         withdraw as drift_withdraw
@@ -10,7 +11,6 @@ use drift::{
     Deposit as DriftDeposit,
     Withdraw as DriftWithdraw
 };
-use crate::cpi_programs::Drift;
 use crate::state::Vault;
 
 #[derive(Accounts)]

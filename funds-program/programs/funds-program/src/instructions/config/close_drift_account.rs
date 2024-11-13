@@ -1,10 +1,10 @@
 use anchor_lang::prelude::*;
 use drift::{
+    Drift,
     cpi::delete_user, 
     DeleteUser
 };
 use crate::state::Vault;
-use crate::cpi_programs::Drift;
 
 #[derive(Accounts)]
 pub struct CloseDriftAccount<'info> {

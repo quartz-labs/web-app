@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/funds_program.json`.
  */
 export type FundsProgram = {
-  "address": "dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH",
+  "address": "6JjHXLheGSNvvexgzMthEcgjkcirDrGduc3HAKB2P1v2",
   "metadata": {
     "name": "fundsProgram",
     "version": "0.1.0",

@@ -3,10 +3,10 @@ use anchor_spl::{
     associated_token::AssociatedToken, token::{self, Mint, Token, TokenAccount}
 };
 use drift::{
+    Drift,
     cpi::deposit as drift_deposit, 
-    Deposit as DriftDeposit
+    Deposit as DriftDeposit,  
 };
-use crate::cpi_programs::Drift;
 use crate::state::Vault;
 
 #[derive(Accounts)]

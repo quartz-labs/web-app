@@ -1,7 +1,6 @@
 use anchor_lang::prelude::*;
 
 mod state;
-mod cpi_programs;
 mod errors;
 mod constants;
 mod instructions;
