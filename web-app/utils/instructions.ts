@@ -381,7 +381,7 @@ export const depositUsdc = async (
 
     try {
         const ix_deposit = await program.methods
-            .deposit(new BN(amountMicroCents), DRIFT_MARKET_INDEX_USDC, false)
+            .deposit(new BN(amountMicroCents), DRIFT_MARKET_INDEX_USDC, true)
             .accounts({
                 // @ts-expect-error - IDL issue
                 vault: vaultPda,
