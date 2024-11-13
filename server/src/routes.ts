@@ -9,11 +9,13 @@ export function setupRoutes(app: Express, driftClientManager: DriftClientManager
     const marketIndicesParam = req.query.marketIndices as string;
     const marketIndices = marketIndicesParam.split(',').map(Number).filter(n => !isNaN(n));
 
+    console.log("Fetching drift data for address: ", address);
+
     try {
       const driftData = await getDriftData(address, marketIndices, driftClientManager);
       res.status(200).json(driftData);
     } catch (error) {
-      console.error('Error fetching Data data:', error);
+      console.error('Error fetching Drift data:', error);
       res.status(500).json({ error: 'Failed to retrieve Drift data' });
     }
   });
@@ -23,8 +25,8 @@ export function setupRoutes(app: Express, driftClientManager: DriftClientManager
       const apy = await getDriftApy(driftClientManager);
       res.status(200).json(apy);
     } catch (error) {
-      console.error('Error fetching Data apy:', error);
-      res.status(500).json({ error: 'Failed to retrieve Drift apy' });
+      console.error('Error fetching APY data:', error);
+      res.status(500).json({ error: 'Failed to retrieve Drift APY' });
     }
   });
 
