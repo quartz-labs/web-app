@@ -9,8 +9,6 @@ export function setupRoutes(app: Express, driftClientManager: DriftClientManager
     const marketIndicesParam = req.query.marketIndices as string;
     const marketIndices = marketIndicesParam.split(',').map(Number).filter(n => !isNaN(n));
 
-    console.log("Fetching drift data for address: ", address);
-
     try {
       const driftData = await getDriftData(address, marketIndices, driftClientManager);
       res.status(200).json(driftData);
