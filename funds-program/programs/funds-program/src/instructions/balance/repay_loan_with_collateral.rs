@@ -91,27 +91,13 @@ pub struct RepayLoanWithCollateral<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn repay_loan_with_collateral_handler<'info>(
-    ctx: Context<'_, '_, '_, 'info, RepayLoanWithCollateral<'info>>, 
-    amount_collateral_base_units: u64,
+#[inline(never)]
+fn repay_loan<'info>(
+    ctx: &Context<'_, '_, '_, 'info, RepayLoanWithCollateral<'info>>,
     amount_loan_base_units: u64,
-    drift_market_index_collateral: u16,
-    drift_market_index_loan: u16
+    drift_market_index_loan: u16,
+    signer_seeds: &[&[&[u8]]]
 ) -> Result<()> {
-    msg!("start handler");
-
-    let vault_bump = ctx.accounts.vault.bump;
-    let owner = ctx.accounts.owner.key();
-    let seeds = &[
-        b"vault",
-        owner.as_ref(),
-        &[vault_bump]
-    ];
-    let signer_seeds = &[&seeds[..]];
-
-
-    // Transfer tokens from owner's loan ATA to vault's loan ATA
-
     token::transfer(
         CpiContext::new(
             ctx.accounts.token_program.to_account_info(), 
@@ -123,9 +109,6 @@ pub fn repay_loan_with_collateral_handler<'info>(
         ),
         amount_loan_base_units
     )?;
-
-
-    // Deposit loan amount to Drift
 
     let deposit_accounts = DriftDeposit {
         state: ctx.accounts.drift_state.to_account_info(),
@@ -146,11 +129,16 @@ pub fn repay_loan_with_collateral_handler<'info>(
     deposit_ctx.remaining_accounts = ctx.remaining_accounts.to_vec();
 
     // reduce_only = true to prevent depositing more than the borrowed position
-    drift_deposit(deposit_ctx, drift_market_index_loan, amount_loan_base_units, true)?; 
+    drift_deposit(deposit_ctx, drift_market_index_loan, amount_loan_base_units, true)
+}
 
-
-    // Withdraw collateral amount from Drift
-
+#[inline(never)]
+fn withdraw_collateral<'info>(
+    ctx: &Context<'_, '_, '_, 'info, RepayLoanWithCollateral<'info>>,
+    amount_collateral_base_units: u64,
+    drift_market_index_collateral: u16,
+    signer_seeds: &[&[&[u8]]]
+) -> Result<()> {
     let withdraw_accounts = DriftWithdraw {
         state: ctx.accounts.drift_state.to_account_info(),
         user: ctx.accounts.drift_user.to_account_info(),
@@ -173,9 +161,6 @@ pub fn repay_loan_with_collateral_handler<'info>(
     // reduce_only = true to prevent withdrawing more than the collateral position (which would create a new loan)
     drift_withdraw(withdraw_ctx, drift_market_index_collateral, amount_collateral_base_units, true)?;
 
-
-    // Transfer tokens from vault's collateral ATA to owner's collateral ATA
-
     token::transfer(
         CpiContext::new_with_signer(
             ctx.accounts.token_program.to_account_info(), 
@@ -187,11 +172,14 @@ pub fn repay_loan_with_collateral_handler<'info>(
             signer_seeds
         ),
         amount_collateral_base_units
-    )?;
+    )
+}
 
-
-    // Close vault's loan ATA
-
+#[inline(never)]
+fn close_atas<'info>(
+    ctx: &Context<'_, '_, '_, 'info, RepayLoanWithCollateral<'info>>,
+    signer_seeds: &[&[&[u8]]]
+) -> Result<()> {
     let cpi_ctx_close = CpiContext::new_with_signer(
         ctx.accounts.token_program.to_account_info(),
         token::CloseAccount {
@@ -203,9 +191,6 @@ pub fn repay_loan_with_collateral_handler<'info>(
     );
     token::close_account(cpi_ctx_close)?;
 
-
-    // Close vault's collateral ATA
-
     let cpi_ctx_close = CpiContext::new_with_signer(
         ctx.accounts.token_program.to_account_info(),
         token::CloseAccount {
@@ -215,7 +200,32 @@ pub fn repay_loan_with_collateral_handler<'info>(
         },
         signer_seeds
     );
-    token::close_account(cpi_ctx_close)?;
+    token::close_account(cpi_ctx_close)
+}
+
+pub fn repay_loan_with_collateral_handler<'info>(
+    ctx: Context<'_, '_, '_, 'info, RepayLoanWithCollateral<'info>>, 
+    amount_collateral_base_units: u64,
+    amount_loan_base_units: u64,
+    drift_market_index_collateral: u16,
+    drift_market_index_loan: u16
+) -> Result<()> {
+    msg!("start handler");
+
+    let vault_bump = ctx.accounts.vault.bump;
+    let owner = ctx.accounts.owner.key();
+    let seeds = &[
+        b"vault",
+        owner.as_ref(),
+        &[vault_bump]
+    ];
+    let signer_seeds = &[&seeds[..]];
+
+    repay_loan(&ctx, amount_loan_base_units, drift_market_index_loan, signer_seeds)?;
+
+    withdraw_collateral(&ctx, amount_collateral_base_units, drift_market_index_collateral, signer_seeds)?;
+
+    close_atas(&ctx, signer_seeds)?;
 
     Ok(())
 }
