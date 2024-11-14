@@ -42,7 +42,7 @@ pub mod funds_program {
         close_drift_account_handler(ctx)
     }
 
-    // Balance
+    // User
 
     pub fn deposit<'info>(
         ctx: Context<'_, '_, '_, 'info, Deposit<'info>>, 
@@ -61,6 +61,8 @@ pub mod funds_program {
     ) -> Result<()> {
         withdraw_handler(ctx, amount_base_units, drift_market_index, reduce_only)
     }
+
+    // Auto Repay
 
     pub fn repay_loan_with_collateral<'info>(
         ctx: Context<'_, '_, '_, 'info, RepayLoanWithCollateral<'info>>,
