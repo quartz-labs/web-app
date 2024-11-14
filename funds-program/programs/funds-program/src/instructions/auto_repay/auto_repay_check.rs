@@ -26,9 +26,9 @@ pub fn auto_repay_check_handler<'info>(
     let deposit_instruction = load_instruction_at_checked(index as usize - 3, &ctx.accounts.instructions.to_account_info())?;
 
     msg!("index: {}", index);
-    msg!("swap_instruction: {:?}", swap_instruction);
-    msg!("withdraw_instruction: {:?}", withdraw_instruction);
-    msg!("deposit_instruction: {:?}", deposit_instruction);
+    msg!("swap_instruction: {:?}", swap_instruction.program_id);
+    msg!("withdraw_instruction: {:?}", withdraw_instruction.program_id);
+    msg!("deposit_instruction: {:?}", deposit_instruction.program_id);
 
     Ok(())
 }

@@ -746,6 +746,10 @@ export const autoRepay = async (
 
         trackTx({status: TxStatus.SIGNING});
         const signedTx = await wallet.signTransaction(flashloanTx);
+
+        const simulation = await connection.simulateTransaction(signedTx);
+        console.log(simulation);
+
         const signature = await sendTransactionHandler(trackTx, connection, signedTx);
         return signature;
     } catch (error) {

@@ -101,11 +101,6 @@ pub fn auto_repay_deposit_handler<'info>(
     let swap_instruction = load_instruction_at_checked(index as usize + 2, &ctx.accounts.instructions.to_account_info())?;
     let check_instruction = load_instruction_at_checked(index as usize + 3, &ctx.accounts.instructions.to_account_info())?;
 
-    msg!("index: {}", index);
-    msg!("withdraw_instruction: {:?}", withdraw_instruction);
-    msg!("swap_instruction: {:?}", swap_instruction);
-    msg!("check_instruction: {:?}", check_instruction);
-
     let vault_bump = ctx.accounts.vault.bump;
     let owner = ctx.accounts.owner.key();
     let seeds = &[

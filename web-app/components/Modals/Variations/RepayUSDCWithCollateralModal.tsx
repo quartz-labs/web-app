@@ -48,6 +48,7 @@ export default function RepayUSDCWithCollateralModal(
 
         setAwaitingSign(true);
         const baseUnits = uiToBaseUnit(amount, DECIMALS_USDC).toNumber();
+        // const signature = await repayWithCollateral(wallet, connection, baseUnits, showError, showTxStatus);
         const signature = await autoRepay(wallet, connection, baseUnits, showError, showTxStatus);
         setAwaitingSign(false);
 

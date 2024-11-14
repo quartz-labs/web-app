@@ -109,9 +109,9 @@ pub fn auto_repay_withdraw_handler<'info>(
     let check_instruction = load_instruction_at_checked(index as usize + 2, &ctx.accounts.instructions.to_account_info())?;
 
     msg!("index: {}", index);
-    msg!("deposit_instruction: {:?}", deposit_instruction);
-    msg!("swap_instruction: {:?}", swap_instruction);
-    msg!("check_instruction: {:?}", check_instruction);
+    msg!("deposit_instruction: {:?}", deposit_instruction.program_id);
+    msg!("swap_instruction: {:?}", swap_instruction.program_id);
+    msg!("check_instruction: {:?}", check_instruction.program_id);
 
     let vault_bump = ctx.accounts.vault.bump;
     let owner = ctx.accounts.owner.key();
