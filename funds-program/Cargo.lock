@@ -1180,6 +1180,7 @@ dependencies = [
  "anchor-lang 0.30.1",
  "anchor-spl",
  "drift",
+ "jupiter",
  "solana-security-txt",
 ]
 
@@ -1361,6 +1362,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1868808506b929d7b0cfa8f75951347aa71bb21144b7791bae35d9bccfcfe37a"
 dependencies = [
  "wasm-bindgen",
+]
+
+[[package]]
+name = "jupiter"
+version = "0.1.1"
+dependencies = [
+ "anchor-i11n",
+ "anchor-lang 0.30.1",
 ]
 
 [[package]]

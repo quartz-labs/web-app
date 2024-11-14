@@ -64,19 +64,25 @@ pub mod funds_program {
 
     // Auto Repay
 
-    pub fn repay_loan_with_collateral<'info>(
-        ctx: Context<'_, '_, '_, 'info, RepayLoanWithCollateral<'info>>,
-        amount_collateral_base_units: u64,
-        amount_loan_base_units: u64,
-        drift_market_index_collateral: u16,
-        drift_market_index_loan: u16,
+    pub fn auto_repay_deposit<'info>(
+        ctx: Context<'_, '_, '_, 'info, AutoRepayDeposit<'info>>,
+        amount_base_units: u64,
+        drift_market_index: u16
     ) -> Result<()> {
-        repay_loan_with_collateral_handler(
-            ctx, 
-            amount_collateral_base_units, 
-            amount_loan_base_units, 
-            drift_market_index_collateral, 
-            drift_market_index_loan
-        )
+        auto_repay_deposit_handler(ctx, amount_base_units, drift_market_index)
+    }
+
+    pub fn auto_repay_withdraw<'info>(
+        ctx: Context<'_, '_, '_, 'info, AutoRepayWithdraw<'info>>,
+        amount_base_units: u64,
+        drift_market_index: u16
+    ) -> Result<()> {
+        auto_repay_withdraw_handler(ctx, amount_base_units, drift_market_index)
+    }
+
+    pub fn auto_repay_check<'info>(
+        ctx: Context<'_, '_, '_, 'info, AutoRepayCheck<'info>>
+    ) -> Result<()> {
+        auto_repay_check_handler(ctx)
     }
 }

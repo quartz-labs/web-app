@@ -43,9 +43,8 @@ export default function WithdrawUSDCModal(
             baseUnitToUi(maxAmountBaseUnits, DECIMALS_USDC)
         );
         
-        if (error) return setErrorText(error);
-
-        if (!wallet) return;
+        setErrorText(error);
+        if (error || !wallet) return;
 
         setAwaitingSign(true);
         const baseUnits = uiToBaseUnit(amount, DECIMALS_USDC).toNumber();

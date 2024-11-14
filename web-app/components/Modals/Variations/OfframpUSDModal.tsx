@@ -32,11 +32,9 @@ export default function OfframpUSDModal(
             baseUnitToUi(MIN_AMOUNT_BASE_UNITS, DECIMALS_USDC), 
             baseUnitToUi(maxAmountBaseUnits, DECIMALS_USDC)
         );
-        
-        if (error) {
-            setErrorText(error);
-            return
-        };
+
+        setErrorText(error);
+        if (error) return;
 
         throw new Error("Off-ramp not implemented");
     }

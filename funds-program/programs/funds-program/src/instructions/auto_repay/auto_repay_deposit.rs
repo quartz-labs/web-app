@@ -1,4 +1,11 @@
-use anchor_lang::prelude::*;
+use anchor_lang::{
+    prelude::*,
+    solana_program::sysvar::instructions::{
+        self,
+        load_current_index_checked, 
+        load_instruction_at_checked
+    }
+};
 use anchor_spl::{
     associated_token::AssociatedToken, token::{self, Mint, Token, TokenAccount}
 };
@@ -10,7 +17,10 @@ use drift::{
 use crate::state::Vault;
 
 #[derive(Accounts)]
-pub struct Deposit<'info> {
+#[instruction(
+    drift_market_index: u16,
+)]
+pub struct AutoRepayDeposit<'info> {
     #[account(
         mut,
         seeds = [b"vault".as_ref(), owner.key().as_ref()],
@@ -32,12 +42,8 @@ pub struct Deposit<'info> {
     #[account(mut)]
     pub owner: Signer<'info>,
 
-    #[account(
-        mut,
-        associated_token::mint = spl_mint,
-        associated_token::authority = owner
-    )]
-    pub owner_spl: Box<Account<'info, TokenAccount>>,
+    /// CHECK: tmp no check
+    pub owner_spl: UncheckedAccount<'info>,
 
     pub spl_mint: Box<Account<'info, Mint>>,
 
@@ -78,15 +84,28 @@ pub struct Deposit<'info> {
 
     pub drift_program: Program<'info, Drift>,
 
+    /// CHECK: Account is safe once address is correct
+    #[account(address = instructions::ID)]
+    instructions: UncheckedAccount<'info>,
+
     pub system_program: Program<'info, System>,
 }
 
-pub fn deposit_handler<'info>(
-    ctx: Context<'_, '_, '_, 'info, Deposit<'info>>, 
+pub fn auto_repay_deposit_handler<'info>(
+    ctx: Context<'_, '_, '_, 'info, AutoRepayDeposit<'info>>, 
     amount_base_units: u64,
-    drift_market_index: u16,
-    reduce_only: bool
+    drift_market_index: u16
 ) -> Result<()> {
+    let index = load_current_index_checked(&ctx.accounts.instructions.to_account_info())?;
+    let withdraw_instruction = load_instruction_at_checked(index as usize + 1, &ctx.accounts.instructions.to_account_info())?;
+    let swap_instruction = load_instruction_at_checked(index as usize + 2, &ctx.accounts.instructions.to_account_info())?;
+    let check_instruction = load_instruction_at_checked(index as usize + 3, &ctx.accounts.instructions.to_account_info())?;
+
+    msg!("index: {}", index);
+    msg!("withdraw_instruction: {:?}", withdraw_instruction);
+    msg!("swap_instruction: {:?}", swap_instruction);
+    msg!("check_instruction: {:?}", check_instruction);
+
     let vault_bump = ctx.accounts.vault.bump;
     let owner = ctx.accounts.owner.key();
     let seeds = &[
@@ -128,7 +147,8 @@ pub fn deposit_handler<'info>(
 
     cpi_ctx.remaining_accounts = ctx.remaining_accounts.to_vec();
 
-    drift_deposit(cpi_ctx, drift_market_index, amount_base_units, reduce_only)?;
+    // reduce_only = true to prevent depositing more than the borrowed position
+    drift_deposit(cpi_ctx, drift_market_index, amount_base_units, true)?;
 
     // Close vault's ATA
 

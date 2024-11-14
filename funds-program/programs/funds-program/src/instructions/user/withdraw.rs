@@ -10,9 +10,6 @@ use drift::{
 use crate::state::Vault;
 
 #[derive(Accounts)]
-#[instruction(
-    drift_market_index: u16,
-)]
 pub struct Withdraw<'info> {
     #[account(
         mut,

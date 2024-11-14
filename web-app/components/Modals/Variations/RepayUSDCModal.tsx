@@ -55,12 +55,9 @@ export default function RepayUSDCModal(
             baseUnitToUi(MIN_AMOUNT_BASE_UNITS, DECIMALS_USDC), 
             baseUnitToUi(maxAmountBaseUnits, DECIMALS_USDC)
         );
-        
-        if (error) {
-            setErrorText(error);
-            return
-        };
-        if (!wallet) return;
+            
+        setErrorText(error);
+        if (error || !wallet) return;
 
         setAwaitingSign(true);
         const baseUnits = uiToBaseUnit(amount, DECIMALS_USDC).toNumber();

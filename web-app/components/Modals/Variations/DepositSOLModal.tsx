@@ -74,11 +74,8 @@ export default function DepositSOLModal(
             baseUnitToUi(maxAmountBaseUnits, DECIMALS_SOL)
         );
 
-        if (error) {
-            setErrorText(error);
-            return;
-        };
-        if (!wallet) return;
+        setErrorText(error);
+        if (error || !wallet) return;
 
         setAwaitingSign(true);
         const baseUnits = uiToBaseUnit(amount, DECIMALS_SOL).toNumber();
