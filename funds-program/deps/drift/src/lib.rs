@@ -2,6 +2,13 @@ use anchor_lang::prelude::*;
 
 declare_id!("dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH");
 
+pub struct Drift;
+impl anchor_lang::Id for Drift {
+    fn id() -> Pubkey {
+        crate::ID
+    }
+}
+
 // Accounts
 #[derive(Accounts)]
 pub struct InitializeUser<'info> {

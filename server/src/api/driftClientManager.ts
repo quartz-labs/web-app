@@ -34,11 +34,9 @@ export async function getDriftData(address: string, marketIndices: number[], dri
 
     const healthPromise = driftClientManager.getUserHealth(address);
 
-
     const [balances, withdrawLimits, rates, health] = await Promise.all([
         balancePromise, getWithdrawLimitPromise(), getRatePromise(), healthPromise
     ]);
-    
     
     return {
         balances,

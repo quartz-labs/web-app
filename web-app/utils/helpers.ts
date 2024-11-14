@@ -12,7 +12,6 @@ import { captureError } from "@/utils/errors";
 export const isVaultInitialized = async (connection: Connection, wallet: PublicKey) => {
     const vaultPda = getVault(wallet);
     const vaultPdaAccount = await connection.getAccountInfo(vaultPda);
-    console.log(vaultPdaAccount);
     return (vaultPdaAccount !== null);
 }
 

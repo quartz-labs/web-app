@@ -1,5 +1,6 @@
 use anchor_lang::prelude::*;
 use drift::{
+    Drift,
     cpi::{
         initialize_user, 
         initialize_user_stats
@@ -8,7 +9,6 @@ use drift::{
     InitializeUserStats
 };
 use crate::state::Vault;
-use crate::cpi_programs::Drift;
 
 #[derive(Accounts)]
 pub struct InitDriftAccount<'info> {

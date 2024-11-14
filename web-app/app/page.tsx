@@ -4,10 +4,10 @@ import styles from './page.module.css';
 import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { hasBetaKey, isVaultClosed, isVaultInitialized } from "@/utils/helpers";
-import { WalletButton } from "@/context/solana/solana-provider";
 import Logo from "@/components/Logo/Logo";
 import { useError } from '@/context/error-provider';
+import { hasBetaKey, isVaultInitialized, isVaultClosed } from '@/utils/helpers';
+import { WalletButton } from '@/context/solana/solana-provider';
 
 export default function Page() {
   const { connection } = useConnection();
@@ -48,11 +48,7 @@ export default function Page() {
         }
 
         {/* <div className={styles.serviceAnnouncement}>
-          <h2>We&apos;re currently deploying a new program upgrade. The website will be offline until 12:30 UTC</h2>
-          <p>
-            Click <a href="https://earn.superteam.fun/listings/hackathon/best-consumer-use-cases/submission/90c99fc7-e3e6-4fad-b743-42d7e4cf88f8/#details" target='_blank'>
-              here
-            </a> to view a demo of our Radar submission.</p>
+          <h2>We&apos;re currently deploying a new program upgrade. The website will be offline until 20:15 UTC</h2>
           <p>You can find more info on our <a href="https://x.com/quartzpay" target="_blank">X</a> and <a href="https://quartzpay.io/">main website</a>.</p>
         </div> */}
       </div>

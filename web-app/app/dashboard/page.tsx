@@ -3,7 +3,6 @@
 import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { hasBetaKey, isVaultClosed, isVaultInitialized } from '@/utils/helpers';
 import Account from '@/components/Account/Account';
 import MainView from '@/components/Views/MainView';
 import LoanView from '@/components/Views/LoanView';
@@ -13,6 +12,7 @@ import { useError } from '@/context/error-provider';
 import Modal, { ModalVariation } from '@/components/Modals/Modal';
 import { useQueryClient } from '@tanstack/react-query';
 import { useDriftDataQuery, useSolPriceQuery } from '@/utils/queries';
+import { hasBetaKey, isVaultInitialized, isVaultClosed } from '@/utils/helpers';
 
 export interface ViewProps {
     solPrice: number | undefined;
