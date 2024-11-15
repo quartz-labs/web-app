@@ -43,8 +43,12 @@ pub struct AutoRepayDeposit<'info> {
     #[account(mut)]
     pub owner: Signer<'info>,
 
-    /// CHECK: tmp no check
-    pub owner_spl: UncheckedAccount<'info>,
+    #[account(
+        mut,
+        associated_token::mint = spl_mint,
+        associated_token::authority = owner
+    )]
+    pub owner_spl: Box<Account<'info, TokenAccount>>,
 
     pub spl_mint: Box<Account<'info, Mint>>,
 

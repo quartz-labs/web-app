@@ -13,6 +13,8 @@ import Modal, { ModalVariation } from '@/components/Modals/Modal';
 import { useQueryClient } from '@tanstack/react-query';
 import { useDriftDataQuery, useSolPriceQuery } from '@/utils/queries';
 import { hasBetaKey, isVaultInitialized, isVaultClosed } from '@/utils/helpers';
+import { TxStatus, useTxStatus } from '@/context/tx-status-provider';
+import { captureError } from '@/utils/errors';
 
 export interface ViewProps {
     solPrice: number | undefined;
@@ -24,6 +26,7 @@ export interface ViewProps {
 export default function Dashboard() {
     const { connection } = useConnection();
     const { showError } = useError();
+    const { showTxStatus } = useTxStatus();
     const queryClient = useQueryClient();
     const wallet = useAnchorWallet();
     const router = useRouter();
@@ -49,13 +52,26 @@ export default function Dashboard() {
     }, [wallet?.publicKey, queryClient]);
 
     const updateDriftData = async (signature?: string) => {
-        if (signature) await connection.confirmTransaction({ signature, ...(await connection.getLatestBlockhash()) }, "finalized");
+        if (signature) {
+            try {
+                await connection.confirmTransaction({ signature, ...(await connection.getLatestBlockhash()) }, "finalized");
+            } catch (error) {
+                showTxStatus({status: TxStatus.TIMEOUT});
+                captureError(showError, "Transaction timed out.", "utils: /instructions.ts", error, wallet?.publicKey, true);
+            }
+        }
+
         queryClient.invalidateQueries({ queryKey: ['driftData'] });
     };
 
     const handleCloseAccount = async (signature: string) => {
-        await connection.confirmTransaction({ signature, ...(await connection.getLatestBlockhash()) }, "finalized");
-        router.push("/account-closed");
+        try {
+            await connection.confirmTransaction({ signature, ...(await connection.getLatestBlockhash()) }, "finalized");
+            router.push("/account-closed");
+        } catch (error) {
+            showTxStatus({status: TxStatus.TIMEOUT});
+            captureError(showError, "Transaction timed out.", "utils: /instructions.ts", error, wallet?.publicKey, true);
+        }
     }
     
     const onModalClose = (signature?: string, accountClosed?: boolean) => {
