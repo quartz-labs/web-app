@@ -81,8 +81,8 @@ pub mod funds_program {
 
     pub fn auto_repay_start<'info>(
         ctx: Context<'_, '_, '_, 'info, AutoRepayStart<'info>>,
-        amount_base_units: u64
+        start_balance: u64  
     ) -> Result<()> {
-        auto_repay_start_handler(ctx, amount_base_units)
+        auto_repay_start_handler(ctx, start_balance)
     }
 }

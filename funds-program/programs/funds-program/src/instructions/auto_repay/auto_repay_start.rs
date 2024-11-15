@@ -11,10 +11,10 @@ use anchor_lang::{
     }
 };
 use anchor_spl::{
-    associated_token::AssociatedToken, token::{self, Mint, Token, TokenAccount}
+    associated_token::AssociatedToken, token::{Mint, Token, TokenAccount}
 };
 use jupiter::i11n::ExactOutRouteI11n;
-use crate::{check, constants::MAX_SLIPPAGE_BPS, errors::QuartzError, state::Mule};
+use crate::{check, constants::MAX_SLIPPAGE_BPS, errors::QuartzError};
 
 #[derive(Accounts)]
 pub struct AutoRepayStart<'info> {
@@ -27,22 +27,6 @@ pub struct AutoRepayStart<'info> {
         associated_token::authority = caller
     )]
     pub caller_spl: Box<Account<'info, TokenAccount>>,
-
-    #[account(
-        seeds = [b"auto_repay_mule".as_ref()],
-        bump
-    )]
-    pub mule: Box<Account<'info, Mule>>,
-
-    #[account(
-        init,
-        seeds = [mule.key().as_ref(), caller.key().as_ref(), spl_mint.key().as_ref()],
-        bump,
-        payer = caller,
-        token::mint = spl_mint,
-        token::authority = mule
-    )]
-    pub mule_spl: Box<Account<'info, TokenAccount>>,
 
     pub spl_mint: Box<Account<'info, Mint>>,
 
@@ -125,16 +109,22 @@ fn validate_swap_data<'info>(
     );
 
     check!(
-        swap_i11n.accounts.user_source_token_account.pubkey.eq(&ctx.accounts.mule_spl.key()),
+        swap_i11n.accounts.user_source_token_account.pubkey.eq(&ctx.accounts.caller_spl.key()),
         QuartzError::InvalidSourceTokenAccount
     );
+
+    // Debug logs
+    msg!("Slippage: {}", swap_i11n.args.slippage_bps);
+    msg!("Platform fee: {}", swap_i11n.args.platform_fee_bps);
+    msg!("Source mint: {}", swap_i11n.accounts.source_mint.pubkey);
+    msg!("User source token account: {}", swap_i11n.accounts.user_source_token_account.pubkey);
 
     Ok(())
 }
 
 pub fn auto_repay_start_handler<'info>(
     ctx: Context<'_, '_, '_, 'info, AutoRepayStart<'info>>,
-    amount_base_units: u64
+    start_balance: u64
 ) -> Result<()> {
     let index: usize = load_current_index_checked(&ctx.accounts.instructions.to_account_info())?.into();
     let swap_instruction = load_instruction_at_checked(index + 1, &ctx.accounts.instructions.to_account_info())?;
@@ -145,18 +135,13 @@ pub fn auto_repay_start_handler<'info>(
 
     validate_swap_data(&ctx, &swap_instruction)?;
 
-    // Deposit tokens to mule
-    token::transfer(
-        CpiContext::new(
-            ctx.accounts.token_program.to_account_info(), 
-            token::Transfer { 
-                from: ctx.accounts.caller_spl.to_account_info(), 
-                to: ctx.accounts.mule_spl.to_account_info(), 
-                authority: ctx.accounts.caller.to_account_info()
-            }
-        ),
-        amount_base_units
-    )?;
+    // Check declared start balance is accurate
+    let caller_balance = ctx.accounts.caller_spl.amount;
+    check!(
+        start_balance ==caller_balance,
+        QuartzError::InvalidStartBalance
+    );
+    msg!("Start balance: {}", start_balance);
 
     Ok(())
 }

@@ -10,12 +10,3 @@ pub struct Vault {
 impl Space for Vault {
     const INIT_SPACE: usize = ANCHOR_DISCRIMINATOR + PUBKEY_SIZE + U8_SIZE;
 }
-
-#[account]
-pub struct Mule {
-    pub owner: Pubkey
-}
-
-impl Space for Mule {
-    const INIT_SPACE: usize = ANCHOR_DISCRIMINATOR + PUBKEY_SIZE;
-}

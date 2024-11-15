@@ -14,7 +14,7 @@ use drift::{
     Withdraw as DriftWithdraw
 };
 use jupiter::i11n::ExactOutRouteI11n;
-use crate::{check, errors::QuartzError, state::{Mule, Vault}};
+use crate::{check, errors::QuartzError, state::Vault};
 
 #[derive(Accounts)]
 pub struct AutoRepayWithdraw<'info> {
@@ -81,21 +81,6 @@ pub struct AutoRepayWithdraw<'info> {
     
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     pub drift_signer: UncheckedAccount<'info>,
-
-    #[account(
-        seeds = [b"auto_repay_mule".as_ref()],
-        bump
-    )]
-    pub mule: Box<Account<'info, Mule>>,
-
-    #[account(
-        mut,
-        seeds = [mule.key().as_ref(), owner.key().as_ref(), spl_mint.key().as_ref()],
-        bump,
-        token::mint = spl_mint,
-        token::authority = mule
-    )]
-    pub mule_spl: Box<Account<'info, TokenAccount>>,
 
     pub token_program: Program<'info, Token>,
 
@@ -185,6 +170,12 @@ fn validate_user_accounts<'info>(
         QuartzError::InvalidUserAccounts
     );
 
+    //Debug logs
+    msg!("Deposit vault: {}", deposit_vault);
+    msg!("Deposit owner: {}", deposit_owner);
+    msg!("Deposit drift_user: {}", deposit_drift_user);
+    msg!("Deposit drift_user_stats: {}", deposit_drift_user_stats);
+
     Ok(())
 }
 
@@ -207,13 +198,6 @@ pub fn auto_repay_withdraw_handler<'info>(
 
     validate_user_accounts(&ctx, &deposit_instruction)?;
 
-    // Validate mule
-    let start_mule = start_instruction.accounts[3].pubkey;
-    check!(
-        ctx.accounts.mule_spl.key().eq(&start_mule),
-        QuartzError::InvalidMuleAccount
-    );
-
     // Validate mint
     let swap_i11n = ExactOutRouteI11n::try_from(&swap_instruction)?;
     check!(
@@ -221,24 +205,28 @@ pub fn auto_repay_withdraw_handler<'info>(
         QuartzError::InvalidMint
     );
 
+    msg!("Swap mint: {}", swap_i11n.accounts.source_mint.pubkey);
+
     // Get amount actually swapped in Jupiter
-    let mule_deposited_balance = u64::from_le_bytes(
+    let start_balance = u64::from_le_bytes(
         start_instruction.data[8..16].try_into().unwrap()
     );
-    let mule_current_balance = ctx.accounts.mule_spl.amount;
-    let withdraw_amount = mule_deposited_balance - mule_current_balance;
+    let end_balance = ctx.accounts.owner_spl.amount;
+    let withdraw_amount = start_balance - end_balance;
 
-    let vault_bump = ctx.accounts.vault.bump;
+    msg!("Start balance: {}", start_balance);
+    msg!("End balance: {}", end_balance);
+    msg!("Withdraw amount: {}", withdraw_amount);
+
     let owner = ctx.accounts.owner.key();
-    let seeds = &[
+    let vault_seeds = &[
         b"vault",
         owner.as_ref(),
-        &[vault_bump]
+        &[ctx.accounts.vault.bump]
     ];
-    let signer_seeds = &[&seeds[..]];
+    let signer_seeds_vault = &[&vault_seeds[..]];
 
     // Drift Withdraw CPI
-
     let mut cpi_ctx = CpiContext::new_with_signer(
         ctx.accounts.drift_program.to_account_info(),
         DriftWithdraw {
@@ -251,7 +239,7 @@ pub fn auto_repay_withdraw_handler<'info>(
             user_token_account: ctx.accounts.vault_spl.to_account_info(),
             token_program: ctx.accounts.token_program.to_account_info(),
         },
-        signer_seeds
+        signer_seeds_vault
     );
 
     cpi_ctx.remaining_accounts = ctx.remaining_accounts.to_vec();
@@ -268,7 +256,7 @@ pub fn auto_repay_withdraw_handler<'info>(
                 to: ctx.accounts.owner_spl.to_account_info(), 
                 authority: ctx.accounts.vault.to_account_info()
             }, 
-            signer_seeds
+            signer_seeds_vault
         ),
         withdraw_amount
     )?;
@@ -281,23 +269,11 @@ pub fn auto_repay_withdraw_handler<'info>(
             destination: ctx.accounts.owner.to_account_info(),
             authority: ctx.accounts.vault.to_account_info(),
         },
-        signer_seeds
+        signer_seeds_vault
     );
     token::close_account(cpi_ctx_close)?;
 
     validate_account_health()?;
-
-    // Close mule_spl
-    let cpi_ctx_close = CpiContext::new_with_signer(
-        ctx.accounts.token_program.to_account_info(),
-        token::CloseAccount {
-            account: ctx.accounts.mule_spl.to_account_info(),
-            destination: ctx.accounts.owner.to_account_info(),
-            authority: ctx.accounts.mule.to_account_info(),
-        },
-        signer_seeds
-    );
-    token::close_account(cpi_ctx_close)?;
 
     Ok(())
 }

@@ -14,6 +14,6 @@ pub enum QuartzError {
     InvalidUserAccounts,
     #[msg("Swap's source token account does not match mule")]
     InvalidSourceTokenAccount,
-    #[msg("Mule accounts do not match")]
-    InvalidMuleAccount,
+    #[msg("Declared start balance is not accurate")]
+    InvalidStartBalance,
 }
