@@ -10,4 +10,6 @@ pub enum QuartzError {
     InvalidMint,
     #[msg("Price slippage is above maximum")]
     MaxSlippageExceeded,
+    #[msg("Swap platform fee must be zero")]
+    InvalidPlatformFee,
 }

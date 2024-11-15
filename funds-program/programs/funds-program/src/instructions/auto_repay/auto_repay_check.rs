@@ -76,7 +76,6 @@ fn validate_swap_args<'info>(
     let swap_i11n = ExactOutRouteI11n::try_from(swap_instruction)?;
 
     // Check repay mints match swap mints
-
     let deposit_mint = deposit_instruction.accounts[4].pubkey;
     check!(
         swap_i11n.accounts.destination_mint.pubkey.eq(&deposit_mint),
@@ -90,7 +89,6 @@ fn validate_swap_args<'info>(
     );
 
     // Check repay amounts match swap amounts
-
     let deposit_amount = u64::from_le_bytes(
         deposit_instruction.data[8..16].try_into().unwrap()
     );
@@ -107,12 +105,24 @@ fn validate_swap_args<'info>(
         QuartzError::UnbalancedSwap
     );
 
-    // Check slippage is below maximum
-
+    // Check slippage and platform fee are valid
     check!(
         swap_i11n.args.slippage_bps < max_slippage_bps,
         QuartzError::MaxSlippageExceeded
     );
+
+    check!(
+        swap_i11n.args.platform_fee_bps.eq(&0),
+        QuartzError::InvalidPlatformFee
+    );
+
+    // Temporary debug logging
+    msg!("Deposit mint: {}", deposit_mint);
+    msg!("Withdraw mint: {}", withdraw_mint);
+    msg!("Deposit amount: {}", deposit_amount);
+    msg!("Withdraw amount: {}", withdraw_amount);
+    msg!("Slippage: {}", swap_i11n.args.slippage_bps);
+    msg!("Platform fee: {}", swap_i11n.args.platform_fee_bps);
 
     Ok(())
 }
