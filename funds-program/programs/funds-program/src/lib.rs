@@ -67,23 +67,22 @@ pub mod funds_program {
 
     pub fn auto_repay_deposit<'info>(
         ctx: Context<'_, '_, '_, 'info, AutoRepayDeposit<'info>>,
-        amount_base_units: u64,
         drift_market_index: u16
     ) -> Result<()> {
-        auto_repay_deposit_handler(ctx, amount_base_units, drift_market_index)
+        auto_repay_deposit_handler(ctx, drift_market_index)
     }
 
     pub fn auto_repay_withdraw<'info>(
         ctx: Context<'_, '_, '_, 'info, AutoRepayWithdraw<'info>>,
-        amount_base_units: u64,
         drift_market_index: u16
     ) -> Result<()> {
-        auto_repay_withdraw_handler(ctx, amount_base_units, drift_market_index)
+        auto_repay_withdraw_handler(ctx, drift_market_index)
     }
 
-    pub fn auto_repay_check<'info>(
-        ctx: Context<'_, '_, '_, 'info, AutoRepayCheck<'info>>
+    pub fn auto_repay_start<'info>(
+        ctx: Context<'_, '_, '_, 'info, AutoRepayStart<'info>>,
+        amount_base_units: u64
     ) -> Result<()> {
-        auto_repay_check_handler(ctx)
+        auto_repay_start_handler(ctx, amount_base_units)
     }
 }

@@ -1,11 +1,9 @@
 use anchor_lang::{
-    prelude::*, 
-    Discriminator,
-    solana_program::sysvar::instructions::{
+    prelude::*, solana_program::{instruction::Instruction, sysvar::instructions::{
         self,
         load_current_index_checked, 
         load_instruction_at_checked
-    }
+    }}, Discriminator
 };
 use anchor_spl::{
     associated_token::AssociatedToken, token::{self, Mint, Token, TokenAccount}
@@ -15,12 +13,10 @@ use drift::{
     cpi::deposit as drift_deposit, 
     Deposit as DriftDeposit,  
 };
+use jupiter::i11n::ExactOutRouteI11n;
 use crate::{check, errors::QuartzError, state::Vault};
 
 #[derive(Accounts)]
-#[instruction(
-    drift_market_index: u16,
-)]
 pub struct AutoRepayDeposit<'info> {
     #[account(
         mut,
@@ -96,29 +92,24 @@ pub struct AutoRepayDeposit<'info> {
     pub system_program: Program<'info, System>,
 }
 
-fn validate_instructions<'info>(
-    ctx: &Context<'_, '_, '_, 'info, AutoRepayDeposit<'info>>
+fn validate_instruction_order<'info>(
+    start_instruction: &Instruction,
+    swap_instruction: &Instruction,
+    withdraw_instruction: &Instruction
 ) -> Result<()> {
-    // This is the 1st instruction
-    let index: usize = load_current_index_checked(&ctx.accounts.instructions.to_account_info())?.into();
-
-    // Check the 2nd instruction is auto_repay_withdraw
-    let withdraw_instruction = load_instruction_at_checked(index + 1, &ctx.accounts.instructions.to_account_info())?;
-
+    // Check the 1st instruction is auto_repay_start
     check!(
-        withdraw_instruction.program_id.eq(&crate::id()),
+        start_instruction.program_id.eq(&crate::id()),
         QuartzError::IllegalAutoRepayInstructions
     );
 
     check!(
-        withdraw_instruction.data[..8]
-            .eq(&crate::instruction::AutoRepayWithdraw::DISCRIMINATOR),
+        start_instruction.data[..8]
+            .eq(&crate::instruction::AutoRepayStart::DISCRIMINATOR),
         QuartzError::IllegalAutoRepayInstructions
     );
 
-    // Check the 3rd instruction is Jupiter's exact_out_route
-    let swap_instruction = load_instruction_at_checked(index + 2, &ctx.accounts.instructions.to_account_info())?;
-
+    // Check the 2nd instruction is Jupiter's exact_out_route
     check!(
         swap_instruction.program_id.eq(&jupiter::ID),
         QuartzError::IllegalAutoRepayInstructions
@@ -130,17 +121,17 @@ fn validate_instructions<'info>(
         QuartzError::IllegalAutoRepayInstructions
     );
 
-    // Check the 4th instruction is auto_repay_check
-    let check_instruction = load_instruction_at_checked(index + 3, &ctx.accounts.instructions.to_account_info())?;
+    // This instruction is the 3rd instruction
 
+    // Check the 4th instruction is auto_repay_withdraw
     check!(
-        check_instruction.program_id.eq(&crate::id()),
+        withdraw_instruction.program_id.eq(&crate::id()),
         QuartzError::IllegalAutoRepayInstructions
     );
 
     check!(
-        check_instruction.data[..8]
-            .eq(&crate::instruction::AutoRepayCheck::DISCRIMINATOR),
+        withdraw_instruction.data[..8]
+            .eq(&crate::instruction::AutoRepayWithdraw::DISCRIMINATOR),
         QuartzError::IllegalAutoRepayInstructions
     );
 
@@ -154,11 +145,22 @@ fn validate_account_health() -> Result<()> {
 }
 
 pub fn auto_repay_deposit_handler<'info>(
-    ctx: Context<'_, '_, '_, 'info, AutoRepayDeposit<'info>>, 
-    amount_base_units: u64,
+    ctx: Context<'_, '_, '_, 'info, AutoRepayDeposit<'info>>,
     drift_market_index: u16
 ) -> Result<()> {
-    validate_instructions(&ctx)?;
+    let index: usize = load_current_index_checked(&ctx.accounts.instructions.to_account_info())?.into();
+    let start_instruction = load_instruction_at_checked(index - 2, &ctx.accounts.instructions.to_account_info())?;
+    let swap_instruction = load_instruction_at_checked(index - 1, &ctx.accounts.instructions.to_account_info())?;
+    let withdraw_instruction = load_instruction_at_checked(index + 1, &ctx.accounts.instructions.to_account_info())?;
+
+    validate_instruction_order(&start_instruction, &swap_instruction, &withdraw_instruction)?;
+
+    // Validate mint
+    let swap_i11n = ExactOutRouteI11n::try_from(&swap_instruction)?;
+    check!(
+        swap_i11n.accounts.destination_mint.pubkey.eq(&ctx.accounts.spl_mint.key()),
+        QuartzError::InvalidMint
+    );
 
     validate_account_health()?;
 
@@ -171,6 +173,9 @@ pub fn auto_repay_deposit_handler<'info>(
     ];
     let signer_seeds = &[&seeds[..]];
 
+    // Get deposit amount from swap instruction
+    let deposit_amount = swap_i11n.args.out_amount;
+
     // Transfer tokens from owner's ATA to vault's ATA
     token::transfer(
         CpiContext::new(
@@ -181,7 +186,7 @@ pub fn auto_repay_deposit_handler<'info>(
                 authority: ctx.accounts.owner.to_account_info()
             }
         ),
-        amount_base_units
+        deposit_amount
     )?;
 
     // Drift Deposit CPI
@@ -202,7 +207,7 @@ pub fn auto_repay_deposit_handler<'info>(
     cpi_ctx.remaining_accounts = ctx.remaining_accounts.to_vec();
 
     // reduce_only = true to prevent depositing more than the borrowed position
-    drift_deposit(cpi_ctx, drift_market_index, amount_base_units, true)?;
+    drift_deposit(cpi_ctx, drift_market_index, deposit_amount, true)?;
 
     // Close vault's ATA
     let cpi_ctx_close = CpiContext::new_with_signer(

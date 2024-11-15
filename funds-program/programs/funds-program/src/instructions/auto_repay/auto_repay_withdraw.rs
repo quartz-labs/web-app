@@ -1,11 +1,9 @@
 use anchor_lang::{
-    prelude::*,
-    Discriminator,
-    solana_program::sysvar::instructions::{
+    prelude::*, solana_program::{instruction::Instruction, sysvar::instructions::{
         self,
         load_current_index_checked, 
         load_instruction_at_checked
-    }
+    }}, Discriminator
 };
 use anchor_spl::{
     associated_token::AssociatedToken, token::{self, Mint, Token, TokenAccount}
@@ -15,12 +13,10 @@ use drift::{
     cpi::withdraw as drift_withdraw, 
     Withdraw as DriftWithdraw
 };
-use crate::{check, errors::QuartzError, state::Vault};
+use jupiter::i11n::ExactOutRouteI11n;
+use crate::{check, errors::QuartzError, state::{Mule, Vault}};
 
 #[derive(Accounts)]
-#[instruction(
-    drift_market_index: u16,
-)]
 pub struct AutoRepayWithdraw<'info> {
     #[account(
         mut,
@@ -86,6 +82,21 @@ pub struct AutoRepayWithdraw<'info> {
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     pub drift_signer: UncheckedAccount<'info>,
 
+    #[account(
+        seeds = [b"auto_repay_mule".as_ref()],
+        bump
+    )]
+    pub mule: Box<Account<'info, Mule>>,
+
+    #[account(
+        mut,
+        seeds = [mule.key().as_ref(), owner.key().as_ref(), spl_mint.key().as_ref()],
+        bump,
+        token::mint = spl_mint,
+        token::authority = mule
+    )]
+    pub mule_spl: Box<Account<'info, TokenAccount>>,
+
     pub token_program: Program<'info, Token>,
 
     pub associated_token_program: Program<'info, AssociatedToken>,
@@ -99,15 +110,37 @@ pub struct AutoRepayWithdraw<'info> {
     pub system_program: Program<'info, System>,
 }
 
-fn validate_instructions<'info>(
-    ctx: &Context<'_, '_, '_, 'info, AutoRepayWithdraw<'info>>
+fn validate_instruction_order<'info>(
+    start_instruction: &Instruction,
+    swap_instruction: &Instruction,
+    deposit_instruction: &Instruction
 ) -> Result<()> {
-    // This is the 2nd instruction
-    let index: usize = load_current_index_checked(&ctx.accounts.instructions.to_account_info())?.into();
+    // Check the 1st instruction is auto_repay_start
+    check!(
+        start_instruction.program_id.eq(&crate::id()),
+        QuartzError::IllegalAutoRepayInstructions
+    );
 
-    // Check the 1st instruction is auto_repay_deposit
-    let deposit_instruction = load_instruction_at_checked(index - 1, &ctx.accounts.instructions.to_account_info())?;
+    check!(
+        start_instruction.data[..8]
+            .eq(&crate::instruction::AutoRepayStart::DISCRIMINATOR),
+        QuartzError::IllegalAutoRepayInstructions
+    );
 
+    // Check the 2n instruction is Jupiter's exact_out_route
+    check!(
+        swap_instruction.program_id.eq(&jupiter::ID),
+        QuartzError::IllegalAutoRepayInstructions
+    );
+
+    check!(
+        swap_instruction.data[..8]
+            .eq(&jupiter::instructions::ExactOutRoute::DISCRIMINATOR),
+        QuartzError::IllegalAutoRepayInstructions
+    );
+    
+
+    // Check the 3rd instruction is auto_repay_deposit
     check!(
         deposit_instruction.program_id.eq(&crate::id()),
         QuartzError::IllegalAutoRepayInstructions
@@ -119,32 +152,37 @@ fn validate_instructions<'info>(
         QuartzError::IllegalAutoRepayInstructions
     );
 
-    // Check the 3rd instruction is Jupiter's exact_out_route
-    let swap_instruction = load_instruction_at_checked(index + 1, &ctx.accounts.instructions.to_account_info())?;
+    // This instruction is the 4th instruction
 
+    Ok(())
+}
+
+fn validate_user_accounts<'info>(
+    ctx: &Context<'_, '_, '_, 'info, AutoRepayWithdraw<'info>>,
+    deposit_instruction: &Instruction
+) -> Result<()> {
+    let deposit_vault = deposit_instruction.accounts[0].pubkey;
     check!(
-        swap_instruction.program_id.eq(&jupiter::ID),
-        QuartzError::IllegalAutoRepayInstructions
+        ctx.accounts.vault.key().eq(&deposit_vault),
+        QuartzError::InvalidUserAccounts
     );
 
+    let deposit_owner = deposit_instruction.accounts[2].pubkey;
     check!(
-        swap_instruction.data[..8]
-            .eq(&jupiter::instructions::ExactOutRoute::DISCRIMINATOR),
-        QuartzError::IllegalAutoRepayInstructions
+        ctx.accounts.owner.key().eq(&deposit_owner),
+        QuartzError::InvalidUserAccounts
     );
 
-    // Check the 4th instruction is auto_repay_check
-    let check_instruction = load_instruction_at_checked(index + 2, &ctx.accounts.instructions.to_account_info())?;
-
+    let deposit_drift_user = deposit_instruction.accounts[5].pubkey;
     check!(
-        check_instruction.program_id.eq(&crate::id()),
-        QuartzError::IllegalAutoRepayInstructions
+        ctx.accounts.drift_user.key().eq(&deposit_drift_user),
+        QuartzError::InvalidUserAccounts
     );
 
+    let deposit_drift_user_stats = deposit_instruction.accounts[6].pubkey;
     check!(
-        check_instruction.data[..8]
-            .eq(&crate::instruction::AutoRepayCheck::DISCRIMINATOR),
-        QuartzError::IllegalAutoRepayInstructions
+        ctx.accounts.drift_user_stats.key().eq(&deposit_drift_user_stats),
+        QuartzError::InvalidUserAccounts
     );
 
     Ok(())
@@ -157,11 +195,38 @@ fn validate_account_health() -> Result<()> {
 }
 
 pub fn auto_repay_withdraw_handler<'info>(
-    ctx: Context<'_, '_, '_, 'info, AutoRepayWithdraw<'info>>, 
-    amount_base_units: u64,
+    ctx: Context<'_, '_, '_, 'info, AutoRepayWithdraw<'info>>,
     drift_market_index: u16
 ) -> Result<()> {
-    validate_instructions(&ctx)?;
+    let index: usize = load_current_index_checked(&ctx.accounts.instructions.to_account_info())?.into();
+    let start_instruction = load_instruction_at_checked(index - 3, &ctx.accounts.instructions.to_account_info())?;
+    let swap_instruction = load_instruction_at_checked(index - 2, &ctx.accounts.instructions.to_account_info())?;
+    let deposit_instruction = load_instruction_at_checked(index - 1, &ctx.accounts.instructions.to_account_info())?;
+
+    validate_instruction_order(&start_instruction, &swap_instruction, &deposit_instruction)?;
+
+    validate_user_accounts(&ctx, &deposit_instruction)?;
+
+    // Validate mule
+    let start_mule = start_instruction.accounts[3].pubkey;
+    check!(
+        ctx.accounts.mule_spl.key().eq(&start_mule),
+        QuartzError::InvalidMuleAccount
+    );
+
+    // Validate mint
+    let swap_i11n = ExactOutRouteI11n::try_from(&swap_instruction)?;
+    check!(
+        swap_i11n.accounts.source_mint.pubkey.eq(&ctx.accounts.spl_mint.key()),
+        QuartzError::InvalidMint
+    );
+
+    // Get amount actually swapped in Jupiter
+    let mule_deposited_balance = u64::from_le_bytes(
+        start_instruction.data[8..16].try_into().unwrap()
+    );
+    let mule_current_balance = ctx.accounts.mule_spl.amount;
+    let withdraw_amount = mule_deposited_balance - mule_current_balance;
 
     let vault_bump = ctx.accounts.vault.bump;
     let owner = ctx.accounts.owner.key();
@@ -192,10 +257,9 @@ pub fn auto_repay_withdraw_handler<'info>(
     cpi_ctx.remaining_accounts = ctx.remaining_accounts.to_vec();
 
     // reduce_only = true to prevent withdrawing more than the collateral position (which would create a new loan)
-    drift_withdraw(cpi_ctx, drift_market_index, amount_base_units, true)?;
+    drift_withdraw(cpi_ctx, drift_market_index, withdraw_amount, true)?;
 
     // Transfer tokens from vault's ATA to owner's ATA
-
     token::transfer(
         CpiContext::new_with_signer(
             ctx.accounts.token_program.to_account_info(), 
@@ -206,11 +270,10 @@ pub fn auto_repay_withdraw_handler<'info>(
             }, 
             signer_seeds
         ),
-        amount_base_units
+        withdraw_amount
     )?;
 
     // Close vault's ATA
-
     let cpi_ctx_close = CpiContext::new_with_signer(
         ctx.accounts.token_program.to_account_info(),
         token::CloseAccount {
@@ -223,6 +286,18 @@ pub fn auto_repay_withdraw_handler<'info>(
     token::close_account(cpi_ctx_close)?;
 
     validate_account_health()?;
+
+    // Close mule_spl
+    let cpi_ctx_close = CpiContext::new_with_signer(
+        ctx.accounts.token_program.to_account_info(),
+        token::CloseAccount {
+            account: ctx.accounts.mule_spl.to_account_info(),
+            destination: ctx.accounts.owner.to_account_info(),
+            authority: ctx.accounts.mule.to_account_info(),
+        },
+        signer_seeds
+    );
+    token::close_account(cpi_ctx_close)?;
 
     Ok(())
 }
