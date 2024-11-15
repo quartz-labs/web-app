@@ -8,7 +8,7 @@ export type FundsProgram = {
   "address": "6JjHXLheGSNvvexgzMthEcgjkcirDrGduc3HAKB2P1v2",
   "metadata": {
     "name": "fundsProgram",
-    "version": "0.1.3",
+    "version": "0.1.8",
     "spec": "0.1.0",
     "description": "Quartz funds program"
   },
@@ -98,7 +98,94 @@ export type FundsProgram = {
           ]
         },
         {
-          "name": "ownerSpl"
+          "name": "ownerSpl",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "owner"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "splMint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
         },
         {
           "name": "splMint"
@@ -1475,8 +1562,28 @@ export type FundsProgram = {
   "errors": [
     {
       "code": 6000,
-      "name": "invalidDriftProgram",
-      "msg": "Invalid Drift program address"
+      "name": "illegalAutoRepayInstructions",
+      "msg": "Illegal auto repay instructions"
+    },
+    {
+      "code": 6001,
+      "name": "unbalancedSwap",
+      "msg": "Repay amounts do not match swap amounts"
+    },
+    {
+      "code": 6002,
+      "name": "invalidMint",
+      "msg": "Repay mints do not match swap mints"
+    },
+    {
+      "code": 6003,
+      "name": "maxSlippageExceeded",
+      "msg": "Price slippage is above maximum"
+    },
+    {
+      "code": 6004,
+      "name": "invalidPlatformFee",
+      "msg": "Swap platform fee must be zero"
     }
   ],
   "types": [
