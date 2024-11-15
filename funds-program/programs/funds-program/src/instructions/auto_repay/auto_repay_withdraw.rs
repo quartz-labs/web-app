@@ -1,5 +1,6 @@
 use anchor_lang::{
     prelude::*,
+    Discriminator,
     solana_program::sysvar::instructions::{
         self,
         load_current_index_checked, 
@@ -14,7 +15,7 @@ use drift::{
     cpi::withdraw as drift_withdraw, 
     Withdraw as DriftWithdraw
 };
-use crate::state::Vault;
+use crate::{check, errors::QuartzError, state::Vault};
 
 #[derive(Accounts)]
 #[instruction(
@@ -98,20 +99,69 @@ pub struct AutoRepayWithdraw<'info> {
     pub system_program: Program<'info, System>,
 }
 
+fn validate_instructions<'info>(
+    ctx: &Context<'_, '_, '_, 'info, AutoRepayWithdraw<'info>>
+) -> Result<()> {
+    // This is the 2nd instruction
+    let index: usize = load_current_index_checked(&ctx.accounts.instructions.to_account_info())?.into();
+
+    // Check the 1st instruction is auto_repay_deposit
+    let deposit_instruction = load_instruction_at_checked(index - 1, &ctx.accounts.instructions.to_account_info())?;
+
+    check!(
+        deposit_instruction.program_id.eq(&crate::id()),
+        QuartzError::IllegalAutoRepayInstructions
+    );
+
+    check!(
+        deposit_instruction.data[..8]
+            .eq(&crate::instruction::AutoRepayDeposit::DISCRIMINATOR),
+        QuartzError::IllegalAutoRepayInstructions
+    );
+
+    // Check the 3rd instruction is Jupiter's exact_out_route
+    let swap_instruction = load_instruction_at_checked(index + 1, &ctx.accounts.instructions.to_account_info())?;
+
+    check!(
+        swap_instruction.program_id.eq(&jupiter::ID),
+        QuartzError::IllegalAutoRepayInstructions
+    );
+
+    check!(
+        swap_instruction.data[..8]
+            .eq(&jupiter::instructions::ExactOutRoute::DISCRIMINATOR),
+        QuartzError::IllegalAutoRepayInstructions
+    );
+
+    // Check the 4th instruction is auto_repay_check
+    let check_instruction = load_instruction_at_checked(index + 2, &ctx.accounts.instructions.to_account_info())?;
+
+    check!(
+        check_instruction.program_id.eq(&crate::id()),
+        QuartzError::IllegalAutoRepayInstructions
+    );
+
+    check!(
+        check_instruction.data[..8]
+            .eq(&crate::instruction::AutoRepayCheck::DISCRIMINATOR),
+        QuartzError::IllegalAutoRepayInstructions
+    );
+
+    Ok(())
+}
+
+fn validate_account_health() -> Result<()> {
+    // TODO: Implement
+
+    Ok(())
+}
+
 pub fn auto_repay_withdraw_handler<'info>(
     ctx: Context<'_, '_, '_, 'info, AutoRepayWithdraw<'info>>, 
     amount_base_units: u64,
     drift_market_index: u16
 ) -> Result<()> {
-    let index = load_current_index_checked(&ctx.accounts.instructions.to_account_info())?;
-    let deposit_instruction = load_instruction_at_checked(index as usize - 1, &ctx.accounts.instructions.to_account_info())?;
-    let swap_instruction = load_instruction_at_checked(index as usize + 1, &ctx.accounts.instructions.to_account_info())?;
-    let check_instruction = load_instruction_at_checked(index as usize + 2, &ctx.accounts.instructions.to_account_info())?;
-
-    msg!("index: {}", index);
-    msg!("deposit_instruction: {:?}", deposit_instruction.program_id);
-    msg!("swap_instruction: {:?}", swap_instruction.program_id);
-    msg!("check_instruction: {:?}", check_instruction.program_id);
+    validate_instructions(&ctx)?;
 
     let vault_bump = ctx.accounts.vault.bump;
     let owner = ctx.accounts.owner.key();
@@ -171,6 +221,8 @@ pub fn auto_repay_withdraw_handler<'info>(
         signer_seeds
     );
     token::close_account(cpi_ctx_close)?;
+
+    validate_account_health()?;
 
     Ok(())
 }

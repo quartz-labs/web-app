@@ -1,7 +1,9 @@
 use anchor_lang::prelude::*;
 
 #[error_code]
-pub enum ErrorCode {
+pub enum QuartzError {
     #[msg("Invalid Drift program address")]
-    InvalidDriftProgram
+    InvalidDriftProgram,
+    #[msg("Illegal auto repay instructions")]
+    IllegalAutoRepayInstructions,
 }
