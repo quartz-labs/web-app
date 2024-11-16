@@ -307,7 +307,7 @@ export type FundsProgram = {
           "signer": true
         },
         {
-          "name": "callerDepositSpl",
+          "name": "callerWithdrawSpl",
           "writable": true,
           "pda": {
             "seeds": [
@@ -354,7 +354,7 @@ export type FundsProgram = {
               },
               {
                 "kind": "account",
-                "path": "depositMint"
+                "path": "withdrawMint"
               }
             ],
             "program": {
@@ -397,7 +397,7 @@ export type FundsProgram = {
           }
         },
         {
-          "name": "depositMint"
+          "name": "withdrawMint"
         },
         {
           "name": "tokenProgram",

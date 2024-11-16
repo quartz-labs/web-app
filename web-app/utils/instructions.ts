@@ -11,7 +11,8 @@ import {
     USDC_MINT, WSOL_MINT,
     MARGINFI_GROUP_1,
     DECIMALS_USDC,
-    FUNDS_PROGRAM_ADDRESS_TABLE
+    FUNDS_PROGRAM_ADDRESS_TABLE,
+    DECIMALS_SOL
 } from "./constants";
 import { ASSOCIATED_PROGRAM_ID, TOKEN_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/utils/token";
 import { SystemProgram, VersionedTransaction, TransactionMessage, Connection, TransactionInstruction, SYSVAR_INSTRUCTIONS_PUBKEY } from "@solana/web3.js";
@@ -644,33 +645,39 @@ export const autoRepay = async (
 
         // Get MarginFi client and bank
         const marginfiClient = await MarginfiClient.fetch(getConfig(), wallet, connection);
-        const wsolBank = marginfiClient.getBankByTokenSymbol("SOL");
-        if (!wsolBank) throw Error(`${"SOL"} bank not found`);
+        const flashLoanToken = "SOL";
+        const wsolBank = marginfiClient.getBankByTokenSymbol(flashLoanToken);
+        if (!wsolBank) throw Error(`${flashLoanToken} bank not found`);
 
         const [ marginfiAccount ] = await marginfiClient.getMarginfiAccountsForAuthority(wallet.publicKey);
         if (marginfiAccount === undefined) throw new Error("Flash loan MarginFi account not found");
 
-        // Build instructions
+        const jupiterQuote = await getJupiterSwapQuote(WSOL_MINT, USDC_MINT, amountMicroCents, true);
+        const amountLamports = Number(jupiterQuote.inAmount);
+        const amountLamportsWithSlippage = amountLamports * (1.01);
+
+        // Create USDC ATA if needed, wSOL is created by flash loan
         const oix_createUsdcAta = await createAtaIfNeeded(connection, walletUsdc, wallet.publicKey, USDC_MINT);
 
-        const walletUsdcBalance = await connection.getTokenAccountBalance(walletUsdc).then(res => res.value.amount);
+        let preLoanBalance;
+        try {
+            preLoanBalance = await connection.getTokenAccountBalance(walletWSol).then(res => res.value.amount);
+        } catch {
+            preLoanBalance = 0;
+        }
+        const walletWsolBalance = Number(preLoanBalance) + amountLamportsWithSlippage;
 
         const ix_autoRepayStart = await quartzProgram.methods
-            .autoRepayStart(new BN(walletUsdcBalance))
+            .autoRepayStart(new BN(walletWsolBalance))
             .accounts({
                 caller: wallet.publicKey,
                 // @ts-expect-error - IDL issue
-                callerDepositSpl: walletUsdc,
-                depositMint: USDC_MINT,
+                callerWithdrawSpl: walletWSol,
+                withdrawMint: WSOL_MINT,
                 tokenProgram: TOKEN_PROGRAM_ID,
                 systemProgram: SystemProgram.programId,
-                instructions: SYSVAR_INSTRUCTIONS_PUBKEY,
             })
             .instruction();
-
-        const jupiterQuote = await getJupiterSwapQuote(WSOL_MINT, USDC_MINT, amountMicroCents, true);
-        const amountLamports = Number(jupiterQuote.inAmount);
-        if (isNaN(amountLamports)) throw Error(`Invalid Jupiter quote`);
 
         const {
             instructions: jupiterSwapIxs,
@@ -681,7 +688,21 @@ export const autoRepay = async (
         const ix_autoRepayDeposit = await quartzProgram.methods
             .autoRepayDeposit(DRIFT_MARKET_INDEX_USDC)
             .accounts({
-                
+                // @ts-expect-error - IDL issue
+                vault: vaultPda,
+                vaultSpl: getVaultSpl(vaultPda, USDC_MINT),
+                owner: wallet.publicKey,
+                ownerSpl: walletUsdc,
+                splMint: USDC_MINT,
+                driftUser: getDriftUser(vaultPda),
+                driftUserStats: getDriftUserStats(vaultPda),
+                driftState: getDriftState(),
+                spotMarketVault: getDriftSpotMarketVault(DRIFT_MARKET_INDEX_USDC),
+                tokenProgram: TOKEN_PROGRAM_ID,
+                associatedTokenProgram: ASSOCIATED_PROGRAM_ID,
+                driftProgram: DRIFT_PROGRAM_ID,
+                instructions: SYSVAR_INSTRUCTIONS_PUBKEY,
+                systemProgram: SystemProgram.programId,
             })
             .remainingAccounts([
                 toRemainingAccount(DRIFT_ORACLE_2, false, false),
@@ -694,7 +715,22 @@ export const autoRepay = async (
         const ix_autoRepayWithdraw = await quartzProgram.methods
             .autoRepayWithdraw(DRIFT_MARKET_INDEX_SOL)
             .accounts({
-                
+                // @ts-expect-error - IDL issue
+                vault: vaultPda,
+                vaultSpl: getVaultSpl(vaultPda, WSOL_MINT),
+                owner: wallet.publicKey,
+                ownerSpl: walletWSol,
+                splMint: WSOL_MINT,
+                driftUser: getDriftUser(vaultPda),
+                driftUserStats: getDriftUserStats(vaultPda),
+                driftState: getDriftState(),
+                spotMarketVault: getDriftSpotMarketVault(DRIFT_MARKET_INDEX_SOL),
+                driftSigner: DRIFT_SIGNER,
+                tokenProgram: TOKEN_PROGRAM_ID,
+                associatedTokenProgram: ASSOCIATED_PROGRAM_ID,
+                driftProgram: DRIFT_PROGRAM_ID,
+                instructions: SYSVAR_INSTRUCTIONS_PUBKEY,
+                systemProgram: SystemProgram.programId,
             })
             .remainingAccounts([
                 toRemainingAccount(DRIFT_ORACLE_2, false, false),
@@ -711,10 +747,10 @@ export const autoRepay = async (
         );
 
         // Create flash loan and send tx
-        const amountUsdcUi = new BigNumber(baseUnitToUi(amountMicroCents, DECIMALS_USDC));
+        const amountSolUi = new BigNumber(baseUnitToUi(amountLamportsWithSlippage, DECIMALS_SOL));
         const { flashloanTx } = await makeFlashLoanTx(
             marginfiAccount,
-            amountUsdcUi,
+            amountSolUi,
             wsolBank.address,
             [...oix_createUsdcAta, ix_autoRepayStart, ix_jupiterSwap, ix_autoRepayDeposit, ix_autoRepayWithdraw, ix_closeWSolAta],
             [fundsProgramLookupTable, ...jupiterLookupTables],

@@ -41,10 +41,6 @@ pub fn validate_instruction_order<'info>(
     deposit_instruction: &Instruction,
     withdraw_instruction: &Instruction,
 ) -> Result<()> {
-    msg!("Swap {:?} = {:?}", &swap_instruction.data[..8], jupiter::instructions::ExactOutRoute::DISCRIMINATOR);
-    msg!("Deposit {:?} = {:?}", &deposit_instruction.data[..8], crate::instruction::AutoRepayDeposit::DISCRIMINATOR);
-    msg!("Withdraw {:?} = {:?}", &withdraw_instruction.data[..8], crate::instruction::AutoRepayWithdraw::DISCRIMINATOR);
-
     // This instruction is the 1st instruction
 
     // Check the 2nd instruction is Jupiter's exact_out_route
@@ -92,11 +88,6 @@ fn validate_swap_data<'info>(
 ) -> Result<()> {
     let swap_i11n = ExactOutRouteI11n::try_from(swap_instruction)?;
 
-    msg!("Slippage: {}", swap_i11n.args.slippage_bps);
-    msg!("Platform fee: {}", swap_i11n.args.platform_fee_bps);
-    msg!("Source mint: {}", swap_i11n.accounts.source_mint.pubkey);
-    msg!("User source token account: {}", swap_i11n.accounts.user_source_token_account.pubkey);
-
     check!(
         swap_i11n.args.platform_fee_bps.eq(&0),
         QuartzError::InvalidPlatformFee
@@ -119,8 +110,6 @@ pub fn auto_repay_start_handler<'info>(
     ctx: Context<'_, '_, '_, 'info, AutoRepayStart<'info>>,
     start_withdraw_balance: u64
 ) -> Result<()> {
-    msg!("Declared start balance: {}", start_withdraw_balance);
-
     let index: usize = load_current_index_checked(&ctx.accounts.instructions.to_account_info())?.into();
     let swap_instruction = load_instruction_at_checked(index + 1, &ctx.accounts.instructions.to_account_info())?;
     let deposit_instruction = load_instruction_at_checked(index + 2, &ctx.accounts.instructions.to_account_info())?;
@@ -132,8 +121,6 @@ pub fn auto_repay_start_handler<'info>(
 
     // Check declared start balance is accurate
     let caller_balance = ctx.accounts.caller_withdraw_spl.amount;
-
-    msg!("True start balance: {}", caller_balance);
 
     check!(
         start_withdraw_balance == caller_balance,

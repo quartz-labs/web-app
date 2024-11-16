@@ -181,8 +181,6 @@ pub fn auto_repay_deposit_handler<'info>(
     // Get deposit amount from swap instruction
     let deposit_amount = swap_i11n.args.out_amount;
 
-    msg!("Deposit amount: {}", deposit_amount);
-
     // Transfer tokens from owner's ATA to vault's ATA
     token::transfer(
         CpiContext::new(

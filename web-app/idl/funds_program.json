@@ -301,7 +301,7 @@
           "signer": true
         },
         {
-          "name": "caller_deposit_spl",
+          "name": "caller_withdraw_spl",
           "writable": true,
           "pda": {
             "seeds": [
@@ -348,7 +348,7 @@
               },
               {
                 "kind": "account",
-                "path": "deposit_mint"
+                "path": "withdraw_mint"
               }
             ],
             "program": {
@@ -391,7 +391,7 @@
           }
         },
         {
-          "name": "deposit_mint"
+          "name": "withdraw_mint"
         },
         {
           "name": "token_program",

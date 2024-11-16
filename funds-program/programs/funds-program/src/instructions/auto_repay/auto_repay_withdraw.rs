@@ -196,15 +196,13 @@ pub fn auto_repay_withdraw_handler<'info>(
 
     validate_user_accounts(&ctx, &deposit_instruction)?;
 
-    // Validate mint
+    // Validate mint and ATA are the same as swap
     let swap_i11n = ExactOutRouteI11n::try_from(&swap_instruction)?;
-    msg!("Swap mint: {} = {}", swap_i11n.accounts.source_mint.pubkey, ctx.accounts.spl_mint.key());
     check!(
         swap_i11n.accounts.source_mint.pubkey.eq(&ctx.accounts.spl_mint.key()),
         QuartzError::InvalidMint
     );
 
-    msg!("Swap user source token account: {} = {}", swap_i11n.accounts.user_source_token_account.pubkey, ctx.accounts.vault_spl.key());
     check!(
         swap_i11n.accounts.user_source_token_account.pubkey.eq(&ctx.accounts.owner_spl.key()),
         QuartzError::InvalidSourceTokenAccount
@@ -216,10 +214,6 @@ pub fn auto_repay_withdraw_handler<'info>(
     );
     let end_balance = ctx.accounts.owner_spl.amount;
     let withdraw_amount = start_balance - end_balance;
-
-    msg!("Start balance: {}", start_balance);
-    msg!("End balance: {}", end_balance);
-    msg!("Withdraw amount: {}", withdraw_amount);
 
     let owner = ctx.accounts.owner.key();
     let vault_seeds = &[
