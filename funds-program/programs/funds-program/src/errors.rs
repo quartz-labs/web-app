@@ -4,8 +4,8 @@ use anchor_lang::prelude::*;
 pub enum QuartzError {
     #[msg("Illegal auto repay instructions")]
     IllegalAutoRepayInstructions,
-    #[msg("Repay mint does not match swap mint")]
-    InvalidMint,
+    #[msg("Invalid mint provided")]
+    InvalidRepayMint,
     #[msg("Price slippage is above maximum")]
     MaxSlippageExceeded,
     #[msg("Swap platform fee must be zero")]
@@ -18,4 +18,6 @@ pub enum QuartzError {
     InvalidDestinationTokenAccount,
     #[msg("Declared start balance is not accurate")]
     InvalidStartBalance,
+    #[msg("Price received from oracle should be a positive number")]
+    NegativeOraclePrice,
 }

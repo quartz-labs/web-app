@@ -14,7 +14,8 @@ use drift::{
     Withdraw as DriftWithdraw
 };
 use jupiter::i11n::ExactOutRouteI11n;
-use crate::{check, errors::QuartzError, state::Vault};
+use pyth_solana_receiver_sdk::price_update::{get_feed_id_from_hex, PriceUpdateV2};
+use crate::{check, constants::{AUTO_REPAY_MAX_PRICE_AGE_SECONDS, AUTO_REPAY_MAX_SLIPPAGE_BPS, PYTH_FEED_SOL_USD, PYTH_FEED_USDC_USD, WSOL_MINT}, errors::QuartzError, state::Vault};
 
 #[derive(Accounts)]
 pub struct AutoRepayWithdraw<'info> {
@@ -46,6 +47,9 @@ pub struct AutoRepayWithdraw<'info> {
     )]
     pub owner_spl: Box<Account<'info, TokenAccount>>,
 
+    #[account(
+        constraint = spl_mint.key().eq(&WSOL_MINT) @ QuartzError::InvalidRepayMint
+    )]
     pub spl_mint: Box<Account<'info, Mint>>,
 
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
@@ -88,11 +92,15 @@ pub struct AutoRepayWithdraw<'info> {
 
     pub drift_program: Program<'info, Drift>,
 
+    pub system_program: Program<'info, System>,
+
+    pub deposit_price_update: Account<'info, PriceUpdateV2>,
+
+    pub withdraw_price_update: Account<'info, PriceUpdateV2>,
+
     /// CHECK: Account is safe once address is correct
     #[account(address = instructions::ID)]
     instructions: UncheckedAccount<'info>,
-
-    pub system_program: Program<'info, System>,
 }
 
 fn validate_instruction_order<'info>(
@@ -147,32 +155,77 @@ fn validate_user_accounts<'info>(
     deposit_instruction: &Instruction
 ) -> Result<()> {
     let deposit_vault = deposit_instruction.accounts[0].pubkey;
-    msg!("Deposit vault: {} = {}", deposit_vault, ctx.accounts.vault.key());
     check!(
         ctx.accounts.vault.key().eq(&deposit_vault),
         QuartzError::InvalidUserAccounts
     );
 
     let deposit_owner = deposit_instruction.accounts[2].pubkey;
-    msg!("Deposit owner: {} = {}", deposit_owner, ctx.accounts.owner.key());
     check!(
         ctx.accounts.owner.key().eq(&deposit_owner),
         QuartzError::InvalidUserAccounts
     );
 
     let deposit_drift_user = deposit_instruction.accounts[5].pubkey;
-    msg!("Deposit drift_user: {} = {}", deposit_drift_user, ctx.accounts.drift_user.key());
     check!(
         ctx.accounts.drift_user.key().eq(&deposit_drift_user),
         QuartzError::InvalidUserAccounts
     );
 
     let deposit_drift_user_stats = deposit_instruction.accounts[6].pubkey;
-    msg!("Deposit drift_user_stats: {} = {}", deposit_drift_user_stats, ctx.accounts.drift_user_stats.key());
     check!(
         ctx.accounts.drift_user_stats.key().eq(&deposit_drift_user_stats),
         QuartzError::InvalidUserAccounts
     );
+
+    Ok(())
+}
+
+fn validate_prices<'info>(
+    ctx: &Context<'_, '_, '_, 'info, AutoRepayWithdraw<'info>>,
+    deposit_token_index: u16,
+    withdraw_token_index: u16,
+    deposit_amount: u64,
+    withdraw_amount: u64
+) -> Result<()> {
+    // Get the deposit price, assuming worst case of lowest end of confidence interval
+    let deposit_feed_id: [u8; 32] = get_feed_id_from_hex(PYTH_FEED_USDC_USD)?;
+    let deposit_price = ctx.accounts.deposit_price_update.get_price_no_older_than(
+        &Clock::get()?, 
+        AUTO_REPAY_MAX_PRICE_AGE_SECONDS,
+        &deposit_feed_id
+    )?;
+
+    check!(
+        deposit_price.price > 0,
+        QuartzError::NegativeOraclePrice
+    );
+    let deposit_lowest_price = (deposit_price.price as u64).checked_sub(deposit_price.conf)
+        .ok_or(QuartzError::NegativeOraclePrice)?;
+
+    // Get the withdraw price, assuming worst case of highest end of confidence interval
+    let withdraw_feed_id: [u8; 32] = get_feed_id_from_hex(PYTH_FEED_SOL_USD)?;
+    let withdraw_price = ctx.accounts.withdraw_price_update.get_price_no_older_than(
+        &Clock::get()?,
+        AUTO_REPAY_MAX_PRICE_AGE_SECONDS,
+        &withdraw_feed_id
+    )?;
+
+    check!(
+        withdraw_price.price > 0,
+        QuartzError::NegativeOraclePrice
+    );
+    let withdraw_highest_price = (withdraw_price.price as u64) + withdraw_price.conf;
+
+    msg!("Deposit token index: {}", deposit_token_index);
+    msg!("Withdraw token index: {}", withdraw_token_index);
+    msg!("Deposit amount: {}", deposit_amount);
+    msg!("Withdraw amount: {}", withdraw_amount);
+    msg!("Accepted slippage bps: {}", AUTO_REPAY_MAX_SLIPPAGE_BPS);
+    msg!("The deposit price range is ({} ± {}) * 10^{}", deposit_price.price, deposit_price.conf, deposit_price.exponent);
+    msg!("The lowest deposit price is {} * 10^{}", deposit_lowest_price, deposit_price.exponent);
+    msg!("The withdraw price range is ({} ± {}) * 10^{}", withdraw_price.price, withdraw_price.conf, withdraw_price.exponent);
+    msg!("The highest withdraw price is {} * 10^{}", withdraw_highest_price, withdraw_price.exponent);
 
     Ok(())
 }
@@ -200,7 +253,7 @@ pub fn auto_repay_withdraw_handler<'info>(
     let swap_i11n = ExactOutRouteI11n::try_from(&swap_instruction)?;
     check!(
         swap_i11n.accounts.source_mint.pubkey.eq(&ctx.accounts.spl_mint.key()),
-        QuartzError::InvalidMint
+        QuartzError::InvalidRepayMint
     );
 
     check!(
@@ -214,6 +267,13 @@ pub fn auto_repay_withdraw_handler<'info>(
     );
     let end_balance = ctx.accounts.owner_spl.amount;
     let withdraw_amount = start_balance - end_balance;
+
+    // Validate values of deposit and withdraw amounts are within slippage
+    let deposit_amount = swap_i11n.args.out_amount;
+    let deposit_token_index = u16::from_le_bytes(
+        start_instruction.data[8..10].try_into().unwrap()
+    );
+    validate_prices(&ctx, deposit_token_index, drift_market_index, deposit_amount, withdraw_amount)?;
 
     let owner = ctx.accounts.owner.key();
     let vault_seeds = &[

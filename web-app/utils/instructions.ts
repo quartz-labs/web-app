@@ -676,6 +676,7 @@ export const autoRepay = async (
                 withdrawMint: WSOL_MINT,
                 tokenProgram: TOKEN_PROGRAM_ID,
                 systemProgram: SystemProgram.programId,
+                instructions: SYSVAR_INSTRUCTIONS_PUBKEY,
             })
             .instruction();
 
@@ -701,8 +702,8 @@ export const autoRepay = async (
                 tokenProgram: TOKEN_PROGRAM_ID,
                 associatedTokenProgram: ASSOCIATED_PROGRAM_ID,
                 driftProgram: DRIFT_PROGRAM_ID,
-                instructions: SYSVAR_INSTRUCTIONS_PUBKEY,
                 systemProgram: SystemProgram.programId,
+                instructions: SYSVAR_INSTRUCTIONS_PUBKEY,
             })
             .remainingAccounts([
                 toRemainingAccount(DRIFT_ORACLE_2, false, false),
@@ -729,8 +730,8 @@ export const autoRepay = async (
                 tokenProgram: TOKEN_PROGRAM_ID,
                 associatedTokenProgram: ASSOCIATED_PROGRAM_ID,
                 driftProgram: DRIFT_PROGRAM_ID,
-                instructions: SYSVAR_INSTRUCTIONS_PUBKEY,
                 systemProgram: SystemProgram.programId,
+                instructions: SYSVAR_INSTRUCTIONS_PUBKEY,
             })
             .remainingAccounts([
                 toRemainingAccount(DRIFT_ORACLE_2, false, false),

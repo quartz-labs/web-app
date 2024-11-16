@@ -95,7 +95,7 @@ fn validate_swap_data<'info>(
 
     check!(
         swap_i11n.accounts.source_mint.pubkey.eq(&ctx.accounts.withdraw_mint.key()),
-        QuartzError::InvalidMint
+        QuartzError::InvalidRepayMint
     );
 
     check!(

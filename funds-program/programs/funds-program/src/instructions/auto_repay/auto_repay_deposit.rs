@@ -14,7 +14,7 @@ use drift::{
     Deposit as DriftDeposit,  
 };
 use jupiter::i11n::ExactOutRouteI11n;
-use crate::{check, errors::QuartzError, state::Vault};
+use crate::{check, constants::USDC_MINT, errors::QuartzError, state::Vault};
 
 #[derive(Accounts)]
 pub struct AutoRepayDeposit<'info> {
@@ -46,6 +46,9 @@ pub struct AutoRepayDeposit<'info> {
     )]
     pub owner_spl: Box<Account<'info, TokenAccount>>,
 
+    #[account(
+        constraint = spl_mint.key().eq(&USDC_MINT) @ QuartzError::InvalidRepayMint
+    )]
     pub spl_mint: Box<Account<'info, Mint>>,
 
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
@@ -85,11 +88,11 @@ pub struct AutoRepayDeposit<'info> {
 
     pub drift_program: Program<'info, Drift>,
 
+    pub system_program: Program<'info, System>,
+
     /// CHECK: Account is safe once address is correct
     #[account(address = instructions::ID)]
     instructions: UncheckedAccount<'info>,
-
-    pub system_program: Program<'info, System>,
 }
 
 fn validate_instruction_order<'info>(
@@ -159,7 +162,7 @@ pub fn auto_repay_deposit_handler<'info>(
     let swap_i11n = ExactOutRouteI11n::try_from(&swap_instruction)?;
     check!(
         swap_i11n.accounts.destination_mint.pubkey.eq(&ctx.accounts.spl_mint.key()),
-        QuartzError::InvalidMint
+        QuartzError::InvalidRepayMint
     );
 
     check!(
