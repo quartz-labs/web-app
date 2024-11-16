@@ -14,7 +14,7 @@ use drift::{
     Deposit as DriftDeposit,  
 };
 use jupiter::i11n::ExactOutRouteI11n;
-use crate::{check, constants::USDC_MINT, errors::QuartzError, state::Vault};
+use crate::{check, constants::{DRIFT_MARKET_INDEX_USDC, USDC_MINT}, errors::QuartzError, state::Vault};
 
 #[derive(Accounts)]
 pub struct AutoRepayDeposit<'info> {
@@ -151,6 +151,11 @@ pub fn auto_repay_deposit_handler<'info>(
     ctx: Context<'_, '_, '_, 'info, AutoRepayDeposit<'info>>,
     drift_market_index: u16
 ) -> Result<()> {
+    check!(
+        drift_market_index == DRIFT_MARKET_INDEX_USDC,
+        QuartzError::UnsupportedDriftMarketIndex
+    );
+
     let index: usize = load_current_index_checked(&ctx.accounts.instructions.to_account_info())?.into();
     let start_instruction = load_instruction_at_checked(index - 2, &ctx.accounts.instructions.to_account_info())?;
     let swap_instruction = load_instruction_at_checked(index - 1, &ctx.accounts.instructions.to_account_info())?;

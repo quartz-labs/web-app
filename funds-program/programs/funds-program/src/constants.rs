@@ -4,9 +4,13 @@ pub const ANCHOR_DISCRIMINATOR: usize = 8;
 pub const PUBKEY_SIZE: usize = 32;
 pub const U8_SIZE: usize = 1;
 
+pub const BASE_UNITS_PER_USDC: u64 = 1_000_000;
+
 pub const USDC_MINT: Pubkey = pubkey!("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
 pub const WSOL_MINT: Pubkey = pubkey!("So11111111111111111111111111111111111111112");
 
+pub const DRIFT_MARKET_INDEX_USDC: u16 = 0;
+pub const DRIFT_MARKET_INDEX_SOL: u16 = 1;
 pub const AUTO_REPAY_MAX_PRICE_AGE_SECONDS: u64 = 30;
 pub const AUTO_REPAY_MAX_SLIPPAGE_BPS: u16 = 100;
 

@@ -1,5 +1,5 @@
 use anchor_lang::{
-    prelude::*, solana_program::{instruction::Instruction, sysvar::instructions::{
+    prelude::*, solana_program::{instruction::Instruction, native_token::LAMPORTS_PER_SOL, sysvar::instructions::{
         self,
         load_current_index_checked, 
         load_instruction_at_checked
@@ -15,7 +15,7 @@ use drift::{
 };
 use jupiter::i11n::ExactOutRouteI11n;
 use pyth_solana_receiver_sdk::price_update::{get_feed_id_from_hex, PriceUpdateV2};
-use crate::{check, constants::{AUTO_REPAY_MAX_PRICE_AGE_SECONDS, AUTO_REPAY_MAX_SLIPPAGE_BPS, PYTH_FEED_SOL_USD, PYTH_FEED_USDC_USD, WSOL_MINT}, errors::QuartzError, state::Vault};
+use crate::{check, constants::{AUTO_REPAY_MAX_PRICE_AGE_SECONDS, AUTO_REPAY_MAX_SLIPPAGE_BPS, BASE_UNITS_PER_USDC, DRIFT_MARKET_INDEX_SOL, PYTH_FEED_SOL_USD, PYTH_FEED_USDC_USD, WSOL_MINT}, errors::QuartzError, state::Vault};
 
 #[derive(Accounts)]
 pub struct AutoRepayWithdraw<'info> {
@@ -183,8 +183,6 @@ fn validate_user_accounts<'info>(
 
 fn validate_prices<'info>(
     ctx: &Context<'_, '_, '_, 'info, AutoRepayWithdraw<'info>>,
-    deposit_token_index: u16,
-    withdraw_token_index: u16,
     deposit_amount: u64,
     withdraw_amount: u64
 ) -> Result<()> {
@@ -200,7 +198,7 @@ fn validate_prices<'info>(
         deposit_price.price > 0,
         QuartzError::NegativeOraclePrice
     );
-    let deposit_lowest_price = (deposit_price.price as u64).checked_sub(deposit_price.conf)
+    let mut deposit_lowest_price = (deposit_price.price as u64).checked_sub(deposit_price.conf)
         .ok_or(QuartzError::NegativeOraclePrice)?;
 
     // Get the withdraw price, assuming worst case of highest end of confidence interval
@@ -215,17 +213,45 @@ fn validate_prices<'info>(
         withdraw_price.price > 0,
         QuartzError::NegativeOraclePrice
     );
-    let withdraw_highest_price = (withdraw_price.price as u64) + withdraw_price.conf;
+    let mut withdraw_highest_price = (withdraw_price.price as u64) + withdraw_price.conf;
 
-    msg!("Deposit token index: {}", deposit_token_index);
-    msg!("Withdraw token index: {}", withdraw_token_index);
+    // Normalize prices to the same exponent
+    if withdraw_price.exponent < deposit_price.exponent {
+        withdraw_highest_price = withdraw_highest_price * 10u64.pow((deposit_price.exponent - withdraw_price.exponent) as u32);
+    } else if deposit_price.exponent < withdraw_price.exponent {
+        deposit_lowest_price = deposit_lowest_price * 10u64.pow((withdraw_price.exponent - deposit_price.exponent) as u32);
+    }
+
+    // Normalize usdc base units to the same decimals as SOL
+    let deposit_amount_normalized = deposit_amount * (LAMPORTS_PER_SOL / BASE_UNITS_PER_USDC);
+
+    // Calculate values
+    let deposit_value = deposit_amount_normalized * deposit_lowest_price;
+    let withdraw_value = withdraw_amount * withdraw_highest_price;
+ 
+    // Allow for slippage, using integar multiplication to prevent floating point errors
+    let multiplier_withdraw = 100 * 100; // 100% x 100bps
+    let multiplier_deposit = multiplier_withdraw + (AUTO_REPAY_MAX_SLIPPAGE_BPS as u128);
+
+    let deposit_slippage_check_value = (deposit_value as u128).checked_mul(multiplier_deposit)
+        .ok_or(QuartzError::MathOverflow)?;
+    let withdraw_slippage_check_value = (withdraw_value as u128).checked_mul(multiplier_withdraw)
+        .ok_or(QuartzError::MathOverflow)?;
+
     msg!("Deposit amount: {}", deposit_amount);
     msg!("Withdraw amount: {}", withdraw_amount);
     msg!("Accepted slippage bps: {}", AUTO_REPAY_MAX_SLIPPAGE_BPS);
-    msg!("The deposit price range is ({} ± {}) * 10^{}", deposit_price.price, deposit_price.conf, deposit_price.exponent);
     msg!("The lowest deposit price is {} * 10^{}", deposit_lowest_price, deposit_price.exponent);
-    msg!("The withdraw price range is ({} ± {}) * 10^{}", withdraw_price.price, withdraw_price.conf, withdraw_price.exponent);
     msg!("The highest withdraw price is {} * 10^{}", withdraw_highest_price, withdraw_price.exponent);
+    msg!("Deposit value: {}", deposit_value);
+    msg!("Withdraw value: {}", withdraw_value);
+    msg!("Deposit slippage check value: {}", deposit_slippage_check_value);
+    msg!("Withdraw slippage check value: {}", withdraw_slippage_check_value);
+
+    check!(
+        deposit_slippage_check_value >= withdraw_slippage_check_value,
+        QuartzError::MaxSlippageExceeded
+    );
 
     Ok(())
 }
@@ -240,6 +266,11 @@ pub fn auto_repay_withdraw_handler<'info>(
     ctx: Context<'_, '_, '_, 'info, AutoRepayWithdraw<'info>>,
     drift_market_index: u16
 ) -> Result<()> {
+    check!(
+        drift_market_index == DRIFT_MARKET_INDEX_SOL,
+        QuartzError::UnsupportedDriftMarketIndex
+    );
+
     let index: usize = load_current_index_checked(&ctx.accounts.instructions.to_account_info())?.into();
     let start_instruction = load_instruction_at_checked(index - 3, &ctx.accounts.instructions.to_account_info())?;
     let swap_instruction = load_instruction_at_checked(index - 2, &ctx.accounts.instructions.to_account_info())?;
@@ -268,12 +299,9 @@ pub fn auto_repay_withdraw_handler<'info>(
     let end_balance = ctx.accounts.owner_spl.amount;
     let withdraw_amount = start_balance - end_balance;
 
-    // Validate values of deposit and withdraw amounts are within slippage
+    // Validate values of deposit_amount and withdraw_amount are within slippage
     let deposit_amount = swap_i11n.args.out_amount;
-    let deposit_token_index = u16::from_le_bytes(
-        start_instruction.data[8..10].try_into().unwrap()
-    );
-    validate_prices(&ctx, deposit_token_index, drift_market_index, deposit_amount, withdraw_amount)?;
+    validate_prices(&ctx, deposit_amount, withdraw_amount)?;
 
     let owner = ctx.accounts.owner.key();
     let vault_seeds = &[

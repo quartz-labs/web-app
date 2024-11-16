@@ -8,7 +8,7 @@ export type FundsProgram = {
   "address": "6JjHXLheGSNvvexgzMthEcgjkcirDrGduc3HAKB2P1v2",
   "metadata": {
     "name": "fundsProgram",
-    "version": "0.1.11",
+    "version": "0.1.12",
     "spec": "0.1.0",
     "description": "quartz"
   },
@@ -273,12 +273,12 @@ export type FundsProgram = {
           "address": "dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH"
         },
         {
-          "name": "instructions",
-          "address": "Sysvar1nstructions1111111111111111111111111"
-        },
-        {
           "name": "systemProgram",
           "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "instructions",
+          "address": "Sysvar1nstructions1111111111111111111111111"
         }
       ],
       "args": [
@@ -682,12 +682,18 @@ export type FundsProgram = {
           "address": "dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH"
         },
         {
-          "name": "instructions",
-          "address": "Sysvar1nstructions1111111111111111111111111"
-        },
-        {
           "name": "systemProgram",
           "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "depositPriceUpdate"
+        },
+        {
+          "name": "withdrawPriceUpdate"
+        },
+        {
+          "name": "instructions",
+          "address": "Sysvar1nstructions1111111111111111111111111"
         }
       ],
       "args": [
@@ -1644,6 +1650,19 @@ export type FundsProgram = {
   ],
   "accounts": [
     {
+      "name": "priceUpdateV2",
+      "discriminator": [
+        34,
+        241,
+        35,
+        99,
+        157,
+        126,
+        244,
+        205
+      ]
+    },
+    {
       "name": "vault",
       "discriminator": [
         211,
@@ -1665,8 +1684,8 @@ export type FundsProgram = {
     },
     {
       "code": 6001,
-      "name": "invalidMint",
-      "msg": "Repay mint does not match swap mint"
+      "name": "invalidRepayMint",
+      "msg": "Invalid mint provided"
     },
     {
       "code": 6002,
@@ -1697,9 +1716,122 @@ export type FundsProgram = {
       "code": 6007,
       "name": "invalidStartBalance",
       "msg": "Declared start balance is not accurate"
+    },
+    {
+      "code": 6008,
+      "name": "negativeOraclePrice",
+      "msg": "Price received from oracle should be a positive number"
     }
   ],
   "types": [
+    {
+      "name": "priceFeedMessage",
+      "repr": {
+        "kind": "c"
+      },
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "feedId",
+            "docs": [
+              "`FeedId` but avoid the type alias because of compatibility issues with Anchor's `idl-build` feature."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "price",
+            "type": "i64"
+          },
+          {
+            "name": "conf",
+            "type": "u64"
+          },
+          {
+            "name": "exponent",
+            "type": "i32"
+          },
+          {
+            "name": "publishTime",
+            "docs": [
+              "The timestamp of this price update in seconds"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "prevPublishTime",
+            "docs": [
+              "The timestamp of the previous price update. This field is intended to allow users to",
+              "identify the single unique price update for any moment in time:",
+              "for any time t, the unique update is the one such that prev_publish_time < t <= publish_time.",
+              "",
+              "Note that there may not be such an update while we are migrating to the new message-sending logic,",
+              "as some price updates on pythnet may not be sent to other chains (because the message-sending",
+              "logic may not have triggered). We can solve this problem by making the message-sending mandatory",
+              "(which we can do once publishers have migrated over).",
+              "",
+              "Additionally, this field may be equal to publish_time if the message is sent on a slot where",
+              "where the aggregation was unsuccesful. This problem will go away once all publishers have",
+              "migrated over to a recent version of pyth-agent."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "emaPrice",
+            "type": "i64"
+          },
+          {
+            "name": "emaConf",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "priceUpdateV2",
+      "docs": [
+        "A price update account. This account is used by the Pyth Receiver program to store a verified price update from a Pyth price feed.",
+        "It contains:",
+        "- `write_authority`: The write authority for this account. This authority can close this account to reclaim rent or update the account to contain a different price update.",
+        "- `verification_level`: The [`VerificationLevel`] of this price update. This represents how many Wormhole guardian signatures have been verified for this price update.",
+        "- `price_message`: The actual price update.",
+        "- `posted_slot`: The slot at which this price update was posted."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "writeAuthority",
+            "type": "pubkey"
+          },
+          {
+            "name": "verificationLevel",
+            "type": {
+              "defined": {
+                "name": "verificationLevel"
+              }
+            }
+          },
+          {
+            "name": "priceMessage",
+            "type": {
+              "defined": {
+                "name": "priceFeedMessage"
+              }
+            }
+          },
+          {
+            "name": "postedSlot",
+            "type": "u64"
+          }
+        ]
+      }
+    },
     {
       "name": "vault",
       "type": {
@@ -1712,6 +1844,39 @@ export type FundsProgram = {
           {
             "name": "bump",
             "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "verificationLevel",
+      "docs": [
+        "Pyth price updates are bridged to all blockchains via Wormhole.",
+        "Using the price updates on another chain requires verifying the signatures of the Wormhole guardians.",
+        "The usual process is to check the signatures for two thirds of the total number of guardians, but this can be cumbersome on Solana because of the transaction size limits,",
+        "so we also allow for partial verification.",
+        "",
+        "This enum represents how much a price update has been verified:",
+        "- If `Full`, we have verified the signatures for two thirds of the current guardians.",
+        "- If `Partial`, only `num_signatures` guardian signatures have been checked.",
+        "",
+        "# Warning",
+        "Using partially verified price updates is dangerous, as it lowers the threshold of guardians that need to collude to produce a malicious price update."
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "partial",
+            "fields": [
+              {
+                "name": "numSignatures",
+                "type": "u8"
+              }
+            ]
+          },
+          {
+            "name": "full"
           }
         ]
       }

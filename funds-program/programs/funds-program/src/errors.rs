@@ -20,4 +20,8 @@ pub enum QuartzError {
     InvalidStartBalance,
     #[msg("Price received from oracle should be a positive number")]
     NegativeOraclePrice,
+    #[msg("Unsupported Drift market index")]
+    UnsupportedDriftMarketIndex,
+    #[msg("Math overflow")]
+    MathOverflow,
 }
