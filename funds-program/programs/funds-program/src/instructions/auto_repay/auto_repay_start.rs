@@ -3,18 +3,15 @@ use anchor_lang::{
     Discriminator,
     solana_program::{
         instruction::Instruction,
-        sysvar::instructions::{
-            self,
-            load_current_index_checked,
-            load_instruction_at_checked
-        }
+        sysvar::instructions::{self, load_current_index_checked, load_instruction_at_checked}
     }
 };
-use anchor_spl::{
-    associated_token::AssociatedToken, token::{Mint, Token, TokenAccount}
-};
+use anchor_spl::token::{Mint, Token, TokenAccount};
 use jupiter::i11n::ExactOutRouteI11n;
-use crate::{check, constants::MAX_SLIPPAGE_BPS, errors::QuartzError};
+use crate::{
+    check, 
+    errors::QuartzError
+};
 
 #[derive(Accounts)]
 pub struct AutoRepayStart<'info> {
@@ -31,8 +28,6 @@ pub struct AutoRepayStart<'info> {
     pub spl_mint: Box<Account<'info, Mint>>,
 
     pub token_program: Program<'info, Token>,
-    
-    pub associated_token_program: Program<'info, AssociatedToken>,
 
     pub system_program: Program<'info, System>,
 
@@ -42,9 +37,9 @@ pub struct AutoRepayStart<'info> {
 }
 
 pub fn validate_instruction_order<'info>(
+    swap_instruction: &Instruction,
     deposit_instruction: &Instruction,
     withdraw_instruction: &Instruction,
-    swap_instruction: &Instruction
 ) -> Result<()> {
     // This instruction is the 1st instruction
 
@@ -94,11 +89,6 @@ fn validate_swap_data<'info>(
     let swap_i11n = ExactOutRouteI11n::try_from(swap_instruction)?;
 
     check!(
-        swap_i11n.args.slippage_bps < MAX_SLIPPAGE_BPS,
-        QuartzError::MaxSlippageExceeded
-    );
-
-    check!(
         swap_i11n.args.platform_fee_bps.eq(&0),
         QuartzError::InvalidPlatformFee
     );
@@ -138,10 +128,11 @@ pub fn auto_repay_start_handler<'info>(
     // Check declared start balance is accurate
     let caller_balance = ctx.accounts.caller_spl.amount;
     check!(
-        start_balance ==caller_balance,
+        start_balance == caller_balance,
         QuartzError::InvalidStartBalance
     );
     msg!("Start balance: {}", start_balance);
+    msg!("Caller balance: {}", caller_balance);
 
     Ok(())
 }

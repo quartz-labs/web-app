@@ -12,8 +12,10 @@ pub enum QuartzError {
     InvalidPlatformFee,
     #[msg("User accounts for deposit and withdraw do not match")]
     InvalidUserAccounts,
-    #[msg("Swap's source token account does not match mule")]
+    #[msg("Swap source token account does not match withdraw")]
     InvalidSourceTokenAccount,
+    #[msg("Swap destination token account does not match deposit")]
+    InvalidDestinationTokenAccount,
     #[msg("Declared start balance is not accurate")]
     InvalidStartBalance,
 }

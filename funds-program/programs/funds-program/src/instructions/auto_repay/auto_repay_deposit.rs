@@ -162,6 +162,11 @@ pub fn auto_repay_deposit_handler<'info>(
         QuartzError::InvalidMint
     );
 
+    check!(
+        swap_i11n.accounts.user_destination_token_account.pubkey.eq(&ctx.accounts.owner_spl.key()),
+        QuartzError::InvalidDestinationTokenAccount
+    );
+
     validate_account_health()?;
 
     let vault_bump = ctx.accounts.vault.bump;

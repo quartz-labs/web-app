@@ -112,7 +112,7 @@ fn validate_instruction_order<'info>(
         QuartzError::IllegalAutoRepayInstructions
     );
 
-    // Check the 2n instruction is Jupiter's exact_out_route
+    // Check the 2nd instruction is Jupiter's exact_out_route
     check!(
         swap_instruction.program_id.eq(&jupiter::ID),
         QuartzError::IllegalAutoRepayInstructions
@@ -203,6 +203,11 @@ pub fn auto_repay_withdraw_handler<'info>(
     check!(
         swap_i11n.accounts.source_mint.pubkey.eq(&ctx.accounts.spl_mint.key()),
         QuartzError::InvalidMint
+    );
+
+    check!(
+        swap_i11n.accounts.user_source_token_account.pubkey.eq(&ctx.accounts.vault_spl.key()),
+        QuartzError::InvalidSourceTokenAccount
     );
 
     msg!("Swap mint: {}", swap_i11n.accounts.source_mint.pubkey);

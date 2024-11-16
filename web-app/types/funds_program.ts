@@ -8,36 +8,11 @@ export type FundsProgram = {
   "address": "6JjHXLheGSNvvexgzMthEcgjkcirDrGduc3HAKB2P1v2",
   "metadata": {
     "name": "fundsProgram",
-    "version": "0.1.8",
+    "version": "0.1.10",
     "spec": "0.1.0",
-    "description": "Quartz funds program"
+    "description": "quartz"
   },
   "instructions": [
-    {
-      "name": "autoRepayCheck",
-      "discriminator": [
-        204,
-        125,
-        252,
-        176,
-        249,
-        124,
-        55,
-        45
-      ],
-      "accounts": [
-        {
-          "name": "caller",
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "instructions",
-          "address": "Sysvar1nstructions1111111111111111111111111"
-        }
-      ],
-      "args": []
-    },
     {
       "name": "autoRepayDeposit",
       "discriminator": [
@@ -308,12 +283,139 @@ export type FundsProgram = {
       ],
       "args": [
         {
-          "name": "amountBaseUnits",
-          "type": "u64"
-        },
-        {
           "name": "driftMarketIndex",
           "type": "u16"
+        }
+      ]
+    },
+    {
+      "name": "autoRepayStart",
+      "discriminator": [
+        86,
+        0,
+        179,
+        75,
+        191,
+        127,
+        28,
+        105
+      ],
+      "accounts": [
+        {
+          "name": "caller",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "callerSpl",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "caller"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "splMint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "splMint"
+        },
+        {
+          "name": "tokenProgram",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "instructions",
+          "address": "Sysvar1nstructions1111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "startBalance",
+          "type": "u64"
         }
       ]
     },
@@ -589,10 +691,6 @@ export type FundsProgram = {
         }
       ],
       "args": [
-        {
-          "name": "amountBaseUnits",
-          "type": "u64"
-        },
         {
           "name": "driftMarketIndex",
           "type": "u16"
@@ -1567,23 +1665,38 @@ export type FundsProgram = {
     },
     {
       "code": 6001,
-      "name": "unbalancedSwap",
-      "msg": "Repay amounts do not match swap amounts"
+      "name": "invalidMint",
+      "msg": "Repay mint does not match swap mint"
     },
     {
       "code": 6002,
-      "name": "invalidMint",
-      "msg": "Repay mints do not match swap mints"
-    },
-    {
-      "code": 6003,
       "name": "maxSlippageExceeded",
       "msg": "Price slippage is above maximum"
     },
     {
-      "code": 6004,
+      "code": 6003,
       "name": "invalidPlatformFee",
       "msg": "Swap platform fee must be zero"
+    },
+    {
+      "code": 6004,
+      "name": "invalidUserAccounts",
+      "msg": "User accounts for deposit and withdraw do not match"
+    },
+    {
+      "code": 6005,
+      "name": "invalidSourceTokenAccount",
+      "msg": "Swap source token account does not match withdraw"
+    },
+    {
+      "code": 6006,
+      "name": "invalidDestinationTokenAccount",
+      "msg": "Swap destination token account does not match deposit"
+    },
+    {
+      "code": 6007,
+      "name": "invalidStartBalance",
+      "msg": "Declared start balance is not accurate"
     }
   ],
   "types": [

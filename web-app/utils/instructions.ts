@@ -644,26 +644,43 @@ export const autoRepay = async (
 
         // Get MarginFi client and bank
         const marginfiClient = await MarginfiClient.fetch(getConfig(), wallet, connection);
-        const usdcBank = marginfiClient.getBankByTokenSymbol("USDC");
-        if (!usdcBank) throw Error(`${"USDC"} bank not found`);
+        const wsolBank = marginfiClient.getBankByTokenSymbol("SOL");
+        if (!wsolBank) throw Error(`${"SOL"} bank not found`);
 
         const [ marginfiAccount ] = await marginfiClient.getMarginfiAccountsForAuthority(wallet.publicKey);
         if (marginfiAccount === undefined) throw new Error("Flash loan MarginFi account not found");
 
-        // Get price info for flash loan
+        // Build instructions
+        const oix_createUsdcAta = await createAtaIfNeeded(connection, walletUsdc, wallet.publicKey, USDC_MINT);
+
+        const walletUsdcBalance = await connection.getTokenAccountBalance(walletUsdc).then(res => res.value.amount);
+
+        const ix_autoRepayStart = await quartzProgram.methods
+            .autoRepayStart(new BN(walletUsdcBalance))
+            .accounts({
+                caller: wallet.publicKey,
+                // @ts-expect-error - IDL issue
+                callerSpl: walletUsdc,
+                splMint: USDC_MINT,
+                tokenProgram: TOKEN_PROGRAM_ID,
+                associatedTokenProgram: ASSOCIATED_PROGRAM_ID,
+                systemProgram: SystemProgram.programId,
+                instructions: SYSVAR_INSTRUCTIONS_PUBKEY
+            })
+            .instruction();
+
         const jupiterQuote = await getJupiterSwapQuote(WSOL_MINT, USDC_MINT, amountMicroCents, true);
         const amountLamports = Number(jupiterQuote.inAmount);
         if (isNaN(amountLamports)) throw Error(`Invalid Jupiter quote`);
 
-        // Build instructions
         const {
             instructions: jupiterSwapIxs,
             addressLookupTableAccounts: jupiterLookupTables
         } = await getJupiterSwapIx(wallet.publicKey, connection, jupiterQuote);
-        const [ix_createWSolIndempotent, , , ix_jupiterSwap] = jupiterSwapIxs;
+        const [, , , ix_jupiterSwap] = jupiterSwapIxs;
 
         const ix_autoRepayDeposit = await quartzProgram.methods
-            .autoRepayDeposit(new BN(amountMicroCents), DRIFT_MARKET_INDEX_USDC)
+            .autoRepayDeposit(DRIFT_MARKET_INDEX_USDC)
             .accounts({
                 // @ts-expect-error - IDL issue
                 vault: vaultPda,
@@ -678,8 +695,8 @@ export const autoRepay = async (
                 tokenProgram: TOKEN_PROGRAM_ID,
                 associatedTokenProgram: ASSOCIATED_PROGRAM_ID,
                 driftProgram: DRIFT_PROGRAM_ID,
+                instructions: SYSVAR_INSTRUCTIONS_PUBKEY,
                 systemProgram: SystemProgram.programId,
-                instructions: SYSVAR_INSTRUCTIONS_PUBKEY
             })
             .remainingAccounts([
                 toRemainingAccount(DRIFT_ORACLE_2, false, false),
@@ -690,7 +707,7 @@ export const autoRepay = async (
             .instruction();
 
         const ix_autoRepayWithdraw = await quartzProgram.methods
-            .autoRepayWithdraw(new BN(amountLamports), DRIFT_MARKET_INDEX_SOL)
+            .autoRepayWithdraw(DRIFT_MARKET_INDEX_SOL)
             .accounts({
                 // @ts-expect-error - IDL issue
                 vault: vaultPda,
@@ -706,8 +723,8 @@ export const autoRepay = async (
                 tokenProgram: TOKEN_PROGRAM_ID,
                 associatedTokenProgram: ASSOCIATED_PROGRAM_ID,
                 driftProgram: DRIFT_PROGRAM_ID,
+                instructions: SYSVAR_INSTRUCTIONS_PUBKEY,
                 systemProgram: SystemProgram.programId,
-                instructions: SYSVAR_INSTRUCTIONS_PUBKEY
             })
             .remainingAccounts([
                 toRemainingAccount(DRIFT_ORACLE_2, false, false),
@@ -715,15 +732,6 @@ export const autoRepay = async (
                 toRemainingAccount(DRIFT_SPOT_MARKET_SOL, true, false),
                 toRemainingAccount(DRIFT_SPOT_MARKET_USDC, false, false)
             ])
-            .instruction();
-
-        const ix_autoRepayCheck = await quartzProgram.methods
-            .autoRepayCheck()
-            .accounts({
-                caller: wallet.publicKey,
-                // @ts-expect-error - IDL issue
-                instructions: SYSVAR_INSTRUCTIONS_PUBKEY
-            })
             .instruction();
 
         const ix_closeWSolAta = createCloseAccountInstruction(
@@ -737,8 +745,8 @@ export const autoRepay = async (
         const { flashloanTx } = await makeFlashLoanTx(
             marginfiAccount,
             amountUsdcUi,
-            usdcBank.address,
-            [ix_createWSolIndempotent, ix_autoRepayDeposit, ix_autoRepayWithdraw, ix_jupiterSwap, ix_autoRepayCheck, ix_closeWSolAta],
+            wsolBank.address,
+            [...oix_createUsdcAta, ix_autoRepayStart, ix_jupiterSwap, ix_autoRepayDeposit, ix_autoRepayWithdraw, ix_closeWSolAta],
             [fundsProgramLookupTable, ...jupiterLookupTables],
             0.002,
             true
@@ -747,8 +755,8 @@ export const autoRepay = async (
         trackTx({status: TxStatus.SIGNING});
         const signedTx = await wallet.signTransaction(flashloanTx);
 
-        // const simulation = await connection.simulateTransaction(signedTx);
-        // console.log(simulation);
+        const simulation = await connection.simulateTransaction(signedTx);
+        console.log(simulation);
 
         const signature = await sendTransactionHandler(trackTx, connection, signedTx);
         return signature;
