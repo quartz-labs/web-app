@@ -660,12 +660,11 @@ export const autoRepay = async (
             .accounts({
                 caller: wallet.publicKey,
                 // @ts-expect-error - IDL issue
-                callerSpl: walletUsdc,
-                splMint: USDC_MINT,
+                callerDepositSpl: walletUsdc,
+                depositMint: USDC_MINT,
                 tokenProgram: TOKEN_PROGRAM_ID,
-                associatedTokenProgram: ASSOCIATED_PROGRAM_ID,
                 systemProgram: SystemProgram.programId,
-                instructions: SYSVAR_INSTRUCTIONS_PUBKEY
+                instructions: SYSVAR_INSTRUCTIONS_PUBKEY,
             })
             .instruction();
 
@@ -682,21 +681,7 @@ export const autoRepay = async (
         const ix_autoRepayDeposit = await quartzProgram.methods
             .autoRepayDeposit(DRIFT_MARKET_INDEX_USDC)
             .accounts({
-                // @ts-expect-error - IDL issue
-                vault: vaultPda,
-                vaultSpl: getVaultSpl(vaultPda, USDC_MINT),
-                owner: wallet.publicKey,
-                ownerSpl: walletUsdc,
-                splMint: USDC_MINT,
-                driftUser: getDriftUser(vaultPda),
-                driftUserStats: getDriftUserStats(vaultPda),
-                driftState: getDriftState(),
-                spotMarketVault: getDriftSpotMarketVault(DRIFT_MARKET_INDEX_USDC),
-                tokenProgram: TOKEN_PROGRAM_ID,
-                associatedTokenProgram: ASSOCIATED_PROGRAM_ID,
-                driftProgram: DRIFT_PROGRAM_ID,
-                instructions: SYSVAR_INSTRUCTIONS_PUBKEY,
-                systemProgram: SystemProgram.programId,
+                
             })
             .remainingAccounts([
                 toRemainingAccount(DRIFT_ORACLE_2, false, false),
@@ -709,22 +694,7 @@ export const autoRepay = async (
         const ix_autoRepayWithdraw = await quartzProgram.methods
             .autoRepayWithdraw(DRIFT_MARKET_INDEX_SOL)
             .accounts({
-                // @ts-expect-error - IDL issue
-                vault: vaultPda,
-                vaultSpl: getVaultSpl(vaultPda, WSOL_MINT),
-                owner: wallet.publicKey,
-                ownerSpl: walletWSol,
-                splMint: WSOL_MINT,
-                driftUser: getDriftUser(vaultPda),
-                driftUserStats: getDriftUserStats(vaultPda),
-                driftState: getDriftState(),
-                spotMarketVault: getDriftSpotMarketVault(DRIFT_MARKET_INDEX_SOL),
-                driftSigner: DRIFT_SIGNER,
-                tokenProgram: TOKEN_PROGRAM_ID,
-                associatedTokenProgram: ASSOCIATED_PROGRAM_ID,
-                driftProgram: DRIFT_PROGRAM_ID,
-                instructions: SYSVAR_INSTRUCTIONS_PUBKEY,
-                systemProgram: SystemProgram.programId,
+                
             })
             .remainingAccounts([
                 toRemainingAccount(DRIFT_ORACLE_2, false, false),

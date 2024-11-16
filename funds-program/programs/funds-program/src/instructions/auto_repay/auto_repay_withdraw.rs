@@ -147,34 +147,32 @@ fn validate_user_accounts<'info>(
     deposit_instruction: &Instruction
 ) -> Result<()> {
     let deposit_vault = deposit_instruction.accounts[0].pubkey;
+    msg!("Deposit vault: {} = {}", deposit_vault, ctx.accounts.vault.key());
     check!(
         ctx.accounts.vault.key().eq(&deposit_vault),
         QuartzError::InvalidUserAccounts
     );
 
     let deposit_owner = deposit_instruction.accounts[2].pubkey;
+    msg!("Deposit owner: {} = {}", deposit_owner, ctx.accounts.owner.key());
     check!(
         ctx.accounts.owner.key().eq(&deposit_owner),
         QuartzError::InvalidUserAccounts
     );
 
     let deposit_drift_user = deposit_instruction.accounts[5].pubkey;
+    msg!("Deposit drift_user: {} = {}", deposit_drift_user, ctx.accounts.drift_user.key());
     check!(
         ctx.accounts.drift_user.key().eq(&deposit_drift_user),
         QuartzError::InvalidUserAccounts
     );
 
     let deposit_drift_user_stats = deposit_instruction.accounts[6].pubkey;
+    msg!("Deposit drift_user_stats: {} = {}", deposit_drift_user_stats, ctx.accounts.drift_user_stats.key());
     check!(
         ctx.accounts.drift_user_stats.key().eq(&deposit_drift_user_stats),
         QuartzError::InvalidUserAccounts
     );
-
-    //Debug logs
-    msg!("Deposit vault: {}", deposit_vault);
-    msg!("Deposit owner: {}", deposit_owner);
-    msg!("Deposit drift_user: {}", deposit_drift_user);
-    msg!("Deposit drift_user_stats: {}", deposit_drift_user_stats);
 
     Ok(())
 }
@@ -200,18 +198,18 @@ pub fn auto_repay_withdraw_handler<'info>(
 
     // Validate mint
     let swap_i11n = ExactOutRouteI11n::try_from(&swap_instruction)?;
+    msg!("Swap mint: {} = {}", swap_i11n.accounts.source_mint.pubkey, ctx.accounts.spl_mint.key());
     check!(
         swap_i11n.accounts.source_mint.pubkey.eq(&ctx.accounts.spl_mint.key()),
         QuartzError::InvalidMint
     );
 
+    msg!("Swap user source token account: {} = {}", swap_i11n.accounts.user_source_token_account.pubkey, ctx.accounts.vault_spl.key());
     check!(
-        swap_i11n.accounts.user_source_token_account.pubkey.eq(&ctx.accounts.vault_spl.key()),
+        swap_i11n.accounts.user_source_token_account.pubkey.eq(&ctx.accounts.owner_spl.key()),
         QuartzError::InvalidSourceTokenAccount
     );
-
-    msg!("Swap mint: {}", swap_i11n.accounts.source_mint.pubkey);
-
+    
     // Get amount actually swapped in Jupiter
     let start_balance = u64::from_le_bytes(
         start_instruction.data[8..16].try_into().unwrap()

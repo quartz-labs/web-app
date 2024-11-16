@@ -2,7 +2,7 @@
   "address": "6JjHXLheGSNvvexgzMthEcgjkcirDrGduc3HAKB2P1v2",
   "metadata": {
     "name": "funds_program",
-    "version": "0.1.10",
+    "version": "0.1.11",
     "spec": "0.1.0",
     "description": "Quartz"
   },
@@ -301,7 +301,7 @@
           "signer": true
         },
         {
-          "name": "caller_spl",
+          "name": "caller_deposit_spl",
           "writable": true,
           "pda": {
             "seeds": [
@@ -348,7 +348,7 @@
               },
               {
                 "kind": "account",
-                "path": "spl_mint"
+                "path": "deposit_mint"
               }
             ],
             "program": {
@@ -391,7 +391,7 @@
           }
         },
         {
-          "name": "spl_mint"
+          "name": "deposit_mint"
         },
         {
           "name": "token_program",

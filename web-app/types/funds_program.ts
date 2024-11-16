@@ -8,7 +8,7 @@ export type FundsProgram = {
   "address": "6JjHXLheGSNvvexgzMthEcgjkcirDrGduc3HAKB2P1v2",
   "metadata": {
     "name": "fundsProgram",
-    "version": "0.1.10",
+    "version": "0.1.11",
     "spec": "0.1.0",
     "description": "quartz"
   },
@@ -307,7 +307,7 @@ export type FundsProgram = {
           "signer": true
         },
         {
-          "name": "callerSpl",
+          "name": "callerDepositSpl",
           "writable": true,
           "pda": {
             "seeds": [
@@ -354,7 +354,7 @@ export type FundsProgram = {
               },
               {
                 "kind": "account",
-                "path": "splMint"
+                "path": "depositMint"
               }
             ],
             "program": {
@@ -397,7 +397,7 @@ export type FundsProgram = {
           }
         },
         {
-          "name": "splMint"
+          "name": "depositMint"
         },
         {
           "name": "tokenProgram",
