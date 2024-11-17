@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use std::collections::{BTreeMap, BTreeSet};
 
 declare_id!("dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH");
 
@@ -8,6 +9,916 @@ impl anchor_lang::Id for Drift {
         crate::ID
     }
 }
+
+pub fn calculate_margin_requirement_and_total_collateral_and_liability_info(
+    user: &accounts::User,
+    perp_market_map: &PerpMarketMap,
+    spot_market_map: &SpotMarketMap,
+    oracle_map: &mut OracleMap,
+    context: MarginContext,
+) -> Result<MarginCalculation> {
+    let mut calculation = MarginCalculation::new(context);
+
+    let user_custom_margin_ratio = if context.margin_type == MarginRequirementType::Initial {
+        user.max_margin_ratio
+    } else {
+        0_u32
+    };
+
+    let user_high_leverage_mode = user.is_high_leverage_mode();
+
+    for spot_position in user.spot_positions.iter() {
+        validate_spot_position(spot_position)?;
+
+        if spot_position.is_available() {
+            continue;
+        }
+
+        let spot_market = spot_market_map.get_ref(&spot_position.market_index)?;
+        let (oracle_price_data, oracle_validity) = oracle_map.get_price_data_and_validity(
+            MarketType::Spot,
+            spot_market.market_index,
+            &spot_market.oracle,
+            spot_market.historical_oracle_data.last_oracle_price_twap,
+            spot_market.get_max_confidence_interval_multiplier()?,
+        )?;
+
+        calculation.update_all_oracles_valid(is_oracle_valid_for_action(
+            oracle_validity,
+            Some(DriftAction::MarginCalc),
+        )?);
+
+        let strict_oracle_price = StrictOraclePrice::new(
+            oracle_price_data.price,
+            spot_market
+                .historical_oracle_data
+                .last_oracle_price_twap_5min,
+            calculation.context.strict,
+        );
+        strict_oracle_price.validate()?;
+
+        if spot_market.market_index == 0 {
+            let token_amount = spot_position.get_signed_token_amount(&spot_market)?;
+            if token_amount == 0 {
+                validate!(
+                    spot_position.scaled_balance == 0,
+                    ErrorCode::InvalidMarginRatio,
+                    "spot_position.scaled_balance={} when token_amount={}",
+                    spot_position.scaled_balance,
+                    token_amount,
+                )?;
+            }
+
+            calculation.update_fuel_spot_bonus(&spot_market, token_amount, &strict_oracle_price)?;
+
+            let token_value =
+                get_strict_token_value(token_amount, spot_market.decimals, &strict_oracle_price)?;
+
+            match spot_position.balance_type {
+                SpotBalanceType::Deposit => {
+                    calculation.add_total_collateral(token_value)?;
+
+                    #[cfg(feature = "drift-rs")]
+                    calculation.add_spot_asset_value(token_value)?;
+                }
+                SpotBalanceType::Borrow => {
+                    let token_value = token_value.unsigned_abs();
+
+                    validate!(
+                        token_value != 0,
+                        ErrorCode::InvalidMarginRatio,
+                        "token_value=0 for token_amount={} in spot market_index={}",
+                        token_amount,
+                        spot_market.market_index,
+                    )?;
+
+                    calculation.add_margin_requirement(
+                        token_value,
+                        token_value,
+                        MarketIdentifier::spot(0),
+                    )?;
+
+                    calculation.add_spot_liability()?;
+
+                    #[cfg(feature = "drift-rs")]
+                    calculation.add_spot_liability_value(token_value)?;
+                }
+            }
+        } else {
+            let signed_token_amount = spot_position.get_signed_token_amount(&spot_market)?;
+
+            calculation.update_fuel_spot_bonus(
+                &spot_market,
+                signed_token_amount,
+                &strict_oracle_price,
+            )?;
+
+            let OrderFillSimulation {
+                token_amount: worst_case_token_amount,
+                orders_value: worst_case_orders_value,
+                token_value: worst_case_token_value,
+                weighted_token_value: worst_case_weighted_token_value,
+                ..
+            } = spot_position
+                .get_worst_case_fill_simulation(
+                    &spot_market,
+                    &strict_oracle_price,
+                    Some(signed_token_amount),
+                    context.margin_type,
+                )?
+                .apply_user_custom_margin_ratio(
+                    &spot_market,
+                    strict_oracle_price.current,
+                    user_custom_margin_ratio,
+                )?;
+
+            if worst_case_token_amount == 0 {
+                validate!(
+                    spot_position.scaled_balance == 0,
+                    ErrorCode::InvalidMarginRatio,
+                    "spot_position.scaled_balance={} when worst_case_token_amount={}",
+                    spot_position.scaled_balance,
+                    worst_case_token_amount,
+                )?;
+            }
+
+            calculation.add_margin_requirement(
+                spot_position.margin_requirement_for_open_orders()?,
+                0,
+                MarketIdentifier::spot(spot_market.market_index),
+            )?;
+
+            match worst_case_token_value.cmp(&0) {
+                Ordering::Greater => {
+                    calculation
+                        .add_total_collateral(worst_case_weighted_token_value.cast::<i128>()?)?;
+
+                    #[cfg(feature = "drift-rs")]
+                    calculation.add_spot_asset_value(worst_case_token_value)?;
+                }
+                Ordering::Less => {
+                    validate!(
+                        worst_case_weighted_token_value.unsigned_abs() >= worst_case_token_value.unsigned_abs(),
+                        ErrorCode::InvalidMarginRatio,
+                        "weighted_token_value < abs(worst_case_token_value) in spot market_index={}",
+                        spot_market.market_index,
+                    )?;
+
+                    validate!(
+                        worst_case_weighted_token_value != 0,
+                        ErrorCode::InvalidOracle,
+                        "weighted_token_value=0 for worst_case_token_amount={} in spot market_index={}",
+                        worst_case_token_amount,
+                        spot_market.market_index,
+                    )?;
+
+                    calculation.add_margin_requirement(
+                        worst_case_weighted_token_value.unsigned_abs(),
+                        worst_case_token_value.unsigned_abs(),
+                        MarketIdentifier::spot(spot_market.market_index),
+                    )?;
+
+                    calculation.add_spot_liability()?;
+                    calculation.update_with_spot_isolated_liability(
+                        spot_market.asset_tier == AssetTier::Isolated,
+                    );
+
+                    #[cfg(feature = "drift-rs")]
+                    calculation.add_spot_liability_value(worst_case_token_value.unsigned_abs())?;
+                }
+                Ordering::Equal => {
+                    if spot_position.has_open_order() {
+                        calculation.add_spot_liability()?;
+                        calculation.update_with_spot_isolated_liability(
+                            spot_market.asset_tier == AssetTier::Isolated,
+                        );
+                    }
+                }
+            }
+
+            match worst_case_orders_value.cmp(&0) {
+                Ordering::Greater => {
+                    calculation.add_total_collateral(worst_case_orders_value.cast::<i128>()?)?;
+
+                    #[cfg(feature = "drift-rs")]
+                    calculation.add_spot_asset_value(worst_case_orders_value)?;
+                }
+                Ordering::Less => {
+                    calculation.add_margin_requirement(
+                        worst_case_orders_value.unsigned_abs(),
+                        worst_case_orders_value.unsigned_abs(),
+                        MarketIdentifier::spot(0),
+                    )?;
+
+                    #[cfg(feature = "drift-rs")]
+                    calculation.add_spot_liability_value(worst_case_orders_value.unsigned_abs())?;
+                }
+                Ordering::Equal => {}
+            }
+        }
+    }
+
+    for market_position in user.perp_positions.iter() {
+        if market_position.is_available() {
+            continue;
+        }
+
+        let market = &perp_market_map.get_ref(&market_position.market_index)?;
+
+        let quote_spot_market = spot_market_map.get_ref(&market.quote_spot_market_index)?;
+        let (quote_oracle_price_data, quote_oracle_validity) = oracle_map
+            .get_price_data_and_validity(
+                MarketType::Spot,
+                quote_spot_market.market_index,
+                &quote_spot_market.oracle,
+                quote_spot_market
+                    .historical_oracle_data
+                    .last_oracle_price_twap,
+                quote_spot_market.get_max_confidence_interval_multiplier()?,
+            )?;
+
+        calculation.update_all_oracles_valid(is_oracle_valid_for_action(
+            quote_oracle_validity,
+            Some(DriftAction::MarginCalc),
+        )?);
+
+        let strict_quote_price = StrictOraclePrice::new(
+            quote_oracle_price_data.price,
+            quote_spot_market
+                .historical_oracle_data
+                .last_oracle_price_twap_5min,
+            calculation.context.strict,
+        );
+        drop(quote_spot_market);
+
+        let (oracle_price_data, oracle_validity) = oracle_map.get_price_data_and_validity(
+            MarketType::Perp,
+            market.market_index,
+            &market.amm.oracle,
+            market.amm.historical_oracle_data.last_oracle_price_twap,
+            market.get_max_confidence_interval_multiplier()?,
+        )?;
+
+        let (
+            perp_margin_requirement,
+            weighted_pnl,
+            worst_case_liability_value,
+            open_order_margin_requirement,
+            base_asset_value,
+        ) = calculate_perp_position_value_and_pnl(
+            market_position,
+            market,
+            oracle_price_data,
+            &strict_quote_price,
+            context.margin_type,
+            user_custom_margin_ratio,
+            user_high_leverage_mode,
+            calculation.track_open_orders_fraction(),
+        )?;
+
+        calculation.update_fuel_perp_bonus(
+            market,
+            market_position,
+            base_asset_value,
+            oracle_price_data.price,
+        )?;
+
+        calculation.add_margin_requirement(
+            perp_margin_requirement,
+            worst_case_liability_value,
+            MarketIdentifier::perp(market.market_index),
+        )?;
+
+        if calculation.track_open_orders_fraction() {
+            calculation.add_open_orders_margin_requirement(open_order_margin_requirement)?;
+        }
+
+        calculation.add_total_collateral(weighted_pnl)?;
+
+        #[cfg(feature = "drift-rs")]
+        calculation.add_perp_liability_value(worst_case_liability_value)?;
+        #[cfg(feature = "drift-rs")]
+        calculation.add_perp_pnl(weighted_pnl)?;
+
+        let has_perp_liability = market_position.base_asset_amount != 0
+            || market_position.quote_asset_amount < 0
+            || market_position.has_open_order()
+            || market_position.is_lp();
+
+        if has_perp_liability {
+            calculation.add_perp_liability()?;
+            calculation.update_with_perp_isolated_liability(
+                market.contract_tier == ContractTier::Isolated,
+            );
+        }
+
+        if has_perp_liability || calculation.context.margin_type != MarginRequirementType::Initial {
+            calculation.update_all_oracles_valid(is_oracle_valid_for_action(
+                oracle_validity,
+                Some(DriftAction::MarginCalc),
+            )?);
+        }
+    }
+
+    calculation.validate_num_spot_liabilities()?;
+
+    Ok(calculation)
+}
+
+pub fn is_oracle_valid_for_action(
+    oracle_validity: OracleValidity,
+    action: Option<DriftAction>,
+) -> DriftResult<bool> {
+    let is_ok = match action {
+        Some(action) => match action {
+            DriftAction::FillOrderAmm => {
+                matches!(oracle_validity, OracleValidity::Valid)
+            }
+            // relax oracle staleness, later checks for sufficiently recent amm slot update for funding update
+            DriftAction::UpdateFunding => {
+                matches!(
+                    oracle_validity,
+                    OracleValidity::Valid
+                        | OracleValidity::StaleForAMM
+                        | OracleValidity::InsufficientDataPoints
+                        | OracleValidity::StaleForMargin
+                )
+            }
+            DriftAction::OracleOrderPrice => {
+                matches!(
+                    oracle_validity,
+                    OracleValidity::Valid
+                        | OracleValidity::StaleForAMM
+                        | OracleValidity::InsufficientDataPoints
+                )
+            }
+            DriftAction::MarginCalc => !matches!(
+                oracle_validity,
+                OracleValidity::NonPositive
+                    | OracleValidity::TooVolatile
+                    | OracleValidity::TooUncertain
+                    | OracleValidity::StaleForMargin
+            ),
+            DriftAction::TriggerOrder => !matches!(
+                oracle_validity,
+                OracleValidity::NonPositive | OracleValidity::TooVolatile
+            ),
+            DriftAction::SettlePnl => matches!(
+                oracle_validity,
+                OracleValidity::Valid
+                    | OracleValidity::StaleForAMM
+                    | OracleValidity::InsufficientDataPoints
+                    | OracleValidity::StaleForMargin
+            ),
+            DriftAction::FillOrderMatch => !matches!(
+                oracle_validity,
+                OracleValidity::NonPositive
+                    | OracleValidity::TooVolatile
+                    | OracleValidity::TooUncertain
+            ),
+            DriftAction::Liquidate => !matches!(
+                oracle_validity,
+                OracleValidity::NonPositive | OracleValidity::TooVolatile
+            ),
+            DriftAction::UpdateTwap => !matches!(oracle_validity, OracleValidity::NonPositive),
+            DriftAction::UpdateAMMCurve => !matches!(oracle_validity, OracleValidity::NonPositive),
+        },
+        None => {
+            matches!(oracle_validity, OracleValidity::Valid)
+        }
+    };
+
+    Ok(is_ok)
+}
+
+
+pub const MAX_OPEN_ORDERS: u8 = 32;
+pub fn validate_spot_position(position: &SpotPosition) -> Result<()> {
+    validate!(
+        position.open_orders <= MAX_OPEN_ORDERS,
+        ErrorCode::InvalidSpotPositionDetected,
+        "user spot={} position.open_orders={} is greater than MAX_OPEN_ORDERS={}",
+        position.market_index,
+        position.open_orders,
+        MAX_OPEN_ORDERS,
+    )?;
+
+    validate!(
+        position.open_bids >= 0,
+        ErrorCode::InvalidSpotPositionDetected,
+        "user spot={} position.open_bids={} is less than 0",
+        position.market_index,
+        position.open_bids,
+    )?;
+
+    validate!(
+        position.open_asks <= 0,
+        ErrorCode::InvalidSpotPositionDetected,
+        "user spot={} position.open_asks={} is greater than 0",
+        position.market_index,
+        position.open_asks,
+    )?;
+
+    Ok(())
+}
+
+#[macro_export]
+macro_rules! validate {
+        ($assert:expr, $err:expr) => {{
+            if ($assert) {
+                Ok(())
+            } else {
+                let error_code: ErrorCode = $err;
+                msg!("Error {} thrown at {}:{}", error_code, file!(), line!());
+                Err(error_code)
+            }
+        }};
+        ($assert:expr, $err:expr, $($arg:tt)+) => {{
+        if ($assert) {
+            Ok(())
+        } else {
+            let error_code: ErrorCode = $err;
+            msg!("Error {} thrown at {}:{}", error_code, file!(), line!());
+            msg!($($arg)*);
+            Err(error_code)
+        }
+    }};
+}
+
+pub struct PerpMarketMap<'a>(pub BTreeMap<u16, AccountLoader<'a, accounts::PerpMarket>>);
+
+pub struct SpotMarketMap<'a>(
+    pub BTreeMap<u16, AccountLoader<'a, accounts::SpotMarket>>,
+    SpotMarketSet,
+);
+
+impl<'a> SpotMarketMap<'a> {
+    #[track_caller]
+    #[inline(always)]
+    pub fn get_ref(&self, market_index: &u16) -> DriftResult<Ref<SpotMarket>> {
+        let loader = match self.0.get(market_index) {
+            Some(loader) => loader,
+            None => {
+                let caller = Location::caller();
+                msg!(
+                    "Could not find spot market {} at {}:{}",
+                    market_index,
+                    caller.file(),
+                    caller.line()
+                );
+                return Err(ErrorCode::SpotMarketNotFound);
+            }
+        };
+
+        match loader.load() {
+            Ok(spot_market) => Ok(spot_market),
+            Err(e) => {
+                let caller = Location::caller();
+                msg!("{:?}", e);
+                msg!(
+                    "Could not load spot market {} at {}:{}",
+                    market_index,
+                    caller.file(),
+                    caller.line()
+                );
+                Err(ErrorCode::UnableToLoadSpotMarketAccount)
+            }
+        }
+    }
+}
+
+pub(crate) type SpotMarketSet = BTreeSet<u16>;
+
+pub struct OracleMap<'a> {
+    oracles: BTreeMap<Pubkey, AccountInfoAndOracleSource<'a>>,
+    price_data: BTreeMap<Pubkey, OraclePriceData>,
+    validity: BTreeMap<Pubkey, OracleValidity>,
+    pub slot: u64,
+    pub oracle_guard_rails: OracleGuardRails,
+    pub quote_asset_price_data: OraclePriceData,
+}
+
+impl<'a> OracleMap<'a> {
+    fn should_get_quote_asset_price_data(&self, pubkey: &Pubkey) -> bool {
+        pubkey == &Pubkey::default()
+    }
+
+    pub fn get_price_data_and_validity(
+        &mut self,
+        market_type: MarketType,
+        market_index: u16,
+        pubkey: &Pubkey,
+        last_oracle_price_twap: i64,
+        max_confidence_interval_multiplier: u64,
+    ) -> Result<(&OraclePriceData, OracleValidity)> {
+        if self.should_get_quote_asset_price_data(pubkey) {
+            return Ok((&self.quote_asset_price_data, OracleValidity::Valid));
+        }
+
+        if self.price_data.contains_key(pubkey) {
+            let oracle_price_data = self.price_data.get(pubkey).safe_unwrap()?;
+
+            let oracle_validity = if let Some(oracle_validity) = self.validity.get(pubkey) {
+                *oracle_validity
+            } else {
+                let oracle_validity = oracle_validity(
+                    market_type,
+                    market_index,
+                    last_oracle_price_twap,
+                    oracle_price_data,
+                    &self.oracle_guard_rails.validity,
+                    max_confidence_interval_multiplier,
+                    true,
+                )?;
+                self.validity.insert(*pubkey, oracle_validity);
+                oracle_validity
+            };
+            return Ok((oracle_price_data, oracle_validity));
+        }
+
+        let (account_info, oracle_source) = match self.oracles.get(pubkey) {
+            Some(AccountInfoAndOracleSource {
+                account_info,
+                oracle_source,
+            }) => (account_info, oracle_source),
+            None => {
+                msg!("oracle pubkey not found in oracle_map: {}", pubkey);
+                return Err(ErrorCode::OracleNotFound);
+            }
+        };
+
+        let price_data = get_oracle_price(oracle_source, account_info, self.slot)?;
+
+        self.price_data.insert(*pubkey, price_data);
+
+        let oracle_price_data = self.price_data.get(pubkey).safe_unwrap()?;
+        let oracle_validity = oracle_validity(
+            market_type,
+            market_index,
+            last_oracle_price_twap,
+            oracle_price_data,
+            &self.oracle_guard_rails.validity,
+            max_confidence_interval_multiplier,
+            true,
+        )?;
+        self.validity.insert(*pubkey, oracle_validity);
+
+        Ok((oracle_price_data, oracle_validity))
+    }
+}
+
+pub struct AccountInfoAndOracleSource<'a> {
+    /// CHECK: ownders are validated in OracleMap::load
+    pub account_info: AccountInfo<'a>,
+    pub oracle_source: OracleSource,
+}
+
+#[derive(Default, Clone, Copy, Debug)]
+pub struct OraclePriceData {
+    pub price: i64,
+    pub confidence: u64,
+    pub delay: i64,
+    pub has_sufficient_number_of_data_points: bool,
+}
+
+#[derive(Clone, Copy, Debug)]
+pub struct MarginContext {
+    pub margin_type: MarginRequirementType,
+    pub mode: MarginCalculationMode,
+    pub strict: bool,
+    pub margin_buffer: u128,
+    pub fuel_bonus_numerator: i64,
+    pub fuel_bonus: u64,
+    pub fuel_perp_delta: Option<(u16, i64)>,
+    pub fuel_spot_deltas: [(u16, i128); 2],
+}
+
+#[derive(Clone, Copy, Debug)]
+pub struct MarginCalculation {
+    pub context: MarginContext,
+    pub total_collateral: i128,
+    pub margin_requirement: u128,
+    #[cfg(not(test))]
+    margin_requirement_plus_buffer: u128,
+    #[cfg(test)]
+    pub margin_requirement_plus_buffer: u128,
+    pub num_spot_liabilities: u8,
+    pub num_perp_liabilities: u8,
+    pub all_oracles_valid: bool,
+    pub with_perp_isolated_liability: bool,
+    pub with_spot_isolated_liability: bool,
+    pub total_spot_asset_value: i128,
+    pub total_spot_liability_value: u128,
+    pub total_perp_liability_value: u128,
+    pub total_perp_pnl: i128,
+    pub open_orders_margin_requirement: u128,
+    tracked_market_margin_requirement: u128,
+    pub fuel_deposits: u32,
+    pub fuel_borrows: u32,
+    pub fuel_positions: u32,
+}
+
+impl MarginCalculation {
+    pub fn new(context: MarginContext) -> Self {
+        Self {
+            context,
+            total_collateral: 0,
+            margin_requirement: 0,
+            margin_requirement_plus_buffer: 0,
+            num_spot_liabilities: 0,
+            num_perp_liabilities: 0,
+            all_oracles_valid: true,
+            with_perp_isolated_liability: false,
+            with_spot_isolated_liability: false,
+            total_spot_asset_value: 0,
+            total_spot_liability_value: 0,
+            total_perp_liability_value: 0,
+            total_perp_pnl: 0,
+            open_orders_margin_requirement: 0,
+            tracked_market_margin_requirement: 0,
+            fuel_deposits: 0,
+            fuel_borrows: 0,
+            fuel_positions: 0,
+        }
+    }
+
+    pub fn add_total_collateral(&mut self, total_collateral: i128) -> Result {
+        self.total_collateral = self.total_collateral.safe_add(total_collateral)?;
+        Ok(())
+    }
+
+    pub fn add_margin_requirement(
+        &mut self,
+        margin_requirement: u128,
+        liability_value: u128,
+        market_identifier: MarketIdentifier,
+    ) -> Result {
+        self.margin_requirement = self.margin_requirement.safe_add(margin_requirement)?;
+
+        if self.context.margin_buffer > 0 {
+            self.margin_requirement_plus_buffer =
+                self.margin_requirement_plus_buffer
+                    .safe_add(margin_requirement.safe_add(
+                        liability_value.safe_mul(self.context.margin_buffer)?
+                            / MARGIN_PRECISION_U128,
+                    )?)?;
+        }
+
+        if let Some(market_to_track) = self.market_to_track_margin_requirement() {
+            if market_to_track == market_identifier {
+                self.tracked_market_margin_requirement = self
+                    .tracked_market_margin_requirement
+                    .safe_add(margin_requirement)?;
+            }
+        }
+
+        Ok(())
+    }
+
+    pub fn add_open_orders_margin_requirement(&mut self, margin_requirement: u128) -> Result {
+        self.open_orders_margin_requirement = self
+            .open_orders_margin_requirement
+            .safe_add(margin_requirement)?;
+        Ok(())
+    }
+
+    pub fn add_spot_liability(&mut self) -> Result {
+        self.num_spot_liabilities = self.num_spot_liabilities.safe_add(1)?;
+        Ok(())
+    }
+
+    pub fn add_perp_liability(&mut self) -> Result {
+        self.num_perp_liabilities = self.num_perp_liabilities.safe_add(1)?;
+        Ok(())
+    }
+
+    #[cfg(feature = "drift-rs")]
+    pub fn add_spot_asset_value(&mut self, spot_asset_value: i128) -> Result {
+        self.total_spot_asset_value = self.total_spot_asset_value.safe_add(spot_asset_value)?;
+        Ok(())
+    }
+
+    #[cfg(feature = "drift-rs")]
+    pub fn add_spot_liability_value(&mut self, spot_liability_value: u128) -> Result {
+        self.total_spot_liability_value = self
+            .total_spot_liability_value
+            .safe_add(spot_liability_value)?;
+        Ok(())
+    }
+
+    #[cfg(feature = "drift-rs")]
+    pub fn add_perp_liability_value(&mut self, perp_liability_value: u128) -> Result {
+        self.total_perp_liability_value = self
+            .total_perp_liability_value
+            .safe_add(perp_liability_value)?;
+        Ok(())
+    }
+
+    #[cfg(feature = "drift-rs")]
+    pub fn add_perp_pnl(&mut self, perp_pnl: i128) -> Result {
+        self.total_perp_pnl = self.total_perp_pnl.safe_add(perp_pnl)?;
+        Ok(())
+    }
+
+    pub fn update_all_oracles_valid(&mut self, valid: bool) {
+        self.all_oracles_valid &= valid;
+    }
+
+    pub fn update_with_spot_isolated_liability(&mut self, isolated: bool) {
+        self.with_spot_isolated_liability |= isolated;
+    }
+
+    pub fn update_with_perp_isolated_liability(&mut self, isolated: bool) {
+        self.with_perp_isolated_liability |= isolated;
+    }
+
+    pub fn validate_num_spot_liabilities(&self) -> Result {
+        if self.num_spot_liabilities > 0 {
+            validate!(
+                self.margin_requirement > 0,
+                ErrorCode::InvalidMarginRatio,
+                "num_spot_liabilities={} but margin_requirement=0",
+                self.num_spot_liabilities
+            )?;
+        }
+        Ok(())
+    }
+
+    pub fn get_num_of_liabilities(&self) -> Result<u8> {
+        self.num_spot_liabilities
+            .safe_add(self.num_perp_liabilities)
+    }
+
+    pub fn meets_margin_requirement(&self) -> bool {
+        self.total_collateral >= self.margin_requirement as i128
+    }
+
+    pub fn positions_meets_margin_requirement(&self) -> Result<bool> {
+        Ok(self.total_collateral
+            >= self
+                .margin_requirement
+                .safe_sub(self.open_orders_margin_requirement)?
+                .cast::<i128>()?)
+    }
+
+    pub fn can_exit_liquidation(&self) -> Result<bool> {
+        if !self.is_liquidation_mode() {
+            msg!("liquidation mode not enabled");
+            return Err(ErrorCode::InvalidMarginCalculation);
+        }
+
+        Ok(self.total_collateral >= self.margin_requirement_plus_buffer as i128)
+    }
+
+    pub fn margin_shortage(&self) -> Result<u128> {
+        if self.context.margin_buffer == 0 {
+            msg!("margin buffer mode not enabled");
+            return Err(ErrorCode::InvalidMarginCalculation);
+        }
+
+        Ok(self
+            .margin_requirement_plus_buffer
+            .cast::<i128>()?
+            .safe_sub(self.total_collateral)?
+            .unsigned_abs())
+    }
+
+    pub fn tracked_market_margin_shortage(&self, margin_shortage: u128) -> Result<u128> {
+        if self.market_to_track_margin_requirement().is_none() {
+            msg!("cant call tracked_market_margin_shortage");
+            return Err(ErrorCode::InvalidMarginCalculation);
+        }
+
+        if self.margin_requirement == 0 {
+            return Ok(0);
+        }
+
+        margin_shortage
+            .safe_mul(self.tracked_market_margin_requirement)?
+            .safe_div(self.margin_requirement)
+    }
+
+    pub fn get_free_collateral(&self) -> Result<u128> {
+        self.total_collateral
+            .safe_sub(self.margin_requirement.cast::<i128>()?)?
+            .max(0)
+            .cast()
+    }
+
+    fn market_to_track_margin_requirement(&self) -> Option<MarketIdentifier> {
+        if let MarginCalculationMode::Liquidation {
+            market_to_track_margin_requirement: track_margin_requirement,
+            ..
+        } = self.context.mode
+        {
+            track_margin_requirement
+        } else {
+            None
+        }
+    }
+
+    fn is_liquidation_mode(&self) -> bool {
+        matches!(self.context.mode, MarginCalculationMode::Liquidation { .. })
+    }
+
+    pub fn track_open_orders_fraction(&self) -> bool {
+        matches!(
+            self.context.mode,
+            MarginCalculationMode::Standard {
+                track_open_orders_fraction: true
+            }
+        )
+    }
+
+    pub fn update_fuel_perp_bonus(
+        &mut self,
+        perp_market: &PerpMarket,
+        perp_position: &PerpPosition,
+        base_asset_value: u128,
+        oracle_price: i64,
+    ) -> Result {
+        if perp_market.fuel_boost_position == 0 {
+            return Ok(());
+        }
+
+        let fuel_base_asset_value =
+            if let Some((market_index, perp_delta)) = self.context.fuel_perp_delta {
+                if market_index == perp_market.market_index {
+                    perp_position
+                        .base_asset_amount
+                        .safe_add(perp_delta)?
+                        .cast::<i128>()?
+                        .safe_mul(oracle_price.cast()?)?
+                        .safe_div(AMM_RESERVE_PRECISION_I128)?
+                        .unsigned_abs()
+                } else {
+                    base_asset_value
+                }
+            } else {
+                base_asset_value
+            };
+
+        let perp_fuel_oi_bonus = calculate_perp_fuel_bonus(
+            perp_market,
+            fuel_base_asset_value as i128,
+            self.context.fuel_bonus_numerator,
+        )?;
+
+        self.fuel_positions = self
+            .fuel_positions
+            .saturating_add(perp_fuel_oi_bonus.cast().unwrap_or(u32::MAX));
+
+        Ok(())
+    }
+
+    pub fn update_fuel_spot_bonus(
+        &mut self,
+        spot_market: &SpotMarket,
+        mut signed_token_amount: i128,
+        strict_price: &StrictOraclePrice,
+    ) -> Result {
+        if spot_market.fuel_boost_deposits == 0 && spot_market.fuel_boost_borrows == 0 {
+            return Ok(());
+        }
+
+        for &(market_index, delta) in &self.context.fuel_spot_deltas {
+            if spot_market.market_index == market_index && delta != 0 {
+                signed_token_amount = signed_token_amount.safe_add(delta)?;
+            }
+        }
+
+        if spot_market.fuel_boost_deposits > 0 && signed_token_amount > 0 {
+            let signed_token_value =
+                get_strict_token_value(signed_token_amount, spot_market.decimals, strict_price)?;
+
+            let fuel_bonus = calculate_spot_fuel_bonus(
+                spot_market,
+                signed_token_value,
+                self.context.fuel_bonus_numerator,
+            )?;
+            self.fuel_deposits = self
+                .fuel_deposits
+                .saturating_add(fuel_bonus.cast().unwrap_or(u32::MAX));
+        } else if spot_market.fuel_boost_borrows > 0 && signed_token_amount < 0 {
+            let signed_token_value =
+                get_strict_token_value(signed_token_amount, spot_market.decimals, strict_price)?;
+
+            let fuel_bonus = calculate_spot_fuel_bonus(
+                spot_market,
+                signed_token_value,
+                self.context.fuel_bonus_numerator,
+            )?;
+
+            self.fuel_borrows = self
+                .fuel_borrows
+                .saturating_add(fuel_bonus.cast().unwrap_or(u32::MAX));
+        }
+
+        Ok(())
+    }
+}
+
+
 
 // Accounts
 #[derive(Accounts)]
@@ -18985,109 +19896,278 @@ pub mod accounts {
         pub padding: [u8;70]
     }
 
-    #[account]
+    #[account(zero_copy(unsafe))]
+    #[derive(Eq, PartialEq, Debug)]
+    #[repr(C)]
     pub struct PerpMarket {
+        /// The perp market's address. It is a pda of the market index
         pub pubkey: Pubkey,
+        /// The automated market maker
         pub amm: AMM,
+        /// The market's pnl pool. When users settle negative pnl, the balance increases.
+        /// When users settle positive pnl, the balance decreases. Can not go negative.
         pub pnl_pool: PoolBalance,
-        pub name: [u8;32],
+        /// Encoded display name for the perp market e.g. SOL-PERP
+        pub name: [u8; 32],
+        /// The perp market's claim on the insurance fund
         pub insurance_claim: InsuranceClaim,
+        /// The max pnl imbalance before positive pnl asset weight is discounted
+        /// pnl imbalance is the difference between long and short pnl. When it's greater than 0,
+        /// the amm has negative pnl and the initial asset weight for positive pnl is discounted
+        /// precision = QUOTE_PRECISION
         pub unrealized_pnl_max_imbalance: u64,
+        /// The ts when the market will be expired. Only set if market is in reduce only mode
         pub expiry_ts: i64,
+        /// The price at which positions will be settled. Only set if market is expired
+        /// precision = PRICE_PRECISION
         pub expiry_price: i64,
+        /// Every trade has a fill record id. This is the next id to be used
         pub next_fill_record_id: u64,
+        /// Every funding rate update has a record id. This is the next id to be used
         pub next_funding_rate_record_id: u64,
+        /// Every amm k updated has a record id. This is the next id to be used
         pub next_curve_record_id: u64,
+        /// The initial margin fraction factor. Used to increase margin ratio for large positions
+        /// precision: MARGIN_PRECISION
         pub imf_factor: u32,
+        /// The imf factor for unrealized pnl. Used to discount asset weight for large positive pnl
+        /// precision: MARGIN_PRECISION
         pub unrealized_pnl_imf_factor: u32,
+        /// The fee the liquidator is paid for taking over perp position
+        /// precision: LIQUIDATOR_FEE_PRECISION
         pub liquidator_fee: u32,
+        /// The fee the insurance fund receives from liquidation
+        /// precision: LIQUIDATOR_FEE_PRECISION
         pub if_liquidation_fee: u32,
+        /// The margin ratio which determines how much collateral is required to open a position
+        /// e.g. margin ratio of .1 means a user must have $100 of total collateral to open a $1000 position
+        /// precision: MARGIN_PRECISION
         pub margin_ratio_initial: u32,
+        /// The margin ratio which determines when a user will be liquidated
+        /// e.g. margin ratio of .05 means a user must have $50 of total collateral to maintain a $1000 position
+        /// else they will be liquidated
+        /// precision: MARGIN_PRECISION
         pub margin_ratio_maintenance: u32,
+        /// The initial asset weight for positive pnl. Negative pnl always has an asset weight of 1
+        /// precision: SPOT_WEIGHT_PRECISION
         pub unrealized_pnl_initial_asset_weight: u32,
+        /// The maintenance asset weight for positive pnl. Negative pnl always has an asset weight of 1
+        /// precision: SPOT_WEIGHT_PRECISION
         pub unrealized_pnl_maintenance_asset_weight: u32,
+        /// number of users in a position (base)
         pub number_of_users_with_base: u32,
+        /// number of users in a position (pnl) or pnl (quote)
         pub number_of_users: u32,
         pub market_index: u16,
+        /// Whether a market is active, reduce only, expired, etc
+        /// Affects whether users can open/close positions
         pub status: MarketStatus,
+        /// Currently only Perpetual markets are supported
         pub contract_type: ContractType,
+        /// The contract tier determines how much insurance a market can receive, with more speculative markets receiving less insurance
+        /// It also influences the order perp markets can be liquidated, with less speculative markets being liquidated first
         pub contract_tier: ContractTier,
         pub paused_operations: u8,
+        /// The spot market that pnl is settled in
         pub quote_spot_market_index: u16,
+        /// Between -100 and 100, represents what % to increase/decrease the fee by
+        /// E.g. if this is -50 and the fee is 5bps, the new fee will be 2.5bps
+        /// if this is 50 and the fee is 5bps, the new fee will be 7.5bps
         pub fee_adjustment: i16,
+        /// fuel multiplier for perp funding
+        /// precision: 10
         pub fuel_boost_position: u8,
+        /// fuel multiplier for perp taker
+        /// precision: 10
         pub fuel_boost_taker: u8,
+        /// fuel multiplier for perp maker
+        /// precision: 10
         pub fuel_boost_maker: u8,
-        pub padding: [u8;43]
+        pub padding1: u8,
+        pub high_leverage_margin_ratio_initial: u16,
+        pub high_leverage_margin_ratio_maintenance: u16,
+        pub padding: [u8; 38],
     }
-
-    #[account]
+    
+    #[account(zero_copy(unsafe))]
+    #[derive(PartialEq, Eq, Debug)]
+    #[repr(C)]
     pub struct SpotMarket {
+        /// The address of the spot market. It is a pda of the market index
         pub pubkey: Pubkey,
+        /// The oracle used to price the markets deposits/borrows
         pub oracle: Pubkey,
+        /// The token mint of the market
         pub mint: Pubkey,
+        /// The vault used to store the market's deposits
+        /// The amount in the vault should be equal to or greater than deposits - borrows
         pub vault: Pubkey,
-        pub name: [u8;32],
+        /// The encoded display name for the market e.g. SOL
+        pub name: [u8; 32],
         pub historical_oracle_data: HistoricalOracleData,
         pub historical_index_data: HistoricalIndexData,
-        pub revenue_pool: PoolBalance,
+        /// Revenue the protocol has collected in this markets token
+        /// e.g. for SOL-PERP, funds can be settled in usdc and will flow into the USDC revenue pool
+        pub revenue_pool: PoolBalance, // in base asset
+        /// The fees collected from swaps between this market and the quote market
+        /// Is settled to the quote markets revenue pool
         pub spot_fee_pool: PoolBalance,
+        /// Details on the insurance fund covering bankruptcies in this markets token
+        /// Covers bankruptcies for borrows with this markets token and perps settling in this markets token
         pub insurance_fund: InsuranceFund,
+        /// The total spot fees collected for this market
+        /// precision: QUOTE_PRECISION
         pub total_spot_fee: u128,
+        /// The sum of the scaled balances for deposits across users and pool balances
+        /// To convert to the deposit token amount, multiply by the cumulative deposit interest
+        /// precision: SPOT_BALANCE_PRECISION
         pub deposit_balance: u128,
+        /// The sum of the scaled balances for borrows across users and pool balances
+        /// To convert to the borrow token amount, multiply by the cumulative borrow interest
+        /// precision: SPOT_BALANCE_PRECISION
         pub borrow_balance: u128,
+        /// The cumulative interest earned by depositors
+        /// Used to calculate the deposit token amount from the deposit balance
+        /// precision: SPOT_CUMULATIVE_INTEREST_PRECISION
         pub cumulative_deposit_interest: u128,
+        /// The cumulative interest earned by borrowers
+        /// Used to calculate the borrow token amount from the borrow balance
+        /// precision: SPOT_CUMULATIVE_INTEREST_PRECISION
         pub cumulative_borrow_interest: u128,
+        /// The total socialized loss from borrows, in the mint's token
+        /// precision: token mint precision
         pub total_social_loss: u128,
+        /// The total socialized loss from borrows, in the quote market's token
+        /// preicision: QUOTE_PRECISION
         pub total_quote_social_loss: u128,
+        /// no withdraw limits/guards when deposits below this threshold
+        /// precision: token mint precision
         pub withdraw_guard_threshold: u64,
+        /// The max amount of token deposits in this market
+        /// 0 if there is no limit
+        /// precision: token mint precision
         pub max_token_deposits: u64,
+        /// 24hr average of deposit token amount
+        /// precision: token mint precision
         pub deposit_token_twap: u64,
+        /// 24hr average of borrow token amount
+        /// precision: token mint precision
         pub borrow_token_twap: u64,
+        /// 24hr average of utilization
+        /// which is borrow amount over token amount
+        /// precision: SPOT_UTILIZATION_PRECISION
         pub utilization_twap: u64,
+        /// Last time the cumulative deposit and borrow interest was updated
         pub last_interest_ts: u64,
+        /// Last time the deposit/borrow/utilization averages were updated
         pub last_twap_ts: u64,
+        /// The time the market is set to expire. Only set if market is in reduce only mode
         pub expiry_ts: i64,
+        /// Spot orders must be a multiple of the step size
+        /// precision: token mint precision
         pub order_step_size: u64,
+        /// Spot orders must be a multiple of the tick size
+        /// precision: PRICE_PRECISION
         pub order_tick_size: u64,
+        /// The minimum order size
+        /// precision: token mint precision
         pub min_order_size: u64,
+        /// The maximum spot position size
+        /// if the limit is 0, there is no limit
+        /// precision: token mint precision
         pub max_position_size: u64,
+        /// Every spot trade has a fill record id. This is the next id to use
         pub next_fill_record_id: u64,
+        /// Every deposit has a deposit record id. This is the next id to use
         pub next_deposit_record_id: u64,
+        /// The initial asset weight used to calculate a deposits contribution to a users initial total collateral
+        /// e.g. if the asset weight is .8, $100 of deposits contributes $80 to the users initial total collateral
+        /// precision: SPOT_WEIGHT_PRECISION
         pub initial_asset_weight: u32,
+        /// The maintenance asset weight used to calculate a deposits contribution to a users maintenance total collateral
+        /// e.g. if the asset weight is .9, $100 of deposits contributes $90 to the users maintenance total collateral
+        /// precision: SPOT_WEIGHT_PRECISION
         pub maintenance_asset_weight: u32,
+        /// The initial liability weight used to calculate a borrows contribution to a users initial margin requirement
+        /// e.g. if the liability weight is .9, $100 of borrows contributes $90 to the users initial margin requirement
+        /// precision: SPOT_WEIGHT_PRECISION
         pub initial_liability_weight: u32,
+        /// The maintenance liability weight used to calculate a borrows contribution to a users maintenance margin requirement
+        /// e.g. if the liability weight is .8, $100 of borrows contributes $80 to the users maintenance margin requirement
+        /// precision: SPOT_WEIGHT_PRECISION
         pub maintenance_liability_weight: u32,
+        /// The initial margin fraction factor. Used to increase liability weight/decrease asset weight for large positions
+        /// precision: MARGIN_PRECISION
         pub imf_factor: u32,
+        /// The fee the liquidator is paid for taking over borrow/deposit
+        /// precision: LIQUIDATOR_FEE_PRECISION
         pub liquidator_fee: u32,
+        /// The fee the insurance fund receives from liquidation
+        /// precision: LIQUIDATOR_FEE_PRECISION
         pub if_liquidation_fee: u32,
+        /// The optimal utilization rate for this market.
+        /// Used to determine the markets borrow rate
+        /// precision: SPOT_UTILIZATION_PRECISION
         pub optimal_utilization: u32,
+        /// The borrow rate for this market when the market has optimal utilization
+        /// precision: SPOT_RATE_PRECISION
         pub optimal_borrow_rate: u32,
+        /// The borrow rate for this market when the market has 1000 utilization
+        /// precision: SPOT_RATE_PRECISION
         pub max_borrow_rate: u32,
+        /// The market's token mint's decimals. To from decimals to a precision, 10^decimals
         pub decimals: u32,
         pub market_index: u16,
+        /// Whether or not spot trading is enabled
         pub orders_enabled: bool,
         pub oracle_source: OracleSource,
         pub status: MarketStatus,
+        /// The asset tier affects how a deposit can be used as collateral and the priority for a borrow being liquidated
         pub asset_tier: AssetTier,
         pub paused_operations: u8,
         pub if_paused_operations: u8,
         pub fee_adjustment: i16,
+        /// What fraction of max_token_deposits
+        /// disabled when 0, 1 => 1/10000 => .01% of max_token_deposits
+        /// precision: X/10000
         pub max_token_borrows_fraction: u16,
+        /// For swaps, the amount of token loaned out in the begin_swap ix
+        /// precision: token mint precision
         pub flash_loan_amount: u64,
+        /// For swaps, the amount in the users token account in the begin_swap ix
+        /// Used to calculate how much of the token left the system in end_swap ix
+        /// precision: token mint precision
         pub flash_loan_initial_token_amount: u64,
+        /// The total fees received from swaps
+        /// precision: token mint precision
         pub total_swap_fee: u64,
+        /// When to begin scaling down the initial asset weight
+        /// disabled when 0
+        /// precision: QUOTE_PRECISION
         pub scale_initial_asset_weight_start: u64,
+        /// The min borrow rate for this market when the market regardless of utilization
+        /// 1 => 1/200 => .5%
+        /// precision: X/200
         pub min_borrow_rate: u8,
+        /// fuel multiplier for spot deposits
+        /// precision: 10
         pub fuel_boost_deposits: u8,
+        /// fuel multiplier for spot borrows
+        /// precision: 10
         pub fuel_boost_borrows: u8,
+        /// fuel multiplier for spot taker
+        /// precision: 10
         pub fuel_boost_taker: u8,
+        /// fuel multiplier for spot maker
+        /// precision: 10
         pub fuel_boost_maker: u8,
+        /// fuel multiplier for spot insurance stake
+        /// precision: 10
         pub fuel_boost_insurance: u8,
         pub token_program: u8,
-        pub padding: [u8;41]
+        pub padding: [u8; 41],
     }
-
+    
     #[account]
     pub struct State {
         pub admin: Pubkey,
@@ -19149,6 +20229,13 @@ pub mod accounts {
         pub last_fuel_bonus_update_ts: u32,
         pub padding: [u8;12]
     }
+
+    impl User {
+        pub fn is_high_leverage_mode(&self) -> bool {
+            self.margin_mode == MarginMode::HighLeverage
+        }
+    }
+    
 
     #[account]
     pub struct UserStats {
@@ -19273,24 +20360,34 @@ pub struct MarketIdentifier {
     pub market_index: u16,
 }
 
-#[cfg_attr(not(feature="solana"), derive(Debug))]
-#[derive(Clone, AnchorSerialize, AnchorDeserialize)]
+#[derive(Default, AnchorSerialize, AnchorDeserialize, Clone, Copy, Eq, PartialEq, Debug)]
 pub struct HistoricalOracleData {
+    /// precision: PRICE_PRECISION
     pub last_oracle_price: i64,
+    /// precision: PRICE_PRECISION
     pub last_oracle_conf: u64,
+    /// number of slots since last update
     pub last_oracle_delay: i64,
+    /// precision: PRICE_PRECISION
     pub last_oracle_price_twap: i64,
-    pub last_oracle_price_twap_5_min: i64,
+    /// precision: PRICE_PRECISION
+    pub last_oracle_price_twap_5min: i64,
+    /// unix_timestamp of last snapshot
     pub last_oracle_price_twap_ts: i64,
 }
 
-#[cfg_attr(not(feature="solana"), derive(Debug))]
-#[derive(Clone, AnchorSerialize, AnchorDeserialize)]
+
+#[derive(Default, AnchorSerialize, AnchorDeserialize, Clone, Copy, Eq, PartialEq, Debug)]
 pub struct HistoricalIndexData {
+    /// precision: PRICE_PRECISION
     pub last_index_bid_price: u64,
+    /// precision: PRICE_PRECISION
     pub last_index_ask_price: u64,
+    /// precision: PRICE_PRECISION
     pub last_index_price_twap: u64,
-    pub last_index_price_twap_5_min: u64,
+    /// precision: PRICE_PRECISION
+    pub last_index_price_twap_5min: u64,
+    /// unix_timestamp of last snapshot
     pub last_index_price_twap_ts: i64,
 }
 
@@ -19343,125 +20440,272 @@ pub struct ModifyOrderParams {
     pub policy: Option<ModifyOrderPolicy>,
 }
 
-#[cfg_attr(not(feature="solana"), derive(Debug))]
-#[derive(Clone, AnchorSerialize, AnchorDeserialize)]
+#[zero_copy(unsafe)]
+#[derive(Default, Eq, PartialEq, Debug)]
+#[repr(C)]
 pub struct InsuranceClaim {
+    /// The amount of revenue last settled
+    /// Positive if funds left the perp market,
+    /// negative if funds were pulled into the perp market
+    /// precision: QUOTE_PRECISION
     pub revenue_withdraw_since_last_settle: i64,
+    /// The max amount of revenue that can be withdrawn per period
+    /// precision: QUOTE_PRECISION
     pub max_revenue_withdraw_per_period: u64,
+    /// The max amount of insurance that perp market can use to resolve bankruptcy and pnl deficits
+    /// precision: QUOTE_PRECISION
     pub quote_max_insurance: u64,
+    /// The amount of insurance that has been used to resolve bankruptcy and pnl deficits
+    /// precision: QUOTE_PRECISION
     pub quote_settled_insurance: u64,
+    /// The last time revenue was settled in/out of market
     pub last_revenue_withdraw_ts: i64,
 }
 
-#[cfg_attr(not(feature="solana"), derive(Debug))]
-#[derive(Clone, AnchorSerialize, AnchorDeserialize)]
+#[zero_copy(unsafe)]
+#[derive(Default, Eq, PartialEq, Debug)]
+#[repr(C)]
 pub struct PoolBalance {
+    /// To get the pool's token amount, you must multiply the scaled balance by the market's cumulative
+    /// deposit interest
+    /// precision: SPOT_BALANCE_PRECISION
     pub scaled_balance: u128,
+    /// The spot market the pool is for
     pub market_index: u16,
-    pub padding: [u8;6],
+    pub padding: [u8; 6],
 }
 
-#[cfg_attr(not(feature="solana"), derive(Debug))]
-#[derive(Clone, AnchorSerialize, AnchorDeserialize)]
+#[zero_copy(unsafe)]
+#[derive(Debug, PartialEq, Eq)]
+#[repr(C)]
 pub struct AMM {
+    /// oracle price data public key
     pub oracle: Pubkey,
+    /// stores historically witnessed oracle data
     pub historical_oracle_data: HistoricalOracleData,
+    /// accumulated base asset amount since inception per lp share
+    /// precision: QUOTE_PRECISION
     pub base_asset_amount_per_lp: i128,
+    /// accumulated quote asset amount since inception per lp share
+    /// precision: QUOTE_PRECISION
     pub quote_asset_amount_per_lp: i128,
+    /// partition of fees from perp market trading moved from pnl settlements
     pub fee_pool: PoolBalance,
+    /// `x` reserves for constant product mm formula (x * y = k)
+    /// precision: AMM_RESERVE_PRECISION
     pub base_asset_reserve: u128,
+    /// `y` reserves for constant product mm formula (x * y = k)
+    /// precision: AMM_RESERVE_PRECISION
     pub quote_asset_reserve: u128,
+    /// determines how close the min/max base asset reserve sit vs base reserves
+    /// allow for decreasing slippage without increasing liquidity and v.v.
+    /// precision: PERCENTAGE_PRECISION
     pub concentration_coef: u128,
+    /// minimum base_asset_reserve allowed before AMM is unavailable
+    /// precision: AMM_RESERVE_PRECISION
     pub min_base_asset_reserve: u128,
+    /// maximum base_asset_reserve allowed before AMM is unavailable
+    /// precision: AMM_RESERVE_PRECISION
     pub max_base_asset_reserve: u128,
+    /// `sqrt(k)` in constant product mm formula (x * y = k). stored to avoid drift caused by integer math issues
+    /// precision: AMM_RESERVE_PRECISION
     pub sqrt_k: u128,
+    /// normalizing numerical factor for y, its use offers lowest slippage in cp-curve when market is balanced
+    /// precision: PEG_PRECISION
     pub peg_multiplier: u128,
+    /// y when market is balanced. stored to save computation
+    /// precision: AMM_RESERVE_PRECISION
     pub terminal_quote_asset_reserve: u128,
+    /// always non-negative. tracks number of total longs in market (regardless of counterparty)
+    /// precision: BASE_PRECISION
     pub base_asset_amount_long: i128,
+    /// always non-positive. tracks number of total shorts in market (regardless of counterparty)
+    /// precision: BASE_PRECISION
     pub base_asset_amount_short: i128,
+    /// tracks net position (longs-shorts) in market with AMM as counterparty
+    /// precision: BASE_PRECISION
     pub base_asset_amount_with_amm: i128,
+    /// tracks net position (longs-shorts) in market with LPs as counterparty
+    /// precision: BASE_PRECISION
     pub base_asset_amount_with_unsettled_lp: i128,
+    /// max allowed open interest, blocks trades that breach this value
+    /// precision: BASE_PRECISION
     pub max_open_interest: u128,
+    /// sum of all user's perp quote_asset_amount in market
+    /// precision: QUOTE_PRECISION
     pub quote_asset_amount: i128,
+    /// sum of all long user's quote_entry_amount in market
+    /// precision: QUOTE_PRECISION
     pub quote_entry_amount_long: i128,
+    /// sum of all short user's quote_entry_amount in market
+    /// precision: QUOTE_PRECISION
     pub quote_entry_amount_short: i128,
+    /// sum of all long user's quote_break_even_amount in market
+    /// precision: QUOTE_PRECISION
     pub quote_break_even_amount_long: i128,
+    /// sum of all short user's quote_break_even_amount in market
+    /// precision: QUOTE_PRECISION
     pub quote_break_even_amount_short: i128,
+    /// total user lp shares of sqrt_k (protocol owned liquidity = sqrt_k - last_funding_rate)
+    /// precision: AMM_RESERVE_PRECISION
     pub user_lp_shares: u128,
+    /// last funding rate in this perp market (unit is quote per base)
+    /// precision: QUOTE_PRECISION
     pub last_funding_rate: i64,
+    /// last funding rate for longs in this perp market (unit is quote per base)
+    /// precision: QUOTE_PRECISION
     pub last_funding_rate_long: i64,
+    /// last funding rate for shorts in this perp market (unit is quote per base)
+    /// precision: QUOTE_PRECISION
     pub last_funding_rate_short: i64,
-    pub last_24_h_avg_funding_rate: i64,
+    /// estimate of last 24h of funding rate perp market (unit is quote per base)
+    /// precision: QUOTE_PRECISION
+    pub last_24h_avg_funding_rate: i64,
+    /// total fees collected by this perp market
+    /// precision: QUOTE_PRECISION
     pub total_fee: i128,
+    /// total fees collected by the vAMM's bid/ask spread
+    /// precision: QUOTE_PRECISION
     pub total_mm_fee: i128,
+    /// total fees collected by exchange fee schedule
+    /// precision: QUOTE_PRECISION
     pub total_exchange_fee: u128,
+    /// total fees minus any recognized upnl and pool withdraws
+    /// precision: QUOTE_PRECISION
     pub total_fee_minus_distributions: i128,
+    /// sum of all fees from fee pool withdrawn to revenue pool
+    /// precision: QUOTE_PRECISION
     pub total_fee_withdrawn: u128,
+    /// all fees collected by market for liquidations
+    /// precision: QUOTE_PRECISION
     pub total_liquidation_fee: u128,
+    /// accumulated funding rate for longs since inception in market
     pub cumulative_funding_rate_long: i128,
+    /// accumulated funding rate for shorts since inception in market
     pub cumulative_funding_rate_short: i128,
+    /// accumulated social loss paid by users since inception in market
     pub total_social_loss: u128,
+    /// transformed base_asset_reserve for users going long
+    /// precision: AMM_RESERVE_PRECISION
     pub ask_base_asset_reserve: u128,
+    /// transformed quote_asset_reserve for users going long
+    /// precision: AMM_RESERVE_PRECISION
     pub ask_quote_asset_reserve: u128,
+    /// transformed base_asset_reserve for users going short
+    /// precision: AMM_RESERVE_PRECISION
     pub bid_base_asset_reserve: u128,
+    /// transformed quote_asset_reserve for users going short
+    /// precision: AMM_RESERVE_PRECISION
     pub bid_quote_asset_reserve: u128,
+    /// the last seen oracle price partially shrunk toward the amm reserve price
+    /// precision: PRICE_PRECISION
     pub last_oracle_normalised_price: i64,
+    /// the gap between the oracle price and the reserve price = y * peg_multiplier / x
     pub last_oracle_reserve_price_spread_pct: i64,
+    /// average estimate of bid price over funding_period
+    /// precision: PRICE_PRECISION
     pub last_bid_price_twap: u64,
+    /// average estimate of ask price over funding_period
+    /// precision: PRICE_PRECISION
     pub last_ask_price_twap: u64,
+    /// average estimate of (bid+ask)/2 price over funding_period
+    /// precision: PRICE_PRECISION
     pub last_mark_price_twap: u64,
-    pub last_mark_price_twap_5_min: u64,
+    /// average estimate of (bid+ask)/2 price over FIVE_MINUTES
+    pub last_mark_price_twap_5min: u64,
+    /// the last blockchain slot the amm was updated
     pub last_update_slot: u64,
+    /// the pct size of the oracle confidence interval
+    /// precision: PERCENTAGE_PRECISION
     pub last_oracle_conf_pct: u64,
+    /// the total_fee_minus_distribution change since the last funding update
+    /// precision: QUOTE_PRECISION
     pub net_revenue_since_last_funding: i64,
+    /// the last funding rate update unix_timestamp
     pub last_funding_rate_ts: i64,
+    /// the peridocity of the funding rate updates
     pub funding_period: i64,
+    /// the base step size (increment) of orders
+    /// precision: BASE_PRECISION
     pub order_step_size: u64,
+    /// the price tick size of orders
+    /// precision: PRICE_PRECISION
     pub order_tick_size: u64,
+    /// the minimum base size of an order
+    /// precision: BASE_PRECISION
     pub min_order_size: u64,
+    /// the max base size a single user can have
+    /// precision: BASE_PRECISION
     pub max_position_size: u64,
-    pub volume_24_h: u64,
+    /// estimated total of volume in market
+    /// QUOTE_PRECISION
+    pub volume_24h: u64,
+    /// the volume intensity of long fills against AMM
     pub long_intensity_volume: u64,
+    /// the volume intensity of short fills against AMM
     pub short_intensity_volume: u64,
+    /// the blockchain unix timestamp at the time of the last trade
     pub last_trade_ts: i64,
+    /// estimate of standard deviation of the fill (mark) prices
+    /// precision: PRICE_PRECISION
     pub mark_std: u64,
+    /// estimate of standard deviation of the oracle price at each update
+    /// precision: PRICE_PRECISION
     pub oracle_std: u64,
+    /// the last unix_timestamp the mark twap was updated
     pub last_mark_price_twap_ts: i64,
+    /// the minimum spread the AMM can quote. also used as step size for some spread logic increases.
     pub base_spread: u32,
+    /// the maximum spread the AMM can quote
     pub max_spread: u32,
+    /// the spread for asks vs the reserve price
     pub long_spread: u32,
+    /// the spread for bids vs the reserve price
     pub short_spread: u32,
+    /// the count intensity of long fills against AMM
     pub long_intensity_count: u32,
+    /// the count intensity of short fills against AMM
     pub short_intensity_count: u32,
+    /// the fraction of total available liquidity a single fill on the AMM can consume
     pub max_fill_reserve_fraction: u16,
+    /// the maximum slippage a single fill on the AMM can push
     pub max_slippage_ratio: u16,
+    /// the update intensity of AMM formulaic updates (adjusting k). 0-100
     pub curve_update_intensity: u8,
+    /// the jit intensity of AMM. larger intensity means larger participation in jit. 0 means no jit participation.
+    /// (0, 100] is intensity for protocol-owned AMM. (100, 200] is intensity for user LP-owned AMM.
     pub amm_jit_intensity: u8,
+    /// the oracle provider information. used to decode/scale the oracle public key
     pub oracle_source: OracleSource,
+    /// tracks whether the oracle was considered valid at the last AMM update
     pub last_oracle_valid: bool,
+    /// the target value for `base_asset_amount_per_lp`, used during AMM JIT with LP split
+    /// precision: BASE_PRECISION
     pub target_base_asset_amount_per_lp: i32,
+    /// expo for unit of per_lp, base 10 (if per_lp_base=X, then per_lp unit is 10^X)
     pub per_lp_base: i8,
-    pub padding_1: u8,
-    pub padding_2: u16,
+    pub padding1: u8,
+    pub padding2: u16,
     pub total_fee_earned_per_lp: u64,
     pub net_unsettled_funding_pnl: i64,
     pub quote_asset_amount_with_unsettled_lp: i64,
     pub reference_price_offset: i32,
-    pub padding: [u8;12],
+    pub padding: [u8; 12],
 }
 
-#[cfg_attr(not(feature="solana"), derive(Debug))]
-#[derive(Clone, AnchorSerialize, AnchorDeserialize)]
+#[zero_copy(unsafe)]
+#[derive(Default, Eq, PartialEq, Debug)]
+#[repr(C)]
 pub struct InsuranceFund {
     pub vault: Pubkey,
     pub total_shares: u128,
     pub user_shares: u128,
-    pub shares_base: u128,
-    pub unstaking_period: i64,
+    pub shares_base: u128,     // exponent for lp shares (for rebasing)
+    pub unstaking_period: i64, // if_unstaking_period
     pub last_revenue_settle_ts: i64,
     pub revenue_settle_period: i64,
-    pub total_factor: u32,
-    pub user_factor: u32,
+    pub total_factor: u32, // percentage of interest for total insurance
+    pub user_factor: u32,  // percentage of interest for user staked insurance
 }
 
 #[cfg_attr(not(feature="solana"), derive(Debug))]
@@ -19539,6 +20783,12 @@ pub struct SpotPosition {
     pub balance_type: SpotBalanceType,
     pub open_orders: u8,
     pub padding: [u8;4],
+}
+
+impl SpotPosition {
+    pub fn is_available(&self) -> bool {
+        self.scaled_balance == 0 && self.open_orders == 0
+    }
 }
 
 #[cfg_attr(not(feature="solana"), derive(Debug))]
@@ -20002,3 +21252,696 @@ pub enum MarketType {
     Spot,
     Perp
 }
+
+use std::panic::Location;
+
+pub trait SafeMath: Sized {
+    fn safe_add(self, rhs: Self) -> Result<Self>;
+    fn safe_sub(self, rhs: Self) -> Result<Self>;
+    fn safe_mul(self, rhs: Self) -> Result<Self>;
+    fn safe_div(self, rhs: Self) -> Result<Self>;
+}
+
+macro_rules! checked_impl {
+    ($t:ty) => {
+        impl SafeMath for $t {
+            #[track_caller]
+            #[inline(always)]
+            fn safe_add(self, v: $t) -> Result<$t> {
+                match self.checked_add(v) {
+                    Some(result) => Ok(result),
+                    None => {
+                        let caller = Location::caller();
+                        msg!("Math error thrown at {}:{}", caller.file(), caller.line());
+                        Err(ErrorCode::MathError.into())
+                    }
+                }
+            }
+
+            #[track_caller]
+            #[inline(always)]
+            fn safe_sub(self, v: $t) -> Result<$t> {
+                match self.checked_sub(v) {
+                    Some(result) => Ok(result),
+                    None => {
+                        let caller = Location::caller();
+                        msg!("Math error thrown at {}:{}", caller.file(), caller.line());
+                        Err(ErrorCode::MathError.into())
+                    }
+                }
+            }
+
+            #[track_caller]
+            #[inline(always)]
+            fn safe_mul(self, v: $t) -> Result<$t> {
+                match self.checked_mul(v) {
+                    Some(result) => Ok(result),
+                    None => {
+                        let caller = Location::caller();
+                        msg!("Math error thrown at {}:{}", caller.file(), caller.line());
+                        Err(ErrorCode::MathError.into())
+                    }
+                }
+            }
+
+            #[track_caller]
+            #[inline(always)]
+            fn safe_div(self, v: $t) -> Result<$t> {
+                match self.checked_div(v) {
+                    Some(result) => Ok(result),
+                    None => {
+                        let caller = Location::caller();
+                        msg!("Math error thrown at {}:{}", caller.file(), caller.line());
+                        Err(ErrorCode::MathError.into())
+                    }
+                }
+            }
+        }
+    };
+}
+
+checked_impl!(u128);
+checked_impl!(u64);
+checked_impl!(u32);
+checked_impl!(u16);
+checked_impl!(u8);
+checked_impl!(i128);
+checked_impl!(i64);
+checked_impl!(i32);
+checked_impl!(i16);
+checked_impl!(i8);
+
+pub trait SafeDivFloor: Sized {
+    /// Perform floor division
+    fn safe_div_floor(self, rhs: Self) -> Result<Self>;
+}
+
+#[error_code]
+#[derive(PartialEq, Eq)]
+pub enum ErrorCode {
+    #[msg("Invalid Spot Market Authority")]
+    InvalidSpotMarketAuthority,
+    #[msg("Clearing house not insurance fund authority")]
+    InvalidInsuranceFundAuthority,
+    #[msg("Insufficient deposit")]
+    InsufficientDeposit,
+    #[msg("Insufficient collateral")]
+    InsufficientCollateral,
+    #[msg("Sufficient collateral")]
+    SufficientCollateral,
+    #[msg("Max number of positions taken")]
+    MaxNumberOfPositions,
+    #[msg("Admin Controls Prices Disabled")]
+    AdminControlsPricesDisabled,
+    #[msg("Market Delisted")]
+    MarketDelisted,
+    #[msg("Market Index Already Initialized")]
+    MarketIndexAlreadyInitialized,
+    #[msg("User Account And User Positions Account Mismatch")]
+    UserAccountAndUserPositionsAccountMismatch,
+    #[msg("User Has No Position In Market")]
+    UserHasNoPositionInMarket,
+    #[msg("Invalid Initial Peg")]
+    InvalidInitialPeg,
+    #[msg("AMM repeg already configured with amt given")]
+    InvalidRepegRedundant,
+    #[msg("AMM repeg incorrect repeg direction")]
+    InvalidRepegDirection,
+    #[msg("AMM repeg out of bounds pnl")]
+    InvalidRepegProfitability,
+    #[msg("Slippage Outside Limit Price")]
+    SlippageOutsideLimit,
+    #[msg("Order Size Too Small")]
+    OrderSizeTooSmall,
+    #[msg("Price change too large when updating K")]
+    InvalidUpdateK,
+    #[msg("Admin tried to withdraw amount larger than fees collected")]
+    AdminWithdrawTooLarge,
+    #[msg("Math Error")]
+    MathError,
+    #[msg("Conversion to u128/u64 failed with an overflow or underflow")]
+    BnConversionError,
+    #[msg("Clock unavailable")]
+    ClockUnavailable,
+    #[msg("Unable To Load Oracles")]
+    UnableToLoadOracle,
+    #[msg("Price Bands Breached")]
+    PriceBandsBreached,
+    #[msg("Exchange is paused")]
+    ExchangePaused,
+    #[msg("Invalid whitelist token")]
+    InvalidWhitelistToken,
+    #[msg("Whitelist token not found")]
+    WhitelistTokenNotFound,
+    #[msg("Invalid discount token")]
+    InvalidDiscountToken,
+    #[msg("Discount token not found")]
+    DiscountTokenNotFound,
+    #[msg("Referrer not found")]
+    ReferrerNotFound,
+    #[msg("ReferrerNotFound")]
+    ReferrerStatsNotFound,
+    #[msg("ReferrerMustBeWritable")]
+    ReferrerMustBeWritable,
+    #[msg("ReferrerMustBeWritable")]
+    ReferrerStatsMustBeWritable,
+    #[msg("ReferrerAndReferrerStatsAuthorityUnequal")]
+    ReferrerAndReferrerStatsAuthorityUnequal,
+    #[msg("InvalidReferrer")]
+    InvalidReferrer,
+    #[msg("InvalidOracle")]
+    InvalidOracle,
+    #[msg("OracleNotFound")]
+    OracleNotFound,
+    #[msg("Liquidations Blocked By Oracle")]
+    LiquidationsBlockedByOracle,
+    #[msg("Can not deposit more than max deposit")]
+    MaxDeposit,
+    #[msg("Can not delete user that still has collateral")]
+    CantDeleteUserWithCollateral,
+    #[msg("AMM funding out of bounds pnl")]
+    InvalidFundingProfitability,
+    #[msg("Casting Failure")]
+    CastingFailure,
+    #[msg("InvalidOrder")]
+    InvalidOrder,
+    #[msg("InvalidOrderMaxTs")]
+    InvalidOrderMaxTs,
+    #[msg("InvalidOrderMarketType")]
+    InvalidOrderMarketType,
+    #[msg("InvalidOrderForInitialMarginReq")]
+    InvalidOrderForInitialMarginReq,
+    #[msg("InvalidOrderNotRiskReducing")]
+    InvalidOrderNotRiskReducing,
+    #[msg("InvalidOrderSizeTooSmall")]
+    InvalidOrderSizeTooSmall,
+    #[msg("InvalidOrderNotStepSizeMultiple")]
+    InvalidOrderNotStepSizeMultiple,
+    #[msg("InvalidOrderBaseQuoteAsset")]
+    InvalidOrderBaseQuoteAsset,
+    #[msg("InvalidOrderIOC")]
+    InvalidOrderIOC,
+    #[msg("InvalidOrderPostOnly")]
+    InvalidOrderPostOnly,
+    #[msg("InvalidOrderIOCPostOnly")]
+    InvalidOrderIOCPostOnly,
+    #[msg("InvalidOrderTrigger")]
+    InvalidOrderTrigger,
+    #[msg("InvalidOrderAuction")]
+    InvalidOrderAuction,
+    #[msg("InvalidOrderOracleOffset")]
+    InvalidOrderOracleOffset,
+    #[msg("InvalidOrderMinOrderSize")]
+    InvalidOrderMinOrderSize,
+    #[msg("Failed to Place Post-Only Limit Order")]
+    PlacePostOnlyLimitFailure,
+    #[msg("User has no order")]
+    UserHasNoOrder,
+    #[msg("Order Amount Too Small")]
+    OrderAmountTooSmall,
+    #[msg("Max number of orders taken")]
+    MaxNumberOfOrders,
+    #[msg("Order does not exist")]
+    OrderDoesNotExist,
+    #[msg("Order not open")]
+    OrderNotOpen,
+    #[msg("FillOrderDidNotUpdateState")]
+    FillOrderDidNotUpdateState,
+    #[msg("Reduce only order increased risk")]
+    ReduceOnlyOrderIncreasedRisk,
+    #[msg("Unable to load AccountLoader")]
+    UnableToLoadAccountLoader,
+    #[msg("Trade Size Too Large")]
+    TradeSizeTooLarge,
+    #[msg("User cant refer themselves")]
+    UserCantReferThemselves,
+    #[msg("Did not receive expected referrer")]
+    DidNotReceiveExpectedReferrer,
+    #[msg("Could not deserialize referrer")]
+    CouldNotDeserializeReferrer,
+    #[msg("Could not deserialize referrer stats")]
+    CouldNotDeserializeReferrerStats,
+    #[msg("User Order Id Already In Use")]
+    UserOrderIdAlreadyInUse,
+    #[msg("No positions liquidatable")]
+    NoPositionsLiquidatable,
+    #[msg("Invalid Margin Ratio")]
+    InvalidMarginRatio,
+    #[msg("Cant Cancel Post Only Order")]
+    CantCancelPostOnlyOrder,
+    #[msg("InvalidOracleOffset")]
+    InvalidOracleOffset,
+    #[msg("CantExpireOrders")]
+    CantExpireOrders,
+    #[msg("CouldNotLoadMarketData")]
+    CouldNotLoadMarketData,
+    #[msg("PerpMarketNotFound")]
+    PerpMarketNotFound,
+    #[msg("InvalidMarketAccount")]
+    InvalidMarketAccount,
+    #[msg("UnableToLoadMarketAccount")]
+    UnableToLoadPerpMarketAccount,
+    #[msg("MarketWrongMutability")]
+    MarketWrongMutability,
+    #[msg("UnableToCastUnixTime")]
+    UnableToCastUnixTime,
+    #[msg("CouldNotFindSpotPosition")]
+    CouldNotFindSpotPosition,
+    #[msg("NoSpotPositionAvailable")]
+    NoSpotPositionAvailable,
+    #[msg("InvalidSpotMarketInitialization")]
+    InvalidSpotMarketInitialization,
+    #[msg("CouldNotLoadSpotMarketData")]
+    CouldNotLoadSpotMarketData,
+    #[msg("SpotMarketNotFound")]
+    SpotMarketNotFound,
+    #[msg("InvalidSpotMarketAccount")]
+    InvalidSpotMarketAccount,
+    #[msg("UnableToLoadSpotMarketAccount")]
+    UnableToLoadSpotMarketAccount,
+    #[msg("SpotMarketWrongMutability")]
+    SpotMarketWrongMutability,
+    #[msg("SpotInterestNotUpToDate")]
+    SpotMarketInterestNotUpToDate,
+    #[msg("SpotMarketInsufficientDeposits")]
+    SpotMarketInsufficientDeposits,
+    #[msg("UserMustSettleTheirOwnPositiveUnsettledPNL")]
+    UserMustSettleTheirOwnPositiveUnsettledPNL,
+    #[msg("CantUpdatePoolBalanceType")]
+    CantUpdatePoolBalanceType,
+    #[msg("InsufficientCollateralForSettlingPNL")]
+    InsufficientCollateralForSettlingPNL,
+    #[msg("AMMNotUpdatedInSameSlot")]
+    AMMNotUpdatedInSameSlot,
+    #[msg("AuctionNotComplete")]
+    AuctionNotComplete,
+    #[msg("MakerNotFound")]
+    MakerNotFound,
+    #[msg("MakerNotFound")]
+    MakerStatsNotFound,
+    #[msg("MakerMustBeWritable")]
+    MakerMustBeWritable,
+    #[msg("MakerMustBeWritable")]
+    MakerStatsMustBeWritable,
+    #[msg("MakerOrderNotFound")]
+    MakerOrderNotFound,
+    #[msg("CouldNotDeserializeMaker")]
+    CouldNotDeserializeMaker,
+    #[msg("CouldNotDeserializeMaker")]
+    CouldNotDeserializeMakerStats,
+    #[msg("AuctionPriceDoesNotSatisfyMaker")]
+    AuctionPriceDoesNotSatisfyMaker,
+    #[msg("MakerCantFulfillOwnOrder")]
+    MakerCantFulfillOwnOrder,
+    #[msg("MakerOrderMustBePostOnly")]
+    MakerOrderMustBePostOnly,
+    #[msg("CantMatchTwoPostOnlys")]
+    CantMatchTwoPostOnlys,
+    #[msg("OrderBreachesOraclePriceLimits")]
+    OrderBreachesOraclePriceLimits,
+    #[msg("OrderMustBeTriggeredFirst")]
+    OrderMustBeTriggeredFirst,
+    #[msg("OrderNotTriggerable")]
+    OrderNotTriggerable,
+    #[msg("OrderDidNotSatisfyTriggerCondition")]
+    OrderDidNotSatisfyTriggerCondition,
+    #[msg("PositionAlreadyBeingLiquidated")]
+    PositionAlreadyBeingLiquidated,
+    #[msg("PositionDoesntHaveOpenPositionOrOrders")]
+    PositionDoesntHaveOpenPositionOrOrders,
+    #[msg("AllOrdersAreAlreadyLiquidations")]
+    AllOrdersAreAlreadyLiquidations,
+    #[msg("CantCancelLiquidationOrder")]
+    CantCancelLiquidationOrder,
+    #[msg("UserIsBeingLiquidated")]
+    UserIsBeingLiquidated,
+    #[msg("LiquidationsOngoing")]
+    LiquidationsOngoing,
+    #[msg("WrongSpotBalanceType")]
+    WrongSpotBalanceType,
+    #[msg("UserCantLiquidateThemself")]
+    UserCantLiquidateThemself,
+    #[msg("InvalidPerpPositionToLiquidate")]
+    InvalidPerpPositionToLiquidate,
+    #[msg("InvalidBaseAssetAmountForLiquidatePerp")]
+    InvalidBaseAssetAmountForLiquidatePerp,
+    #[msg("InvalidPositionLastFundingRate")]
+    InvalidPositionLastFundingRate,
+    #[msg("InvalidPositionDelta")]
+    InvalidPositionDelta,
+    #[msg("UserBankrupt")]
+    UserBankrupt,
+    #[msg("UserNotBankrupt")]
+    UserNotBankrupt,
+    #[msg("UserHasInvalidBorrow")]
+    UserHasInvalidBorrow,
+    #[msg("DailyWithdrawLimit")]
+    DailyWithdrawLimit,
+    #[msg("DefaultError")]
+    DefaultError,
+    #[msg("Insufficient LP tokens")]
+    InsufficientLPTokens,
+    #[msg("Cant LP with a market position")]
+    CantLPWithPerpPosition,
+    #[msg("Unable to burn LP tokens")]
+    UnableToBurnLPTokens,
+    #[msg("Trying to remove liqudity too fast after adding it")]
+    TryingToRemoveLiquidityTooFast,
+    #[msg("Invalid Spot Market Vault")]
+    InvalidSpotMarketVault,
+    #[msg("Invalid Spot Market State")]
+    InvalidSpotMarketState,
+    #[msg("InvalidSerumProgram")]
+    InvalidSerumProgram,
+    #[msg("InvalidSerumMarket")]
+    InvalidSerumMarket,
+    #[msg("InvalidSerumBids")]
+    InvalidSerumBids,
+    #[msg("InvalidSerumAsks")]
+    InvalidSerumAsks,
+    #[msg("InvalidSerumOpenOrders")]
+    InvalidSerumOpenOrders,
+    #[msg("FailedSerumCPI")]
+    FailedSerumCPI,
+    #[msg("FailedToFillOnExternalMarket")]
+    FailedToFillOnExternalMarket,
+    #[msg("InvalidFulfillmentConfig")]
+    InvalidFulfillmentConfig,
+    #[msg("InvalidFeeStructure")]
+    InvalidFeeStructure,
+    #[msg("Insufficient IF shares")]
+    InsufficientIFShares,
+    #[msg("the Market has paused this action")]
+    MarketActionPaused,
+    #[msg("the Market status doesnt allow placing orders")]
+    MarketPlaceOrderPaused,
+    #[msg("the Market status doesnt allow filling orders")]
+    MarketFillOrderPaused,
+    #[msg("the Market status doesnt allow withdraws")]
+    MarketWithdrawPaused,
+    #[msg("Action violates the Protected Asset Tier rules")]
+    ProtectedAssetTierViolation,
+    #[msg("Action violates the Isolated Asset Tier rules")]
+    IsolatedAssetTierViolation,
+    #[msg("User Cant Be Deleted")]
+    UserCantBeDeleted,
+    #[msg("Reduce Only Withdraw Increased Risk")]
+    ReduceOnlyWithdrawIncreasedRisk,
+    #[msg("Max Open Interest")]
+    MaxOpenInterest,
+    #[msg("Cant Resolve Perp Bankruptcy")]
+    CantResolvePerpBankruptcy,
+    #[msg("Liquidation Doesnt Satisfy Limit Price")]
+    LiquidationDoesntSatisfyLimitPrice,
+    #[msg("Margin Trading Disabled")]
+    MarginTradingDisabled,
+    #[msg("Invalid Market Status to Settle Perp Pnl")]
+    InvalidMarketStatusToSettlePnl,
+    #[msg("PerpMarketNotInSettlement")]
+    PerpMarketNotInSettlement,
+    #[msg("PerpMarketNotInReduceOnly")]
+    PerpMarketNotInReduceOnly,
+    #[msg("PerpMarketSettlementBufferNotReached")]
+    PerpMarketSettlementBufferNotReached,
+    #[msg("PerpMarketSettlementUserHasOpenOrders")]
+    PerpMarketSettlementUserHasOpenOrders,
+    #[msg("PerpMarketSettlementUserHasActiveLP")]
+    PerpMarketSettlementUserHasActiveLP,
+    #[msg("UnableToSettleExpiredUserPosition")]
+    UnableToSettleExpiredUserPosition,
+    #[msg("UnequalMarketIndexForSpotTransfer")]
+    UnequalMarketIndexForSpotTransfer,
+    #[msg("InvalidPerpPositionDetected")]
+    InvalidPerpPositionDetected,
+    #[msg("InvalidSpotPositionDetected")]
+    InvalidSpotPositionDetected,
+    #[msg("InvalidAmmDetected")]
+    InvalidAmmDetected,
+    #[msg("InvalidAmmForFillDetected")]
+    InvalidAmmForFillDetected,
+    #[msg("InvalidAmmLimitPriceOverride")]
+    InvalidAmmLimitPriceOverride,
+    #[msg("InvalidOrderFillPrice")]
+    InvalidOrderFillPrice,
+    #[msg("SpotMarketBalanceInvariantViolated")]
+    SpotMarketBalanceInvariantViolated,
+    #[msg("SpotMarketVaultInvariantViolated")]
+    SpotMarketVaultInvariantViolated,
+    #[msg("InvalidPDA")]
+    InvalidPDA,
+    #[msg("InvalidPDASigner")]
+    InvalidPDASigner,
+    #[msg("RevenueSettingsCannotSettleToIF")]
+    RevenueSettingsCannotSettleToIF,
+    #[msg("NoRevenueToSettleToIF")]
+    NoRevenueToSettleToIF,
+    #[msg("NoAmmPerpPnlDeficit")]
+    NoAmmPerpPnlDeficit,
+    #[msg("SufficientPerpPnlPool")]
+    SufficientPerpPnlPool,
+    #[msg("InsufficientPerpPnlPool")]
+    InsufficientPerpPnlPool,
+    #[msg("PerpPnlDeficitBelowThreshold")]
+    PerpPnlDeficitBelowThreshold,
+    #[msg("MaxRevenueWithdrawPerPeriodReached")]
+    MaxRevenueWithdrawPerPeriodReached,
+    #[msg("InvalidSpotPositionDetected")]
+    MaxIFWithdrawReached,
+    #[msg("NoIFWithdrawAvailable")]
+    NoIFWithdrawAvailable,
+    #[msg("InvalidIFUnstake")]
+    InvalidIFUnstake,
+    #[msg("InvalidIFUnstakeSize")]
+    InvalidIFUnstakeSize,
+    #[msg("InvalidIFUnstakeCancel")]
+    InvalidIFUnstakeCancel,
+    #[msg("InvalidIFForNewStakes")]
+    InvalidIFForNewStakes,
+    #[msg("InvalidIFRebase")]
+    InvalidIFRebase,
+    #[msg("InvalidInsuranceUnstakeSize")]
+    InvalidInsuranceUnstakeSize,
+    #[msg("InvalidOrderLimitPrice")]
+    InvalidOrderLimitPrice,
+    #[msg("InvalidIFDetected")]
+    InvalidIFDetected,
+    #[msg("InvalidAmmMaxSpreadDetected")]
+    InvalidAmmMaxSpreadDetected,
+    #[msg("InvalidConcentrationCoef")]
+    InvalidConcentrationCoef,
+    #[msg("InvalidSrmVault")]
+    InvalidSrmVault,
+    #[msg("InvalidVaultOwner")]
+    InvalidVaultOwner,
+    #[msg("InvalidMarketStatusForFills")]
+    InvalidMarketStatusForFills,
+    #[msg("IFWithdrawRequestInProgress")]
+    IFWithdrawRequestInProgress,
+    #[msg("NoIFWithdrawRequestInProgress")]
+    NoIFWithdrawRequestInProgress,
+    #[msg("IFWithdrawRequestTooSmall")]
+    IFWithdrawRequestTooSmall,
+    #[msg("IncorrectSpotMarketAccountPassed")]
+    IncorrectSpotMarketAccountPassed,
+    #[msg("BlockchainClockInconsistency")]
+    BlockchainClockInconsistency,
+    #[msg("InvalidIFSharesDetected")]
+    InvalidIFSharesDetected,
+    #[msg("NewLPSizeTooSmall")]
+    NewLPSizeTooSmall,
+    #[msg("MarketStatusInvalidForNewLP")]
+    MarketStatusInvalidForNewLP,
+    #[msg("InvalidMarkTwapUpdateDetected")]
+    InvalidMarkTwapUpdateDetected,
+    #[msg("MarketSettlementAttemptOnActiveMarket")]
+    MarketSettlementAttemptOnActiveMarket,
+    #[msg("MarketSettlementRequiresSettledLP")]
+    MarketSettlementRequiresSettledLP,
+    #[msg("MarketSettlementAttemptTooEarly")]
+    MarketSettlementAttemptTooEarly,
+    #[msg("MarketSettlementTargetPriceInvalid")]
+    MarketSettlementTargetPriceInvalid,
+    #[msg("UnsupportedSpotMarket")]
+    UnsupportedSpotMarket,
+    #[msg("SpotOrdersDisabled")]
+    SpotOrdersDisabled,
+    #[msg("Market Being Initialized")]
+    MarketBeingInitialized,
+    #[msg("Invalid Sub Account Id")]
+    InvalidUserSubAccountId,
+    #[msg("Invalid Trigger Order Condition")]
+    InvalidTriggerOrderCondition,
+    #[msg("Invalid Spot Position")]
+    InvalidSpotPosition,
+    #[msg("Cant transfer between same user account")]
+    CantTransferBetweenSameUserAccount,
+    #[msg("Invalid Perp Position")]
+    InvalidPerpPosition,
+    #[msg("Unable To Get Limit Price")]
+    UnableToGetLimitPrice,
+    #[msg("Invalid Liquidation")]
+    InvalidLiquidation,
+    #[msg("Spot Fulfillment Config Disabled")]
+    SpotFulfillmentConfigDisabled,
+    #[msg("Invalid Maker")]
+    InvalidMaker,
+    #[msg("Failed Unwrap")]
+    FailedUnwrap,
+    #[msg("Max Number Of Users")]
+    MaxNumberOfUsers,
+    #[msg("InvalidOracleForSettlePnl")]
+    InvalidOracleForSettlePnl,
+    #[msg("MarginOrdersOpen")]
+    MarginOrdersOpen,
+    #[msg("TierViolationLiquidatingPerpPnl")]
+    TierViolationLiquidatingPerpPnl,
+    #[msg("CouldNotLoadUserData")]
+    CouldNotLoadUserData,
+    #[msg("UserWrongMutability")]
+    UserWrongMutability,
+    #[msg("InvalidUserAccount")]
+    InvalidUserAccount,
+    #[msg("CouldNotLoadUserData")]
+    CouldNotLoadUserStatsData,
+    #[msg("UserWrongMutability")]
+    UserStatsWrongMutability,
+    #[msg("InvalidUserAccount")]
+    InvalidUserStatsAccount,
+    #[msg("UserNotFound")]
+    UserNotFound,
+    #[msg("UnableToLoadUserAccount")]
+    UnableToLoadUserAccount,
+    #[msg("UserStatsNotFound")]
+    UserStatsNotFound,
+    #[msg("UnableToLoadUserStatsAccount")]
+    UnableToLoadUserStatsAccount,
+    #[msg("User Not Inactive")]
+    UserNotInactive,
+    #[msg("RevertFill")]
+    RevertFill,
+    #[msg("Invalid MarketAccount for Deletion")]
+    InvalidMarketAccountforDeletion,
+    #[msg("Invalid Spot Fulfillment Params")]
+    InvalidSpotFulfillmentParams,
+    #[msg("Failed to Get Mint")]
+    FailedToGetMint,
+    #[msg("FailedPhoenixCPI")]
+    FailedPhoenixCPI,
+    #[msg("FailedToDeserializePhoenixMarket")]
+    FailedToDeserializePhoenixMarket,
+    #[msg("InvalidPricePrecision")]
+    InvalidPricePrecision,
+    #[msg("InvalidPhoenixProgram")]
+    InvalidPhoenixProgram,
+    #[msg("InvalidPhoenixMarket")]
+    InvalidPhoenixMarket,
+    #[msg("InvalidSwap")]
+    InvalidSwap,
+    #[msg("SwapLimitPriceBreached")]
+    SwapLimitPriceBreached,
+    #[msg("SpotMarketReduceOnly")]
+    SpotMarketReduceOnly,
+    #[msg("FundingWasNotUpdated")]
+    FundingWasNotUpdated,
+    #[msg("ImpossibleFill")]
+    ImpossibleFill,
+    #[msg("CantUpdatePerpBidAskTwap")]
+    CantUpdatePerpBidAskTwap,
+    #[msg("UserReduceOnly")]
+    UserReduceOnly,
+    #[msg("InvalidMarginCalculation")]
+    InvalidMarginCalculation,
+    #[msg("CantPayUserInitFee")]
+    CantPayUserInitFee,
+    #[msg("CantReclaimRent")]
+    CantReclaimRent,
+    #[msg("InsuranceFundOperationPaused")]
+    InsuranceFundOperationPaused,
+    #[msg("NoUnsettledPnl")]
+    NoUnsettledPnl,
+    #[msg("PnlPoolCantSettleUser")]
+    PnlPoolCantSettleUser,
+    #[msg("OracleInvalid")]
+    OracleNonPositive,
+    #[msg("OracleTooVolatile")]
+    OracleTooVolatile,
+    #[msg("OracleTooUncertain")]
+    OracleTooUncertain,
+    #[msg("OracleStaleForMargin")]
+    OracleStaleForMargin,
+    #[msg("OracleInsufficientDataPoints")]
+    OracleInsufficientDataPoints,
+    #[msg("OracleStaleForAMM")]
+    OracleStaleForAMM,
+    #[msg("Unable to parse pull oracle message")]
+    UnableToParsePullOracleMessage,
+    #[msg("Can not borow more than max borrows")]
+    MaxBorrows,
+    #[msg("Updates must be monotonically increasing")]
+    OracleUpdatesNotMonotonic,
+    #[msg("Trying to update price feed with the wrong feed id")]
+    OraclePriceFeedMessageMismatch,
+    #[msg("The message in the update must be a PriceFeedMessage")]
+    OracleUnsupportedMessageType,
+    #[msg("Could not deserialize the message in the update")]
+    OracleDeserializeMessageFailed,
+    #[msg("Wrong guardian set owner in update price atomic")]
+    OracleWrongGuardianSetOwner,
+    #[msg("Oracle post update atomic price feed account must be drift program")]
+    OracleWrongWriteAuthority,
+    #[msg("Oracle vaa owner must be wormhole program")]
+    OracleWrongVaaOwner,
+    #[msg("Multi updates must have 2 or fewer accounts passed in remaining accounts")]
+    OracleTooManyPriceAccountUpdates,
+    #[msg("Don't have the same remaining accounts number and merkle price updates left")]
+    OracleMismatchedVaaAndPriceUpdates,
+    #[msg("Remaining account passed is not a valid pda")]
+    OracleBadRemainingAccountPublicKey,
+    #[msg("FailedOpenbookV2CPI")]
+    FailedOpenbookV2CPI,
+    #[msg("InvalidOpenbookV2Program")]
+    InvalidOpenbookV2Program,
+    #[msg("InvalidOpenbookV2Market")]
+    InvalidOpenbookV2Market,
+    #[msg("Non zero transfer fee")]
+    NonZeroTransferFee,
+    #[msg("Liquidation order failed to fill")]
+    LiquidationOrderFailedToFill,
+    #[msg("Invalid prediction market order")]
+    InvalidPredictionMarketOrder,
+    #[msg("Ed25519 Ix must be before place and make swift order ix")]
+    InvalidVerificationIxIndex,
+    #[msg("Swift message verificaiton failed")]
+    SigVerificationFailed,
+    #[msg("Market index mismatched b/w taker and maker swift order params")]
+    MismatchedSwiftOrderParamsMarketIndex,
+    #[msg("Swift only available for market/oracle perp orders")]
+    InvalidSwiftOrderParam,
+    #[msg("Place and take order success condition failed")]
+    PlaceAndTakeOrderSuccessConditionFailed,
+    #[msg("Invalid High Leverage Mode Config")]
+    InvalidHighLeverageModeConfig,
+}
+
+#[macro_export]
+macro_rules! print_error {
+    ($err:expr) => {{
+        || {
+            let error_code: ErrorCode = $err;
+            msg!("{:?} thrown at {}:{}", error_code, file!(), line!());
+            $err
+        }
+    }};
+}
+
+#[macro_export]
+macro_rules! math_error {
+    () => {{
+        || {
+            let error_code = $crate::error::ErrorCode::MathError;
+            msg!("Error {} thrown at {}:{}", error_code, file!(), line!());
+            error_code
+        }
+    }};
+}
+

@@ -198,7 +198,7 @@ fn validate_prices<'info>(
         deposit_price.price > 0,
         QuartzError::NegativeOraclePrice
     );
-    let mut deposit_lowest_price = (deposit_price.price as u64).checked_sub(deposit_price.conf)
+    let deposit_lowest_price = (deposit_price.price as u64).checked_sub(deposit_price.conf)
         .ok_or(QuartzError::NegativeOraclePrice)?;
 
     // Get the withdraw price, assuming worst case of highest end of confidence interval
@@ -213,14 +213,14 @@ fn validate_prices<'info>(
         withdraw_price.price > 0,
         QuartzError::NegativeOraclePrice
     );
-    let mut withdraw_highest_price = (withdraw_price.price as u64) + withdraw_price.conf;
+    let withdraw_highest_price = (withdraw_price.price as u64) + withdraw_price.conf;
 
-    // Normalize prices to the same exponent
-    if withdraw_price.exponent < deposit_price.exponent {
-        withdraw_highest_price = withdraw_highest_price * 10u64.pow((deposit_price.exponent - withdraw_price.exponent) as u32);
-    } else if deposit_price.exponent < withdraw_price.exponent {
-        deposit_lowest_price = deposit_lowest_price * 10u64.pow((withdraw_price.exponent - deposit_price.exponent) as u32);
-    }
+    // Check that the exponents are the same
+    // TODO - Normalize the exponenets if they don't match
+    check!(
+        withdraw_price.exponent == deposit_price.exponent,
+        QuartzError::InvalidPriceExponent
+    );
 
     // Normalize usdc base units to the same decimals as SOL
     let deposit_amount_normalized = deposit_amount * (LAMPORTS_PER_SOL / BASE_UNITS_PER_USDC);
@@ -230,23 +230,13 @@ fn validate_prices<'info>(
     let withdraw_value = withdraw_amount * withdraw_highest_price;
  
     // Allow for slippage, using integar multiplication to prevent floating point errors
-    let multiplier_withdraw = 100 * 100; // 100% x 100bps
-    let multiplier_deposit = multiplier_withdraw + (AUTO_REPAY_MAX_SLIPPAGE_BPS as u128);
+    let multiplier_deposit = 100 * 100; // 100% x 100bps
+    let multiplier_withdraw = multiplier_deposit - (AUTO_REPAY_MAX_SLIPPAGE_BPS as u128);
 
     let deposit_slippage_check_value = (deposit_value as u128).checked_mul(multiplier_deposit)
         .ok_or(QuartzError::MathOverflow)?;
     let withdraw_slippage_check_value = (withdraw_value as u128).checked_mul(multiplier_withdraw)
         .ok_or(QuartzError::MathOverflow)?;
-
-    msg!("Deposit amount: {}", deposit_amount);
-    msg!("Withdraw amount: {}", withdraw_amount);
-    msg!("Accepted slippage bps: {}", AUTO_REPAY_MAX_SLIPPAGE_BPS);
-    msg!("The lowest deposit price is {} * 10^{}", deposit_lowest_price, deposit_price.exponent);
-    msg!("The highest withdraw price is {} * 10^{}", withdraw_highest_price, withdraw_price.exponent);
-    msg!("Deposit value: {}", deposit_value);
-    msg!("Withdraw value: {}", withdraw_value);
-    msg!("Deposit slippage check value: {}", deposit_slippage_check_value);
-    msg!("Withdraw slippage check value: {}", withdraw_slippage_check_value);
 
     check!(
         deposit_slippage_check_value >= withdraw_slippage_check_value,

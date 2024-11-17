@@ -24,4 +24,6 @@ pub enum QuartzError {
     UnsupportedDriftMarketIndex,
     #[msg("Math overflow")]
     MathOverflow,
+    #[msg("Price exponents received from oracle should be the same")]
+    InvalidPriceExponent,
 }
