@@ -220,7 +220,6 @@ dependencies = [
  "anchor-derive-accounts",
  "anchor-derive-serde",
  "anchor-derive-space",
- "anchor-syn",
  "arrayref",
  "base64 0.13.1",
  "bincode",
@@ -888,7 +887,7 @@ dependencies = [
 [[package]]
 name = "drift"
 version = "2.101.0"
-source = "git+https://github.com/drift-labs/protocol-v2?rev=55b1e3e#55b1e3e41fc44a9e28b33a759371e180aa53c172"
+source = "git+https://github.com/drift-labs/protocol-v2?rev=55b1e3e41fc44a9e28b33a759371e180aa53c172#55b1e3e41fc44a9e28b33a759371e180aa53c172"
 dependencies = [
  "ahash 0.8.6",
  "anchor-lang",
@@ -906,8 +905,8 @@ dependencies = [
  "openbook-v2-light",
  "phoenix-v1",
  "pyth-client",
- "pyth-solana-receiver-sdk 0.3.0",
- "pythnet-sdk 2.1.0",
+ "pyth-solana-receiver-sdk",
+ "pythnet-sdk",
  "serum_dex",
  "solana-program",
  "solana-security-txt",
@@ -1060,7 +1059,8 @@ dependencies = [
  "anchor-spl",
  "drift",
  "jupiter",
- "pyth-solana-receiver-sdk 0.3.2",
+ "pyth-solana-receiver-sdk",
+ "solana-program",
  "solana-security-txt",
 ]
 
@@ -1582,7 +1582,7 @@ checksum = "c08d65885ee38876c4f86fa503fb49d7b507c2b62552df7c70b2fce627e06381"
 [[package]]
 name = "openbook-v2-light"
 version = "0.1.0"
-source = "git+https://github.com/drift-labs/protocol-v2?rev=55b1e3e#55b1e3e41fc44a9e28b33a759371e180aa53c172"
+source = "git+https://github.com/drift-labs/protocol-v2?rev=55b1e3e41fc44a9e28b33a759371e180aa53c172#55b1e3e41fc44a9e28b33a759371e180aa53c172"
 dependencies = [
  "anchor-lang",
  "borsh 0.10.3",
@@ -1733,19 +1733,7 @@ source = "git+https://github.com/drift-labs/pyth-crosschain?rev=3e8a24ecd0bcf22b
 dependencies = [
  "anchor-lang",
  "hex",
- "pythnet-sdk 2.1.0",
- "solana-program",
-]
-
-[[package]]
-name = "pyth-solana-receiver-sdk"
-version = "0.3.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "186d107c507e71a4528405eccefc6b3b7177a10ad6dd4bde531604debf87f091"
-dependencies = [
- "anchor-lang",
- "hex",
- "pythnet-sdk 2.3.1",
+ "pythnet-sdk",
  "solana-program",
 ]
 
@@ -1762,27 +1750,6 @@ dependencies = [
  "fast-math",
  "hex",
  "proc-macro2",
- "rustc_version",
- "serde",
- "sha3 0.10.8",
- "slow_primes",
- "solana-program",
- "thiserror",
-]
-
-[[package]]
-name = "pythnet-sdk"
-version = "2.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "498d20fd330277697aaee92f341bdabdb4695b10e05f054157a18ad8b7746a17"
-dependencies = [
- "anchor-lang",
- "bincode",
- "borsh 0.10.3",
- "bytemuck",
- "byteorder",
- "fast-math",
- "hex",
  "rustc_version",
  "serde",
  "sha3 0.10.8",
@@ -2646,7 +2613,7 @@ checksum = "6bdef32e8150c2a081110b42772ffe7d7c9032b606bc226c8260fd97e0976601"
 [[package]]
 name = "switchboard"
 version = "0.1.0"
-source = "git+https://github.com/drift-labs/protocol-v2?rev=55b1e3e#55b1e3e41fc44a9e28b33a759371e180aa53c172"
+source = "git+https://github.com/drift-labs/protocol-v2?rev=55b1e3e41fc44a9e28b33a759371e180aa53c172#55b1e3e41fc44a9e28b33a759371e180aa53c172"
 dependencies = [
  "anchor-lang",
 ]
@@ -2654,7 +2621,7 @@ dependencies = [
 [[package]]
 name = "switchboard-on-demand"
 version = "0.1.0"
-source = "git+https://github.com/drift-labs/protocol-v2?rev=55b1e3e#55b1e3e41fc44a9e28b33a759371e180aa53c172"
+source = "git+https://github.com/drift-labs/protocol-v2?rev=55b1e3e41fc44a9e28b33a759371e180aa53c172#55b1e3e41fc44a9e28b33a759371e180aa53c172"
 dependencies = [
  "anchor-lang",
  "bytemuck",

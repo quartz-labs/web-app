@@ -1,12 +1,12 @@
 use anchor_lang::prelude::*;
 use drift::{
-    Drift,
+    program::Drift,
     cpi::{
         initialize_user, 
         initialize_user_stats
     }, 
-    InitializeUser, 
-    InitializeUserStats
+    cpi::accounts::InitializeUser, 
+    cpi::accounts::InitializeUserStats
 };
 use crate::state::Vault;
 

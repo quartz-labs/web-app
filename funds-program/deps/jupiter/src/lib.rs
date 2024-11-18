@@ -8965,7 +8965,7 @@ pub mod rpc {
 }
 
 // I11n
-#[cfg(all(target_os = "solana", feature="i11n"))]
+#[cfg(feature="i11n")]
 pub mod i11n {
     use anchor_lang::prelude::*;
     use anchor_i11n::prelude::*;
@@ -10667,12 +10667,6 @@ pub mod instructions {
             self.serialize(&mut data).unwrap();
             data
         }
-    
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -10693,12 +10687,6 @@ pub mod instructions {
             self.serialize(&mut data).unwrap();
             data
         }
-    
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -10717,12 +10705,6 @@ pub mod instructions {
             data.extend_from_slice(&Self::DISCRIMINATOR);
             self.serialize(&mut data).unwrap();
             data
-        }
-    
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
         }
     }
     
@@ -10744,12 +10726,6 @@ pub mod instructions {
             self.serialize(&mut data).unwrap();
             data
         }
-    
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -10764,12 +10740,6 @@ pub mod instructions {
             data.extend_from_slice(&Self::DISCRIMINATOR);
             self.serialize(&mut data).unwrap();
             data
-        }
-    
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
         }
     }
     
@@ -10786,12 +10756,6 @@ pub mod instructions {
             self.serialize(&mut data).unwrap();
             data
         }
-    
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -10806,12 +10770,6 @@ pub mod instructions {
             data.extend_from_slice(&Self::DISCRIMINATOR);
             self.serialize(&mut data).unwrap();
             data
-        }
-    
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
         }
     }
     
@@ -10828,12 +10786,6 @@ pub mod instructions {
             self.serialize(&mut data).unwrap();
             data
         }
-    
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -10848,12 +10800,6 @@ pub mod instructions {
             data.extend_from_slice(&Self::DISCRIMINATOR);
             self.serialize(&mut data).unwrap();
             data
-        }
-    
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
         }
     }
     
@@ -10870,12 +10816,6 @@ pub mod instructions {
             self.serialize(&mut data).unwrap();
             data
         }
-    
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -10890,12 +10830,6 @@ pub mod instructions {
             data.extend_from_slice(&Self::DISCRIMINATOR);
             self.serialize(&mut data).unwrap();
             data
-        }
-    
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
         }
     }
     
@@ -10912,12 +10846,6 @@ pub mod instructions {
             self.serialize(&mut data).unwrap();
             data
         }
-    
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -10932,12 +10860,6 @@ pub mod instructions {
             data.extend_from_slice(&Self::DISCRIMINATOR);
             self.serialize(&mut data).unwrap();
             data
-        }
-    
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
         }
     }
     
@@ -10954,12 +10876,6 @@ pub mod instructions {
             self.serialize(&mut data).unwrap();
             data
         }
-    
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -10974,12 +10890,6 @@ pub mod instructions {
             data.extend_from_slice(&Self::DISCRIMINATOR);
             self.serialize(&mut data).unwrap();
             data
-        }
-    
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
         }
     }
     
@@ -10996,12 +10906,6 @@ pub mod instructions {
             self.serialize(&mut data).unwrap();
             data
         }
-    
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -11016,12 +10920,6 @@ pub mod instructions {
             data.extend_from_slice(&Self::DISCRIMINATOR);
             self.serialize(&mut data).unwrap();
             data
-        }
-    
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
         }
     }
     
@@ -11038,12 +10936,6 @@ pub mod instructions {
             self.serialize(&mut data).unwrap();
             data
         }
-    
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -11058,12 +10950,6 @@ pub mod instructions {
             data.extend_from_slice(&Self::DISCRIMINATOR);
             self.serialize(&mut data).unwrap();
             data
-        }
-    
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
         }
     }
     
@@ -11080,12 +10966,6 @@ pub mod instructions {
             self.serialize(&mut data).unwrap();
             data
         }
-    
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -11100,12 +10980,6 @@ pub mod instructions {
             data.extend_from_slice(&Self::DISCRIMINATOR);
             self.serialize(&mut data).unwrap();
             data
-        }
-    
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
         }
     }
     
@@ -11122,12 +10996,6 @@ pub mod instructions {
             self.serialize(&mut data).unwrap();
             data
         }
-    
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -11143,12 +11011,6 @@ pub mod instructions {
             self.serialize(&mut data).unwrap();
             data
         }
-    
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -11163,12 +11025,6 @@ pub mod instructions {
             data.extend_from_slice(&Self::DISCRIMINATOR);
             self.serialize(&mut data).unwrap();
             data
-        }
-    
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
         }
     }
     
@@ -11186,11 +11042,6 @@ pub mod instructions {
             data
         }
     
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -11205,12 +11056,6 @@ pub mod instructions {
             data.extend_from_slice(&Self::DISCRIMINATOR);
             self.serialize(&mut data).unwrap();
             data
-        }
-    
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
         }
     }
     
@@ -11228,11 +11073,6 @@ pub mod instructions {
             data
         }
     
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -11247,12 +11087,6 @@ pub mod instructions {
             data.extend_from_slice(&Self::DISCRIMINATOR);
             self.serialize(&mut data).unwrap();
             data
-        }
-    
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
         }
     }
     
@@ -11270,11 +11104,6 @@ pub mod instructions {
             data
         }
     
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -11291,11 +11120,6 @@ pub mod instructions {
             data
         }
     
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -11310,12 +11134,6 @@ pub mod instructions {
             data.extend_from_slice(&Self::DISCRIMINATOR);
             self.serialize(&mut data).unwrap();
             data
-        }
-    
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
         }
     }
     
@@ -11333,11 +11151,6 @@ pub mod instructions {
             data
         }
     
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -11353,12 +11166,6 @@ pub mod instructions {
             self.serialize(&mut data).unwrap();
             data
         }
-    
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -11373,12 +11180,6 @@ pub mod instructions {
             data.extend_from_slice(&Self::DISCRIMINATOR);
             self.serialize(&mut data).unwrap();
             data
-        }
-    
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
         }
     }
     
@@ -11396,11 +11197,6 @@ pub mod instructions {
             data
         }
     
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -11415,12 +11211,6 @@ pub mod instructions {
             data.extend_from_slice(&Self::DISCRIMINATOR);
             self.serialize(&mut data).unwrap();
             data
-        }
-    
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
         }
     }
     
@@ -11438,11 +11228,6 @@ pub mod instructions {
             data
         }
     
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -11459,11 +11244,6 @@ pub mod instructions {
             data
         }
     
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -11480,11 +11260,6 @@ pub mod instructions {
             data
         }
     
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -11501,11 +11276,6 @@ pub mod instructions {
             data
         }
     
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -11522,11 +11292,6 @@ pub mod instructions {
             data
         }
     
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -11543,11 +11308,6 @@ pub mod instructions {
             data
         }
     
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -11564,11 +11324,6 @@ pub mod instructions {
             data
         }
     
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -11583,12 +11338,6 @@ pub mod instructions {
             data.extend_from_slice(&Self::DISCRIMINATOR);
             self.serialize(&mut data).unwrap();
             data
-        }
-    
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
         }
     }
     
@@ -11606,11 +11355,6 @@ pub mod instructions {
             data
         }
     
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -11626,12 +11370,6 @@ pub mod instructions {
             self.serialize(&mut data).unwrap();
             data
         }
-    
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -11646,12 +11384,6 @@ pub mod instructions {
             data.extend_from_slice(&Self::DISCRIMINATOR);
             self.serialize(&mut data).unwrap();
             data
-        }
-    
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
         }
     }
     
@@ -11669,11 +11401,6 @@ pub mod instructions {
             data
         }
     
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -11690,11 +11417,6 @@ pub mod instructions {
             data
         }
     
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -11711,11 +11433,6 @@ pub mod instructions {
             data
         }
     
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -11732,11 +11449,6 @@ pub mod instructions {
             data
         }
     
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -11751,12 +11463,6 @@ pub mod instructions {
             data.extend_from_slice(&Self::DISCRIMINATOR);
             self.serialize(&mut data).unwrap();
             data
-        }
-    
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
         }
     }
     
@@ -11774,11 +11480,6 @@ pub mod instructions {
             data
         }
     
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -11795,11 +11496,6 @@ pub mod instructions {
             data
         }
     
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -11816,11 +11512,6 @@ pub mod instructions {
             data
         }
     
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -11837,11 +11528,6 @@ pub mod instructions {
             data
         }
     
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -11856,12 +11542,6 @@ pub mod instructions {
             data.extend_from_slice(&Self::DISCRIMINATOR);
             self.serialize(&mut data).unwrap();
             data
-        }
-    
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
         }
     }
     
@@ -11878,12 +11558,6 @@ pub mod instructions {
             self.serialize(&mut data).unwrap();
             data
         }
-    
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -11899,12 +11573,6 @@ pub mod instructions {
             self.serialize(&mut data).unwrap();
             data
         }
-    
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -11919,12 +11587,6 @@ pub mod instructions {
             data.extend_from_slice(&Self::DISCRIMINATOR);
             self.serialize(&mut data).unwrap();
             data
-        }
-    
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
         }
     }
     
@@ -11942,11 +11604,6 @@ pub mod instructions {
             data
         }
     
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -11963,11 +11620,6 @@ pub mod instructions {
             data
         }
     
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -11984,11 +11636,6 @@ pub mod instructions {
             data
         }
     
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -12005,11 +11652,6 @@ pub mod instructions {
             data
         }
     
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
-        }
     }
     
 
@@ -12024,12 +11666,6 @@ pub mod instructions {
             data.extend_from_slice(&Self::DISCRIMINATOR);
             self.serialize(&mut data).unwrap();
             data
-        }
-    
-        fn write_to(&self, mut data: &mut Vec<u8>) {
-            data.clear();
-            data.extend_from_slice(&Self::DISCRIMINATOR);
-            self.serialize(&mut data).unwrap()
         }
     }
             

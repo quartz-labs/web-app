@@ -1,8 +1,8 @@
 use anchor_lang::prelude::*;
 use drift::{
-    Drift,
+    program::Drift,
     cpi::delete_user, 
-    DeleteUser
+    cpi::accounts::DeleteUser
 };
 use crate::state::Vault;
 

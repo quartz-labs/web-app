@@ -3,9 +3,9 @@ use anchor_spl::{
     associated_token::AssociatedToken, token::{self, Mint, Token, TokenAccount}
 };
 use drift::{
-    Drift,
+    program::Drift,
     cpi::withdraw as drift_withdraw, 
-    Withdraw as DriftWithdraw
+    cpi::accounts::Withdraw as DriftWithdraw
 };
 use crate::state::Vault;
 

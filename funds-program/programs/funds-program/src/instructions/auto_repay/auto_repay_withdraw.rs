@@ -9,9 +9,9 @@ use anchor_spl::{
     associated_token::AssociatedToken, token::{self, Mint, Token, TokenAccount}
 };
 use drift::{
-    Drift,
+    program::Drift,
     cpi::withdraw as drift_withdraw, 
-    Withdraw as DriftWithdraw
+    cpi::accounts::Withdraw as DriftWithdraw
 };
 use jupiter::i11n::ExactOutRouteI11n;
 use pyth_solana_receiver_sdk::price_update::{get_feed_id_from_hex, PriceUpdateV2};

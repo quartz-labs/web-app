@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use solana_program::pubkey;
 
 pub const ANCHOR_DISCRIMINATOR: usize = 8;
 pub const PUBKEY_SIZE: usize = 32;
