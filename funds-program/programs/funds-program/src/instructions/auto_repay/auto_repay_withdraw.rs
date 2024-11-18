@@ -15,7 +15,7 @@ use drift::{
 };
 use jupiter::i11n::ExactOutRouteI11n;
 use pyth_solana_receiver_sdk::price_update::{get_feed_id_from_hex, PriceUpdateV2};
-use crate::{check, constants::{AUTO_REPAY_MAX_PRICE_AGE_SECONDS, AUTO_REPAY_MAX_SLIPPAGE_BPS, BASE_UNITS_PER_USDC, DRIFT_MARKET_INDEX_SOL, PYTH_FEED_SOL_USD, PYTH_FEED_USDC_USD, WSOL_MINT}, errors::QuartzError, state::Vault};
+use crate::{check, constants::{AUTO_REPAY_MAX_SLIPPAGE_BPS, BASE_UNITS_PER_USDC, DRIFT_MARKET_INDEX_SOL, MAX_PRICE_AGE_SECONDS_SOL, MAX_PRICE_AGE_SECONDS_USDC, PYTH_FEED_SOL_USD, PYTH_FEED_USDC_USD, WSOL_MINT}, errors::QuartzError, state::Vault};
 
 #[derive(Accounts)]
 pub struct AutoRepayWithdraw<'info> {
@@ -190,7 +190,7 @@ fn validate_prices<'info>(
     let deposit_feed_id: [u8; 32] = get_feed_id_from_hex(PYTH_FEED_USDC_USD)?;
     let deposit_price = ctx.accounts.deposit_price_update.get_price_no_older_than(
         &Clock::get()?, 
-        AUTO_REPAY_MAX_PRICE_AGE_SECONDS,
+        MAX_PRICE_AGE_SECONDS_USDC,
         &deposit_feed_id
     )?;
 
@@ -205,7 +205,7 @@ fn validate_prices<'info>(
     let withdraw_feed_id: [u8; 32] = get_feed_id_from_hex(PYTH_FEED_SOL_USD)?;
     let withdraw_price = ctx.accounts.withdraw_price_update.get_price_no_older_than(
         &Clock::get()?,
-        AUTO_REPAY_MAX_PRICE_AGE_SECONDS,
+        MAX_PRICE_AGE_SECONDS_SOL,
         &withdraw_feed_id
     )?;
 
