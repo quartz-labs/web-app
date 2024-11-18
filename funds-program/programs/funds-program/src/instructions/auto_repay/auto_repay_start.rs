@@ -10,7 +10,7 @@ use anchor_spl::token::{Mint, Token, TokenAccount};
 use jupiter::i11n::ExactOutRouteI11n;
 use crate::{
     check, 
-    errors::QuartzError
+    errors::ErrorCode
 };
 
 #[derive(Accounts)]
@@ -46,37 +46,37 @@ pub fn validate_instruction_order<'info>(
     // Check the 2nd instruction is Jupiter's exact_out_route
     check!(
         swap_instruction.program_id.eq(&jupiter::ID),
-        QuartzError::IllegalAutoRepayInstructions
+        ErrorCode::IllegalAutoRepayInstructions
     );
 
     check!(
         swap_instruction.data[..8]
             .eq(&jupiter::instructions::ExactOutRoute::DISCRIMINATOR),
-        QuartzError::IllegalAutoRepayInstructions
+        ErrorCode::IllegalAutoRepayInstructions
     );
 
     // Check the 3rd instruction is auto_repay_deposit
     check!(
         deposit_instruction.program_id.eq(&crate::id()),
-        QuartzError::IllegalAutoRepayInstructions
+        ErrorCode::IllegalAutoRepayInstructions
     );
 
     check!(
         deposit_instruction.data[..8]
             .eq(&crate::instruction::AutoRepayDeposit::DISCRIMINATOR),
-        QuartzError::IllegalAutoRepayInstructions
+        ErrorCode::IllegalAutoRepayInstructions
     );
 
     // Check the 4th instruction is auto_repay_withdraw
     check!(
         withdraw_instruction.program_id.eq(&crate::id()),
-        QuartzError::IllegalAutoRepayInstructions
+        ErrorCode::IllegalAutoRepayInstructions
     );
 
     check!(
         withdraw_instruction.data[..8]
             .eq(&crate::instruction::AutoRepayWithdraw::DISCRIMINATOR),
-        QuartzError::IllegalAutoRepayInstructions
+        ErrorCode::IllegalAutoRepayInstructions
     );
 
     Ok(())
@@ -90,17 +90,17 @@ fn validate_swap_data<'info>(
 
     check!(
         swap_i11n.args.platform_fee_bps.eq(&0),
-        QuartzError::InvalidPlatformFee
+        ErrorCode::InvalidPlatformFee
     );
 
     check!(
         swap_i11n.accounts.source_mint.pubkey.eq(&ctx.accounts.withdraw_mint.key()),
-        QuartzError::InvalidRepayMint
+        ErrorCode::InvalidRepayMint
     );
 
     check!(
         swap_i11n.accounts.user_source_token_account.pubkey.eq(&ctx.accounts.caller_withdraw_spl.key()),
-        QuartzError::InvalidSourceTokenAccount
+        ErrorCode::InvalidSourceTokenAccount
     );    
 
     Ok(())
@@ -124,7 +124,7 @@ pub fn auto_repay_start_handler<'info>(
 
     check!(
         start_withdraw_balance == caller_balance,
-        QuartzError::InvalidStartBalance
+        ErrorCode::InvalidStartBalance
     );
 
     Ok(())

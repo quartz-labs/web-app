@@ -4,7 +4,7 @@
 macro_rules! check {
     ($cond:expr, $err:expr) => {
         if !($cond) {
-            let error_code: $crate::errors::QuartzError = $err;
+            let error_code: $crate::errors::ErrorCode = $err;
             anchor_lang::prelude::msg!(
                 "Error \"{}\" thrown at {}:{}",
                 error_code,
@@ -17,7 +17,7 @@ macro_rules! check {
 
     ($cond:expr, $err:expr, $($arg:tt)*) => {
         if !($cond) {
-            let error_code: $crate::errors::QuartzError = $err;
+            let error_code: $crate::errors::ErrorCode = $err;
             anchor_lang::prelude::msg!(
                 "Error \"{}\" thrown at {}:{}",
                 error_code,

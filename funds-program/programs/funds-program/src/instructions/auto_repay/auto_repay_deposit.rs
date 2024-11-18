@@ -1,3 +1,5 @@
+use std::collections::BTreeSet;
+
 use anchor_lang::{
     prelude::*, solana_program::{instruction::Instruction, sysvar::instructions::{
         self,
@@ -6,15 +8,23 @@ use anchor_lang::{
     }}, Discriminator
 };
 use anchor_spl::{
-    associated_token::AssociatedToken, token::{self, Mint, Token, TokenAccount}
+    associated_token::AssociatedToken, 
+    token::{self, Mint, Token, TokenAccount}
 };
 use drift::{
-    program::Drift,
-    cpi::deposit as drift_deposit, 
-    cpi::accounts::Deposit as DriftDeposit,  
+    cpi::{
+        accounts::Deposit as DriftDeposit,
+        deposit as drift_deposit
+    }, instructions::optional_accounts::{load_maps, AccountMaps}, load_mut, math::margin::calculate_margin_requirement_and_total_collateral_and_liability_info, program::Drift, state::{
+        margin_calculation::{MarginContext, MarketIdentifier}, spot_market_map::get_writable_spot_market_set, state::State as DriftState, user::{User as DriftUser, UserStats as DriftUserStats}
+    }  
 };
 use jupiter::i11n::ExactOutRouteI11n;
-use crate::{check, constants::{DRIFT_MARKET_INDEX_USDC, USDC_MINT}, errors::QuartzError, state::Vault};
+use crate::{
+    check, 
+    constants::{DRIFT_MARKET_INDEX_USDC, USDC_MINT}, 
+    errors::ErrorCode, state::Vault
+};
 
 #[derive(Accounts)]
 pub struct AutoRepayDeposit<'info> {
@@ -47,7 +57,7 @@ pub struct AutoRepayDeposit<'info> {
     pub owner_spl: Box<Account<'info, TokenAccount>>,
 
     #[account(
-        constraint = spl_mint.key().eq(&USDC_MINT) @ QuartzError::InvalidRepayMint
+        constraint = spl_mint.key().eq(&USDC_MINT) @ ErrorCode::InvalidRepayMint
     )]
     pub spl_mint: Box<Account<'info, Mint>>,
 
@@ -58,7 +68,7 @@ pub struct AutoRepayDeposit<'info> {
         seeds::program = drift_program.key(),
         bump
     )]
-    pub drift_user: UncheckedAccount<'info>,
+    pub drift_user: AccountLoader<'info, DriftUser>,
     
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
@@ -67,7 +77,7 @@ pub struct AutoRepayDeposit<'info> {
         seeds::program = drift_program.key(),
         bump
     )]
-    pub drift_user_stats: UncheckedAccount<'info>,
+    pub drift_user_stats: AccountLoader<'info, DriftUserStats>,
 
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
@@ -76,7 +86,7 @@ pub struct AutoRepayDeposit<'info> {
         seeds::program = drift_program.key(),
         bump
     )]
-    pub drift_state: UncheckedAccount<'info>,
+    pub drift_state: Box<Account<'info, DriftState>>,
     
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(mut)]
@@ -103,25 +113,25 @@ fn validate_instruction_order<'info>(
     // Check the 1st instruction is auto_repay_start
     check!(
         start_instruction.program_id.eq(&crate::id()),
-        QuartzError::IllegalAutoRepayInstructions
+        ErrorCode::IllegalAutoRepayInstructions
     );
 
     check!(
         start_instruction.data[..8]
             .eq(&crate::instruction::AutoRepayStart::DISCRIMINATOR),
-        QuartzError::IllegalAutoRepayInstructions
+        ErrorCode::IllegalAutoRepayInstructions
     );
 
     // Check the 2nd instruction is Jupiter's exact_out_route
     check!(
         swap_instruction.program_id.eq(&jupiter::ID),
-        QuartzError::IllegalAutoRepayInstructions
+        ErrorCode::IllegalAutoRepayInstructions
     );
 
     check!(
         swap_instruction.data[..8]
             .eq(&jupiter::instructions::ExactOutRoute::DISCRIMINATOR),
-        QuartzError::IllegalAutoRepayInstructions
+        ErrorCode::IllegalAutoRepayInstructions
     );
 
     // This instruction is the 3rd instruction
@@ -129,31 +139,67 @@ fn validate_instruction_order<'info>(
     // Check the 4th instruction is auto_repay_withdraw
     check!(
         withdraw_instruction.program_id.eq(&crate::id()),
-        QuartzError::IllegalAutoRepayInstructions
+        ErrorCode::IllegalAutoRepayInstructions
     );
 
     check!(
         withdraw_instruction.data[..8]
             .eq(&crate::instruction::AutoRepayWithdraw::DISCRIMINATOR),
-        QuartzError::IllegalAutoRepayInstructions
+        ErrorCode::IllegalAutoRepayInstructions
     );
 
     Ok(())
 }
 
-fn validate_account_health() -> Result<()> {
-    // TODO: Implement
+fn validate_account_health<'info>(
+    ctx: &Context<'_, '_, 'info, 'info, AutoRepayDeposit<'info>>,
+    drift_market_index: u16
+) -> Result<()> {
+    pub(crate) type MarketSet = BTreeSet<u16>;
+
+    let user = &mut load_mut!(ctx.accounts.drift_user)?;
+    let state = &ctx.accounts.drift_state;
+    let liquidation_margin_buffer_ratio = state.liquidation_margin_buffer_ratio;
+    let clock = Clock::get()?;
+    let now = clock.unix_timestamp;
+
+    let remaining_accounts_iter = &mut ctx.remaining_accounts.iter().peekable();
+    let AccountMaps {
+        perp_market_map,
+        spot_market_map,
+        mut oracle_map,
+    } = load_maps(
+        remaining_accounts_iter,
+        &MarketSet::new(),
+        &get_writable_spot_market_set(drift_market_index),
+        clock.slot,
+        Some(state.oracle_guard_rails),
+    )?;
+
+    let margin_calculation = calculate_margin_requirement_and_total_collateral_and_liability_info(
+        user,
+        &perp_market_map,
+        &spot_market_map,
+        &mut oracle_map,
+        MarginContext::liquidation(liquidation_margin_buffer_ratio)
+            .track_market_margin_requirement(MarketIdentifier::spot(
+                1u16,
+            ))?
+            .fuel_numerator(user, now),
+    )?;
+
+    msg!("margin calculation: {:?}", margin_calculation);
 
     Ok(())
 }
 
 pub fn auto_repay_deposit_handler<'info>(
-    ctx: Context<'_, '_, '_, 'info, AutoRepayDeposit<'info>>,
+    ctx: Context<'_, '_, 'info, 'info, AutoRepayDeposit<'info>>,
     drift_market_index: u16
 ) -> Result<()> {
     check!(
         drift_market_index == DRIFT_MARKET_INDEX_USDC,
-        QuartzError::UnsupportedDriftMarketIndex
+        ErrorCode::UnsupportedDriftMarketIndex
     );
 
     let index: usize = load_current_index_checked(&ctx.accounts.instructions.to_account_info())?.into();
@@ -167,15 +213,15 @@ pub fn auto_repay_deposit_handler<'info>(
     let swap_i11n = ExactOutRouteI11n::try_from(&swap_instruction)?;
     check!(
         swap_i11n.accounts.destination_mint.pubkey.eq(&ctx.accounts.spl_mint.key()),
-        QuartzError::InvalidRepayMint
+        ErrorCode::InvalidRepayMint
     );
 
     check!(
         swap_i11n.accounts.user_destination_token_account.pubkey.eq(&ctx.accounts.owner_spl.key()),
-        QuartzError::InvalidDestinationTokenAccount
+        ErrorCode::InvalidDestinationTokenAccount
     );
 
-    validate_account_health()?;
+    validate_account_health(&ctx, drift_market_index)?;
 
     let vault_bump = ctx.accounts.vault.bump;
     let owner = ctx.accounts.owner.key();

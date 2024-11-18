@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 
 #[error_code]
-pub enum QuartzError {
+pub enum ErrorCode {
     #[msg("Illegal auto repay instructions")]
     IllegalAutoRepayInstructions,
     #[msg("Invalid mint provided")]
@@ -26,4 +26,6 @@ pub enum QuartzError {
     MathOverflow,
     #[msg("Price exponents received from oracle should be the same")]
     InvalidPriceExponent,
+    #[msg("Unable to load account loader")]
+    UnableToLoadAccountLoader,
 }
