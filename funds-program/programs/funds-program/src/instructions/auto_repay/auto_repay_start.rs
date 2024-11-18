@@ -103,6 +103,10 @@ fn validate_swap_data<'info>(
         ErrorCode::InvalidSourceTokenAccount
     );    
 
+    msg!("platform fee bps: {:?}", swap_i11n.args.platform_fee_bps);
+    msg!("source mint: {:?}", swap_i11n.accounts.source_mint.pubkey);
+    msg!("destination mint: {:?}", swap_i11n.accounts.destination_mint.pubkey);
+
     Ok(())
 }
 

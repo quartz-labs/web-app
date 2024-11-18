@@ -5,7 +5,11 @@ use anchor_spl::{
 use drift::{
     program::Drift,
     cpi::withdraw as drift_withdraw, 
-    cpi::accounts::Withdraw as DriftWithdraw
+    cpi::accounts::Withdraw as DriftWithdraw,
+    state::{
+        state::State as DriftState, 
+        user::{User as DriftUser, UserStats as DriftUserStats}
+    }
 };
 use crate::state::Vault;
 
@@ -48,7 +52,7 @@ pub struct Withdraw<'info> {
         seeds::program = drift_program.key(),
         bump
     )]
-    pub drift_user: UncheckedAccount<'info>,
+    pub drift_user: AccountLoader<'info, DriftUser>,
     
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
@@ -57,7 +61,7 @@ pub struct Withdraw<'info> {
         seeds::program = drift_program.key(),
         bump
     )]
-    pub drift_user_stats: UncheckedAccount<'info>,
+    pub drift_user_stats: AccountLoader<'info, DriftUserStats>,
 
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
@@ -66,7 +70,7 @@ pub struct Withdraw<'info> {
         seeds::program = drift_program.key(),
         bump
     )]
-    pub drift_state: UncheckedAccount<'info>,
+    pub drift_state: Box<Account<'info, DriftState>>,
 
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(mut)]

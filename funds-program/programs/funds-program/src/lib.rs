@@ -4,6 +4,7 @@ mod macros;
 mod state;
 mod errors;
 mod constants;
+mod math;
 mod instructions;
 use instructions::*;
 
@@ -80,7 +81,7 @@ pub mod funds_program {
     }
 
     pub fn auto_repay_withdraw<'info>(
-        ctx: Context<'_, '_, '_, 'info, AutoRepayWithdraw<'info>>,
+        ctx: Context<'_, '_, 'info, 'info, AutoRepayWithdraw<'info>>,
         drift_market_index: u16
     ) -> Result<()> {
         auto_repay_withdraw_handler(ctx, drift_market_index)

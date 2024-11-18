@@ -1,21 +1,37 @@
 use anchor_lang::{
-    prelude::*, solana_program::{instruction::Instruction, native_token::LAMPORTS_PER_SOL, sysvar::instructions::{
-        self,
-        load_current_index_checked, 
-        load_instruction_at_checked
-    }}, Discriminator
+    prelude::*, 
+    solana_program::{
+        instruction::Instruction, 
+        native_token::LAMPORTS_PER_SOL, 
+        sysvar::instructions::{
+            self,
+            load_current_index_checked, 
+            load_instruction_at_checked
+        }
+    }, 
+    Discriminator
 };
 use anchor_spl::{
     associated_token::AssociatedToken, token::{self, Mint, Token, TokenAccount}
 };
 use drift::{
-    program::Drift,
-    cpi::withdraw as drift_withdraw, 
-    cpi::accounts::Withdraw as DriftWithdraw
+    cpi::{accounts::Withdraw as DriftWithdraw, withdraw as drift_withdraw}, 
+    load_mut, 
+    program::Drift, 
+    state::{
+        state::State as DriftState, 
+        user::{User as DriftUser, UserStats as DriftUserStats}
+    }
 };
 use jupiter::i11n::ExactOutRouteI11n;
 use pyth_solana_receiver_sdk::price_update::{get_feed_id_from_hex, PriceUpdateV2};
-use crate::{check, constants::{AUTO_REPAY_MAX_SLIPPAGE_BPS, BASE_UNITS_PER_USDC, DRIFT_MARKET_INDEX_SOL, MAX_PRICE_AGE_SECONDS_SOL, MAX_PRICE_AGE_SECONDS_USDC, PYTH_FEED_SOL_USD, PYTH_FEED_USDC_USD, WSOL_MINT}, errors::ErrorCode, state::Vault};
+use crate::{
+    check, 
+    constants::{AUTO_REPAY_MAX_SLIPPAGE_BPS, BASE_UNITS_PER_USDC, DRIFT_MARKET_INDEX_SOL, MAX_PRICE_AGE_SECONDS_SOL, MAX_PRICE_AGE_SECONDS_USDC, PYTH_FEED_SOL_USD, PYTH_FEED_USDC_USD, WSOL_MINT}, 
+    errors::ErrorCode, 
+    math::get_margin_calculation, 
+    state::Vault
+};
 
 #[derive(Accounts)]
 pub struct AutoRepayWithdraw<'info> {
@@ -59,7 +75,7 @@ pub struct AutoRepayWithdraw<'info> {
         seeds::program = drift_program.key(),
         bump
     )]
-    pub drift_user: UncheckedAccount<'info>,
+    pub drift_user: AccountLoader<'info, DriftUser>,
     
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
@@ -68,7 +84,7 @@ pub struct AutoRepayWithdraw<'info> {
         seeds::program = drift_program.key(),
         bump
     )]
-    pub drift_user_stats: UncheckedAccount<'info>,
+    pub drift_user_stats: AccountLoader<'info, DriftUserStats>,
 
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
@@ -77,7 +93,7 @@ pub struct AutoRepayWithdraw<'info> {
         seeds::program = drift_program.key(),
         bump
     )]
-    pub drift_state: UncheckedAccount<'info>,
+    pub drift_state: Box<Account<'info, DriftState>>,
 
     /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(mut)]
@@ -193,7 +209,6 @@ fn validate_prices<'info>(
         MAX_PRICE_AGE_SECONDS_USDC,
         &deposit_feed_id
     )?;
-
     check!(
         deposit_price.price > 0,
         ErrorCode::NegativeOraclePrice
@@ -208,7 +223,6 @@ fn validate_prices<'info>(
         MAX_PRICE_AGE_SECONDS_SOL,
         &withdraw_feed_id
     )?;
-
     check!(
         withdraw_price.price > 0,
         ErrorCode::NegativeOraclePrice
@@ -243,17 +257,33 @@ fn validate_prices<'info>(
         ErrorCode::MaxSlippageExceeded
     );
 
+    msg!("The deposit price is ({} ± {}) * 10^{}", deposit_price.price, deposit_price.conf, deposit_price.exponent);
+    msg!("The withdraw price is ({} ± {}) * 10^{}", withdraw_price.price, withdraw_price.conf, withdraw_price.exponent);
+    msg!("deposit slippage check value: {:?}", deposit_slippage_check_value);
+    msg!("withdraw slippage check value: {:?}", withdraw_slippage_check_value);
+
     Ok(())
 }
 
-fn validate_account_health() -> Result<()> {
-    // TODO: Implement
+fn validate_account_health<'info>(
+    ctx: &Context<'_, '_, 'info, 'info, AutoRepayWithdraw<'info>>,
+    drift_market_index: u16
+) -> Result<()> {
+    let user = &mut load_mut!(ctx.accounts.drift_user)?;
+    let margin_calculation = get_margin_calculation(
+        user, 
+        &ctx.accounts.drift_state, 
+        drift_market_index, 
+        &ctx.remaining_accounts
+    )?;
+
+    msg!("margin calculation: {:?}", margin_calculation);
 
     Ok(())
 }
 
 pub fn auto_repay_withdraw_handler<'info>(
-    ctx: Context<'_, '_, '_, 'info, AutoRepayWithdraw<'info>>,
+    ctx: Context<'_, '_, 'info, 'info, AutoRepayWithdraw<'info>>,
     drift_market_index: u16
 ) -> Result<()> {
     check!(
@@ -348,7 +378,7 @@ pub fn auto_repay_withdraw_handler<'info>(
     );
     token::close_account(cpi_ctx_close)?;
 
-    validate_account_health()?;
+    validate_account_health(&ctx, drift_market_index)?;
 
     Ok(())
 }

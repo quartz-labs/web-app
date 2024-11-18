@@ -1,11 +1,14 @@
-use std::collections::BTreeSet;
-
 use anchor_lang::{
-    prelude::*, solana_program::{instruction::Instruction, sysvar::instructions::{
-        self,
-        load_current_index_checked, 
-        load_instruction_at_checked
-    }}, Discriminator
+    prelude::*, 
+    solana_program::{
+        instruction::Instruction, 
+        sysvar::instructions::{
+            self,
+            load_current_index_checked, 
+            load_instruction_at_checked
+        }
+    }, 
+    Discriminator
 };
 use anchor_spl::{
     associated_token::AssociatedToken, 
@@ -15,15 +18,21 @@ use drift::{
     cpi::{
         accounts::Deposit as DriftDeposit,
         deposit as drift_deposit
-    }, instructions::optional_accounts::{load_maps, AccountMaps}, load_mut, math::margin::calculate_margin_requirement_and_total_collateral_and_liability_info, program::Drift, state::{
-        margin_calculation::{MarginContext, MarketIdentifier}, spot_market_map::get_writable_spot_market_set, state::State as DriftState, user::{User as DriftUser, UserStats as DriftUserStats}
+    }, 
+    load_mut, 
+    program::Drift, 
+    state::{
+        state::State as DriftState, 
+        user::{User as DriftUser, UserStats as DriftUserStats}
     }  
 };
 use jupiter::i11n::ExactOutRouteI11n;
 use crate::{
     check, 
     constants::{DRIFT_MARKET_INDEX_USDC, USDC_MINT}, 
-    errors::ErrorCode, state::Vault
+    errors::ErrorCode, 
+    math::get_margin_calculation, 
+    state::Vault
 };
 
 #[derive(Accounts)]
@@ -61,7 +70,6 @@ pub struct AutoRepayDeposit<'info> {
     )]
     pub spl_mint: Box<Account<'info, Mint>>,
 
-    /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
         mut,
         seeds = [b"user".as_ref(), vault.key().as_ref(), (0u16).to_le_bytes().as_ref()],
@@ -70,7 +78,6 @@ pub struct AutoRepayDeposit<'info> {
     )]
     pub drift_user: AccountLoader<'info, DriftUser>,
     
-    /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
         mut,
         seeds = [b"user_stats".as_ref(), vault.key().as_ref()],
@@ -79,7 +86,6 @@ pub struct AutoRepayDeposit<'info> {
     )]
     pub drift_user_stats: AccountLoader<'info, DriftUserStats>,
 
-    /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
         mut,
         seeds = [b"drift_state".as_ref()],
@@ -155,37 +161,12 @@ fn validate_account_health<'info>(
     ctx: &Context<'_, '_, 'info, 'info, AutoRepayDeposit<'info>>,
     drift_market_index: u16
 ) -> Result<()> {
-    pub(crate) type MarketSet = BTreeSet<u16>;
-
     let user = &mut load_mut!(ctx.accounts.drift_user)?;
-    let state = &ctx.accounts.drift_state;
-    let liquidation_margin_buffer_ratio = state.liquidation_margin_buffer_ratio;
-    let clock = Clock::get()?;
-    let now = clock.unix_timestamp;
-
-    let remaining_accounts_iter = &mut ctx.remaining_accounts.iter().peekable();
-    let AccountMaps {
-        perp_market_map,
-        spot_market_map,
-        mut oracle_map,
-    } = load_maps(
-        remaining_accounts_iter,
-        &MarketSet::new(),
-        &get_writable_spot_market_set(drift_market_index),
-        clock.slot,
-        Some(state.oracle_guard_rails),
-    )?;
-
-    let margin_calculation = calculate_margin_requirement_and_total_collateral_and_liability_info(
-        user,
-        &perp_market_map,
-        &spot_market_map,
-        &mut oracle_map,
-        MarginContext::liquidation(liquidation_margin_buffer_ratio)
-            .track_market_margin_requirement(MarketIdentifier::spot(
-                1u16,
-            ))?
-            .fuel_numerator(user, now),
+    let margin_calculation = get_margin_calculation(
+        user, 
+        &ctx.accounts.drift_state, 
+        drift_market_index, 
+        &ctx.remaining_accounts
     )?;
 
     msg!("margin calculation: {:?}", margin_calculation);
