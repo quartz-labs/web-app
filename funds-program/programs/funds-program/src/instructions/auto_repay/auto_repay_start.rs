@@ -9,8 +9,7 @@ use anchor_lang::{
 use anchor_spl::token::{Mint, Token, TokenAccount};
 use jupiter::i11n::ExactOutRouteI11n;
 use crate::{
-    check, 
-    errors::QuartzError
+    check, constants::{JUPITER_EXACT_OUT_ROUTE_DISCRIMINATOR, JUPITER_ID}, errors::QuartzError
 };
 
 #[derive(Accounts)]
@@ -45,13 +44,12 @@ pub fn validate_instruction_order<'info>(
 
     // Check the 2nd instruction is Jupiter's exact_out_route
     check!(
-        swap_instruction.program_id.eq(&jupiter::ID),
+        swap_instruction.program_id.eq(&JUPITER_ID),
         QuartzError::IllegalAutoRepayInstructions
     );
 
     check!(
-        swap_instruction.data[..8]
-            .eq(&jupiter::instructions::ExactOutRoute::DISCRIMINATOR),
+        swap_instruction.data[..8].eq(&JUPITER_EXACT_OUT_ROUTE_DISCRIMINATOR),
         QuartzError::IllegalAutoRepayInstructions
     );
 
