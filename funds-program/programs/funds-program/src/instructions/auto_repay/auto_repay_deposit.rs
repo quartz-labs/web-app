@@ -170,6 +170,7 @@ fn validate_account_health<'info>(
     )?;
 
     msg!("margin calculation: {:?}", margin_calculation);
+    msg!("margin context: {:?}", margin_calculation.context);
 
     Ok(())
 }
@@ -192,11 +193,13 @@ pub fn auto_repay_deposit_handler<'info>(
 
     // Validate mint
     let swap_i11n = ExactOutRouteI11n::try_from(&swap_instruction)?;
+    msg!("destination mint: {:?}", swap_i11n.accounts.destination_mint.pubkey);
     check!(
         swap_i11n.accounts.destination_mint.pubkey.eq(&ctx.accounts.spl_mint.key()),
         ErrorCode::InvalidRepayMint
     );
 
+    msg!("destination token account: {:?}", swap_i11n.accounts.user_destination_token_account.pubkey);
     check!(
         swap_i11n.accounts.user_destination_token_account.pubkey.eq(&ctx.accounts.owner_spl.key()),
         ErrorCode::InvalidDestinationTokenAccount

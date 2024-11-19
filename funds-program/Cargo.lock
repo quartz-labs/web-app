@@ -185,8 +185,7 @@ dependencies = [
 [[package]]
 name = "anchor-i11n"
 version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f54c456296663e530c63a44862ae3f2970b22e38f575632048000684725c6c94"
+source = "git+https://github.com/deanmlittle/anchor-i11n.git#699cff32e186e766076147380d2ea5596d990feb"
 dependencies = [
  "anchor-i11n-derive",
  "anchor-lang",
@@ -195,8 +194,7 @@ dependencies = [
 [[package]]
 name = "anchor-i11n-derive"
 version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6d2e72b8cfc15923cfaed70999414c7690f55f1df71c31dcadff4a8165efdcfb"
+source = "git+https://github.com/deanmlittle/anchor-i11n.git#699cff32e186e766076147380d2ea5596d990feb"
 dependencies = [
  "anchor-lang",
  "convert_case",
@@ -1053,7 +1051,7 @@ checksum = "3f9eec918d3f24069decb9af1554cad7c880e2da24a9afd88aca000531ab82c1"
 
 [[package]]
 name = "funds-program"
-version = "0.1.15"
+version = "0.1.16"
 dependencies = [
  "anchor-lang",
  "anchor-spl",

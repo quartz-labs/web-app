@@ -86,7 +86,12 @@ fn validate_swap_data<'info>(
     ctx: &Context<'_, '_, '_, 'info, AutoRepayStart<'info>>,
     swap_instruction: &Instruction,
 ) -> Result<()> {
+
+    msg!("Attempting to deserialize swap instruction");
+
     let swap_i11n = ExactOutRouteI11n::try_from(swap_instruction)?;
+
+    msg!("Successfully deserialized swap instruction");
 
     check!(
         swap_i11n.args.platform_fee_bps.eq(&0),

@@ -148,7 +148,6 @@ fn validate_instruction_order<'info>(
         ErrorCode::IllegalAutoRepayInstructions
     );
     
-
     // Check the 3rd instruction is auto_repay_deposit
     check!(
         deposit_instruction.program_id.eq(&crate::id()),
@@ -171,24 +170,28 @@ fn validate_user_accounts<'info>(
     deposit_instruction: &Instruction
 ) -> Result<()> {
     let deposit_vault = deposit_instruction.accounts[0].pubkey;
+    msg!("deposit vault: {:?}", deposit_vault);
     check!(
         ctx.accounts.vault.key().eq(&deposit_vault),
         ErrorCode::InvalidUserAccounts
     );
 
     let deposit_owner = deposit_instruction.accounts[2].pubkey;
+    msg!("deposit owner: {:?}", deposit_owner);
     check!(
         ctx.accounts.owner.key().eq(&deposit_owner),
         ErrorCode::InvalidUserAccounts
     );
 
     let deposit_drift_user = deposit_instruction.accounts[5].pubkey;
+    msg!("deposit drift user: {:?}", deposit_drift_user);
     check!(
         ctx.accounts.drift_user.key().eq(&deposit_drift_user),
         ErrorCode::InvalidUserAccounts
     );
 
     let deposit_drift_user_stats = deposit_instruction.accounts[6].pubkey;
+    msg!("deposit drift user stats: {:?}", deposit_drift_user_stats);
     check!(
         ctx.accounts.drift_user_stats.key().eq(&deposit_drift_user_stats),
         ErrorCode::InvalidUserAccounts
@@ -278,6 +281,7 @@ fn validate_account_health<'info>(
     )?;
 
     msg!("margin calculation: {:?}", margin_calculation);
+    msg!("margin context: {:?}", margin_calculation.context);
 
     Ok(())
 }
@@ -302,11 +306,13 @@ pub fn auto_repay_withdraw_handler<'info>(
 
     // Validate mint and ATA are the same as swap
     let swap_i11n = ExactOutRouteI11n::try_from(&swap_instruction)?;
+    msg!("source mint: {:?}", swap_i11n.accounts.source_mint.pubkey);
     check!(
         swap_i11n.accounts.source_mint.pubkey.eq(&ctx.accounts.spl_mint.key()),
         ErrorCode::InvalidRepayMint
     );
 
+    msg!("source token account: {:?}", swap_i11n.accounts.user_source_token_account.pubkey);
     check!(
         swap_i11n.accounts.user_source_token_account.pubkey.eq(&ctx.accounts.owner_spl.key()),
         ErrorCode::InvalidSourceTokenAccount
