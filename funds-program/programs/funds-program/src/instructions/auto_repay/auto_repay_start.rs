@@ -114,14 +114,22 @@ pub fn auto_repay_start_handler<'info>(
     ctx: Context<'_, '_, '_, 'info, AutoRepayStart<'info>>,
     start_withdraw_balance: u64
 ) -> Result<()> {
+    msg!("start repay");
+
     let index: usize = load_current_index_checked(&ctx.accounts.instructions.to_account_info())?.into();
     let swap_instruction = load_instruction_at_checked(index + 1, &ctx.accounts.instructions.to_account_info())?;
     let deposit_instruction = load_instruction_at_checked(index + 2, &ctx.accounts.instructions.to_account_info())?;
     let withdraw_instruction = load_instruction_at_checked(index + 3, &ctx.accounts.instructions.to_account_info())?;
 
+    msg!("validate instruction order");
+    
     validate_instruction_order(&swap_instruction, &deposit_instruction, &withdraw_instruction)?;
 
+    msg!("validate swap data");
+
     validate_swap_data(&ctx, &swap_instruction)?;
+
+    msg!("validated");
 
     // Check declared start balance is accurate
     let caller_balance = ctx.accounts.caller_withdraw_spl.amount;

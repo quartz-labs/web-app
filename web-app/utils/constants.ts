@@ -1,6 +1,7 @@
 import { PublicKey } from "@solana/web3.js";
 
 export const FUNDS_PROGRAM_ID = new PublicKey("6JjHXLheGSNvvexgzMthEcgjkcirDrGduc3HAKB2P1v2");
+export const MARGINFI_PROGRAM_ID = new PublicKey("MFv2hWf31Z9kbCa1snEPYctwafyhdvnV7FZnsebVacA");
 export const FUNDS_PROGRAM_ADDRESS_TABLE = new PublicKey("96BmeKKVGX3LKYSKo3FCEom1YpNY11kCnGscKq6ouxLx"); // Mainnet
 // export const FUNDS_PROGRAM_ADDRESS_TABLE = new PublicKey("5RFqRXucCtpz4ZzZWMLV1bRMVyESVFusptr1cGMRHQTr"); // Devnet
 

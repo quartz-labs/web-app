@@ -1,7 +1,6 @@
 import quartzIdl from "../idl/funds_program.json";
 import { FundsProgram } from "@/types/funds_program";
 import marginfiIdl from "../idl/marginfi.json";
-import { MarginFi } from "@/types/marginfi";
 
 import { AnchorProvider, BN, Idl, Program, setProvider, web3 } from "@coral-xyz/anchor";
 import { AnchorWallet } from "@solana/wallet-adapter-react";
@@ -12,7 +11,9 @@ import {
     MARGINFI_GROUP_1,
     DECIMALS_USDC,
     FUNDS_PROGRAM_ADDRESS_TABLE,
-    DECIMALS_SOL
+    DECIMALS_SOL,
+    FUNDS_PROGRAM_ID,
+    MARGINFI_PROGRAM_ID
 } from "./constants";
 import { ASSOCIATED_PROGRAM_ID, TOKEN_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/utils/token";
 import { SystemProgram, VersionedTransaction, TransactionMessage, Connection, TransactionInstruction, SYSVAR_INSTRUCTIONS_PUBKEY } from "@solana/web3.js";
@@ -39,8 +40,8 @@ export const initAccount = async (
 ) => {
     const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
     setProvider(provider);
-    const quartzProgram = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>;
-    const marginfiProgram = new Program(marginfiIdl as Idl, provider) as unknown as Program<MarginFi>;
+    const quartzProgram = new Program(quartzIdl as Idl, FUNDS_PROGRAM_ID, provider) as unknown as Program<FundsProgram>;
+    const marginfiProgram = new Program(marginfiIdl as Idl, MARGINFI_PROGRAM_ID, provider);
     const marginfiClient = await MarginfiClient.fetch(getConfig(), wallet, connection);
 
     const vaultPda = getVault(wallet.publicKey);
@@ -50,7 +51,6 @@ export const initAccount = async (
         const ix_initUser = await quartzProgram.methods
             .initUser()
             .accounts({
-                // @ts-expect-error - IDL issue
                 vault: vaultPda,
                 owner: wallet.publicKey,
                 systemProgram: SystemProgram.programId,
@@ -128,7 +128,7 @@ export const closeAccount = async (
 ) => {
     const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
     setProvider(provider);
-    const program = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>;
+    const program = new Program(quartzIdl as Idl, FUNDS_PROGRAM_ID, provider) as unknown as Program<FundsProgram>;
 
     const vaultPda = getVault(wallet.publicKey);
 
@@ -187,7 +187,7 @@ export const closeAccount = async (
 export const makeDepositLamportsInstructions = async (wallet: AnchorWallet, connection: web3.Connection, amountLamports: number, showError: (props: ShowErrorProps) => void) => {
     const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
     setProvider(provider);
-    const program = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>;
+    const program = new Program(quartzIdl as Idl, FUNDS_PROGRAM_ID, provider) as unknown as Program<FundsProgram>;
 
     const walletWSol = await getAssociatedTokenAddress(WSOL_MINT, wallet.publicKey);
     const vaultPda = getVault(wallet.publicKey);
@@ -206,7 +206,6 @@ export const makeDepositLamportsInstructions = async (wallet: AnchorWallet, conn
         const ix_deposit = await program.methods
             .deposit(new BN(amountLamports), DRIFT_MARKET_INDEX_SOL, false)
             .accounts({
-                //@ts-expect-error: IDL issues
                 vault: vaultPda,
                 vaultSpl: getVaultSpl(vaultPda, WSOL_MINT),
                 owner: wallet.publicKey,
@@ -290,7 +289,7 @@ export const withdrawLamports = async (
 ) => {
     const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
     setProvider(provider);
-    const program = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>;
+    const program = new Program(quartzIdl as Idl, FUNDS_PROGRAM_ID, provider) as unknown as Program<FundsProgram>;
 
     const walletWSol = await getAssociatedTokenAddress(WSOL_MINT, wallet.publicKey);
     const vaultPda = getVault(wallet.publicKey);
@@ -301,7 +300,6 @@ export const withdrawLamports = async (
         const ix_withdraw = await program.methods
             .withdraw(new BN(amountLamports), DRIFT_MARKET_INDEX_SOL, true)
             .accounts({
-                // @ts-expect-error - IDL issue
                 vault: vaultPda,
                 vaultSpl: getVaultSpl(vaultPda, WSOL_MINT),
                 owner: wallet.publicKey,
@@ -368,7 +366,7 @@ export const depositUsdc = async (
 ) => {
     const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
     setProvider(provider);
-    const program = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>;
+    const program = new Program(quartzIdl as Idl, FUNDS_PROGRAM_ID, provider) as unknown as Program<FundsProgram>;
     
     const vaultPda = getVault(wallet.publicKey);
     const walletUsdc = await getAssociatedTokenAddress(USDC_MINT, wallet.publicKey);
@@ -378,7 +376,6 @@ export const depositUsdc = async (
         const ix_deposit = await program.methods
             .deposit(new BN(amountMicroCents), DRIFT_MARKET_INDEX_USDC, true)
             .accounts({
-                // @ts-expect-error - IDL issue
                 vault: vaultPda,
                 vaultSpl: getVaultSpl(vaultPda, USDC_MINT),
                 owner: wallet.publicKey,
@@ -439,7 +436,7 @@ export const withdrawUsdc = async (
 ) => {
     const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
     setProvider(provider);
-    const program = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>;
+    const program = new Program(quartzIdl as Idl, FUNDS_PROGRAM_ID, provider) as unknown as Program<FundsProgram>;
     
     const vaultPda = getVault(wallet.publicKey);
     const walletUsdc = await getAssociatedTokenAddress(USDC_MINT, wallet.publicKey);
@@ -450,7 +447,6 @@ export const withdrawUsdc = async (
         const ix_withdraw = await program.methods
             .withdraw(new BN(amountMicroCents), DRIFT_MARKET_INDEX_USDC, false)
             .accounts({
-                // @ts-expect-error - IDL issue
                 vault: vaultPda,
                 vaultSpl: getVaultSpl(vaultPda, USDC_MINT),
                 owner: wallet.publicKey,
@@ -511,7 +507,7 @@ export const repayUsdcWithSol = async (
 ) => {
     const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
     setProvider(provider);
-    const quartzProgram = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>;
+    const quartzProgram = new Program(quartzIdl as Idl, FUNDS_PROGRAM_ID, provider) as unknown as Program<FundsProgram>;
 
     const vaultPda = getVault(wallet.publicKey);
     const walletUsdc = await getAssociatedTokenAddress(USDC_MINT, wallet.publicKey);
@@ -544,7 +540,6 @@ export const repayUsdcWithSol = async (
         const ix_depositUsdc = await quartzProgram.methods
             .deposit(new BN(amountMicroCents), DRIFT_MARKET_INDEX_USDC, true)
             .accounts({
-                // @ts-expect-error - IDL issue
                 vault: vaultPda,
                 vaultSpl: getVaultSpl(vaultPda, USDC_MINT),
                 owner: wallet.publicKey,
@@ -570,7 +565,6 @@ export const repayUsdcWithSol = async (
         const ix_withdrawLamports = await quartzProgram.methods
             .withdraw(new BN(amountLamports), DRIFT_MARKET_INDEX_SOL, true)
             .accounts({
-                // @ts-expect-error - IDL issue
                 vault: vaultPda,
                 vaultSpl: getVaultSpl(vaultPda, WSOL_MINT),
                 owner: wallet.publicKey,
@@ -635,7 +629,7 @@ export const autoRepay = async (
 ) => {
     const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
     setProvider(provider);
-    const quartzProgram = new Program(quartzIdl as Idl, provider) as unknown as Program<FundsProgram>;
+    const quartzProgram = new Program(quartzIdl as Idl, FUNDS_PROGRAM_ID, provider) as unknown as Program<FundsProgram>;
 
     const vaultPda = getVault(wallet.publicKey);
     const walletUsdc = await getAssociatedTokenAddress(USDC_MINT, wallet.publicKey);
@@ -673,7 +667,6 @@ export const autoRepay = async (
             .autoRepayStart(new BN(walletWsolBalance))
             .accounts({
                 caller: wallet.publicKey,
-                // @ts-expect-error - IDL issue
                 callerWithdrawSpl: walletWSol,
                 withdrawMint: WSOL_MINT,
                 tokenProgram: TOKEN_PROGRAM_ID,
@@ -691,7 +684,6 @@ export const autoRepay = async (
         const ix_autoRepayDeposit = await quartzProgram.methods
             .autoRepayDeposit(DRIFT_MARKET_INDEX_USDC)
             .accounts({
-                // @ts-expect-error - IDL issue
                 vault: vaultPda,
                 vaultSpl: getVaultSpl(vaultPda, USDC_MINT),
                 owner: wallet.publicKey,
@@ -727,7 +719,6 @@ export const autoRepay = async (
         const ix_autoRepayWithdraw = await quartzProgram.methods
             .autoRepayWithdraw(DRIFT_MARKET_INDEX_SOL)
             .accounts({
-                // @ts-expect-error - IDL issue
                 vault: vaultPda,
                 vaultSpl: getVaultSpl(vaultPda, WSOL_MINT),
                 owner: wallet.publicKey,
