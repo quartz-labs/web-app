@@ -14,7 +14,6 @@
     "@jup-ag/api": "^6.0.29",
     "@mrgnlabs/marginfi-client-v2": "^4.0.0",
     "@mrgnlabs/mrgn-common": "^1.8.0",
-    "@pythnetwork/pyth-solana-receiver": "^0.8.2",
     "@solana-developers/preset-next": "3.1.0",
     "@solana/spl-token": "^0.4.9",
     "@solana/wallet-adapter-base": "^0.9.23",

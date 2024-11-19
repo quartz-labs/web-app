@@ -7,7 +7,7 @@ import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useError } from "@/context/error-provider";
 import { DECIMALS_USDC, MICRO_CENTS_PER_USDC } from "@/utils/constants";
 import { baseUnitToUi, uiToBaseUnit } from "@/utils/helpers";
-import { autoRepay } from "@/utils/instructions";
+import { repayUsdcWithSol } from "@/utils/instructions";
 import { AccountData } from "@/utils/accountData";
 import { useTxStatus } from "@/context/tx-status-provider";
 
@@ -48,8 +48,7 @@ export default function RepayUSDCWithCollateralModal(
 
         setAwaitingSign(true);
         const baseUnits = uiToBaseUnit(amount, DECIMALS_USDC).toNumber();
-        // const signature = await repayWithCollateral(wallet, connection, baseUnits, showError, showTxStatus);
-        const signature = await autoRepay(wallet, connection, baseUnits, showError, showTxStatus);
+        const signature = await repayUsdcWithSol(wallet, connection, baseUnits, showError, showTxStatus);
         setAwaitingSign(false);
 
         if (signature) closeModal(signature);

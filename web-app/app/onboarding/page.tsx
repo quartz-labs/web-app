@@ -107,7 +107,7 @@ export default function Onboarding() {
                                 onChange={() => handleCheckboxChange(2)} 
                             />
                             <span className={styles.checkboxText}>
-                                I have read and understood the <a href="https://docs.quartzpay.io/legal/risks" target="_blank">protocol disclaimer</a>
+                                I have read and understood the <a href="https://docs.quartzpay.io/risks" target="_blank">protocol disclaimer</a>
                             </span>
                         </label>
                     </li>
