@@ -15,8 +15,7 @@ use anchor_spl::{
     associated_token::AssociatedToken, token::{self, Mint, Token, TokenAccount}
 };
 use drift::{
-    cpi::{accounts::Withdraw as DriftWithdraw, withdraw as drift_withdraw}, 
-    load_mut, 
+    cpi::{accounts::Withdraw as DriftWithdraw, withdraw as drift_withdraw},
     program::Drift, 
     state::{
         state::State as DriftState, 
@@ -26,11 +25,7 @@ use drift::{
 use jupiter::i11n::ExactOutRouteI11n;
 use pyth_solana_receiver_sdk::price_update::{get_feed_id_from_hex, PriceUpdateV2};
 use crate::{
-    check, 
-    constants::{AUTO_REPAY_MAX_SLIPPAGE_BPS, BASE_UNITS_PER_USDC, DRIFT_MARKET_INDEX_SOL, MAX_PRICE_AGE_SECONDS_SOL, MAX_PRICE_AGE_SECONDS_USDC, PYTH_FEED_SOL_USD, PYTH_FEED_USDC_USD, WSOL_MINT}, 
-    errors::ErrorCode, 
-    math::get_margin_calculation, 
-    state::Vault
+    check, constants::{AUTO_REPAY_MAX_SLIPPAGE_BPS, BASE_UNITS_PER_USDC, DRIFT_MARKET_INDEX_SOL, MAX_PRICE_AGE_SECONDS_SOL, MAX_PRICE_AGE_SECONDS_USDC, PYTH_FEED_SOL_USD, PYTH_FEED_USDC_USD, WSOL_MINT}, errors::QuartzError, load_mut, math::{get_drift_account_health, get_drift_margin_calculation, get_quartz_account_health}, state::Vault
 };
 
 #[derive(Accounts)]
@@ -64,11 +59,10 @@ pub struct AutoRepayWithdraw<'info> {
     pub owner_spl: Box<Account<'info, TokenAccount>>,
 
     #[account(
-        constraint = spl_mint.key().eq(&WSOL_MINT) @ ErrorCode::InvalidRepayMint
+        constraint = spl_mint.key().eq(&WSOL_MINT) @ QuartzError::InvalidRepayMint
     )]
     pub spl_mint: Box<Account<'info, Mint>>,
 
-    /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
         mut,
         seeds = [b"user".as_ref(), vault.key().as_ref(), (0u16).to_le_bytes().as_ref()],
@@ -77,7 +71,6 @@ pub struct AutoRepayWithdraw<'info> {
     )]
     pub drift_user: AccountLoader<'info, DriftUser>,
     
-    /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
         mut,
         seeds = [b"user_stats".as_ref(), vault.key().as_ref()],
@@ -86,7 +79,6 @@ pub struct AutoRepayWithdraw<'info> {
     )]
     pub drift_user_stats: AccountLoader<'info, DriftUserStats>,
 
-    /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
     #[account(
         mut,
         seeds = [b"drift_state".as_ref()],
@@ -110,9 +102,9 @@ pub struct AutoRepayWithdraw<'info> {
 
     pub system_program: Program<'info, System>,
 
-    pub deposit_price_update: Account<'info, PriceUpdateV2>,
+    pub deposit_price_update: Box<Account<'info, PriceUpdateV2>>,
 
-    pub withdraw_price_update: Account<'info, PriceUpdateV2>,
+    pub withdraw_price_update: Box<Account<'info, PriceUpdateV2>>,
 
     /// CHECK: Account is safe once address is correct
     #[account(address = instructions::ID)]
@@ -127,37 +119,37 @@ fn validate_instruction_order<'info>(
     // Check the 1st instruction is auto_repay_start
     check!(
         start_instruction.program_id.eq(&crate::id()),
-        ErrorCode::IllegalAutoRepayInstructions
+        QuartzError::IllegalAutoRepayInstructions
     );
 
     check!(
         start_instruction.data[..8]
             .eq(&crate::instruction::AutoRepayStart::DISCRIMINATOR),
-        ErrorCode::IllegalAutoRepayInstructions
+        QuartzError::IllegalAutoRepayInstructions
     );
 
     // Check the 2nd instruction is Jupiter's exact_out_route
     check!(
         swap_instruction.program_id.eq(&jupiter::ID),
-        ErrorCode::IllegalAutoRepayInstructions
+        QuartzError::IllegalAutoRepayInstructions
     );
 
     check!(
         swap_instruction.data[..8]
             .eq(&jupiter::instructions::ExactOutRoute::DISCRIMINATOR),
-        ErrorCode::IllegalAutoRepayInstructions
+        QuartzError::IllegalAutoRepayInstructions
     );
     
     // Check the 3rd instruction is auto_repay_deposit
     check!(
         deposit_instruction.program_id.eq(&crate::id()),
-        ErrorCode::IllegalAutoRepayInstructions
+        QuartzError::IllegalAutoRepayInstructions
     );
 
     check!(
         deposit_instruction.data[..8]
             .eq(&crate::instruction::AutoRepayDeposit::DISCRIMINATOR),
-        ErrorCode::IllegalAutoRepayInstructions
+        QuartzError::IllegalAutoRepayInstructions
     );
 
     // This instruction is the 4th instruction
@@ -173,28 +165,28 @@ fn validate_user_accounts<'info>(
     msg!("deposit vault: {:?}", deposit_vault);
     check!(
         ctx.accounts.vault.key().eq(&deposit_vault),
-        ErrorCode::InvalidUserAccounts
+        QuartzError::InvalidUserAccounts
     );
 
     let deposit_owner = deposit_instruction.accounts[2].pubkey;
     msg!("deposit owner: {:?}", deposit_owner);
     check!(
         ctx.accounts.owner.key().eq(&deposit_owner),
-        ErrorCode::InvalidUserAccounts
+        QuartzError::InvalidUserAccounts
     );
 
     let deposit_drift_user = deposit_instruction.accounts[5].pubkey;
     msg!("deposit drift user: {:?}", deposit_drift_user);
     check!(
         ctx.accounts.drift_user.key().eq(&deposit_drift_user),
-        ErrorCode::InvalidUserAccounts
+        QuartzError::InvalidUserAccounts
     );
 
     let deposit_drift_user_stats = deposit_instruction.accounts[6].pubkey;
     msg!("deposit drift user stats: {:?}", deposit_drift_user_stats);
     check!(
         ctx.accounts.drift_user_stats.key().eq(&deposit_drift_user_stats),
-        ErrorCode::InvalidUserAccounts
+        QuartzError::InvalidUserAccounts
     );
 
     Ok(())
@@ -214,10 +206,10 @@ fn validate_prices<'info>(
     )?;
     check!(
         deposit_price.price > 0,
-        ErrorCode::NegativeOraclePrice
+        QuartzError::NegativeOraclePrice
     );
     let deposit_lowest_price = (deposit_price.price as u64).checked_sub(deposit_price.conf)
-        .ok_or(ErrorCode::NegativeOraclePrice)?;
+        .ok_or(QuartzError::NegativeOraclePrice)?;
 
     // Get the withdraw price, assuming worst case of highest end of confidence interval
     let withdraw_feed_id: [u8; 32] = get_feed_id_from_hex(PYTH_FEED_SOL_USD)?;
@@ -228,7 +220,7 @@ fn validate_prices<'info>(
     )?;
     check!(
         withdraw_price.price > 0,
-        ErrorCode::NegativeOraclePrice
+        QuartzError::NegativeOraclePrice
     );
     let withdraw_highest_price = (withdraw_price.price as u64) + withdraw_price.conf;
 
@@ -236,7 +228,7 @@ fn validate_prices<'info>(
     // TODO - Normalize the exponenets if they don't match
     check!(
         withdraw_price.exponent == deposit_price.exponent,
-        ErrorCode::InvalidPriceExponent
+        QuartzError::InvalidPriceExponent
     );
 
     // Normalize usdc base units to the same decimals as SOL
@@ -251,13 +243,13 @@ fn validate_prices<'info>(
     let multiplier_withdraw = multiplier_deposit - (AUTO_REPAY_MAX_SLIPPAGE_BPS as u128);
 
     let deposit_slippage_check_value = (deposit_value as u128).checked_mul(multiplier_deposit)
-        .ok_or(ErrorCode::MathOverflow)?;
+        .ok_or(QuartzError::MathOverflow)?;
     let withdraw_slippage_check_value = (withdraw_value as u128).checked_mul(multiplier_withdraw)
-        .ok_or(ErrorCode::MathOverflow)?;
+        .ok_or(QuartzError::MathOverflow)?;
 
     check!(
         deposit_slippage_check_value >= withdraw_slippage_check_value,
-        ErrorCode::MaxSlippageExceeded
+        QuartzError::MaxSlippageExceeded
     );
 
     msg!("The deposit price is ({} ± {}) * 10^{}", deposit_price.price, deposit_price.conf, deposit_price.exponent);
@@ -273,15 +265,19 @@ fn validate_account_health<'info>(
     drift_market_index: u16
 ) -> Result<()> {
     let user = &mut load_mut!(ctx.accounts.drift_user)?;
-    let margin_calculation = get_margin_calculation(
+    let margin_calculation = get_drift_margin_calculation(
         user, 
         &ctx.accounts.drift_state, 
         drift_market_index, 
         &ctx.remaining_accounts
     )?;
 
-    msg!("margin calculation: {:?}", margin_calculation);
-    msg!("margin context: {:?}", margin_calculation.context);
+    let drift_account_health = get_drift_account_health(margin_calculation)?;
+
+    let quartz_account_health = get_quartz_account_health(margin_calculation)?;
+
+    msg!("drift_account_health: {}", drift_account_health);
+    msg!("quartz_account_health: {}", quartz_account_health);
 
     Ok(())
 }
@@ -290,9 +286,10 @@ pub fn auto_repay_withdraw_handler<'info>(
     ctx: Context<'_, '_, 'info, 'info, AutoRepayWithdraw<'info>>,
     drift_market_index: u16
 ) -> Result<()> {
+    msg!("start handler");
     check!(
         drift_market_index == DRIFT_MARKET_INDEX_SOL,
-        ErrorCode::UnsupportedDriftMarketIndex
+        QuartzError::UnsupportedDriftMarketIndex
     );
 
     let index: usize = load_current_index_checked(&ctx.accounts.instructions.to_account_info())?.into();
@@ -309,13 +306,13 @@ pub fn auto_repay_withdraw_handler<'info>(
     msg!("source mint: {:?}", swap_i11n.accounts.source_mint.pubkey);
     check!(
         swap_i11n.accounts.source_mint.pubkey.eq(&ctx.accounts.spl_mint.key()),
-        ErrorCode::InvalidRepayMint
+        QuartzError::InvalidRepayMint
     );
 
     msg!("source token account: {:?}", swap_i11n.accounts.user_source_token_account.pubkey);
     check!(
         swap_i11n.accounts.user_source_token_account.pubkey.eq(&ctx.accounts.owner_spl.key()),
-        ErrorCode::InvalidSourceTokenAccount
+        QuartzError::InvalidSourceTokenAccount
     );
     
     // Get amount actually swapped in Jupiter

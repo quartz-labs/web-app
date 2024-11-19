@@ -1,5 +1,5 @@
 export type FundsProgram = {
-  "version": "0.1.14",
+  "version": "0.1.16",
   "name": "funds_program",
   "instructions": [
     {
@@ -601,7 +601,7 @@ export type FundsProgram = {
 };
 
 export const IDL: FundsProgram = {
-  "version": "0.1.14",
+  "version": "0.1.16",
   "name": "funds_program",
   "instructions": [
     {

@@ -10,9 +10,11 @@ use drift::{
     }  
 };
 
+use crate::{constants::ACCOUNT_HEALTH_BUFFER_PERCENTAGE, errors::QuartzError};
+
 pub(crate) type MarketSet = BTreeSet<u16>;
 
-pub fn get_margin_calculation<'info>(
+pub fn get_drift_margin_calculation<'info>(
     drift_user: &User,
     drift_state: &State,
     drift_market_index: u16,
@@ -48,4 +50,74 @@ pub fn get_margin_calculation<'info>(
     )?;
 
     Ok(margin_calculation)
+}
+
+pub fn get_drift_account_health<'info>(
+    margin_calculation: MarginCalculation,
+) -> Result<u8> {
+    let total_collateral = margin_calculation.total_collateral;
+    let margin_requirement = margin_calculation.margin_requirement;
+
+    if total_collateral < 0 {
+        return Ok(0);
+    }
+
+    let total_collateral_unsigned = total_collateral as u128;
+
+    if margin_requirement > total_collateral_unsigned {
+        return Ok(0);
+    }
+
+    if margin_requirement == 0 {
+        return Ok(100);
+    }
+
+    let health = total_collateral_unsigned.checked_sub(margin_requirement)
+        .ok_or(QuartzError::MathOverflow)?
+        .checked_mul(100)
+        .ok_or(QuartzError::MathOverflow)?
+        .checked_div(total_collateral_unsigned)
+        .ok_or(QuartzError::MathOverflow)?;
+
+    Ok(health as u8)
+}
+
+pub fn get_quartz_account_health(
+    margin_calculation: MarginCalculation,
+) -> Result<u8> {
+    let total_collateral = margin_calculation.total_collateral;
+    let margin_requirement = margin_calculation.margin_requirement;
+
+    if total_collateral < 0 || ACCOUNT_HEALTH_BUFFER_PERCENTAGE >= 100 {
+        return Ok(0);
+    }
+
+    let total_collateral_unsigned = total_collateral as u128;
+
+    let buffer_multiplier = 100u128.checked_sub(ACCOUNT_HEALTH_BUFFER_PERCENTAGE as u128)
+        .ok_or(QuartzError::MathOverflow)?;
+    
+    let adjusted_total_collateral = total_collateral_unsigned
+        .checked_mul(buffer_multiplier)
+        .ok_or(QuartzError::MathOverflow)?
+        .checked_div(100)
+        .ok_or(QuartzError::MathOverflow)?;
+
+    if margin_requirement > adjusted_total_collateral {
+        return Ok(0);
+    }
+
+    if margin_requirement == 0 {
+        return Ok(100);
+    }
+
+    let health = adjusted_total_collateral
+        .checked_sub(margin_requirement)
+        .ok_or(QuartzError::MathOverflow)?
+        .checked_mul(100)
+        .ok_or(QuartzError::MathOverflow)?
+        .checked_div(adjusted_total_collateral)
+        .ok_or(QuartzError::MathOverflow)?;
+
+    Ok(health as u8)
 }

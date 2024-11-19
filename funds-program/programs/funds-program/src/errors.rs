@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 
 #[error_code]
-pub enum ErrorCode {
+pub enum QuartzError {
     #[msg("Illegal auto repay instructions")]
     IllegalAutoRepayInstructions,
     #[msg("Invalid mint provided")]

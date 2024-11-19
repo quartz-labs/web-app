@@ -19,7 +19,6 @@ use drift::{
         accounts::Deposit as DriftDeposit,
         deposit as drift_deposit
     }, 
-    load_mut, 
     program::Drift, 
     state::{
         state::State as DriftState, 
@@ -28,11 +27,7 @@ use drift::{
 };
 use jupiter::i11n::ExactOutRouteI11n;
 use crate::{
-    check, 
-    constants::{DRIFT_MARKET_INDEX_USDC, USDC_MINT}, 
-    errors::ErrorCode, 
-    math::get_margin_calculation, 
-    state::Vault
+    check, constants::{DRIFT_MARKET_INDEX_USDC, USDC_MINT}, errors::QuartzError, load_mut, math::{get_drift_account_health, get_drift_margin_calculation, get_quartz_account_health}, state::Vault
 };
 
 #[derive(Accounts)]
@@ -66,7 +61,7 @@ pub struct AutoRepayDeposit<'info> {
     pub owner_spl: Box<Account<'info, TokenAccount>>,
 
     #[account(
-        constraint = spl_mint.key().eq(&USDC_MINT) @ ErrorCode::InvalidRepayMint
+        constraint = spl_mint.key().eq(&USDC_MINT) @ QuartzError::InvalidRepayMint
     )]
     pub spl_mint: Box<Account<'info, Mint>>,
 
@@ -119,25 +114,25 @@ fn validate_instruction_order<'info>(
     // Check the 1st instruction is auto_repay_start
     check!(
         start_instruction.program_id.eq(&crate::id()),
-        ErrorCode::IllegalAutoRepayInstructions
+        QuartzError::IllegalAutoRepayInstructions
     );
 
     check!(
         start_instruction.data[..8]
             .eq(&crate::instruction::AutoRepayStart::DISCRIMINATOR),
-        ErrorCode::IllegalAutoRepayInstructions
+        QuartzError::IllegalAutoRepayInstructions
     );
 
     // Check the 2nd instruction is Jupiter's exact_out_route
     check!(
         swap_instruction.program_id.eq(&jupiter::ID),
-        ErrorCode::IllegalAutoRepayInstructions
+        QuartzError::IllegalAutoRepayInstructions
     );
 
     check!(
         swap_instruction.data[..8]
             .eq(&jupiter::instructions::ExactOutRoute::DISCRIMINATOR),
-        ErrorCode::IllegalAutoRepayInstructions
+        QuartzError::IllegalAutoRepayInstructions
     );
 
     // This instruction is the 3rd instruction
@@ -145,13 +140,13 @@ fn validate_instruction_order<'info>(
     // Check the 4th instruction is auto_repay_withdraw
     check!(
         withdraw_instruction.program_id.eq(&crate::id()),
-        ErrorCode::IllegalAutoRepayInstructions
+        QuartzError::IllegalAutoRepayInstructions
     );
 
     check!(
         withdraw_instruction.data[..8]
             .eq(&crate::instruction::AutoRepayWithdraw::DISCRIMINATOR),
-        ErrorCode::IllegalAutoRepayInstructions
+        QuartzError::IllegalAutoRepayInstructions
     );
 
     Ok(())
@@ -162,15 +157,19 @@ fn validate_account_health<'info>(
     drift_market_index: u16
 ) -> Result<()> {
     let user = &mut load_mut!(ctx.accounts.drift_user)?;
-    let margin_calculation = get_margin_calculation(
+    let margin_calculation = get_drift_margin_calculation(
         user, 
         &ctx.accounts.drift_state, 
         drift_market_index, 
         &ctx.remaining_accounts
     )?;
 
-    msg!("margin calculation: {:?}", margin_calculation);
-    msg!("margin context: {:?}", margin_calculation.context);
+    let drift_account_health = get_drift_account_health(margin_calculation)?;
+
+    let quartz_account_health = get_quartz_account_health(margin_calculation)?;
+
+    msg!("drift_account_health: {}", drift_account_health);
+    msg!("quartz_account_health: {}", quartz_account_health);
 
     Ok(())
 }
@@ -181,7 +180,7 @@ pub fn auto_repay_deposit_handler<'info>(
 ) -> Result<()> {
     check!(
         drift_market_index == DRIFT_MARKET_INDEX_USDC,
-        ErrorCode::UnsupportedDriftMarketIndex
+        QuartzError::UnsupportedDriftMarketIndex
     );
 
     let index: usize = load_current_index_checked(&ctx.accounts.instructions.to_account_info())?.into();
@@ -193,16 +192,14 @@ pub fn auto_repay_deposit_handler<'info>(
 
     // Validate mint
     let swap_i11n = ExactOutRouteI11n::try_from(&swap_instruction)?;
-    msg!("destination mint: {:?}", swap_i11n.accounts.destination_mint.pubkey);
     check!(
         swap_i11n.accounts.destination_mint.pubkey.eq(&ctx.accounts.spl_mint.key()),
-        ErrorCode::InvalidRepayMint
+        QuartzError::InvalidRepayMint
     );
 
-    msg!("destination token account: {:?}", swap_i11n.accounts.user_destination_token_account.pubkey);
     check!(
         swap_i11n.accounts.user_destination_token_account.pubkey.eq(&ctx.accounts.owner_spl.key()),
-        ErrorCode::InvalidDestinationTokenAccount
+        QuartzError::InvalidDestinationTokenAccount
     );
 
     validate_account_health(&ctx, drift_market_index)?;
