@@ -10,7 +10,7 @@ export const sendTransactionHandler = async (
   connection: Connection, 
   tx: VersionedTransaction, 
 ) => {
-    const signature = await connection.sendRawTransaction(tx.serialize(), {skipPreflight: true});
+    const signature = await connection.sendRawTransaction(tx.serialize());
     trackTx({
       signature,
       status: TxStatus.SENT
