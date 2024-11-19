@@ -2,7 +2,7 @@ import quartzIdl from "../idl/funds_program.json";
 import { FundsProgram } from "@/types/funds_program";
 import marginfiIdl from "../idl/marginfi.json";
 
-import { AnchorProvider, BN, Idl, Program, setProvider, web3 } from "@coral-xyz/anchor";
+import { AnchorProvider, BN, Idl, Program, setProvider, Wallet, web3 } from "@coral-xyz/anchor";
 import { AnchorWallet } from "@solana/wallet-adapter-react";
 import {
     DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC, DRIFT_PROGRAM_ID, DRIFT_SPOT_MARKET_SOL, DRIFT_SPOT_MARKET_USDC, DRIFT_SIGNER,
@@ -707,8 +707,7 @@ export const autoRepay = async (
             ])
             .instruction();
 
-        const pythKeypair = new NodeWallet(Keypair.generate());
-        const pythSolanaReceiver = new PythSolanaReceiver({ connection, wallet: pythKeypair });
+        const pythSolanaReceiver = new PythSolanaReceiver({ connection, wallet: wallet as Wallet });
         const solUsdPriceFeedAccount = pythSolanaReceiver
             .getPriceFeedAccountAddress(0, "0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d")
             .toBase58();

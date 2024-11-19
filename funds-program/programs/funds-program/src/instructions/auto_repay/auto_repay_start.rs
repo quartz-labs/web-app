@@ -10,7 +10,7 @@ use anchor_spl::token::{Mint, Token, TokenAccount};
 use jupiter::i11n::ExactOutRouteI11n;
 use crate::{
     check, 
-    errors::ErrorCode
+    errors::ErrorCode, helpers::get_jup_exact_out_route_platform_fees
 };
 
 #[derive(Accounts)]
@@ -86,26 +86,26 @@ fn validate_swap_data<'info>(
     ctx: &Context<'_, '_, '_, 'info, AutoRepayStart<'info>>,
     swap_instruction: &Instruction,
 ) -> Result<()> {
-    let swap_i11n = ExactOutRouteI11n::try_from(swap_instruction)?;
-
+    msg!("platform fee bps: {:?}", get_jup_exact_out_route_platform_fees(swap_instruction));
+    
     check!(
-        swap_i11n.args.platform_fee_bps.eq(&0),
+        get_jup_exact_out_route_platform_fees(swap_instruction)?.eq(&0),
         ErrorCode::InvalidPlatformFee
     );
 
+    let swap_source_mint = swap_instruction.accounts[5].pubkey;
+    msg!("source mint: {:?}", swap_source_mint);
     check!(
-        swap_i11n.accounts.source_mint.pubkey.eq(&ctx.accounts.withdraw_mint.key()),
+        swap_source_mint.eq(&ctx.accounts.withdraw_mint.key()),
         ErrorCode::InvalidRepayMint
     );
 
+    let swap_source_token_account = swap_instruction.accounts[2].pubkey;
+    msg!("source token account: {:?}", swap_source_token_account);
     check!(
-        swap_i11n.accounts.user_source_token_account.pubkey.eq(&ctx.accounts.caller_withdraw_spl.key()),
+        swap_source_token_account.eq(&ctx.accounts.caller_withdraw_spl.key()),
         ErrorCode::InvalidSourceTokenAccount
-    );    
-
-    msg!("platform fee bps: {:?}", swap_i11n.args.platform_fee_bps);
-    msg!("source mint: {:?}", swap_i11n.accounts.source_mint.pubkey);
-    msg!("destination mint: {:?}", swap_i11n.accounts.destination_mint.pubkey);
+    );
 
     Ok(())
 }
@@ -114,25 +114,21 @@ pub fn auto_repay_start_handler<'info>(
     ctx: Context<'_, '_, '_, 'info, AutoRepayStart<'info>>,
     start_withdraw_balance: u64
 ) -> Result<()> {
-    msg!("start repay: {}", start_withdraw_balance);
 
     let index: usize = load_current_index_checked(&ctx.accounts.instructions.to_account_info())?.into();
     let swap_instruction = load_instruction_at_checked(index + 1, &ctx.accounts.instructions.to_account_info())?;
     let deposit_instruction = load_instruction_at_checked(index + 2, &ctx.accounts.instructions.to_account_info())?;
     let withdraw_instruction = load_instruction_at_checked(index + 3, &ctx.accounts.instructions.to_account_info())?;
 
-    msg!("validate instruction order");
-    
     validate_instruction_order(&swap_instruction, &deposit_instruction, &withdraw_instruction)?;
-
-    msg!("validate swap data");
 
     validate_swap_data(&ctx, &swap_instruction)?;
 
-    msg!("validated");
-
     // Check declared start balance is accurate
     let caller_balance = ctx.accounts.caller_withdraw_spl.amount;
+
+    msg!("start withdraw balance: {:?}", start_withdraw_balance);
+    msg!("caller balance: {:?}", caller_balance);
 
     check!(
         start_withdraw_balance == caller_balance,

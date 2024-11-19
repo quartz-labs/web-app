@@ -183,29 +183,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "anchor-i11n"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f54c456296663e530c63a44862ae3f2970b22e38f575632048000684725c6c94"
-dependencies = [
- "anchor-i11n-derive",
- "anchor-lang",
-]
-
-[[package]]
-name = "anchor-i11n-derive"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6d2e72b8cfc15923cfaed70999414c7690f55f1df71c31dcadff4a8165efdcfb"
-dependencies = [
- "anchor-lang",
- "convert_case",
- "quote",
- "sha2 0.10.8",
- "syn 1.0.109",
-]
-
-[[package]]
 name = "anchor-lang"
 version = "0.29.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -721,15 +698,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7c74b8349d32d297c9134b8c88677813a227df8f779daa29bfc29c183fe3dca6"
 
 [[package]]
-name = "convert_case"
-version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ec182b0ca2f35d8fc196cf3404988fd8b8c739a4d270ff118a398feb0cbec1ca"
-dependencies = [
- "unicode-segmentation",
-]
-
-[[package]]
 name = "cpufeatures"
 version = "0.2.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1058,7 +1026,6 @@ dependencies = [
  "anchor-lang",
  "anchor-spl",
  "drift",
- "jupiter",
  "pyth-solana-receiver-sdk 0.3.2",
  "solana-program",
  "solana-security-txt",
@@ -1266,14 +1233,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1868808506b929d7b0cfa8f75951347aa71bb21144b7791bae35d9bccfcfe37a"
 dependencies = [
  "wasm-bindgen",
-]
-
-[[package]]
-name = "jupiter"
-version = "0.1.1"
-dependencies = [
- "anchor-i11n",
- "anchor-lang",
 ]
 
 [[package]]
