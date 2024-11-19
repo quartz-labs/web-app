@@ -7,9 +7,11 @@ use anchor_lang::{
     }
 };
 use anchor_spl::token::{Mint, Token, TokenAccount};
-use jupiter::i11n::ExactOutRouteI11n;
 use crate::{
-    check, constants::{JUPITER_EXACT_OUT_ROUTE_DISCRIMINATOR, JUPITER_ID}, errors::QuartzError
+    check, 
+    constants::{JUPITER_EXACT_OUT_ROUTE_DISCRIMINATOR, JUPITER_ID}, 
+    helpers::get_jup_exact_out_route_platform_fees,
+    errors::QuartzError
 };
 
 #[derive(Accounts)]
@@ -84,22 +86,27 @@ fn validate_swap_data<'info>(
     ctx: &Context<'_, '_, '_, 'info, AutoRepayStart<'info>>,
     swap_instruction: &Instruction,
 ) -> Result<()> {
-    let swap_i11n = ExactOutRouteI11n::try_from(swap_instruction)?;
-
+    let platform_fee_bps = get_jup_exact_out_route_platform_fees(swap_instruction)?;
+    msg!("platform fee bps: {:?}", platform_fee_bps);
+    
     check!(
-        swap_i11n.args.platform_fee_bps.eq(&0),
+        get_jup_exact_out_route_platform_fees(swap_instruction)?.eq(&0),
         QuartzError::InvalidPlatformFee
     );
 
+    let swap_source_mint = swap_instruction.accounts[5].pubkey;
+    msg!("source mint: {:?}", swap_source_mint);
     check!(
-        swap_i11n.accounts.source_mint.pubkey.eq(&ctx.accounts.withdraw_mint.key()),
+        swap_source_mint.eq(&ctx.accounts.withdraw_mint.key()),
         QuartzError::InvalidRepayMint
     );
 
+    let swap_source_token_account = swap_instruction.accounts[2].pubkey;
+    msg!("source token account: {:?}", swap_source_token_account);
     check!(
-        swap_i11n.accounts.user_source_token_account.pubkey.eq(&ctx.accounts.caller_withdraw_spl.key()),
+        swap_source_token_account.eq(&ctx.accounts.caller_withdraw_spl.key()),
         QuartzError::InvalidSourceTokenAccount
-    );    
+    );
 
     Ok(())
 }
@@ -119,6 +126,9 @@ pub fn auto_repay_start_handler<'info>(
 
     // Check declared start balance is accurate
     let caller_balance = ctx.accounts.caller_withdraw_spl.amount;
+
+    msg!("start withdraw balance: {:?}", start_withdraw_balance);
+    msg!("caller balance: {:?}", caller_balance);
 
     check!(
         start_withdraw_balance == caller_balance,

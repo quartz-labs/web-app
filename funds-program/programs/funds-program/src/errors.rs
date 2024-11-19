@@ -28,4 +28,6 @@ pub enum QuartzError {
     InvalidPriceExponent,
     #[msg("Unable to load account loader")]
     UnableToLoadAccountLoader,
+    #[msg("Could not deserialize introspection instruction data")]
+    DeserializationError,
 }

@@ -25,9 +25,8 @@ use drift::{
         user::{User as DriftUser, UserStats as DriftUserStats}
     }  
 };
-use jupiter::i11n::ExactOutRouteI11n;
 use crate::{
-    check, constants::{DRIFT_MARKET_INDEX_USDC, USDC_MINT}, errors::QuartzError, load_mut, math::{get_drift_account_health, get_drift_margin_calculation, get_quartz_account_health}, state::Vault
+    check, constants::{DRIFT_MARKET_INDEX_USDC, JUPITER_EXACT_OUT_ROUTE_DISCRIMINATOR, JUPITER_ID, USDC_MINT}, errors::QuartzError, helpers::get_jup_exact_out_route_out_amount, load_mut, math::{get_drift_account_health, get_drift_margin_calculation, get_quartz_account_health}, state::Vault
 };
 
 #[derive(Accounts)]
@@ -125,13 +124,12 @@ fn validate_instruction_order<'info>(
 
     // Check the 2nd instruction is Jupiter's exact_out_route
     check!(
-        swap_instruction.program_id.eq(&jupiter::ID),
+        swap_instruction.program_id.eq(&JUPITER_ID),
         QuartzError::IllegalAutoRepayInstructions
     );
 
     check!(
-        swap_instruction.data[..8]
-            .eq(&jupiter::instructions::ExactOutRoute::DISCRIMINATOR),
+        swap_instruction.data[..8].eq(&JUPITER_EXACT_OUT_ROUTE_DISCRIMINATOR),
         QuartzError::IllegalAutoRepayInstructions
     );
 
@@ -191,14 +189,15 @@ pub fn auto_repay_deposit_handler<'info>(
     validate_instruction_order(&start_instruction, &swap_instruction, &withdraw_instruction)?;
 
     // Validate mint
-    let swap_i11n = ExactOutRouteI11n::try_from(&swap_instruction)?;
+    let swap_destination_mint = swap_instruction.accounts[6].pubkey;
     check!(
-        swap_i11n.accounts.destination_mint.pubkey.eq(&ctx.accounts.spl_mint.key()),
+        swap_destination_mint.eq(&ctx.accounts.spl_mint.key()),
         QuartzError::InvalidRepayMint
     );
 
+    let swap_destination_token_account = swap_instruction.accounts[3].pubkey;
     check!(
-        swap_i11n.accounts.user_destination_token_account.pubkey.eq(&ctx.accounts.owner_spl.key()),
+        swap_destination_token_account.eq(&ctx.accounts.owner_spl.key()),
         QuartzError::InvalidDestinationTokenAccount
     );
 
@@ -214,7 +213,7 @@ pub fn auto_repay_deposit_handler<'info>(
     let signer_seeds = &[&seeds[..]];
 
     // Get deposit amount from swap instruction
-    let deposit_amount = swap_i11n.args.out_amount;
+    let deposit_amount = get_jup_exact_out_route_out_amount(&swap_instruction)?;
 
     // Transfer tokens from owner's ATA to vault's ATA
     token::transfer(

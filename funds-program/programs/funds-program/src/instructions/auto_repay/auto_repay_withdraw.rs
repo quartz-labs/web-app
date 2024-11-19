@@ -22,10 +22,9 @@ use drift::{
         user::{User as DriftUser, UserStats as DriftUserStats}
     }
 };
-use jupiter::i11n::ExactOutRouteI11n;
 use pyth_solana_receiver_sdk::price_update::{get_feed_id_from_hex, PriceUpdateV2};
 use crate::{
-    check, constants::{AUTO_REPAY_MAX_SLIPPAGE_BPS, BASE_UNITS_PER_USDC, DRIFT_MARKET_INDEX_SOL, MAX_PRICE_AGE_SECONDS_SOL, MAX_PRICE_AGE_SECONDS_USDC, PYTH_FEED_SOL_USD, PYTH_FEED_USDC_USD, WSOL_MINT}, errors::QuartzError, load_mut, math::{get_drift_account_health, get_drift_margin_calculation, get_quartz_account_health}, state::Vault
+    check, constants::{AUTO_REPAY_MAX_SLIPPAGE_BPS, BASE_UNITS_PER_USDC, DRIFT_MARKET_INDEX_SOL, JUPITER_EXACT_OUT_ROUTE_DISCRIMINATOR, JUPITER_ID, MAX_PRICE_AGE_SECONDS_SOL, MAX_PRICE_AGE_SECONDS_USDC, PYTH_FEED_SOL_USD, PYTH_FEED_USDC_USD, WSOL_MINT}, errors::QuartzError, helpers::get_jup_exact_out_route_out_amount, load_mut, math::{get_drift_account_health, get_drift_margin_calculation, get_quartz_account_health}, state::Vault
 };
 
 #[derive(Accounts)]
@@ -130,13 +129,12 @@ fn validate_instruction_order<'info>(
 
     // Check the 2nd instruction is Jupiter's exact_out_route
     check!(
-        swap_instruction.program_id.eq(&jupiter::ID),
+        swap_instruction.program_id.eq(&JUPITER_ID),
         QuartzError::IllegalAutoRepayInstructions
     );
 
     check!(
-        swap_instruction.data[..8]
-            .eq(&jupiter::instructions::ExactOutRoute::DISCRIMINATOR),
+        swap_instruction.data[..8].eq(&JUPITER_EXACT_OUT_ROUTE_DISCRIMINATOR),
         QuartzError::IllegalAutoRepayInstructions
     );
     
@@ -302,16 +300,17 @@ pub fn auto_repay_withdraw_handler<'info>(
     validate_user_accounts(&ctx, &deposit_instruction)?;
 
     // Validate mint and ATA are the same as swap
-    let swap_i11n = ExactOutRouteI11n::try_from(&swap_instruction)?;
-    msg!("source mint: {:?}", swap_i11n.accounts.source_mint.pubkey);
+    let swap_source_mint = swap_instruction.accounts[5].pubkey;
+    msg!("source mint: {:?}", swap_source_mint);
     check!(
-        swap_i11n.accounts.source_mint.pubkey.eq(&ctx.accounts.spl_mint.key()),
+        swap_source_mint.eq(&ctx.accounts.spl_mint.key()),
         QuartzError::InvalidRepayMint
     );
 
-    msg!("source token account: {:?}", swap_i11n.accounts.user_source_token_account.pubkey);
+    let swap_source_token_account = swap_instruction.accounts[2].pubkey;
+    msg!("source token account: {:?}", swap_source_token_account);
     check!(
-        swap_i11n.accounts.user_source_token_account.pubkey.eq(&ctx.accounts.owner_spl.key()),
+        swap_source_token_account.eq(&ctx.accounts.owner_spl.key()),
         QuartzError::InvalidSourceTokenAccount
     );
     
@@ -323,7 +322,7 @@ pub fn auto_repay_withdraw_handler<'info>(
     let withdraw_amount = start_balance - end_balance;
 
     // Validate values of deposit_amount and withdraw_amount are within slippage
-    let deposit_amount = swap_i11n.args.out_amount;
+    let deposit_amount = get_jup_exact_out_route_out_amount(&swap_instruction)?;
     validate_prices(&ctx, deposit_amount, withdraw_amount)?;
 
     let owner = ctx.accounts.owner.key();
