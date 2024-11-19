@@ -44,16 +44,11 @@ export const initAccount = async (
     const vaultPda = getVault(wallet.publicKey);
     const marginfiAccount = Keypair.generate();
 
-    console.log(wallet.publicKey.toBase58());
-    console.log(vaultPda.toBase58());
-    console.log(getDriftUser(vaultPda).toBase58());
-    console.log(getDriftUserStats(vaultPda).toBase58());
-
     try {
         const ix_initUser = await quartzProgram.methods
             .initUser()
             .accounts({
-                vault: wallet.publicKey,
+                vault: vaultPda,
                 owner: wallet.publicKey,
                 systemProgram: SystemProgram.programId,
             })

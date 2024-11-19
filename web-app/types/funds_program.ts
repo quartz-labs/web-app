@@ -1,5 +1,5 @@
 export type FundsProgram = {
-  "version": "0.1.16",
+  "version": "0.1.19",
   "name": "funds_program",
   "instructions": [
     {
@@ -596,12 +596,32 @@ export type FundsProgram = {
       "code": 6012,
       "name": "UnableToLoadAccountLoader",
       "msg": "Unable to load account loader"
+    },
+    {
+      "code": 6013,
+      "name": "DeserializationError",
+      "msg": "Could not deserialize introspection instruction data"
+    },
+    {
+      "code": 6014,
+      "name": "NotReachedAutoRepayThreshold",
+      "msg": "Account health is not low enough for auto_repay"
+    },
+    {
+      "code": 6015,
+      "name": "AutoRepayHealthTooLow",
+      "msg": "Not enough collateral sold in auto_repay"
+    },
+    {
+      "code": 6016,
+      "name": "AutoRepayHealthTooHigh",
+      "msg": "Too much collateral sold in auto_repay"
     }
   ]
 };
 
 export const IDL: FundsProgram = {
-  "version": "0.1.16",
+  "version": "0.1.19",
   "name": "funds_program",
   "instructions": [
     {
@@ -1198,6 +1218,26 @@ export const IDL: FundsProgram = {
       "code": 6012,
       "name": "UnableToLoadAccountLoader",
       "msg": "Unable to load account loader"
+    },
+    {
+      "code": 6013,
+      "name": "DeserializationError",
+      "msg": "Could not deserialize introspection instruction data"
+    },
+    {
+      "code": 6014,
+      "name": "NotReachedAutoRepayThreshold",
+      "msg": "Account health is not low enough for auto_repay"
+    },
+    {
+      "code": 6015,
+      "name": "AutoRepayHealthTooLow",
+      "msg": "Not enough collateral sold in auto_repay"
+    },
+    {
+      "code": 6016,
+      "name": "AutoRepayHealthTooHigh",
+      "msg": "Too much collateral sold in auto_repay"
     }
   ]
 };
