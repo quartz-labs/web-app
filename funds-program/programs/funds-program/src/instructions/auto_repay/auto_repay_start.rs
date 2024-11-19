@@ -87,22 +87,18 @@ fn validate_swap_data<'info>(
     swap_instruction: &Instruction,
 ) -> Result<()> {
     let platform_fee_bps = get_jup_exact_out_route_platform_fees(swap_instruction)?;
-    msg!("platform fee bps: {:?}", platform_fee_bps);
-    
     check!(
-        get_jup_exact_out_route_platform_fees(swap_instruction)?.eq(&0),
+        platform_fee_bps.eq(&0),
         QuartzError::InvalidPlatformFee
     );
 
     let swap_source_mint = swap_instruction.accounts[5].pubkey;
-    msg!("source mint: {:?}", swap_source_mint);
     check!(
         swap_source_mint.eq(&ctx.accounts.withdraw_mint.key()),
         QuartzError::InvalidRepayMint
     );
 
     let swap_source_token_account = swap_instruction.accounts[2].pubkey;
-    msg!("source token account: {:?}", swap_source_token_account);
     check!(
         swap_source_token_account.eq(&ctx.accounts.caller_withdraw_spl.key()),
         QuartzError::InvalidSourceTokenAccount
@@ -115,27 +111,17 @@ pub fn auto_repay_start_handler<'info>(
     ctx: Context<'_, '_, '_, 'info, AutoRepayStart<'info>>,
     start_withdraw_balance: u64
 ) -> Result<()> {
-    msg!("start auto repay");
     let index: usize = load_current_index_checked(&ctx.accounts.instructions.to_account_info())?.into();
     let swap_instruction = load_instruction_at_checked(index + 1, &ctx.accounts.instructions.to_account_info())?;
     let deposit_instruction = load_instruction_at_checked(index + 2, &ctx.accounts.instructions.to_account_info())?;
     let withdraw_instruction = load_instruction_at_checked(index + 3, &ctx.accounts.instructions.to_account_info())?;
-
-    msg!("loaded instructions");
     
     validate_instruction_order(&swap_instruction, &deposit_instruction, &withdraw_instruction)?;
 
-    msg!("validated instruction order");
-
     validate_swap_data(&ctx, &swap_instruction)?;
-
-    msg!("validated swap data");
 
     // Check declared start balance is accurate
     let caller_balance = ctx.accounts.caller_withdraw_spl.amount;
-
-    msg!("start withdraw balance: {:?}", start_withdraw_balance);
-    msg!("caller balance: {:?}", caller_balance);
 
     check!(
         start_withdraw_balance == caller_balance,

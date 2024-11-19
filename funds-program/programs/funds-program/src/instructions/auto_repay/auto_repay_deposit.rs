@@ -26,7 +26,13 @@ use drift::{
     }  
 };
 use crate::{
-    check, constants::{DRIFT_MARKET_INDEX_USDC, JUPITER_EXACT_OUT_ROUTE_DISCRIMINATOR, JUPITER_ID, USDC_MINT}, errors::QuartzError, helpers::get_jup_exact_out_route_out_amount, load_mut, math::{get_drift_account_health, get_drift_margin_calculation, get_quartz_account_health}, state::Vault
+    check, 
+    constants::{DRIFT_MARKET_INDEX_USDC, JUPITER_EXACT_OUT_ROUTE_DISCRIMINATOR, JUPITER_ID, USDC_MINT}, 
+    errors::QuartzError, 
+    helpers::get_jup_exact_out_route_out_amount, 
+    load_mut,
+    math::{get_drift_margin_calculation, get_quartz_account_health}, 
+    state::Vault
 };
 
 #[derive(Accounts)]
@@ -162,12 +168,12 @@ fn validate_account_health<'info>(
         &ctx.remaining_accounts
     )?;
 
-    let drift_account_health = get_drift_account_health(margin_calculation)?;
-
     let quartz_account_health = get_quartz_account_health(margin_calculation)?;
 
-    msg!("drift_account_health: {}", drift_account_health);
-    msg!("quartz_account_health: {}", quartz_account_health);
+    check!(
+        quartz_account_health == 0,
+        QuartzError::NotReachedAutoRepayThreshold
+    );
 
     Ok(())
 }
@@ -190,14 +196,12 @@ pub fn auto_repay_deposit_handler<'info>(
 
     // Validate mint
     let swap_destination_mint = swap_instruction.accounts[6].pubkey;
-    msg!("swap destination mint: {:?}", swap_destination_mint);
     check!(
         swap_destination_mint.eq(&ctx.accounts.spl_mint.key()),
         QuartzError::InvalidRepayMint
     );
 
     let swap_destination_token_account = swap_instruction.accounts[3].pubkey;
-    msg!("swap destination token account: {:?}", swap_destination_token_account);
     check!(
         swap_destination_token_account.eq(&ctx.accounts.owner_spl.key()),
         QuartzError::InvalidDestinationTokenAccount
@@ -216,7 +220,6 @@ pub fn auto_repay_deposit_handler<'info>(
 
     // Get deposit amount from swap instruction
     let deposit_amount = get_jup_exact_out_route_out_amount(&swap_instruction)?;
-    msg!("deposit amount: {:?}", deposit_amount);
     // Transfer tokens from owner's ATA to vault's ATA
     token::transfer(
         CpiContext::new(

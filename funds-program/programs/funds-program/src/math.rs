@@ -51,7 +51,7 @@ pub fn get_drift_margin_calculation<'info>(
     Ok(margin_calculation)
 }
 
-pub fn get_drift_account_health<'info>(
+pub fn _get_drift_account_health<'info>(
     margin_calculation: MarginCalculation,
 ) -> Result<u8> {
     let total_collateral = margin_calculation.total_collateral;

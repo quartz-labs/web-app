@@ -30,4 +30,10 @@ pub enum QuartzError {
     UnableToLoadAccountLoader,
     #[msg("Could not deserialize introspection instruction data")]
     DeserializationError,
+    #[msg("Account health is not low enough for auto_repay")]
+    NotReachedAutoRepayThreshold,
+    #[msg("Not enough collateral sold in auto_repay")]
+    AutoRepayHealthTooLow,
+    #[msg("Too much collateral sold in auto_repay")]
+    AutoRepayHealthTooHigh,
 }

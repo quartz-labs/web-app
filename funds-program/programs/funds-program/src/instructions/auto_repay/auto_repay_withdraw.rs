@@ -24,7 +24,13 @@ use drift::{
 };
 use pyth_solana_receiver_sdk::price_update::{get_feed_id_from_hex, PriceUpdateV2};
 use crate::{
-    check, constants::{AUTO_REPAY_MAX_SLIPPAGE_BPS, BASE_UNITS_PER_USDC, DRIFT_MARKET_INDEX_SOL, JUPITER_EXACT_OUT_ROUTE_DISCRIMINATOR, JUPITER_ID, MAX_PRICE_AGE_SECONDS_SOL, MAX_PRICE_AGE_SECONDS_USDC, PYTH_FEED_SOL_USD, PYTH_FEED_USDC_USD, WSOL_MINT}, errors::QuartzError, helpers::get_jup_exact_out_route_out_amount, load_mut, math::{get_drift_account_health, get_drift_margin_calculation, get_quartz_account_health}, state::Vault
+    check, 
+    constants::{AUTO_REPAY_MAX_HEALTH_RESULT, AUTO_REPAY_MAX_SLIPPAGE_BPS, AUTO_REPAY_MIN_HEALTH_RESULT, BASE_UNITS_PER_USDC, DRIFT_MARKET_INDEX_SOL, JUPITER_EXACT_OUT_ROUTE_DISCRIMINATOR, JUPITER_ID, MAX_PRICE_AGE_SECONDS_SOL, MAX_PRICE_AGE_SECONDS_USDC, PYTH_FEED_SOL_USD, PYTH_FEED_USDC_USD, WSOL_MINT}, 
+    errors::QuartzError, 
+    helpers::get_jup_exact_out_route_out_amount, 
+    load_mut, 
+    math::{get_drift_margin_calculation, get_quartz_account_health}, 
+    state::Vault
 };
 
 #[derive(Accounts)]
@@ -160,28 +166,24 @@ fn validate_user_accounts<'info>(
     deposit_instruction: &Instruction
 ) -> Result<()> {
     let deposit_vault = deposit_instruction.accounts[0].pubkey;
-    msg!("deposit vault: {:?}", deposit_vault);
     check!(
         ctx.accounts.vault.key().eq(&deposit_vault),
         QuartzError::InvalidUserAccounts
     );
 
     let deposit_owner = deposit_instruction.accounts[2].pubkey;
-    msg!("deposit owner: {:?}", deposit_owner);
     check!(
         ctx.accounts.owner.key().eq(&deposit_owner),
         QuartzError::InvalidUserAccounts
     );
 
     let deposit_drift_user = deposit_instruction.accounts[5].pubkey;
-    msg!("deposit drift user: {:?}", deposit_drift_user);
     check!(
         ctx.accounts.drift_user.key().eq(&deposit_drift_user),
         QuartzError::InvalidUserAccounts
     );
 
     let deposit_drift_user_stats = deposit_instruction.accounts[6].pubkey;
-    msg!("deposit drift user stats: {:?}", deposit_drift_user_stats);
     check!(
         ctx.accounts.drift_user_stats.key().eq(&deposit_drift_user_stats),
         QuartzError::InvalidUserAccounts
@@ -250,11 +252,6 @@ fn validate_prices<'info>(
         QuartzError::MaxSlippageExceeded
     );
 
-    msg!("The deposit price is ({} ± {}) * 10^{}", deposit_price.price, deposit_price.conf, deposit_price.exponent);
-    msg!("The withdraw price is ({} ± {}) * 10^{}", withdraw_price.price, withdraw_price.conf, withdraw_price.exponent);
-    msg!("deposit slippage check value: {:?}", deposit_slippage_check_value);
-    msg!("withdraw slippage check value: {:?}", withdraw_slippage_check_value);
-
     Ok(())
 }
 
@@ -270,12 +267,17 @@ fn validate_account_health<'info>(
         &ctx.remaining_accounts
     )?;
 
-    let drift_account_health = get_drift_account_health(margin_calculation)?;
-
     let quartz_account_health = get_quartz_account_health(margin_calculation)?;
 
-    msg!("drift_account_health: {}", drift_account_health);
-    msg!("quartz_account_health: {}", quartz_account_health);
+    check!(
+        quartz_account_health >= AUTO_REPAY_MIN_HEALTH_RESULT,
+        QuartzError::AutoRepayHealthTooLow
+    );
+
+    check!(
+        quartz_account_health <= AUTO_REPAY_MAX_HEALTH_RESULT,
+        QuartzError::AutoRepayHealthTooHigh
+    );
 
     Ok(())
 }
@@ -284,7 +286,6 @@ pub fn auto_repay_withdraw_handler<'info>(
     ctx: Context<'_, '_, 'info, 'info, AutoRepayWithdraw<'info>>,
     drift_market_index: u16
 ) -> Result<()> {
-    msg!("start handler");
     check!(
         drift_market_index == DRIFT_MARKET_INDEX_SOL,
         QuartzError::UnsupportedDriftMarketIndex
@@ -301,14 +302,12 @@ pub fn auto_repay_withdraw_handler<'info>(
 
     // Validate mint and ATA are the same as swap
     let swap_source_mint = swap_instruction.accounts[5].pubkey;
-    msg!("source mint: {:?}", swap_source_mint);
     check!(
         swap_source_mint.eq(&ctx.accounts.spl_mint.key()),
         QuartzError::InvalidRepayMint
     );
 
     let swap_source_token_account = swap_instruction.accounts[2].pubkey;
-    msg!("source token account: {:?}", swap_source_token_account);
     check!(
         swap_source_token_account.eq(&ctx.accounts.owner_spl.key()),
         QuartzError::InvalidSourceTokenAccount
@@ -320,11 +319,9 @@ pub fn auto_repay_withdraw_handler<'info>(
     );
     let end_balance = ctx.accounts.owner_spl.amount;
     let withdraw_amount = start_balance - end_balance;
-    msg!("withdraw amount: {:?}", withdraw_amount);
 
     // Validate values of deposit_amount and withdraw_amount are within slippage
     let deposit_amount = get_jup_exact_out_route_out_amount(&swap_instruction)?;
-    msg!("deposit amount: {:?}", deposit_amount);
     validate_prices(&ctx, deposit_amount, withdraw_amount)?;
 
     let owner = ctx.accounts.owner.key();
