@@ -190,12 +190,14 @@ pub fn auto_repay_deposit_handler<'info>(
 
     // Validate mint
     let swap_destination_mint = swap_instruction.accounts[6].pubkey;
+    msg!("swap destination mint: {:?}", swap_destination_mint);
     check!(
         swap_destination_mint.eq(&ctx.accounts.spl_mint.key()),
         QuartzError::InvalidRepayMint
     );
 
     let swap_destination_token_account = swap_instruction.accounts[3].pubkey;
+    msg!("swap destination token account: {:?}", swap_destination_token_account);
     check!(
         swap_destination_token_account.eq(&ctx.accounts.owner_spl.key()),
         QuartzError::InvalidDestinationTokenAccount
@@ -214,7 +216,7 @@ pub fn auto_repay_deposit_handler<'info>(
 
     // Get deposit amount from swap instruction
     let deposit_amount = get_jup_exact_out_route_out_amount(&swap_instruction)?;
-
+    msg!("deposit amount: {:?}", deposit_amount);
     // Transfer tokens from owner's ATA to vault's ATA
     token::transfer(
         CpiContext::new(

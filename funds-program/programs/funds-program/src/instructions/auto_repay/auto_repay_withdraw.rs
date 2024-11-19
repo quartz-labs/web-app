@@ -320,9 +320,11 @@ pub fn auto_repay_withdraw_handler<'info>(
     );
     let end_balance = ctx.accounts.owner_spl.amount;
     let withdraw_amount = start_balance - end_balance;
+    msg!("withdraw amount: {:?}", withdraw_amount);
 
     // Validate values of deposit_amount and withdraw_amount are within slippage
     let deposit_amount = get_jup_exact_out_route_out_amount(&swap_instruction)?;
+    msg!("deposit amount: {:?}", deposit_amount);
     validate_prices(&ctx, deposit_amount, withdraw_amount)?;
 
     let owner = ctx.accounts.owner.key();
