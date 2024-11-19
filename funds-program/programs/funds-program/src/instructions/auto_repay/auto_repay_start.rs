@@ -114,7 +114,7 @@ pub fn auto_repay_start_handler<'info>(
     ctx: Context<'_, '_, '_, 'info, AutoRepayStart<'info>>,
     start_withdraw_balance: u64
 ) -> Result<()> {
-    msg!("start repay");
+    msg!("start repay: {}", start_withdraw_balance);
 
     let index: usize = load_current_index_checked(&ctx.accounts.instructions.to_account_info())?.into();
     let swap_instruction = load_instruction_at_checked(index + 1, &ctx.accounts.instructions.to_account_info())?;
