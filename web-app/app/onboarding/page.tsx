@@ -59,6 +59,7 @@ export default function Onboarding() {
         if (signature) router.push("/dashboard");
         else {
             if (!wallet || !await hasBetaKey(wallet.publicKey, showError)) router.push("/");
+            else if (await isVaultClosed(connection, wallet.publicKey)) router.push("/account-closed");
             else if (await isVaultInitialized(connection, wallet.publicKey)) router.push("/dashboard");
             else setAwaitingSign(false);
         }

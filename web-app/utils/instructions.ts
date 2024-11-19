@@ -44,11 +44,16 @@ export const initAccount = async (
     const vaultPda = getVault(wallet.publicKey);
     const marginfiAccount = Keypair.generate();
 
+    console.log(wallet.publicKey.toBase58());
+    console.log(vaultPda.toBase58());
+    console.log(getDriftUser(vaultPda).toBase58());
+    console.log(getDriftUserStats(vaultPda).toBase58());
+
     try {
         const ix_initUser = await quartzProgram.methods
             .initUser()
             .accounts({
-                vault: vaultPda,
+                vault: wallet.publicKey,
                 owner: wallet.publicKey,
                 systemProgram: SystemProgram.programId,
             })
@@ -103,7 +108,7 @@ export const initAccount = async (
         trackTx({status: TxStatus.SIGNING});
         const signedTx = await wallet.signTransaction(tx);
         if (oix_initMarginfiAccount) signedTx.sign([marginfiAccount]);  // Only sign if initing new MarginFi account
-        
+
         const signature = await sendTransactionHandler(trackTx, connection, signedTx);
         return signature;
     } catch (error) {

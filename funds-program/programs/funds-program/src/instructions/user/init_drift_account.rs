@@ -31,7 +31,8 @@ pub struct InitDriftAccount<'info> {
         mut,
         seeds = [b"user".as_ref(), vault.key().as_ref(), (0u16).to_le_bytes().as_ref()],
         seeds::program = drift_program.key(),
-        bump
+        bump,
+        owner = system_program.key()
     )]
     pub drift_user: AccountLoader<'info, DriftUser>,
     
@@ -39,7 +40,8 @@ pub struct InitDriftAccount<'info> {
         mut,
         seeds = [b"user_stats".as_ref(), vault.key().as_ref()],
         seeds::program = drift_program.key(),
-        bump
+        bump,
+        owner = system_program.key()
     )]
     pub drift_user_stats: AccountLoader<'info, DriftUserStats>,
 
