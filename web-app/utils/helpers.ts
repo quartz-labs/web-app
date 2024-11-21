@@ -90,26 +90,6 @@ export const divideBN = (a: BN, b: BN) => {
 
 export const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-export function getFlashLoanRepayAmount(
-    amountBorrowUi: BigNumber | number,
-    borrowBank: Bank,
-    repayBank: Bank,
-    slippage: number,
-    marginfiClient: MarginfiClient,
-) {
-    const oracleBorrow = marginfiClient.getOraclePriceByBank(borrowBank.address);
-    if (!oracleBorrow) throw Error(`Oracle for bank ${borrowBank.address} not found`);
-    const oracleRepay = marginfiClient.getOraclePriceByBank(repayBank.address);
-    if (!oracleRepay) throw Error(`Oracle for bank ${repayBank.address} not found`);
-
-    const amountBorrow = new BigNumber(amountBorrowUi);
-    const amountRepay = amountBorrow
-        .times(oracleBorrow.priceWeighted.highestPrice)
-        .div(oracleRepay.priceWeighted.lowestPrice)
-        .times(1 + slippage);
-    return amountRepay;
-}
-
 export async function makeFlashLoanTx(
     marginfiAccount: MarginfiAccountWrapper,
     amountUi: Amount,
