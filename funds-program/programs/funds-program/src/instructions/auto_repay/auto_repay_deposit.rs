@@ -183,12 +183,6 @@ pub fn auto_repay_deposit_handler<'info>(
     ctx: Context<'_, '_, 'info, 'info, AutoRepayDeposit<'info>>,
     drift_market_index: u16
 ) -> Result<()> {
-    // TODO: Remove temporary guardrail check
-    check!(
-        ctx.accounts.owner.key() == ctx.accounts.caller.key(),
-        QuartzError::InvalidUserAccounts
-    );
-
     check!(
         drift_market_index == DRIFT_MARKET_INDEX_USDC,
         QuartzError::UnsupportedDriftMarketIndex
@@ -214,8 +208,7 @@ pub fn auto_repay_deposit_handler<'info>(
         QuartzError::InvalidDestinationTokenAccount
     );
 
-    // TODO: Add back in (Temporarily removed for testing)
-    // validate_account_health(&ctx, drift_market_index)?;
+    validate_account_health(&ctx, drift_market_index)?;
 
     let vault_bump = ctx.accounts.vault.bump;
     let owner = ctx.accounts.owner.key();

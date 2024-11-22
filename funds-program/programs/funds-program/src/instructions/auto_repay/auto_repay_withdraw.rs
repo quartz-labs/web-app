@@ -306,12 +306,6 @@ pub fn auto_repay_withdraw_handler<'info>(
     ctx: Context<'_, '_, 'info, 'info, AutoRepayWithdraw<'info>>,
     drift_market_index: u16
 ) -> Result<()> {
-    // TODO: Remove temporary guardrail check
-    check!(
-        ctx.accounts.owner.key() == ctx.accounts.caller.key(),
-        QuartzError::InvalidUserAccounts
-    );
-
     check!(
         drift_market_index == DRIFT_MARKET_INDEX_SOL,
         QuartzError::UnsupportedDriftMarketIndex
