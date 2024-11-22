@@ -1,5 +1,5 @@
 export type FundsProgram = {
-  "version": "0.1.19",
+  "version": "0.1.20",
   "name": "funds_program",
   "instructions": [
     {
@@ -313,7 +313,27 @@ export type FundsProgram = {
           "isSigner": false
         },
         {
+          "name": "vault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultWithdrawSpl",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "owner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
           "isMut": false,
           "isSigner": false
         },
@@ -481,11 +501,6 @@ export type FundsProgram = {
         },
         {
           "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "associatedTokenProgram",
           "isMut": false,
           "isSigner": false
         },
@@ -631,7 +646,7 @@ export type FundsProgram = {
 };
 
 export const IDL: FundsProgram = {
-  "version": "0.1.19",
+  "version": "0.1.20",
   "name": "funds_program",
   "instructions": [
     {
@@ -945,7 +960,27 @@ export const IDL: FundsProgram = {
           "isSigner": false
         },
         {
+          "name": "vault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultWithdrawSpl",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "owner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
           "isMut": false,
           "isSigner": false
         },
@@ -1113,11 +1148,6 @@ export const IDL: FundsProgram = {
         },
         {
           "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "associatedTokenProgram",
           "isMut": false,
           "isSigner": false
         },

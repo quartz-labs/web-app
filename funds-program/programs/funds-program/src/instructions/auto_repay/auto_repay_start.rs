@@ -6,7 +6,7 @@ use anchor_lang::{
         sysvar::instructions::{self, load_current_index_checked, load_instruction_at_checked}
     }
 };
-use anchor_spl::token::{Mint, Token, TokenAccount};
+use anchor_spl::{associated_token::AssociatedToken, token::{Mint, Token, TokenAccount}};
 use crate::{
     check, constants::{JUPITER_EXACT_OUT_ROUTE_DISCRIMINATOR, JUPITER_ID}, errors::QuartzError, helpers::get_jup_exact_out_route_platform_fees, state::Vault
 };
@@ -47,6 +47,8 @@ pub struct AutoRepayStart<'info> {
     pub owner: UncheckedAccount<'info>,
 
     pub token_program: Program<'info, Token>,
+
+    pub associated_token_program: Program<'info, AssociatedToken>,
 
     pub system_program: Program<'info, System>,
 
