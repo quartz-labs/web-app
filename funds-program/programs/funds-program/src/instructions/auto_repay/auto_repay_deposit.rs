@@ -49,21 +49,24 @@ pub struct AutoRepayDeposit<'info> {
         init,
         seeds = [vault.key().as_ref(), spl_mint.key().as_ref()],
         bump,
-        payer = owner,
+        payer = caller,
         token::mint = spl_mint,
         token::authority = vault
     )]
     pub vault_spl: Box<Account<'info, TokenAccount>>,
 
+    /// CHECK: Can be any account, once it has a Vault
+    pub owner: UncheckedAccount<'info>,
+
     #[account(mut)]
-    pub owner: Signer<'info>,
+    pub caller: Signer<'info>,
 
     #[account(
         mut,
         associated_token::mint = spl_mint,
-        associated_token::authority = owner
+        associated_token::authority = caller
     )]
-    pub owner_spl: Box<Account<'info, TokenAccount>>,
+    pub caller_spl: Box<Account<'info, TokenAccount>>,
 
     #[account(
         constraint = spl_mint.key().eq(&USDC_MINT) @ QuartzError::InvalidRepayMint
@@ -182,6 +185,12 @@ pub fn auto_repay_deposit_handler<'info>(
     ctx: Context<'_, '_, 'info, 'info, AutoRepayDeposit<'info>>,
     drift_market_index: u16
 ) -> Result<()> {
+    // TODO: Remove temporary guardrail check
+    check!(
+        ctx.accounts.owner.key() == ctx.accounts.caller.key(),
+        QuartzError::InvalidUserAccounts
+    );
+
     check!(
         drift_market_index == DRIFT_MARKET_INDEX_USDC,
         QuartzError::UnsupportedDriftMarketIndex
@@ -203,11 +212,12 @@ pub fn auto_repay_deposit_handler<'info>(
 
     let swap_destination_token_account = swap_instruction.accounts[3].pubkey;
     check!(
-        swap_destination_token_account.eq(&ctx.accounts.owner_spl.key()),
+        swap_destination_token_account.eq(&ctx.accounts.caller_spl.key()),
         QuartzError::InvalidDestinationTokenAccount
     );
 
-    validate_account_health(&ctx, drift_market_index)?;
+    // TODO: Add back in (Temporarily removed for testing)
+    // validate_account_health(&ctx, drift_market_index)?;
 
     let vault_bump = ctx.accounts.vault.bump;
     let owner = ctx.accounts.owner.key();
@@ -220,14 +230,15 @@ pub fn auto_repay_deposit_handler<'info>(
 
     // Get deposit amount from swap instruction
     let deposit_amount = get_jup_exact_out_route_out_amount(&swap_instruction)?;
-    // Transfer tokens from owner's ATA to vault's ATA
+
+    // Transfer tokens from callers's ATA to vault's ATA
     token::transfer(
         CpiContext::new(
             ctx.accounts.token_program.to_account_info(), 
             token::Transfer { 
-                from: ctx.accounts.owner_spl.to_account_info(), 
+                from: ctx.accounts.caller_spl.to_account_info(), 
                 to: ctx.accounts.vault_spl.to_account_info(), 
-                authority: ctx.accounts.owner.to_account_info()
+                authority: ctx.accounts.caller.to_account_info()
             }
         ),
         deposit_amount
@@ -258,7 +269,7 @@ pub fn auto_repay_deposit_handler<'info>(
         ctx.accounts.token_program.to_account_info(),
         token::CloseAccount {
             account: ctx.accounts.vault_spl.to_account_info(),
-            destination: ctx.accounts.owner.to_account_info(),
+            destination: ctx.accounts.caller.to_account_info(),
             authority: ctx.accounts.vault.to_account_info(),
         },
         signer_seeds

@@ -47,21 +47,24 @@ pub struct AutoRepayWithdraw<'info> {
         init,
         seeds = [vault.key().as_ref(), spl_mint.key().as_ref()],
         bump,
-        payer = owner,
+        payer = caller,
         token::mint = spl_mint,
         token::authority = vault
     )]
     pub vault_spl: Box<Account<'info, TokenAccount>>,
 
+    /// CHECK: Can be any account, once it has a Vault
+    pub owner: UncheckedAccount<'info>,
+
     #[account(mut)]
-    pub owner: Signer<'info>,
+    pub caller: Signer<'info>,
 
     #[account(
         mut,
         associated_token::mint = spl_mint,
-        associated_token::authority = owner
+        associated_token::authority = caller
     )]
-    pub owner_spl: Box<Account<'info, TokenAccount>>,
+    pub caller_spl: Box<Account<'info, TokenAccount>>,
 
     #[account(
         constraint = spl_mint.key().eq(&WSOL_MINT) @ QuartzError::InvalidRepayMint
@@ -177,13 +180,19 @@ fn validate_user_accounts<'info>(
         QuartzError::InvalidUserAccounts
     );
 
-    let deposit_drift_user = deposit_instruction.accounts[5].pubkey;
+    let deposit_caller = deposit_instruction.accounts[3].pubkey;
+    check!(
+        ctx.accounts.caller.key().eq(&deposit_caller),
+        QuartzError::InvalidUserAccounts
+    );
+
+    let deposit_drift_user = deposit_instruction.accounts[6].pubkey;
     check!(
         ctx.accounts.drift_user.key().eq(&deposit_drift_user),
         QuartzError::InvalidUserAccounts
     );
 
-    let deposit_drift_user_stats = deposit_instruction.accounts[6].pubkey;
+    let deposit_drift_user_stats = deposit_instruction.accounts[7].pubkey;
     check!(
         ctx.accounts.drift_user_stats.key().eq(&deposit_drift_user_stats),
         QuartzError::InvalidUserAccounts
@@ -281,6 +290,12 @@ pub fn auto_repay_withdraw_handler<'info>(
     ctx: Context<'_, '_, 'info, 'info, AutoRepayWithdraw<'info>>,
     drift_market_index: u16
 ) -> Result<()> {
+    // TODO: Remove temporary guardrail check
+    check!(
+        ctx.accounts.owner.key() == ctx.accounts.caller.key(),
+        QuartzError::InvalidUserAccounts
+    );
+
     check!(
         drift_market_index == DRIFT_MARKET_INDEX_SOL,
         QuartzError::UnsupportedDriftMarketIndex
@@ -304,7 +319,7 @@ pub fn auto_repay_withdraw_handler<'info>(
 
     let swap_source_token_account = swap_instruction.accounts[2].pubkey;
     check!(
-        swap_source_token_account.eq(&ctx.accounts.owner_spl.key()),
+        swap_source_token_account.eq(&ctx.accounts.caller_spl.key()),
         QuartzError::InvalidSourceTokenAccount
     );
     
@@ -312,7 +327,7 @@ pub fn auto_repay_withdraw_handler<'info>(
     let start_balance = u64::from_le_bytes(
         start_instruction.data[8..16].try_into().unwrap()
     );
-    let end_balance = ctx.accounts.owner_spl.amount;
+    let end_balance = ctx.accounts.caller_spl.amount;
     let withdraw_amount = start_balance - end_balance;
 
     // Validate values of deposit_amount and withdraw_amount are within slippage
@@ -348,13 +363,13 @@ pub fn auto_repay_withdraw_handler<'info>(
     // reduce_only = true to prevent withdrawing more than the collateral position (which would create a new loan)
     drift_withdraw(cpi_ctx, drift_market_index, withdraw_amount, true)?;
 
-    // Transfer tokens from vault's ATA to owner's ATA
+    // Transfer tokens from vault's ATA to caller's ATA
     token::transfer(
         CpiContext::new_with_signer(
             ctx.accounts.token_program.to_account_info(), 
             token::Transfer { 
                 from: ctx.accounts.vault_spl.to_account_info(), 
-                to: ctx.accounts.owner_spl.to_account_info(), 
+                to: ctx.accounts.caller_spl.to_account_info(), 
                 authority: ctx.accounts.vault.to_account_info()
             }, 
             signer_seeds_vault
@@ -367,7 +382,7 @@ pub fn auto_repay_withdraw_handler<'info>(
         ctx.accounts.token_program.to_account_info(),
         token::CloseAccount {
             account: ctx.accounts.vault_spl.to_account_info(),
-            destination: ctx.accounts.owner.to_account_info(),
+            destination: ctx.accounts.caller.to_account_info(),
             authority: ctx.accounts.vault.to_account_info(),
         },
         signer_seeds_vault

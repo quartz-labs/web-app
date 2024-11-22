@@ -121,10 +121,9 @@ pub fn auto_repay_start_handler<'info>(
     validate_swap_data(&ctx, &swap_instruction)?;
 
     // Check declared start balance is accurate
-    let caller_balance = ctx.accounts.caller_withdraw_spl.amount;
-
+    let caller_true_balance = ctx.accounts.caller_withdraw_spl.amount;
     check!(
-        start_withdraw_balance == caller_balance,
+        start_withdraw_balance == caller_true_balance,
         QuartzError::InvalidStartBalance
     );
 

@@ -4,6 +4,7 @@ export const FUNDS_PROGRAM_ID = new PublicKey("6JjHXLheGSNvvexgzMthEcgjkcirDrGdu
 export const MARGINFI_PROGRAM_ID = new PublicKey("MFv2hWf31Z9kbCa1snEPYctwafyhdvnV7FZnsebVacA");
 export const FUNDS_PROGRAM_ADDRESS_TABLE = new PublicKey("96BmeKKVGX3LKYSKo3FCEom1YpNY11kCnGscKq6ouxLx"); // Mainnet
 // export const FUNDS_PROGRAM_ADDRESS_TABLE = new PublicKey("5RFqRXucCtpz4ZzZWMLV1bRMVyESVFusptr1cGMRHQTr"); // Devnet
+export const QUARTZ_HEALTH_BUFFER_PERCENTAGE = 10;
 
 export const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL ?? "https://janella-g42vor-fast-mainnet.helius-rpc.com";
 

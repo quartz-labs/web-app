@@ -54,12 +54,12 @@
         },
         {
           "name": "driftUser",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
           "name": "driftUserStats",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -350,11 +350,16 @@
         },
         {
           "name": "owner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "caller",
           "isMut": true,
           "isSigner": true
         },
         {
-          "name": "ownerSpl",
+          "name": "callerSpl",
           "isMut": true,
           "isSigner": false
         },
@@ -431,11 +436,16 @@
         },
         {
           "name": "owner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "caller",
           "isMut": true,
           "isSigner": true
         },
         {
-          "name": "ownerSpl",
+          "name": "callerSpl",
           "isMut": true,
           "isSigner": false
         },

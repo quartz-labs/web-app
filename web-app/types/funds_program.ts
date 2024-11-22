@@ -54,12 +54,12 @@ export type FundsProgram = {
         },
         {
           "name": "driftUser",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
           "name": "driftUserStats",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -350,11 +350,16 @@ export type FundsProgram = {
         },
         {
           "name": "owner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "caller",
           "isMut": true,
           "isSigner": true
         },
         {
-          "name": "ownerSpl",
+          "name": "callerSpl",
           "isMut": true,
           "isSigner": false
         },
@@ -431,11 +436,16 @@ export type FundsProgram = {
         },
         {
           "name": "owner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "caller",
           "isMut": true,
           "isSigner": true
         },
         {
-          "name": "ownerSpl",
+          "name": "callerSpl",
           "isMut": true,
           "isSigner": false
         },
@@ -676,12 +686,12 @@ export const IDL: FundsProgram = {
         },
         {
           "name": "driftUser",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
           "name": "driftUserStats",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -972,11 +982,16 @@ export const IDL: FundsProgram = {
         },
         {
           "name": "owner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "caller",
           "isMut": true,
           "isSigner": true
         },
         {
-          "name": "ownerSpl",
+          "name": "callerSpl",
           "isMut": true,
           "isSigner": false
         },
@@ -1053,11 +1068,16 @@ export const IDL: FundsProgram = {
         },
         {
           "name": "owner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "caller",
           "isMut": true,
           "isSigner": true
         },
         {
-          "name": "ownerSpl",
+          "name": "callerSpl",
           "isMut": true,
           "isSigner": false
         },

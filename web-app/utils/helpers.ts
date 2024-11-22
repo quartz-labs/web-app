@@ -1,11 +1,11 @@
 import { AddressLookupTableAccount, PublicKey, TransactionInstruction, Connection, Keypair, Transaction } from "@solana/web3.js";
 import { getVault } from "./getAccounts";
 import { createAssociatedTokenAccountInstruction } from "@solana/spl-token";
-import { Bank, MarginfiAccountWrapper, MarginfiClient } from "@mrgnlabs/marginfi-client-v2";
+import { MarginfiAccountWrapper } from "@mrgnlabs/marginfi-client-v2";
 import BigNumber from "bignumber.js";
 import { Amount } from "@mrgnlabs/mrgn-common";
 import { BN } from "@coral-xyz/anchor";
-import { RPC_URL } from "./constants";
+import { QUARTZ_HEALTH_BUFFER_PERCENTAGE, RPC_URL } from "./constants";
 import { ShowErrorProps } from "@/context/error-provider";
 import { captureError } from "@/utils/errors";
 
@@ -181,4 +181,19 @@ export async function getAccountsFromInstructions(connection: Connection, instru
 
 export function getDisplayWalletAddress(address: string) {
     return `(${address.slice(0, 4)}...${address.slice(-4)})` 
+}
+
+export function getQuartzHealthFromDrift(driftHealth: number): number {
+    if (driftHealth <= 0) return 0;
+    if (driftHealth >= 100) return 100;
+
+    return Math.floor(
+        Math.min(
+            100,
+            Math.max(
+                0,
+                (driftHealth - QUARTZ_HEALTH_BUFFER_PERCENTAGE) / (1 - (QUARTZ_HEALTH_BUFFER_PERCENTAGE / 100))
+            )
+        )
+    );
 }

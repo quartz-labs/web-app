@@ -5,6 +5,7 @@ import { AccountData } from "./accountData";
 import { captureError } from "./errors";
 import { useError } from "@/context/error-provider";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
+import { getQuartzHealthFromDrift } from "./helpers";
 
 export function useDriftDataQuery() {   
     const wallet = useAnchorWallet();
@@ -33,7 +34,7 @@ export function useDriftDataQuery() {
             usdcWithdrawLimitBaseUnits: responseJson.withdrawLimits[1],
             solRate: responseJson.rates[0].depositRate,
             usdcRate: responseJson.rates[1].borrowRate,
-            health: responseJson.health
+            health: getQuartzHealthFromDrift(responseJson.health)
             };
         return data;
     };

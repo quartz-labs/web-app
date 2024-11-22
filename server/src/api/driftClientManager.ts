@@ -6,6 +6,7 @@ import { bnToDecimal } from "../helpers.js";
 export async function getDriftData(address: string, marketIndices: number[], driftClientManager: DriftClientManager) {
     const balancePromise = driftClientManager.getUserBalances(address, marketIndices);
 
+    // TODO - Get withdraw limit with Quartz health, not Drift health
     const getWithdrawLimitPromise = async () => {
         const promises = marketIndices.map(async (index) => {
             const withdrawalLimit = await driftClientManager.getWithdrawalLimit(address, index);
