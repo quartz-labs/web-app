@@ -8,10 +8,7 @@ use anchor_lang::{
 };
 use anchor_spl::token::{Mint, Token, TokenAccount};
 use crate::{
-    check, 
-    constants::{JUPITER_EXACT_OUT_ROUTE_DISCRIMINATOR, JUPITER_ID}, 
-    helpers::get_jup_exact_out_route_platform_fees,
-    errors::QuartzError
+    check, constants::{JUPITER_EXACT_OUT_ROUTE_DISCRIMINATOR, JUPITER_ID}, errors::QuartzError, helpers::get_jup_exact_out_route_platform_fees, state::Vault
 };
 
 #[derive(Accounts)]
@@ -27,6 +24,27 @@ pub struct AutoRepayStart<'info> {
     pub caller_withdraw_spl: Box<Account<'info, TokenAccount>>,
 
     pub withdraw_mint: Box<Account<'info, Mint>>,
+
+    #[account(
+        mut,
+        seeds = [b"vault".as_ref(), owner.key().as_ref()],
+        bump = vault.bump,
+        has_one = owner
+    )]
+    pub vault: Box<Account<'info, Vault>>,
+
+    #[account(
+        init,
+        seeds = [vault.key().as_ref(), withdraw_mint.key().as_ref()],
+        bump,
+        payer = caller,
+        token::mint = withdraw_mint,
+        token::authority = vault
+    )]
+    pub vault_withdraw_spl: Box<Account<'info, TokenAccount>>,
+
+    /// CHECK: Can be any account, once it has a Vault
+    pub owner: UncheckedAccount<'info>,
 
     pub token_program: Program<'info, Token>,
 

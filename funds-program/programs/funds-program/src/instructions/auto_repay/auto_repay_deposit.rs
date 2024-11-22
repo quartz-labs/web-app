@@ -19,11 +19,11 @@ use drift::{
         accounts::Deposit as DriftDeposit,
         deposit as drift_deposit
     }, 
-    program::Drift, 
     state::{
         state::State as DriftState, 
-        user::{User as DriftUser, UserStats as DriftUserStats}
-    }  
+        user::User as DriftUser
+    },
+    program::Drift
 };
 use crate::{
     check, 
@@ -81,13 +81,9 @@ pub struct AutoRepayDeposit<'info> {
     )]
     pub drift_user: AccountLoader<'info, DriftUser>,
     
-    #[account(
-        mut,
-        seeds = [b"user_stats".as_ref(), vault.key().as_ref()],
-        seeds::program = drift_program.key(),
-        bump
-    )]
-    pub drift_user_stats: AccountLoader<'info, DriftUserStats>,
+    /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
+    #[account(mut)]
+    pub drift_user_stats: UncheckedAccount<'info>,
 
     #[account(
         mut,
@@ -114,6 +110,7 @@ pub struct AutoRepayDeposit<'info> {
     instructions: UncheckedAccount<'info>,
 }
 
+#[inline(never)]
 fn validate_instruction_order<'info>(
     start_instruction: &Instruction,
     swap_instruction: &Instruction,
@@ -159,6 +156,7 @@ fn validate_instruction_order<'info>(
     Ok(())
 }
 
+#[inline(never)]
 fn validate_account_health<'info>(
     ctx: &Context<'_, '_, 'info, 'info, AutoRepayDeposit<'info>>,
     drift_market_index: u16

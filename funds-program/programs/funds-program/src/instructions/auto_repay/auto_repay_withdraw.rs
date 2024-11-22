@@ -11,15 +11,13 @@ use anchor_lang::{
     }, 
     Discriminator
 };
-use anchor_spl::{
-    associated_token::AssociatedToken, token::{self, Mint, Token, TokenAccount}
-};
+use anchor_spl::token::{self, Mint, Token, TokenAccount};
 use drift::{
     cpi::{accounts::Withdraw as DriftWithdraw, withdraw as drift_withdraw},
     program::Drift, 
     state::{
         state::State as DriftState, 
-        user::{User as DriftUser, UserStats as DriftUserStats}
+        user::User as DriftUser
     }
 };
 use pyth_solana_receiver_sdk::price_update::{get_feed_id_from_hex, PriceUpdateV2};
@@ -44,10 +42,9 @@ pub struct AutoRepayWithdraw<'info> {
     pub vault: Box<Account<'info, Vault>>,
 
     #[account(
-        init,
+        mut,
         seeds = [vault.key().as_ref(), spl_mint.key().as_ref()],
         bump,
-        payer = caller,
         token::mint = spl_mint,
         token::authority = vault
     )]
@@ -79,13 +76,9 @@ pub struct AutoRepayWithdraw<'info> {
     )]
     pub drift_user: AccountLoader<'info, DriftUser>,
     
-    #[account(
-        mut,
-        seeds = [b"user_stats".as_ref(), vault.key().as_ref()],
-        seeds::program = drift_program.key(),
-        bump
-    )]
-    pub drift_user_stats: AccountLoader<'info, DriftUserStats>,
+    /// CHECK: This account is passed through to the Drift CPI, which performs the security checks
+    #[account(mut)]
+    pub drift_user_stats: UncheckedAccount<'info>,
 
     #[account(
         mut,
@@ -104,8 +97,6 @@ pub struct AutoRepayWithdraw<'info> {
 
     pub token_program: Program<'info, Token>,
 
-    pub associated_token_program: Program<'info, AssociatedToken>,
-
     pub drift_program: Program<'info, Drift>,
 
     pub system_program: Program<'info, System>,
@@ -119,6 +110,7 @@ pub struct AutoRepayWithdraw<'info> {
     instructions: UncheckedAccount<'info>,
 }
 
+#[inline(never)]
 fn validate_instruction_order<'info>(
     start_instruction: &Instruction,
     swap_instruction: &Instruction,
@@ -164,10 +156,32 @@ fn validate_instruction_order<'info>(
     Ok(())
 }
 
+#[inline(never)]
 fn validate_user_accounts<'info>(
     ctx: &Context<'_, '_, '_, 'info, AutoRepayWithdraw<'info>>,
+    start_instruction: &Instruction,
     deposit_instruction: &Instruction
 ) -> Result<()> {
+    // Start instruction
+    let start_owner = start_instruction.accounts[5].pubkey;
+    check!(
+        ctx.accounts.owner.key().eq(&start_owner),
+        QuartzError::InvalidUserAccounts
+    );
+
+    let start_vault = start_instruction.accounts[3].pubkey;
+    check!(
+        ctx.accounts.vault.key().eq(&start_vault),
+        QuartzError::InvalidUserAccounts
+    );
+
+    let start_vault_spl = start_instruction.accounts[4].pubkey;
+    check!(
+        ctx.accounts.vault_spl.key().eq(&start_vault_spl),
+        QuartzError::InvalidUserAccounts
+    );
+
+    // Deposit instruction
     let deposit_vault = deposit_instruction.accounts[0].pubkey;
     check!(
         ctx.accounts.vault.key().eq(&deposit_vault),
@@ -201,6 +215,7 @@ fn validate_user_accounts<'info>(
     Ok(())
 }
 
+#[inline(never)]
 fn validate_prices<'info>(
     ctx: &Context<'_, '_, '_, 'info, AutoRepayWithdraw<'info>>,
     deposit_amount: u64,
@@ -264,6 +279,7 @@ fn validate_prices<'info>(
     Ok(())
 }
 
+#[inline(never)]
 fn validate_account_health<'info>(
     ctx: &Context<'_, '_, 'info, 'info, AutoRepayWithdraw<'info>>,
     drift_market_index: u16
@@ -308,7 +324,7 @@ pub fn auto_repay_withdraw_handler<'info>(
 
     validate_instruction_order(&start_instruction, &swap_instruction, &deposit_instruction)?;
 
-    validate_user_accounts(&ctx, &deposit_instruction)?;
+    validate_user_accounts(&ctx, &start_instruction, &deposit_instruction)?;
 
     // Validate mint and ATA are the same as swap
     let swap_source_mint = swap_instruction.accounts[5].pubkey;

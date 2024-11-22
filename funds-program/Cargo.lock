@@ -596,9 +596,9 @@ dependencies = [
 
 [[package]]
 name = "bumpalo"
-version = "3.16.0"
+version = "3.15.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "79296716171880943b8470b5f8d03aa55eb2e645a4874bdbb28adb49162e012c"
+checksum = "c764d619ca78fccbf3069b37bd7af92577f044bb15236036662d79b6559f25b7"
 
 [[package]]
 name = "bv"
@@ -1021,7 +1021,7 @@ checksum = "3f9eec918d3f24069decb9af1554cad7c880e2da24a9afd88aca000531ab82c1"
 
 [[package]]
 name = "funds-program"
-version = "0.1.19"
+version = "0.1.20"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
