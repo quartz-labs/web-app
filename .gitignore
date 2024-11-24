@@ -5,6 +5,10 @@
 build
 dist
 
+apps/web/web/.next/
+
+apps/web/.nx/
+
 # local env files
 .env.local
 .env.development.local

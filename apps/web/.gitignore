@@ -11,6 +11,10 @@ drift-keypair.json
 # testing
 /coverage
 
+.web/.next
+
+.nx/
+
 # next.js
 .next/
 /.next/
