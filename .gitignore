@@ -1,6 +1,26 @@
 **/node_modules/
 **/.env
 
+# production
+build
+dist
+
+# local env files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# turbo
+.turbo
+.vercel
+
+# store for local dev scripts
+scripts/dev/**
+
+# typescript
+*.tsbuildinfo
+
 keypairs
 
 # Expo app

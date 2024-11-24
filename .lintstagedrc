@@ -1,0 +1,9 @@
+{
+  "**/*.{js,ts,json}": [
+    "biome check --write --no-errors-on-unmatched",
+    "biome check --write --organize-imports-enabled=true --no-errors-on-unmatched",
+    "biome check --write --unsafe --no-errors-on-unmatched",
+    "biome format --write --no-errors-on-unmatched",
+    "biome lint --write --no-errors-on-unmatched"
+  ]
+}

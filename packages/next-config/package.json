@@ -1,0 +1,23 @@
+{
+  "name": "@quartz/next-config",
+  "version": "0.0.1",
+  "sideEffects": false,
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "npx tsc"
+  },
+  "peerDependencies": {
+    "next": "catalog:"
+  },
+  "devDependencies": {
+    "next": "catalog:"
+  },
+  "exports": {
+    "./withWebSecurityHeaders": {
+      "types": "./dist/withWebSecurityHeaders.d.ts",
+      "import": "./dist/withWebSecurityHeaders.js",
+      "require": "./dist/withWebSecurityHeaders.js"
+    }
+  }
+}
