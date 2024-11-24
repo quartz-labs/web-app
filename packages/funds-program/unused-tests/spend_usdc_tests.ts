@@ -1,15 +1,20 @@
 import * as anchor from "@coral-xyz/anchor";
-import { Program, AnchorError } from "@coral-xyz/anchor";
+import { AnchorError, Program } from "@coral-xyz/anchor";
+import {
+  ASSOCIATED_TOKEN_PROGRAM_ID,
+  TOKEN_PROGRAM_ID,
+  createMint,
+  getOrCreateAssociatedTokenAccount,
+  mintTo,
+} from "@solana/spl-token";
+import { Keypair, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
+import dotenv from "dotenv";
 import { FundsProgram } from "../target/types/funds_program";
-import { Keypair, SystemProgram, LAMPORTS_PER_SOL, Transaction, PublicKey } from "@solana/web3.js";
-import { createMint, getOrCreateAssociatedTokenAccount, TOKEN_PROGRAM_ID, mintTo, ASSOCIATED_TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import dotenv from 'dotenv';
 const fs = require("fs");
 import path from "path";
 import { assert, expect } from "chai";
 import { setupTests } from "../tests/setup_tests";
 dotenv.config();
-
 
 describe("spend_usdc tests", () => {
   let testSetup: Awaited<ReturnType<typeof setupTests>>;
@@ -18,15 +23,24 @@ describe("spend_usdc tests", () => {
     testSetup = await setupTests();
   });
 
-
   it("spend_usdc insufficient funds", async () => {
-    const { program, vaultPda, vaultUsdcPda, backupKeypair, userKeypair, testUsdcMint, CENT_PER_USDC, QUARTZ_HOLDING_ADDRESS, quartzHoldingUsdc } = testSetup;
+    const {
+      program,
+      vaultPda,
+      vaultUsdcPda,
+      backupKeypair,
+      userKeypair,
+      testUsdcMint,
+      CENT_PER_USDC,
+      QUARTZ_HOLDING_ADDRESS,
+      quartzHoldingUsdc,
+    } = testSetup;
     const desiredErrorCode = "InsufficientFunds";
 
     // Call PDA to spend USDC without required funds
     try {
       const tx = await program.methods
-        .spendUsdc(new anchor.BN(CENT_PER_USDC * 10000))  // Insufficient funds for transaction (instruction should fail)
+        .spendUsdc(new anchor.BN(CENT_PER_USDC * 10000)) // Insufficient funds for transaction (instruction should fail)
         .accounts({
           // @ts-ignore - Causing an issue in Cursor IDE
           vault: vaultPda,
@@ -38,7 +52,7 @@ describe("spend_usdc tests", () => {
           usdcMint: testUsdcMint,
           tokenProgram: TOKEN_PROGRAM_ID,
           associateTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-          systemProgram: SystemProgram.programId
+          systemProgram: SystemProgram.programId,
         })
         .signers([userKeypair])
         .rpc();
@@ -51,18 +65,27 @@ describe("spend_usdc tests", () => {
   });
 
   it("spend_usdc mismatched ata owner", async () => {
-    const { program, vaultPda, vaultUsdcPda, backupKeypair, userKeypair, testUsdcMint, connection, wallet, CENT_PER_USDC, mintUsdcToVault, QUARTZ_HOLDING_ADDRESS } = testSetup;
+    const {
+      program,
+      vaultPda,
+      vaultUsdcPda,
+      backupKeypair,
+      userKeypair,
+      testUsdcMint,
+      connection,
+      wallet,
+      CENT_PER_USDC,
+      mintUsdcToVault,
+      QUARTZ_HOLDING_ADDRESS,
+    } = testSetup;
     const desiredErrorCode = "ConstraintTokenOwner";
 
     await mintUsdcToVault(10);
 
     // Initialize a random ATA
-    const incorrectAta = (await getOrCreateAssociatedTokenAccount(
-      connection,
-      wallet.payer,
-      testUsdcMint,
-      Keypair.generate().publicKey
-    )).address;
+    const incorrectAta = (
+      await getOrCreateAssociatedTokenAccount(connection, wallet.payer, testUsdcMint, Keypair.generate().publicKey)
+    ).address;
 
     // Call PDA to spend USDC
     try {
@@ -79,7 +102,7 @@ describe("spend_usdc tests", () => {
           usdcMint: testUsdcMint,
           tokenProgram: TOKEN_PROGRAM_ID,
           associateTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-          systemProgram: SystemProgram.programId
+          systemProgram: SystemProgram.programId,
         })
         .signers([userKeypair])
         .rpc();
@@ -92,8 +115,18 @@ describe("spend_usdc tests", () => {
   });
 
   it("spend_usdc mismatched mint receiver", async () => {
-    const { 
-      program, vaultPda, vaultUsdcPda, backupKeypair, userKeypair, testUsdcMint, connection, wallet, CENT_PER_USDC, mintUsdcToVault, QUARTZ_HOLDING_ADDRESS
+    const {
+      program,
+      vaultPda,
+      vaultUsdcPda,
+      backupKeypair,
+      userKeypair,
+      testUsdcMint,
+      connection,
+      wallet,
+      CENT_PER_USDC,
+      mintUsdcToVault,
+      QUARTZ_HOLDING_ADDRESS,
     } = testSetup;
     const desiredErrorCode = "ConstraintAssociated";
     await mintUsdcToVault(10);
@@ -105,15 +138,12 @@ describe("spend_usdc tests", () => {
       mintAuth.publicKey,
       mintAuth.publicKey,
       2,
-      Keypair.generate()
+      Keypair.generate(),
     );
 
-    const quartzHoldingIncorrect = (await getOrCreateAssociatedTokenAccount(
-      connection,
-      wallet.payer,
-      incorrectMint,
-      QUARTZ_HOLDING_ADDRESS
-    )).address;
+    const quartzHoldingIncorrect = (
+      await getOrCreateAssociatedTokenAccount(connection, wallet.payer, incorrectMint, QUARTZ_HOLDING_ADDRESS)
+    ).address;
 
     // Call PDA to spend USDC
     try {
@@ -130,7 +160,7 @@ describe("spend_usdc tests", () => {
           usdcMint: testUsdcMint,
           tokenProgram: TOKEN_PROGRAM_ID,
           associateTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-          systemProgram: SystemProgram.programId
+          systemProgram: SystemProgram.programId,
         })
         .signers([userKeypair])
         .rpc();
@@ -143,8 +173,18 @@ describe("spend_usdc tests", () => {
   });
 
   it("spend_usdc mismatched mint vault", async () => {
-    const { 
-      program, vaultPda, vaultUsdcPda, backupKeypair, userKeypair, quartzHoldingUsdc, QUARTZ_HOLDING_ADDRESS, connection, wallet, CENT_PER_USDC, mintUsdcToVault 
+    const {
+      program,
+      vaultPda,
+      vaultUsdcPda,
+      backupKeypair,
+      userKeypair,
+      quartzHoldingUsdc,
+      QUARTZ_HOLDING_ADDRESS,
+      connection,
+      wallet,
+      CENT_PER_USDC,
+      mintUsdcToVault,
     } = testSetup;
     const desiredErrorCode = "ConstraintSeeds";
     await mintUsdcToVault(10);
@@ -156,7 +196,7 @@ describe("spend_usdc tests", () => {
       mintAuth.publicKey,
       mintAuth.publicKey,
       2,
-      Keypair.generate()
+      Keypair.generate(),
     );
 
     // Call PDA to spend USDC
@@ -174,7 +214,7 @@ describe("spend_usdc tests", () => {
           usdcMint: incorrectMint,
           tokenProgram: TOKEN_PROGRAM_ID,
           associateTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-          systemProgram: SystemProgram.programId
+          systemProgram: SystemProgram.programId,
         })
         .signers([userKeypair])
         .rpc();
@@ -187,10 +227,19 @@ describe("spend_usdc tests", () => {
   });
 
   it("spend_usdc incorrect signature", async () => {
-    const { 
-      program, vaultPda, vaultUsdcPda, backupKeypair, userKeypair, testUsdcMint, 
-      QUARTZ_HOLDING_ADDRESS, quartzHoldingUsdc, CENT_PER_USDC, mintUsdcToVault, quartzManagerKeypair
-     } = testSetup;
+    const {
+      program,
+      vaultPda,
+      vaultUsdcPda,
+      backupKeypair,
+      userKeypair,
+      testUsdcMint,
+      QUARTZ_HOLDING_ADDRESS,
+      quartzHoldingUsdc,
+      CENT_PER_USDC,
+      mintUsdcToVault,
+      quartzManagerKeypair,
+    } = testSetup;
     const desiredErrorMessage = "Missing signature";
     await mintUsdcToVault(10);
 
@@ -209,7 +258,7 @@ describe("spend_usdc tests", () => {
           usdcMint: testUsdcMint,
           tokenProgram: TOKEN_PROGRAM_ID,
           associateTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-          systemProgram: SystemProgram.programId
+          systemProgram: SystemProgram.programId,
         })
         .signers([quartzManagerKeypair])
         .rpc();
@@ -222,8 +271,17 @@ describe("spend_usdc tests", () => {
   });
 
   it("spend_usdc incorrect user", async () => {
-    const { 
-      program, vaultPda, vaultUsdcPda, backupKeypair, userKeypair, testUsdcMint, QUARTZ_HOLDING_ADDRESS, quartzHoldingUsdc, CENT_PER_USDC, mintUsdcToVault 
+    const {
+      program,
+      vaultPda,
+      vaultUsdcPda,
+      backupKeypair,
+      userKeypair,
+      testUsdcMint,
+      QUARTZ_HOLDING_ADDRESS,
+      quartzHoldingUsdc,
+      CENT_PER_USDC,
+      mintUsdcToVault,
     } = testSetup;
     const desiredErrorMessage = "unknown signer";
     await mintUsdcToVault(10);
@@ -243,7 +301,7 @@ describe("spend_usdc tests", () => {
           usdcMint: testUsdcMint,
           tokenProgram: TOKEN_PROGRAM_ID,
           associateTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-          systemProgram: SystemProgram.programId
+          systemProgram: SystemProgram.programId,
         })
         .signers([userKeypair])
         .rpc();
@@ -256,8 +314,16 @@ describe("spend_usdc tests", () => {
   });
 
   it("spend_usdc incorrect backup", async () => {
-    const { 
-      program, vaultPda, vaultUsdcPda, QUARTZ_HOLDING_ADDRESS, quartzHoldingUsdc, userKeypair, testUsdcMint, CENT_PER_USDC, mintUsdcToVault 
+    const {
+      program,
+      vaultPda,
+      vaultUsdcPda,
+      QUARTZ_HOLDING_ADDRESS,
+      quartzHoldingUsdc,
+      userKeypair,
+      testUsdcMint,
+      CENT_PER_USDC,
+      mintUsdcToVault,
     } = testSetup;
     const desiredErrorCode = "ConstraintSeeds";
     await mintUsdcToVault(10);
@@ -277,7 +343,7 @@ describe("spend_usdc tests", () => {
           usdcMint: testUsdcMint,
           tokenProgram: TOKEN_PROGRAM_ID,
           associateTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-          systemProgram: SystemProgram.programId
+          systemProgram: SystemProgram.programId,
         })
         .signers([userKeypair])
         .rpc();
@@ -289,11 +355,20 @@ describe("spend_usdc tests", () => {
     }
   });
 
-
   it("spend_usdc incorrect vault pda", async () => {
-    const { 
-      program, vaultUsdcPda, backupKeypair, userKeypair, testUsdcMint, connection, wallet, 
-      CENT_PER_USDC, mintUsdcToVault, otherKeypairVaultPda, QUARTZ_HOLDING_ADDRESS, quartzHoldingUsdc
+    const {
+      program,
+      vaultUsdcPda,
+      backupKeypair,
+      userKeypair,
+      testUsdcMint,
+      connection,
+      wallet,
+      CENT_PER_USDC,
+      mintUsdcToVault,
+      otherKeypairVaultPda,
+      QUARTZ_HOLDING_ADDRESS,
+      quartzHoldingUsdc,
     } = testSetup;
     const desiredErrorCode = "AccountNotInitialized";
     await mintUsdcToVault(10);
@@ -313,7 +388,7 @@ describe("spend_usdc tests", () => {
           usdcMint: testUsdcMint,
           tokenProgram: TOKEN_PROGRAM_ID,
           associateTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-          systemProgram: SystemProgram.programId
+          systemProgram: SystemProgram.programId,
         })
         .signers([userKeypair])
         .rpc();
@@ -326,8 +401,17 @@ describe("spend_usdc tests", () => {
   });
 
   it("spend_usdc incorrect vault ata pda", async () => {
-    const { 
-      program, vaultPda, backupKeypair, userKeypair, testUsdcMint, CENT_PER_USDC, mintUsdcToVault, otherKeypairVaultUsdcPda, QUARTZ_HOLDING_ADDRESS, quartzHoldingUsdc
+    const {
+      program,
+      vaultPda,
+      backupKeypair,
+      userKeypair,
+      testUsdcMint,
+      CENT_PER_USDC,
+      mintUsdcToVault,
+      otherKeypairVaultUsdcPda,
+      QUARTZ_HOLDING_ADDRESS,
+      quartzHoldingUsdc,
     } = testSetup;
     const desiredErrorCode = "AccountNotInitialized";
     await mintUsdcToVault(10);
@@ -347,7 +431,7 @@ describe("spend_usdc tests", () => {
           usdcMint: testUsdcMint,
           tokenProgram: TOKEN_PROGRAM_ID,
           associateTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-          systemProgram: SystemProgram.programId
+          systemProgram: SystemProgram.programId,
         })
         .signers([userKeypair])
         .rpc();
@@ -360,8 +444,17 @@ describe("spend_usdc tests", () => {
   });
 
   it("spend_usdc backup signature", async () => {
-    const { 
-      program, vaultPda, vaultUsdcPda, backupKeypair, userKeypair, testUsdcMint, CENT_PER_USDC, mintUsdcToVault, QUARTZ_HOLDING_ADDRESS, quartzHoldingUsdc
+    const {
+      program,
+      vaultPda,
+      vaultUsdcPda,
+      backupKeypair,
+      userKeypair,
+      testUsdcMint,
+      CENT_PER_USDC,
+      mintUsdcToVault,
+      QUARTZ_HOLDING_ADDRESS,
+      quartzHoldingUsdc,
     } = testSetup;
     const desiredErrorMessage = "unknown signer";
     await mintUsdcToVault(10);
@@ -381,7 +474,7 @@ describe("spend_usdc tests", () => {
           usdcMint: testUsdcMint,
           tokenProgram: TOKEN_PROGRAM_ID,
           associateTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-          systemProgram: SystemProgram.programId
+          systemProgram: SystemProgram.programId,
         })
         .signers([backupKeypair])
         .rpc();
@@ -393,16 +486,23 @@ describe("spend_usdc tests", () => {
     }
   });
 
-
   it("spend_usdc", async () => {
-    const { 
-      program, vaultPda, vaultUsdcPda, backupKeypair, userKeypair, testUsdcMint, connection, CENT_PER_USDC, mintUsdcToVault, QUARTZ_HOLDING_ADDRESS, quartzHoldingUsdc
+    const {
+      program,
+      vaultPda,
+      vaultUsdcPda,
+      backupKeypair,
+      userKeypair,
+      testUsdcMint,
+      connection,
+      CENT_PER_USDC,
+      mintUsdcToVault,
+      QUARTZ_HOLDING_ADDRESS,
+      quartzHoldingUsdc,
     } = testSetup;
     await mintUsdcToVault(10);
 
-    const initialBalance = Number(
-      (await connection.getTokenAccountBalance(quartzHoldingUsdc)).value.amount
-    );
+    const initialBalance = Number((await connection.getTokenAccountBalance(quartzHoldingUsdc)).value.amount);
 
     // Call PDA to spend USDC
     const tx = await program.methods
@@ -418,15 +518,13 @@ describe("spend_usdc tests", () => {
         usdcMint: testUsdcMint,
         tokenProgram: TOKEN_PROGRAM_ID,
         associateTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-        systemProgram: SystemProgram.programId
+        systemProgram: SystemProgram.programId,
       })
       .signers([userKeypair])
       .rpc();
 
     // Check USDC is received
-    const newBalance = Number(
-      (await connection.getTokenAccountBalance(quartzHoldingUsdc)).value.amount
-    );
+    const newBalance = Number((await connection.getTokenAccountBalance(quartzHoldingUsdc)).value.amount);
     expect(newBalance - initialBalance).to.equal(CENT_PER_USDC);
   });
 });

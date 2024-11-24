@@ -61,16 +61,11 @@ a:hover {
 }
 
 .glass-button:hover {
-  background-image: 
-    var(--overlay), 
-    var(--gradient-glass-stroke);
+  background-image: var(--overlay), var(--gradient-glass-stroke);
 }
 
 .glass-button:active {
-  background-image: 
-    var(--overlay), 
-    var(--overlay), 
-    var(--gradient-glass-stroke);
+  background-image: var(--overlay), var(--overlay), var(--gradient-glass-stroke);
 }
 
 .glass-button.ghost {
@@ -94,14 +89,14 @@ a:hover {
   position: relative;
 
   /* Black Shadow */
-  -webkit-box-shadow: -10px 10px 24px 0px rgba(0,0,0,0.3);
-  -moz-box-shadow: -10px 10px 24px 0px rgba(0,0,0,0.3);
-  box-shadow: -10px 10px 24px 0px rgba(0,0,0,0.3);
+  -webkit-box-shadow: -10px 10px 24px 0px rgba(0, 0, 0, 0.3);
+  -moz-box-shadow: -10px 10px 24px 0px rgba(0, 0, 0, 0.3);
+  box-shadow: -10px 10px 24px 0px rgba(0, 0, 0, 0.3);
 
   /* Primary Shadow */
-  -webkit-box-shadow: -10px 10px 24px 0px rgba(41,135,200,0.12);
-  -moz-box-shadow: -10px 10px 24px 0px rgba(41,135,200,0.12);
-  box-shadow: -10px 10px 24px 0px rgba(41,135,200,0.12);
+  -webkit-box-shadow: -10px 10px 24px 0px rgba(41, 135, 200, 0.12);
+  -moz-box-shadow: -10px 10px 24px 0px rgba(41, 135, 200, 0.12);
+  box-shadow: -10px 10px 24px 0px rgba(41, 135, 200, 0.12);
 
   /* Background */
   background-image: var(--glass-background);
@@ -136,31 +131,27 @@ a:hover {
   --overlay-color: rgba(255, 255, 255, 0.03);
   --overlay: linear-gradient(var(--overlay-color), var(--overlay-color));
 
-  --gradient-glass-stroke:
-    linear-gradient(65deg, rgba(41,135,200,0.02) 0%, rgba(41,135,200,0.22) 100%),
-    linear-gradient(65deg, rgba(188,188,188,0.12) 0%, rgba(235,235,235,0.25) 100%);
-  
-  --placeholder-glass-stroke: #2B3A4A;
-  --placeholder-glass-stroke-accent: #5A355A;
-  --placeholder-glass-stroke-error: #83484E;
+  --gradient-glass-stroke: linear-gradient(65deg, rgba(41, 135, 200, 0.02) 0%, rgba(41, 135, 200, 0.22) 100%),
+    linear-gradient(65deg, rgba(188, 188, 188, 0.12) 0%, rgba(235, 235, 235, 0.25) 100%);
+
+  --placeholder-glass-stroke: #2b3a4a;
+  --placeholder-glass-stroke-accent: #5a355a;
+  --placeholder-glass-stroke-error: #83484e;
   --placeholder-glass-icon-error: #695563;
 
   --glass-border: 2px solid var(--placeholder-glass-stroke); /* TODO: Make gradient */
   --glass-border-error: 1.5px solid var(--placeholder-glass-stroke-error);
   --glass-border-popup: 1.5px solid var(--placeholder-glass-stroke);
-  --glass-background: 
-    url("/noise.png"),
-    radial-gradient(circle at 80% 20%, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%),
-    linear-gradient(#ffffff03, #ffffff03),
-    linear-gradient(#0B111D99, #0B111D99),
-    linear-gradient(#060910, #060910); /* TODO - Remove this and get background blur or fallback working on mobile */
+  --glass-background: url("/noise.png"),
+    radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 100%),
+    linear-gradient(#ffffff03, #ffffff03), linear-gradient(#0b111d99, #0b111d99), linear-gradient(#060910, #060910); /* TODO - Remove this and get background blur or fallback working on mobile */
 
   --background-linear-gradient: linear-gradient(var(--color-background), var(--color-background));
 
-  --color-background: #0B111D;
+  --color-background: #0b111d;
   --color-text: #ffffff;
-  --color-text-light: #ffffffA5;
-  --color-error: #FF8080;
+  --color-text-light: #ffffffa5;
+  --color-error: #ff8080;
   --color-link-hover: #d8f3ff;
 
   --logo-width: 360px;

@@ -16,104 +16,110 @@ import { AccountData } from "@/utils/accountData";
 import { useTxStatus } from "@/context/tx-status-provider";
 
 interface DepositSOLModalProps {
-    solPriceUSD: number | undefined;
-    accountData: AccountData | undefined;
-    isValid: (amountBaseUnits: number, minAmountBaseUnits: number, maxAmountBaseUnits: number, minAmountUi: string, maxAmountUi: string) => string;
-    closeModal: (signature?: string) => void;
+  solPriceUSD: number | undefined;
+  accountData: AccountData | undefined;
+  isValid: (
+    amountBaseUnits: number,
+    minAmountBaseUnits: number,
+    maxAmountBaseUnits: number,
+    minAmountUi: string,
+    maxAmountUi: string,
+  ) => string;
+  closeModal: (signature?: string) => void;
 }
 
-export default function DepositSOLModal(
-    {accountData, solPriceUSD, isValid, closeModal} : DepositSOLModalProps
-) {
-    const { connection } = useConnection();
-    const { showError } = useError();
-    const { showTxStatus } = useTxStatus();
-    const wallet = useAnchorWallet();
+export default function DepositSOLModal({ accountData, solPriceUSD, isValid, closeModal }: DepositSOLModalProps) {
+  const { connection } = useConnection();
+  const { showError } = useError();
+  const { showTxStatus } = useTxStatus();
+  const wallet = useAnchorWallet();
 
-    const [awaitingSign, setAwaitingSign] = useState(false);
-    const [errorText, setErrorText] = useState("");
-    const [amountStr, setAmountStr] = useState("");
-    const amount = Number(amountStr);
+  const [awaitingSign, setAwaitingSign] = useState(false);
+  const [errorText, setErrorText] = useState("");
+  const [amountStr, setAmountStr] = useState("");
+  const amount = Number(amountStr);
 
-    const MIN_AMOUNT_BASE_UNITS = 0.00001 * LAMPORTS_PER_SOL;
+  const MIN_AMOUNT_BASE_UNITS = 0.00001 * LAMPORTS_PER_SOL;
 
-    const [maxAmountBaseUnits, setMaxDepositBaseUnits] = useState(0);
-    useEffect(() => {
-        const fetchMaxDeposit = async () => {
-            if (!wallet) return;
-            const balanceLamports = await connection.getBalance(wallet?.publicKey);
+  const [maxAmountBaseUnits, setMaxDepositBaseUnits] = useState(0);
+  useEffect(() => {
+    const fetchMaxDeposit = async () => {
+      if (!wallet) return;
+      const balanceLamports = await connection.getBalance(wallet?.publicKey);
 
-            const ataSize = AccountLayout.span;
-            const wSolAtaRent = await connection.getMinimumBalanceForRentExemption(ataSize);
-            
-            try {
-                const depositIxs = await makeDepositLamportsInstructions(wallet, connection, balanceLamports, showError);
-                const accountKeys = await getAccountsFromInstructions(connection, depositIxs);
+      const ataSize = AccountLayout.span;
+      const wSolAtaRent = await connection.getMinimumBalanceForRentExemption(ataSize);
 
-                const computeUnitPriceMicroLamports = await getPriorityFeeEstimate(accountKeys);
-                const baseSignerFeeLamports = 5000;
-                const priorityFeeLamports = (computeUnitPriceMicroLamports * 200_000 ) / MICRO_LAMPORTS_PER_LAMPORT;
-                const maxDeposit = balanceLamports - (wSolAtaRent * 2) - (baseSignerFeeLamports + priorityFeeLamports);
+      try {
+        const depositIxs = await makeDepositLamportsInstructions(wallet, connection, balanceLamports, showError);
+        const accountKeys = await getAccountsFromInstructions(connection, depositIxs);
 
-                setMaxDepositBaseUnits(Math.max(maxDeposit, 0));
-            } catch (error) {
-                captureError(showError, "Could not calculate max SOL deposit value", "/DepositSOLModal.tsx", error, wallet.publicKey);
-                setMaxDepositBaseUnits(0);
-            }
-        }
-        fetchMaxDeposit();
-    }, [connection, wallet, showError]);
+        const computeUnitPriceMicroLamports = await getPriorityFeeEstimate(accountKeys);
+        const baseSignerFeeLamports = 5000;
+        const priorityFeeLamports = (computeUnitPriceMicroLamports * 200_000) / MICRO_LAMPORTS_PER_LAMPORT;
+        const maxDeposit = balanceLamports - wSolAtaRent * 2 - (baseSignerFeeLamports + priorityFeeLamports);
 
-    const handleConfirm = async () => {
-        const amountBaseUnits = uiToBaseUnit(amount, DECIMALS_SOL).toNumber();
-        const error = isValid(
-            amountBaseUnits, 
-            MIN_AMOUNT_BASE_UNITS, 
-            maxAmountBaseUnits, 
-            baseUnitToUi(MIN_AMOUNT_BASE_UNITS, DECIMALS_SOL), 
-            baseUnitToUi(maxAmountBaseUnits, DECIMALS_SOL)
+        setMaxDepositBaseUnits(Math.max(maxDeposit, 0));
+      } catch (error) {
+        captureError(
+          showError,
+          "Could not calculate max SOL deposit value",
+          "/DepositSOLModal.tsx",
+          error,
+          wallet.publicKey,
         );
+        setMaxDepositBaseUnits(0);
+      }
+    };
+    fetchMaxDeposit();
+  }, [connection, wallet, showError]);
 
-        setErrorText(error);
-        if (error || !wallet) return;
+  const handleConfirm = async () => {
+    const amountBaseUnits = uiToBaseUnit(amount, DECIMALS_SOL).toNumber();
+    const error = isValid(
+      amountBaseUnits,
+      MIN_AMOUNT_BASE_UNITS,
+      maxAmountBaseUnits,
+      baseUnitToUi(MIN_AMOUNT_BASE_UNITS, DECIMALS_SOL),
+      baseUnitToUi(maxAmountBaseUnits, DECIMALS_SOL),
+    );
 
-        setAwaitingSign(true);
-        const baseUnits = uiToBaseUnit(amount, DECIMALS_SOL).toNumber();
-        const signature = await depositLamports(wallet, connection, baseUnits, showError, showTxStatus);
-        setAwaitingSign(false);
+    setErrorText(error);
+    if (error || !wallet) return;
 
-        if (signature) closeModal(signature);
-    }
+    setAwaitingSign(true);
+    const baseUnits = uiToBaseUnit(amount, DECIMALS_SOL).toNumber();
+    const signature = await depositLamports(wallet, connection, baseUnits, showError, showTxStatus);
+    setAwaitingSign(false);
 
-    return (
-        <>
-            <ModalDefaultContent
-                title="Deposit SOL"
-                denomination="SOL"
-                amountStr={amountStr}
-                setAmountStr={setAmountStr}
-                setMaxAmount={() => setAmountStr(baseUnitToUi(maxAmountBaseUnits, DECIMALS_SOL))}
-                setHalfAmount={() => setAmountStr(baseUnitToUi(Math.trunc(maxAmountBaseUnits / 2), DECIMALS_SOL))}
-            />
+    if (signature) closeModal(signature);
+  };
 
-            <ModalInfoSection 
-                maxAmountUi={Number(baseUnitToUi(maxAmountBaseUnits, DECIMALS_SOL))}
-                minDecimals={0} 
-                errorText={errorText}
-            >
-                {(solPriceUSD !== undefined) &&
-                    <p>${(solPriceUSD * amount).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {accountData &&
-                        <span className="tiny-text">({(accountData.solRate * 100).toFixed(4)}% APY)</span>
-                    }</p>
-                }
-            </ModalInfoSection>
+  return (
+    <>
+      <ModalDefaultContent
+        title="Deposit SOL"
+        denomination="SOL"
+        amountStr={amountStr}
+        setAmountStr={setAmountStr}
+        setMaxAmount={() => setAmountStr(baseUnitToUi(maxAmountBaseUnits, DECIMALS_SOL))}
+        setHalfAmount={() => setAmountStr(baseUnitToUi(Math.trunc(maxAmountBaseUnits / 2), DECIMALS_SOL))}
+      />
 
-            <ModalButtons 
-                label="Deposit" 
-                awaitingSign={awaitingSign} 
-                onConfirm={handleConfirm} 
-                onCancel={closeModal}
-            />
-        </>
-    )
+      <ModalInfoSection
+        maxAmountUi={Number(baseUnitToUi(maxAmountBaseUnits, DECIMALS_SOL))}
+        minDecimals={0}
+        errorText={errorText}
+      >
+        {solPriceUSD !== undefined && (
+          <p>
+            ${(solPriceUSD * amount).toLocaleString("en-IE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{" "}
+            {accountData && <span className="tiny-text">({(accountData.solRate * 100).toFixed(4)}% APY)</span>}
+          </p>
+        )}
+      </ModalInfoSection>
+
+      <ModalButtons label="Deposit" awaitingSign={awaitingSign} onConfirm={handleConfirm} onCancel={closeModal} />
+    </>
+  );
 }

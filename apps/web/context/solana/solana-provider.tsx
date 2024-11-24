@@ -1,17 +1,14 @@
-'use client';
+"use client";
 
-import dynamic from 'next/dynamic';
+import dynamic from "next/dynamic";
 
-import { WalletError } from '@solana/wallet-adapter-base';
-import {
-  ConnectionProvider,
-  WalletProvider,
-} from '@solana/wallet-adapter-react';
-import { WalletModalProvider, WalletMultiButton } from './wallet-adapter-react-ui';
-import { ReactNode, useCallback, useMemo } from 'react';
-import { useCluster } from './cluster-data-access';
+import { WalletError } from "@solana/wallet-adapter-base";
+import { ConnectionProvider, WalletProvider } from "@solana/wallet-adapter-react";
+import { WalletModalProvider, WalletMultiButton } from "./wallet-adapter-react-ui";
+import { ReactNode, useCallback, useMemo } from "react";
+import { useCluster } from "./cluster-data-access";
 
-import './wallet-adapter-react-ui/styles.css';
+import "./wallet-adapter-react-ui/styles.css";
 
 type WalletButtonProps = React.ComponentProps<typeof WalletMultiButton> & {
   onCloseAccount?: () => void;
@@ -20,14 +17,12 @@ type WalletButtonProps = React.ComponentProps<typeof WalletMultiButton> & {
 
 export const WalletButton = dynamic(
   async () => {
-    const { WalletMultiButton } = await import('./wallet-adapter-react-ui');
-    const WalletButtonWrapper = (props: WalletButtonProps) => (
-      <WalletMultiButton {...props} />
-    );
-    WalletButtonWrapper.displayName = 'WalletButton';
+    const { WalletMultiButton } = await import("./wallet-adapter-react-ui");
+    const WalletButtonWrapper = (props: WalletButtonProps) => <WalletMultiButton {...props} />;
+    WalletButtonWrapper.displayName = "WalletButton";
     return WalletButtonWrapper;
   },
-  { ssr: false }
+  { ssr: false },
 );
 
 export function SolanaProvider({ children }: { children: ReactNode }) {

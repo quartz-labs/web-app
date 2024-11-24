@@ -9,9 +9,9 @@
     "test:withdraw_usdc": "TEST_FILE='withdraw_usdc_tests.ts' anchor test -- --features 'local'",
     "test:spend_usdc": "TEST_FILE='spend_usdc_tests.ts' anchor test -- --features 'local'",
     "format:check": "biome format .",
-		"format:write": "biome format . --write",
-		"format:check:staged": "lint-staged",
-		"lint": "biome lint ."
+    "format:write": "biome format . --write",
+    "format:check:staged": "lint-staged",
+    "lint": "biome lint ."
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.30.1",
@@ -20,7 +20,7 @@
     "dotenv": "^16.4.5"
   },
   "devDependencies": {
-		"@biomejs/biome": "^1.8.3",
+    "@biomejs/biome": "^1.8.3",
     "@types/bn.js": "^5.1.0",
     "@types/chai": "^4.3.0",
     "@types/mocha": "^9.0.0",

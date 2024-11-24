@@ -7,14 +7,13 @@
 // - Include transaction simulation to show expected outcome
 
 import { Transaction } from "@solana/web3.js";
-import { getSolanaKeypair } from "./keyManagement";
 import { secureWipe } from "../crypto/secureWipe";
-
+import { getSolanaKeypair } from "./keyManagement";
 
 export async function signTransaction(transaction: Transaction): Promise<Transaction> {
   const solanaKeypair = await getSolanaKeypair();
   if (!solanaKeypair) {
-    throw new Error('Solana keypair not found');
+    throw new Error("Solana keypair not found");
   }
   transaction.sign(solanaKeypair);
 

@@ -18,7 +18,6 @@
       "config": {
         "usesNonExemptEncryption": false
       }
-
     },
     "android": {
       "adaptiveIcon": {
@@ -40,7 +39,6 @@
           "faceIDPermission": "Allow Quartz to access your Face ID biometric data."
         }
       ]
-
     ],
     "experiments": {
       "typedRoutes": true

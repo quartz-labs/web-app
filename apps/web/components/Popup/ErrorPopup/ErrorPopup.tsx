@@ -5,56 +5,52 @@ import styles from "../Popup.module.css";
 import { useEffect, useRef, useState } from "react";
 
 export default function ErrorPopup() {
-    const { propsError, errorEnabled, hideError, showDetails } = useError();
-    const [isMouseEntered, setIsMouseEntered] = useState(false);
-    const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
-    
-    const TIMEOUT_TIME = 6_000;
+  const { propsError, errorEnabled, hideError, showDetails } = useError();
+  const [isMouseEntered, setIsMouseEntered] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
-    useEffect(() => {
-        timeoutRef.current = setTimeout(() => {
-            if(!isMouseEntered) hideError();
-        }, TIMEOUT_TIME);
+  const TIMEOUT_TIME = 6_000;
 
-        return () => clearTimeout(timeoutRef.current);
-    }, [hideError, isMouseEntered]);
+  useEffect(() => {
+    timeoutRef.current = setTimeout(() => {
+      if (!isMouseEntered) hideError();
+    }, TIMEOUT_TIME);
 
-    const handleMouseEnter = () => {
-        setIsMouseEntered(true);
-    }
+    return () => clearTimeout(timeoutRef.current);
+  }, [hideError, isMouseEntered]);
 
-    const handleMouseLeave = () => {
-        setIsMouseEntered(false);
-        clearTimeout(timeoutRef.current);
-        timeoutRef.current = setTimeout(() => {
-            if(!isMouseEntered) hideError();
-        }, TIMEOUT_TIME);
-    }
+  const handleMouseEnter = () => {
+    setIsMouseEntered(true);
+  };
 
-    if (!propsError) return (<></>)
-    const { message } = propsError;
+  const handleMouseLeave = () => {
+    setIsMouseEntered(false);
+    clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      if (!isMouseEntered) hideError();
+    }, TIMEOUT_TIME);
+  };
 
-    if (!errorEnabled) return (<></>);
-    return (
-        <button 
-            className={`${styles.popup} ${styles.error}`} 
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-            onClick={() => showDetails(propsError)}
-        >
-            <div className={styles.heading}>
-                <p className={styles.headingError}>
-                    Error
-                </p>
+  if (!propsError) return <></>;
+  const { message } = propsError;
 
-                <p className={styles.headingDetails}>
-                    Details
-                </p>
-            </div>
+  if (!errorEnabled) return <></>;
+  return (
+    <button
+      className={`${styles.popup} ${styles.error}`}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onClick={() => showDetails(propsError)}
+    >
+      <div className={styles.heading}>
+        <p className={styles.headingError}>Error</p>
 
-            <div className={styles.message}>
-                <p >{message}</p>
-            </div>
-        </button>
-    );
+        <p className={styles.headingDetails}>Details</p>
+      </div>
+
+      <div className={styles.message}>
+        <p>{message}</p>
+      </div>
+    </button>
+  );
 }

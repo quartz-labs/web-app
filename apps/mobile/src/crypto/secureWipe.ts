@@ -1,9 +1,9 @@
-import * as crypto from 'expo-crypto';
+import * as crypto from "expo-crypto";
 
 //Securely wipes a Uint8Array by overwriting it with random data multiple times.
 export function secureWipe(data: Uint8Array): void {
   if (!(data instanceof Uint8Array)) {
-    throw new Error('Input must be a Uint8Array');
+    throw new Error("Input must be a Uint8Array");
   }
 
   const length = data.length;
@@ -15,7 +15,7 @@ export function secureWipe(data: Uint8Array): void {
       data.set(randomBytes);
     }
   } catch (error) {
-    console.error('Error during secure wipe:', error);
+    console.error("Error during secure wipe:", error);
     // Fallback to a less secure but still somewhat effective method
     for (let i = 0; i < length; i++) {
       data[i] = Math.floor(Math.random() * 256);
@@ -26,7 +26,7 @@ export function secureWipe(data: Uint8Array): void {
   }
 
   // Attempt to prevent compiler/runtime optimizations
-  return void(0);
+  return void 0;
 }
 
 // Usage example:

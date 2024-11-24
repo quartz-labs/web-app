@@ -5,11 +5,7 @@ export const encryptPayload = (payload: any, sharedSecret?: Uint8Array) => {
 
   const nonce = nacl.randomBytes(24);
 
-  const encryptedPayload = nacl.box.after(
-    Buffer.from(JSON.stringify(payload)),
-    nonce,
-    sharedSecret
-  );
+  const encryptedPayload = nacl.box.after(Buffer.from(JSON.stringify(payload)), nonce, sharedSecret);
 
   return [nonce, encryptedPayload];
 };

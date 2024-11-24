@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState } from "react";
 
 export interface ShowErrorProps {
   message: string;
@@ -39,17 +39,19 @@ export function ErrorProvider({ children }: { children: React.ReactNode }) {
 
   const showDetails = (props: ShowErrorProps) => {
     hideError();
-    setPropsDetails(props)
+    setPropsDetails(props);
     setDetailsEnabled(true);
-  }
+  };
 
   const hideDetails = () => {
     setDetailsEnabled(false);
     setPropsDetails(null);
-  }
+  };
 
   return (
-    <ErrorContext.Provider value={{ showError, hideError, showDetails, hideDetails, propsError, propsDetails, errorEnabled, detailsEnabled }}>
+    <ErrorContext.Provider
+      value={{ showError, hideError, showDetails, hideDetails, propsError, propsDetails, errorEnabled, detailsEnabled }}
+    >
       {children}
     </ErrorContext.Provider>
   );
@@ -58,7 +60,7 @@ export function ErrorProvider({ children }: { children: React.ReactNode }) {
 export function useError() {
   const context = useContext(ErrorContext);
   if (context === undefined) {
-    throw new Error('useError must be used within an ErrorProvider');
+    throw new Error("useError must be used within an ErrorProvider");
   }
   return context;
 }

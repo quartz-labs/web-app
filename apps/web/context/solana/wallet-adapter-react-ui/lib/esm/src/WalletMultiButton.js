@@ -1,15 +1,15 @@
-import React from 'react';
-import { BaseWalletMultiButton } from './BaseWalletMultiButton';
+import React from "react";
+import { BaseWalletMultiButton } from "./BaseWalletMultiButton";
 const LABELS = {
-    'change-wallet': 'Close account',
-    connecting: 'Connecting ...',
-    'copy-address': 'Copy address',
-    copied: 'Copied',
-    disconnect: 'Disconnect',
-    'has-wallet': 'Connect',
-    'no-wallet': 'Select Wallet',
+  "change-wallet": "Close account",
+  connecting: "Connecting ...",
+  "copy-address": "Copy address",
+  copied: "Copied",
+  disconnect: "Disconnect",
+  "has-wallet": "Connect",
+  "no-wallet": "Select Wallet",
 };
 export function WalletMultiButton(props) {
-    return React.createElement(BaseWalletMultiButton, { ...props, labels: LABELS });
+  return React.createElement(BaseWalletMultiButton, { ...props, labels: LABELS });
 }
 //# sourceMappingURL=WalletMultiButton.js.map

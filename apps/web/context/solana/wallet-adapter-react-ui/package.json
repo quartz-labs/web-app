@@ -7,19 +7,12 @@
   "publishConfig": {
     "access": "public"
   },
-  "files": [
-    "lib",
-    "src",
-    "LICENSE",
-    "styles.css"
-  ],
+  "files": ["lib", "src", "LICENSE", "styles.css"],
   "engines": {
     "node": ">=16"
   },
   "type": "module",
-  "sideEffects": [
-    "styles.css"
-  ],
+  "sideEffects": ["styles.css"],
   "main": "./lib/cjs/index.js",
   "module": "./lib/esm/index.js",
   "types": "./lib/types/index.d.ts",

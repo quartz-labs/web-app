@@ -5,12 +5,7 @@ global.Buffer = global.Buffer || Buffer;
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
-import {
-  clusterApiUrl,
-  Connection,
-  PublicKey,
-  Transaction,
-} from "@solana/web3.js";
+import { clusterApiUrl, Connection, PublicKey, Transaction } from "@solana/web3.js";
 import Button from "../components/Button";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { COLORS } from "../constants";
@@ -21,7 +16,7 @@ import { buildUrl } from "@/utils/buildUrl";
 import { decryptPayload } from "@/utils/decryptPayload";
 import { encryptPayload } from "@/utils/encryptPayload";
 import { Link } from "expo-router";
-import { useRouter } from 'expo-router';
+import { useRouter } from "expo-router";
 
 const onConnectRedirectLink = Linking.createURL("onConnect");
 const onDisconnectRedirectLink = Linking.createURL("onDisconnect");
@@ -31,8 +26,7 @@ const connection = new Connection(clusterApiUrl("devnet"));
 export default function App() {
   const router = useRouter();
 
-  const [phantomWalletPublicKey, setPhantomWalletPublicKey] =
-    useState<PublicKey | null>(null);
+  const [phantomWalletPublicKey, setPhantomWalletPublicKey] = useState<PublicKey | null>(null);
 
   const [submitting, setSubmitting] = useState(false);
 
@@ -73,9 +67,7 @@ export default function App() {
     // Handle an error response from Phantom
     if (params.get("errorCode")) {
       const error = Object.fromEntries([...params]);
-      const message =
-        error?.errorMessage ??
-        JSON.stringify(Object.fromEntries([...params]), null, 2);
+      const message = error?.errorMessage ?? JSON.stringify(Object.fromEntries([...params]), null, 2);
       console.log("error: ", message);
       return;
     }
@@ -84,19 +76,15 @@ export default function App() {
     if (/onConnect/.test(url.host)) {
       const sharedSecretDapp = nacl.box.before(
         bs58.decode(params.get("phantom_encryption_public_key")!),
-        dappKeyPair.secretKey
+        dappKeyPair.secretKey,
       );
-      const connectData = decryptPayload(
-        params.get("data")!,
-        params.get("nonce")!,
-        sharedSecretDapp
-      );
+      const connectData = decryptPayload(params.get("data")!, params.get("nonce")!, sharedSecretDapp);
       setSharedSecret(sharedSecretDapp);
       setSession(connectData.session);
       const newPublicKey = new PublicKey(connectData.public_key);
       setPhantomWalletPublicKey(newPublicKey);
       console.log(`connected to ${newPublicKey.toString()}`);
-      
+
       // Instead of navigating, just update the URL with the public key
       router.setParams({ phantomPublicKey: newPublicKey.toString() });
     }
@@ -150,11 +138,7 @@ export default function App() {
             <>
               <View style={[styles.row, styles.wallet]}>
                 <View style={styles.greenDot} />
-                <Text
-                  style={styles.text}
-                  numberOfLines={1}
-                  ellipsizeMode="middle"
-                >
+                <Text style={styles.text} numberOfLines={1} ellipsizeMode="middle">
                   {`Connected to: ${phantomWalletPublicKey.toString()}`}
                 </Text>
               </View>
@@ -173,13 +157,7 @@ export default function App() {
             <Text style={{ fontSize: 20, color: COLORS.WHITE }}>Create or Restore Keypair</Text>
           </Link>
         </View>
-        {submitting && (
-          <ActivityIndicator
-            color={COLORS.WHITE}
-            size="large"
-            style={styles.spinner}
-          />
-        )}
+        {submitting && <ActivityIndicator color={COLORS.WHITE} size="large" style={styles.spinner} />}
         <StatusBar style="auto" />
       </SafeAreaView>
     </SafeAreaProvider>

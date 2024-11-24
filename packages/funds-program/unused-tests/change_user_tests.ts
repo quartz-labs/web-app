@@ -1,15 +1,20 @@
 import * as anchor from "@coral-xyz/anchor";
-import { Program, AnchorError } from "@coral-xyz/anchor";
+import { AnchorError, Program } from "@coral-xyz/anchor";
+import {
+  ASSOCIATED_TOKEN_PROGRAM_ID,
+  TOKEN_PROGRAM_ID,
+  createMint,
+  getOrCreateAssociatedTokenAccount,
+  mintTo,
+} from "@solana/spl-token";
+import { Keypair, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
+import dotenv from "dotenv";
 import { FundsProgram } from "../target/types/funds_program";
-import { Keypair, SystemProgram, LAMPORTS_PER_SOL, Transaction, PublicKey } from "@solana/web3.js";
-import { createMint, getOrCreateAssociatedTokenAccount, TOKEN_PROGRAM_ID, mintTo, ASSOCIATED_TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import dotenv from 'dotenv';
 const fs = require("fs");
 import path from "path";
 import { assert, expect } from "chai";
 import { setupTests } from "../tests/setup_tests";
 dotenv.config();
-
 
 describe("change_user tests", () => {
   let testSetup: Awaited<ReturnType<typeof setupTests>>;
@@ -17,11 +22,10 @@ describe("change_user tests", () => {
   before(async () => {
     testSetup = await setupTests();
   });
-  
 
   it("change_user incorrect signature", async () => {
-    const {program, vaultPda, backupKeypair, newUserKeypair, quartzManagerKeypair} = testSetup;
-    const desiredErrorMessage = "Missing signature"
+    const { program, vaultPda, backupKeypair, newUserKeypair, quartzManagerKeypair } = testSetup;
+    const desiredErrorMessage = "Missing signature";
 
     try {
       await program.methods
@@ -42,10 +46,9 @@ describe("change_user tests", () => {
     }
   });
 
-
   it("change_user incorrect backup", async () => {
-    const {program, vaultPda, newUserKeypair, backupKeypair} = testSetup;
-    const desiredErrorMessage = "unknown signer"
+    const { program, vaultPda, newUserKeypair, backupKeypair } = testSetup;
+    const desiredErrorMessage = "unknown signer";
 
     try {
       await program.methods
@@ -66,9 +69,8 @@ describe("change_user tests", () => {
     }
   });
 
-
   it("change_user incorrect vault pda", async () => {
-    const {program, otherKeypairVaultPda, backupKeypair, newUserKeypair} = testSetup;
+    const { program, otherKeypairVaultPda, backupKeypair, newUserKeypair } = testSetup;
     const desiredErrorCode = "AccountNotInitialized";
 
     try {
@@ -90,10 +92,9 @@ describe("change_user tests", () => {
     }
   });
 
-
   it("change_user local signature", async () => {
-    const {program, backupKeypair, newUserKeypair, vaultPda, userKeypair} = testSetup;
-    const desiredErrorMessage = "unknown signer"
+    const { program, backupKeypair, newUserKeypair, vaultPda, userKeypair } = testSetup;
+    const desiredErrorMessage = "unknown signer";
 
     try {
       await program.methods
@@ -114,9 +115,8 @@ describe("change_user tests", () => {
     }
   });
 
-
   it("change_user", async () => {
-    const {program, vaultPda, backupKeypair, newUserKeypair, quartzManagerKeypair} = testSetup;
+    const { program, vaultPda, backupKeypair, newUserKeypair, quartzManagerKeypair } = testSetup;
     await program.methods
       .changeUser()
       .accounts({
@@ -127,16 +127,15 @@ describe("change_user tests", () => {
       })
       .signers([backupKeypair])
       .rpc();
-    
+
     const account = await program.account.vault.fetch(vaultPda);
     expect(account.backup.equals(backupKeypair.publicKey)).to.be.true;
     expect(account.user.equals(newUserKeypair.publicKey)).to.be.true;
     expect(account.initPayer.equals(quartzManagerKeypair.publicKey)).to.be.true;
   });
 
-
   it("withdraw_lamports old user", async () => {
-    const {program, vaultPda, backupKeypair, userKeypair, provider} = testSetup;
+    const { program, vaultPda, backupKeypair, userKeypair, provider } = testSetup;
     const desiredErrorCode = "ConstraintHasOne";
 
     try {
@@ -148,8 +147,8 @@ describe("change_user tests", () => {
           fromPubkey: provider.wallet.publicKey,
           toPubkey: vaultPda,
           lamports: LAMPORTS_PER_SOL * 2,
-        })
-      )
+        }),
+      );
       await provider.sendAndConfirm(transaction);
 
       // Call PDA to transfer SOL
@@ -157,23 +156,22 @@ describe("change_user tests", () => {
         .withdrawLamports(new anchor.BN(LAMPORTS_PER_SOL))
         .accounts({
           // @ts-ignore - Causing an issue in Cursor IDE
-          vault: vaultPda, 
+          vault: vaultPda,
           receiver: destinationAccount,
           backup: backupKeypair.publicKey,
           user: userKeypair.publicKey,
-          systemProgram: SystemProgram.programId
+          systemProgram: SystemProgram.programId,
         })
         .signers([userKeypair])
         .rpc();
-    } catch(err) {
-      expect(err).to.be.instanceOf(AnchorError)
-      expect((err as AnchorError).error.errorCode.code).to.equal(desiredErrorCode)
+    } catch (err) {
+      expect(err).to.be.instanceOf(AnchorError);
+      expect((err as AnchorError).error.errorCode.code).to.equal(desiredErrorCode);
     }
-  })
-
+  });
 
   it("close_user old user", async () => {
-    const {program, vaultPda, backupKeypair, userKeypair, quartzManagerKeypair} = testSetup;
+    const { program, vaultPda, backupKeypair, userKeypair, quartzManagerKeypair } = testSetup;
     const desiredErrorCode = "ConstraintHasOne";
 
     try {
@@ -184,23 +182,20 @@ describe("change_user tests", () => {
           vault: vaultPda,
           initPayer: quartzManagerKeypair.publicKey,
           backup: backupKeypair.publicKey,
-          user: userKeypair.publicKey
+          user: userKeypair.publicKey,
         })
         .signers([userKeypair])
         .rpc();
-    } catch(err) {
-      expect(err).to.be.instanceOf(AnchorError)
-      expect((err as AnchorError).error.errorCode.code).to.equal(desiredErrorCode)
+    } catch (err) {
+      expect(err).to.be.instanceOf(AnchorError);
+      expect((err as AnchorError).error.errorCode.code).to.equal(desiredErrorCode);
     }
   });
 
-
   it("withdraw_lamports new user", async () => {
-    const {program, vaultPda, backupKeypair, newUserKeypair, provider} = testSetup;
+    const { program, vaultPda, backupKeypair, newUserKeypair, provider } = testSetup;
     const destinationAccount = Keypair.generate().publicKey;
-    expect(
-      await provider.connection.getBalance(destinationAccount)
-    ).to.equal(0);
+    expect(await provider.connection.getBalance(destinationAccount)).to.equal(0);
 
     // Send SOL to vaultPda
     const transaction = new Transaction().add(
@@ -208,8 +203,8 @@ describe("change_user tests", () => {
         fromPubkey: provider.wallet.publicKey,
         toPubkey: vaultPda,
         lamports: LAMPORTS_PER_SOL * 2,
-      })
-    )
+      }),
+    );
     await provider.sendAndConfirm(transaction);
 
     // Call PDA to transfer SOL
@@ -217,24 +212,21 @@ describe("change_user tests", () => {
       .withdrawLamports(new anchor.BN(LAMPORTS_PER_SOL))
       .accounts({
         // @ts-ignore - Causing an issue in Cursor IDE
-        vault: vaultPda, 
+        vault: vaultPda,
         receiver: destinationAccount,
         backup: backupKeypair.publicKey,
         user: newUserKeypair.publicKey,
-        systemProgram: SystemProgram.programId
+        systemProgram: SystemProgram.programId,
       })
       .signers([newUserKeypair])
       .rpc();
 
     // Check SOL is received
-    expect(
-      await provider.connection.getBalance(destinationAccount)
-    ).to.equal(LAMPORTS_PER_SOL)
-  })
-
+    expect(await provider.connection.getBalance(destinationAccount)).to.equal(LAMPORTS_PER_SOL);
+  });
 
   it("change_user back to original", async () => {
-    const {program, vaultPda, backupKeypair, userKeypair, quartzManagerKeypair} = testSetup;
+    const { program, vaultPda, backupKeypair, userKeypair, quartzManagerKeypair } = testSetup;
 
     await program.methods
       .changeUser()
@@ -246,7 +238,7 @@ describe("change_user tests", () => {
       })
       .signers([backupKeypair])
       .rpc();
-    
+
     const account = await program.account.vault.fetch(vaultPda);
     expect(account.backup.equals(backupKeypair.publicKey)).to.be.true;
     expect(account.user.equals(userKeypair.publicKey)).to.be.true;

@@ -9,16 +9,9 @@
           "build": {
             "executor": "@nx/next:build",
             "cache": true,
-            "dependsOn": [
-              "^build"
-            ],
-            "inputs": [
-              "production",
-              "^production"
-            ],
-            "outputs": [
-              "{options.outputPath}"
-            ],
+            "dependsOn": ["^build"],
+            "inputs": ["production", "^production"],
+            "outputs": ["{options.outputPath}"],
             "defaultConfiguration": "production",
             "options": {
               "outputPath": "dist/web"

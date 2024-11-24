@@ -7,11 +7,10 @@
     "build": "next build",
     "start": "next start",
     "format:check:staged": "lint-staged",
-		"format:check": "biome format .",
-		"format:write": "biome format . --write",
-		"lint": "biome lint .",
+    "format:check": "biome format .",
+    "format:write": "biome format . --write",
+    "lint": "biome lint .",
     "typechecks": "tsc --noEmit -p ./tsconfig.json"
-
   },
   "dependencies": {
     "@coral-xyz/anchor": "0.29.0",

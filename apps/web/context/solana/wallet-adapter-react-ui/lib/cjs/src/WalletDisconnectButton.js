@@ -1,17 +1,22 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
+var __importDefault =
+  (this && this.__importDefault) ||
+  function (mod) {
+    return mod && mod.__esModule ? mod : { default: mod };
+  };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.WalletDisconnectButton = WalletDisconnectButton;
 const react_1 = __importDefault(require("react"));
 const BaseWalletDisconnectButton_1 = require("./BaseWalletDisconnectButton");
 const LABELS = {
-    disconnecting: 'Disconnecting ...',
-    'has-wallet': 'Disconnect',
-    'no-wallet': 'Disconnect Wallet',
+  disconnecting: "Disconnecting ...",
+  "has-wallet": "Disconnect",
+  "no-wallet": "Disconnect Wallet",
 };
 function WalletDisconnectButton(props) {
-    return react_1.default.createElement(BaseWalletDisconnectButton_1.BaseWalletDisconnectButton, Object.assign({}, props, { labels: LABELS }));
+  return react_1.default.createElement(
+    BaseWalletDisconnectButton_1.BaseWalletDisconnectButton,
+    Object.assign({}, props, { labels: LABELS }),
+  );
 }
 //# sourceMappingURL=WalletDisconnectButton.js.map

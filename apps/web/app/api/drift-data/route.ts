@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const address = searchParams.get('address');
-  const marketIndicesStr = searchParams.get('marketIndices');
+  const address = searchParams.get("address");
+  const marketIndicesStr = searchParams.get("marketIndices");
 
   if (!address) {
     const error = "Missing address";
@@ -24,7 +24,9 @@ export async function GET(request: Request) {
 
   try {
     // const response = await fetch(`http://localhost:8080/drift-data?address=${address}&marketIndices=${marketIndices}`);
-    const response = await fetch(`https://quartz-server-puoxw.ondigitalocean.app/drift-data?address=${address}&marketIndices=${marketIndices}`);
+    const response = await fetch(
+      `https://quartz-server-puoxw.ondigitalocean.app/drift-data?address=${address}&marketIndices=${marketIndices}`,
+    );
     if (!response.ok) {
       const errorResponse = await response.json();
       throw new Error(errorResponse.error || "An unknown error occurred");

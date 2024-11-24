@@ -3,9 +3,7 @@
   "version": "1.2.0",
   "description": "Eslint config for Quartz",
   "main": "lib/index.js",
-  "files": [
-    "lib"
-  ],
+  "files": ["lib"],
   "repository": {
     "type": "git",
     "url": "https://github.com/quartz-labs/quartz-app.git",

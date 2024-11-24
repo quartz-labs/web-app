@@ -50,9 +50,7 @@
     "typescript": "~5.4.2"
   },
   "pathMappings": {
-    "@/*": [
-      "./web/*"
-    ]
+    "@/*": ["./web/*"]
   },
   "nxJsonPlugins": [],
   "fileMap": {
@@ -115,9 +113,7 @@
         {
           "file": "web/app/api/solana-price/route.ts",
           "hash": "13855960088195402093",
-          "deps": [
-            "npm:next"
-          ]
+          "deps": ["npm:next"]
         },
         {
           "file": "web/app/dashboard/page.module.css",
@@ -131,10 +127,7 @@
             "npm:@solana/wallet-adapter-react",
             "npm:react",
             "npm:@solana/web3.js",
-            [
-              "npm:@solana/wallet-adapter-react-ui",
-              "dynamic"
-            ]
+            ["npm:@solana/wallet-adapter-react-ui", "dynamic"]
           ]
         },
         {
@@ -144,9 +137,7 @@
         {
           "file": "web/app/layout.tsx",
           "hash": "9283079351119576869",
-          "deps": [
-            "npm:next"
-          ]
+          "deps": ["npm:next"]
         },
         {
           "file": "web/app/page.module.css",
@@ -161,20 +152,13 @@
             "npm:@solana/wallet-adapter-react",
             "npm:react",
             "npm:@coral-xyz/anchor",
-            [
-              "npm:@solana/wallet-adapter-react-ui",
-              "dynamic"
-            ]
+            ["npm:@solana/wallet-adapter-react-ui", "dynamic"]
           ]
         },
         {
           "file": "web/app/react-query-provider.tsx",
           "hash": "3045630838846882828",
-          "deps": [
-            "npm:react",
-            "npm:@tanstack/react-query-next-experimental",
-            "npm:@tanstack/react-query"
-          ]
+          "deps": ["npm:react", "npm:@tanstack/react-query-next-experimental", "npm:@tanstack/react-query"]
         },
         {
           "file": "web/components/balance/Balance.module.css",
@@ -183,11 +167,7 @@
         {
           "file": "web/components/balance/Balance.tsx",
           "hash": "17071780799741806328",
-          "deps": [
-            "npm:@solana/wallet-adapter-react",
-            "npm:react",
-            "npm:@solana/web3.js"
-          ]
+          "deps": ["npm:@solana/wallet-adapter-react", "npm:react", "npm:@solana/web3.js"]
         },
         {
           "file": "web/components/modal/Modal.module.css",
@@ -196,19 +176,12 @@
         {
           "file": "web/components/modal/Modal.tsx",
           "hash": "9452940420058806895",
-          "deps": [
-            "npm:react"
-          ]
+          "deps": ["npm:react"]
         },
         {
           "file": "web/components/solana/cluster-data-access.tsx",
           "hash": "10485683769835153257",
-          "deps": [
-            "npm:@solana/web3.js",
-            "npm:jotai",
-            "npm:react",
-            "npm:react-hot-toast"
-          ]
+          "deps": ["npm:@solana/web3.js", "npm:jotai", "npm:react", "npm:react-hot-toast"]
         },
         {
           "file": "web/components/solana/solana-provider.tsx",
@@ -219,10 +192,7 @@
             "npm:@solana/wallet-adapter-react",
             "npm:@solana/wallet-adapter-react-ui",
             "npm:react",
-            [
-              "npm:@solana/wallet-adapter-react-ui",
-              "dynamic"
-            ]
+            ["npm:@solana/wallet-adapter-react-ui", "dynamic"]
           ]
         },
         {
@@ -240,9 +210,7 @@
         {
           "file": "web/next.config.js",
           "hash": "11075275437133129850",
-          "deps": [
-            "npm:@nx/next"
-          ]
+          "deps": ["npm:@nx/next"]
         },
         {
           "file": "web/postcss.config.js",
@@ -271,10 +239,7 @@
         {
           "file": "web/tailwind.config.js",
           "hash": "15953156811378497776",
-          "deps": [
-            "npm:@nx/react",
-            "npm:daisyui"
-          ]
+          "deps": ["npm:@nx/react", "npm:daisyui"]
         },
         {
           "file": "web/tsconfig.json",
@@ -287,17 +252,12 @@
         {
           "file": "web/utils/constants.ts",
           "hash": "8878022193512829864",
-          "deps": [
-            "npm:@solana/web3.js"
-          ]
+          "deps": ["npm:@solana/web3.js"]
         },
         {
           "file": "web/utils/getPDAs.ts",
           "hash": "10173124361527352181",
-          "deps": [
-            "npm:@coral-xyz/anchor",
-            "npm:@solana/web3.js"
-          ]
+          "deps": ["npm:@coral-xyz/anchor", "npm:@solana/web3.js"]
         },
         {
           "file": "web/utils/instructions.ts",

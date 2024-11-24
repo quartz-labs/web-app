@@ -6,7 +6,7 @@ import { getKeypairPublicKey } from "../src/crypto/solanaKeypair";
 import { COLORS } from "../constants";
 import { createSolanaKeypair, deleteSolanaKeypair } from "@/src/wallet/keyManagement";
 import { signTransaction } from "@/src/wallet/transactionSigning";
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from "expo-router";
 
 export default function OnConnect() {
   const { phantomPublicKey } = useLocalSearchParams();
@@ -58,7 +58,7 @@ export default function OnConnect() {
       }
       setPublicKey(null);
       setBalance(null);
-    } catch (err) { 
+    } catch (err) {
       setError("Failed to delete keypair");
       console.error(err);
     } finally {
@@ -70,10 +70,7 @@ export default function OnConnect() {
     if (!publicKey) return;
     setLoading(true);
     try {
-      const airdropSignature = await connection.requestAirdrop(
-        publicKey,
-        2 * LAMPORTS_PER_SOL
-      );
+      const airdropSignature = await connection.requestAirdrop(publicKey, 2 * LAMPORTS_PER_SOL);
       await connection.confirmTransaction(airdropSignature);
       updateBalance();
     } catch (err) {
@@ -97,8 +94,8 @@ export default function OnConnect() {
 
   const sendTransaction = async () => {
     if (!publicKey) {
-        setError("Failed to get public key");
-        return;
+      setError("Failed to get public key");
+      return;
     }
     setLoading(true);
     try {
@@ -108,7 +105,7 @@ export default function OnConnect() {
           fromPubkey: publicKey,
           toPubkey: recipientPubkey,
           lamports: LAMPORTS_PER_SOL / 100,
-        })
+        }),
       );
       const signedTransaction = await signTransaction(transaction);
       //TODO: Update to use transactionSender logic in wallet/transactionSender.ts
@@ -135,38 +132,36 @@ export default function OnConnect() {
   }, [phantomPublicKey]);
 
   return (
-    <View style={{ flex: 1, alignItems: 'center' }}>
-      {phantomWalletPublicKey && (
-        <Text>Phantom Wallet Public Key: {phantomWalletPublicKey.toString()}</Text>
-      )}
+    <View style={{ flex: 1, alignItems: "center" }}>
+      {phantomWalletPublicKey && <Text>Phantom Wallet Public Key: {phantomWalletPublicKey.toString()}</Text>}
       {publicKey ? (
         <>
           <Text>Public Key: {publicKey.toString()}</Text>
-          <Text>Balance: {balance !== null ? `${balance} SOL` : 'Loading...'}</Text>
+          <Text>Balance: {balance !== null ? `${balance} SOL` : "Loading..."}</Text>
           <Button title="Request Airdrop" onPress={requestAirdrop} disabled={loading} />
           <TextInput
-            style={{ borderWidth: 1, borderColor: 'gray', padding: 5, marginVertical: 10, width: '80%' }}
+            style={{ borderWidth: 1, borderColor: "gray", padding: 5, marginVertical: 10, width: "80%" }}
             placeholder="Enter recipient address"
             value={recipientAddress}
             onChangeText={setRecipientAddress}
           />
           <Button title="Send Transaction" onPress={sendTransaction} disabled={loading || !recipientAddress} />
           {loading && <ActivityIndicator color={COLORS.WHITE} />}
-          {error && <Text style={{ color: 'red' }}>{error}</Text>}
+          {error && <Text style={{ color: "red" }}>{error}</Text>}
         </>
       ) : (
         <>
           <Button title="Delete" onPress={deleteKeypair} disabled={loading} />
           {loading && <ActivityIndicator color={COLORS.WHITE} />}
-          {error && <Text style={{ color: 'red' }}>{error}</Text>}
+          {error && <Text style={{ color: "red" }}>{error}</Text>}
 
           <Button title="Create Account" onPress={generateKeypair} disabled={loading} />
           {loading && <ActivityIndicator color={COLORS.WHITE} />}
-          {error && <Text style={{ color: 'red' }}>{error}</Text>}
+          {error && <Text style={{ color: "red" }}>{error}</Text>}
 
           <Button title="Get existing" onPress={getPublicKey} disabled={loading} />
           {loading && <ActivityIndicator color={COLORS.WHITE} />}
-          {error && <Text style={{ color: 'red' }}>{error}</Text>}
+          {error && <Text style={{ color: "red" }}>{error}</Text>}
         </>
       )}
     </View>

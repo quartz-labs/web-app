@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState } from "react";
 
 export enum TxStatus {
   NONE,
@@ -9,7 +9,7 @@ export enum TxStatus {
   SENT,
   CONFIRMED,
   FINALIZED,
-  TIMEOUT
+  TIMEOUT,
 }
 
 export interface TxStatusProps {
@@ -52,7 +52,7 @@ export function TxStatusProvider({ children }: { children: React.ReactNode }) {
 export function useTxStatus() {
   const context = useContext(TxStatusContext);
   if (context === undefined) {
-    throw new Error('useTxStatus must be used within an TxStatusProvider');
+    throw new Error("useTxStatus must be used within an TxStatusProvider");
   }
   return context;
 }
