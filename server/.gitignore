@@ -1,7 +1,0 @@
-# Git ignore file
-# - Ignore node_modules, .env, and other non-tracked files
-
-build/
-node_modules/
-.env
-package-lock.json
