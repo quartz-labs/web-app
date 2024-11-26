@@ -8,18 +8,21 @@ import { useError } from "@/context/error-provider";
 import { DECIMALS_USDC, MICRO_CENTS_PER_USDC } from "@/utils/constants";
 import { baseUnitToUi, uiToBaseUnit } from "@/utils/helpers";
 import { withdrawUsdc } from "@/utils/instructions";
-import { AccountData } from "@/utils/accountData";
 import { useTxStatus } from "@/context/tx-status-provider";
 
 interface WithdrawUSDCModalProps {
-    accountData: AccountData | undefined;
+    withdrawLimitsUsdc?: number;
+    usdcRate?: number;
     isValid: (amountBaseUnits: number, minAmountBaseUnits: number, maxAmountBaseUnits: number, minAmountUi: string, maxAmountUi: string) => string;
     closeModal: (signature?: string) => void;
 }
 
-export default function WithdrawUSDCModal(
-    {accountData, isValid, closeModal} : WithdrawUSDCModalProps
-) {
+export default function WithdrawUSDCModal({
+    withdrawLimitsUsdc, 
+    usdcRate,
+    isValid, 
+    closeModal
+} : WithdrawUSDCModalProps) {
     const { connection } = useConnection();
     const { showError } = useError();
     const { showTxStatus } = useTxStatus();
@@ -31,7 +34,7 @@ export default function WithdrawUSDCModal(
     const amount = Number(amountStr);
 
     const MIN_AMOUNT_BASE_UNITS = 0.01 * MICRO_CENTS_PER_USDC;
-    const maxAmountBaseUnits = (accountData) ? accountData.usdcWithdrawLimitBaseUnits : 0;
+    const maxAmountBaseUnits = withdrawLimitsUsdc ?? 0;
 
     const handleConfirm = async () => {
         const amountBaseUnits = uiToBaseUnit(amount, DECIMALS_USDC).toNumber();
@@ -71,8 +74,8 @@ export default function WithdrawUSDCModal(
                 errorText={errorText}
             >
                 <p>
-                    ${amount.toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {accountData &&
-                        <span className="tiny-text">({(accountData.usdcRate * 100).toFixed(4)}% APR)</span>
+                    ${amount.toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {(usdcRate !== undefined) &&
+                        <span className="tiny-text">({(usdcRate * 100).toFixed(4)}% APR)</span>
                     }
                 </p>
             </ModalInfoSection>

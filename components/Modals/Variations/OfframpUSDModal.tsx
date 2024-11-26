@@ -3,25 +3,28 @@ import ModalDefaultContent from "../DefaultLayout/ModalDefaultContent";
 import ModalInfoSection from "../DefaultLayout/ModalInfoSection";
 import ModalButtons from "../DefaultLayout/ModalButtons";
 import { baseUnitToUi, uiToBaseUnit } from "@/utils/helpers";
-import { AccountData } from "@/utils/accountData";
 import { DECIMALS_USDC, MICRO_CENTS_PER_USDC } from "@/utils/constants";
 
 interface OfframpUSDModalProps {
-    accountData: AccountData | undefined,
+    withdrawLimitsUsdc?: number;
+    usdcRate?: number;
     isValid: (amountBaseUnits: number, minAmountBaseUnits: number, maxAmountBaseUnits: number, minAmountUi: string, maxAmountUi: string) => string;
     closeModal: (signature?: string) => void;
 }
 
-export default function OfframpUSDModal(
-    {accountData, isValid, closeModal} : OfframpUSDModalProps
-) {
+export default function OfframpUSDModal({
+    withdrawLimitsUsdc,
+    usdcRate,
+    isValid, 
+    closeModal
+} : OfframpUSDModalProps) {
     const awaitingSign = false;
     const [errorText, setErrorText] = useState("");
     const [amountStr, setAmountStr] = useState("");
     const amount = Number(amountStr);
 
     const MIN_AMOUNT_BASE_UNITS = 31 * MICRO_CENTS_PER_USDC;
-    const maxAmountBaseUnits = (accountData) ? accountData.usdcWithdrawLimitBaseUnits : 0;
+    const maxAmountBaseUnits = withdrawLimitsUsdc ?? 0;
 
     const handleConfirm = async () => {
         const amountBaseUnits = uiToBaseUnit(amount, DECIMALS_USDC).toNumber();
@@ -55,8 +58,8 @@ export default function OfframpUSDModal(
                 minDecimals={2} 
                 errorText={errorText}
             >
-                {accountData &&
-                    <p>({(accountData.usdcRate * 100).toFixed(4)}% APR)</p>
+                {(usdcRate !== undefined) &&
+                    <p>({(usdcRate * 100).toFixed(4)}% APR)</p>
                 }
             </ModalInfoSection>
 

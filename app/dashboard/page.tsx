@@ -21,8 +21,7 @@ export interface ViewProps {
     solPrice?: number;
     balance?: Balance;
     balanceStale: boolean;
-    solRate?: number;
-    usdcRate?: number;
+    rates?: Balance;
     swapView: () => void;
 }
 
@@ -38,10 +37,10 @@ export default function Dashboard() {
     const [modal, setModal] = useState(ModalVariation.Disabled);
 
     const { data: solPrice } = useSolPriceQuery();
-    const { isPending: ratePending, isStale: rateStale, data: rateData } = useDriftRateQuery();
+    const { data: rateData } = useDriftRateQuery();
     const { isPending: balancePending, isStale: balanceStale, data: balanceData } = useDriftBalanceQuery();
-    const { isPending: withdrawLimitPending, isStale: withdrawLimitStale, data: withdrawLimitData } = useDriftWithdrawLimitQuery();
-    const { isPending: healthPending, isStale: healthStale, data: healthData } = useDriftHealthQuery();
+    const { data: withdrawLimitData } = useDriftWithdrawLimitQuery();
+    const { data: healthData } = useDriftHealthQuery();
 
     useEffect(() => {
         const isLoggedIn = async () => {
@@ -95,8 +94,10 @@ export default function Dashboard() {
         <main className={styles.maxHeight}>
             <Modal 
                 variation={modal}
-                accountData={driftData}
                 solPriceUSD={solPrice}
+                balance={balanceData}
+                rates={rateData}
+                withdrawLimits={withdrawLimitData}
                 onClose={onModalClose} 
             />
 
@@ -107,9 +108,8 @@ export default function Dashboard() {
                     <MainView
                         solPrice={solPrice}
                         balance={balanceData}
-                        balanceStale={balanceStale}
-                        solRate={rateData?.depositRate}
-                        usdcRate={rateData?.withdrawRate}
+                        balanceStale={balanceStale || balancePending}
+                        rates={rateData}
                         swapView={() => setMainView(false)}
 
                         handleDepositSol={() => setModal(ModalVariation.DepositSOL)}
@@ -122,9 +122,8 @@ export default function Dashboard() {
                     <LoanView
                         solPrice={solPrice}
                         balance={balanceData}
-                        balanceStale={balanceStale}
-                        solRate={rateData?.depositRate}
-                        usdcRate={rateData?.withdrawRate}
+                        balanceStale={balanceStale || balancePending}
+                        rates={rateData}
                         swapView={() => setMainView(true)}
 
                         health={healthData}

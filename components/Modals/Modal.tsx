@@ -8,9 +8,9 @@ import OfframpUSDModal from "./Variations/OfframpUSDModal";
 import OfframpCompleteModal from "./Variations/OfframpCompleteModal";
 import RepayUSDCModal from "./Variations/RepayUSDCModal";
 import RepayUSDCWithCollateralModal from "./Variations/RepayUSDCWithCollateralModal";
-import { AccountData } from "@/utils/accountData";
 import TelegramModal from "./Variations/TelegramModal";
 import CloseAccountModal from "./Variations/CloseAccountModal";
+import { Balance } from "@/interfaces/balance.interface";
 
 export enum ModalVariation {
     Disabled,
@@ -27,14 +27,21 @@ export enum ModalVariation {
 
 interface ModalProps{
     variation: ModalVariation;
-    accountData: AccountData | undefined;
-    solPriceUSD: number | undefined;
+    solPriceUSD?: number;
+    balance?: Balance;
+    rates?: Balance;
+    withdrawLimits?: Balance;
     onClose: (signature?: string, accountClosed?: boolean) => void;
 }
 
-export default function Modal(
-    {variation, accountData, solPriceUSD, onClose} : ModalProps
-) {
+export default function Modal({
+    variation, 
+    solPriceUSD, 
+    balance,
+    rates,
+    withdrawLimits, 
+    onClose
+} : ModalProps) {
     const wallet = useAnchorWallet();
 
     const handleWrapperClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -69,30 +76,32 @@ export default function Modal(
                     switch (variation) {
                         case ModalVariation.DepositSOL:
                             return <DepositSOLModal
-                                accountData={accountData} 
                                 solPriceUSD={solPriceUSD}
+                                solRate={rates?.lamports}
                                 isValid={isValid} 
                                 closeModal={onClose}
                             />;
                             
                         case ModalVariation.WithdrawSOL:
                             return <WithdrawSOLModal 
-                                accountData={accountData} 
                                 solPriceUSD={solPriceUSD}
+                                withdrawLimitsSol={withdrawLimits?.lamports}
                                 isValid={isValid}
                                 closeModal={onClose}
                             />;
 
                         case ModalVariation.WithdrawUSDC:
                             return <WithdrawUSDCModal 
-                                accountData={accountData} 
+                                withdrawLimitsUsdc={withdrawLimits?.usdc}
+                                usdcRate={rates?.usdc}
                                 isValid={isValid}
                                 closeModal={onClose}
                             />;
 
                         case ModalVariation.OfframpUSD:
                             return <OfframpUSDModal 
-                                accountData={accountData} 
+                                withdrawLimitsUsdc={withdrawLimits?.usdc}
+                                usdcRate={rates?.usdc}
                                 isValid={isValid}
                                 closeModal={onClose}
                             />;
@@ -105,14 +114,14 @@ export default function Modal(
 
                         case ModalVariation.RepayUSDC:
                             return <RepayUSDCModal
-                                accountData={accountData} 
+                                balanceUsdc={balance?.usdc}
                                 isValid={isValid}
                                 closeModal={onClose}
                             />;
 
                         case ModalVariation.RepayUSDCWithCollateral:
                             return <RepayUSDCWithCollateralModal
-                                accountData={accountData} 
+                                balanceUsdc={balance?.usdc} 
                                 isValid={isValid}
                                 closeModal={onClose}
                             />;

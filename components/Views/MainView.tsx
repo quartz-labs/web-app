@@ -15,8 +15,7 @@ export default function MainView({
     solPrice,
     balance,
     balanceStale,
-    solRate,
-    usdcRate,
+    rates,
     swapView,
     handleDepositSol,
     handleWithdrawSol,
@@ -39,9 +38,9 @@ export default function MainView({
 
         netSolBalance = ((solBalanceUi * solPrice) - usdcBalanceUi) / solPrice;
 
-        if (solRate && usdcRate) {
-            dailySolChange = solBalanceUi * (solRate / DAYS_IN_YEAR) * solPrice;
-            dailyUsdcChange = usdcBalanceUi * (usdcRate / DAYS_IN_YEAR);
+        if (rates) {
+            dailySolChange = solBalanceUi * (rates.lamports / DAYS_IN_YEAR) * solPrice;
+            dailyUsdcChange = usdcBalanceUi * (rates.usdc / DAYS_IN_YEAR);
         }
     }
 
@@ -73,7 +72,7 @@ export default function MainView({
                             <p className={styles.fiatAmount}>
                                 ${(netSolBalance * solPrice).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </p>
-                            {solRate && usdcRate &&
+                            {rates &&
                                 <p className={styles.subBalance}>
                                     {getSign(dailyNetChange, CHANGE_DECIMAL_PRECISION)}${truncateToDecimalPlacesAbsolute(dailyNetChange, CHANGE_DECIMAL_PRECISION)} /day
                                 </p>

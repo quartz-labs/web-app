@@ -15,8 +15,7 @@ export default function LoanView({
     solPrice,
     balance,
     balanceStale,
-    solRate,
-    usdcRate,
+    rates,
     health,
     swapView,
     handleRepayUsdc,
@@ -42,9 +41,9 @@ export default function LoanView({
 
         netSolBalance = ((solBalanceUi * solPrice) - usdcBalanceUi) / solPrice;
 
-        if (solRate && usdcRate) {
-            dailySolChange = solBalanceUi * (solRate / DAYS_IN_YEAR) * solPrice;
-            dailyUsdcChange = usdcBalanceUi * (usdcRate / DAYS_IN_YEAR);
+        if (rates) {
+            dailySolChange = solBalanceUi * (rates.lamports / DAYS_IN_YEAR) * solPrice;
+            dailyUsdcChange = usdcBalanceUi * (rates.usdc / DAYS_IN_YEAR);
         }
     }
 
@@ -72,7 +71,11 @@ export default function LoanView({
                                 ${(solBalanceUi * solPrice).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </p>
                             <p className={styles.subBalance}>
-                                {truncateToDecimalPlaces(solBalanceUi, 5)} SOL ({getSign(dailySolChange, CHANGE_DECIMAL_PRECISION)}${truncateToDecimalPlacesAbsolute(dailySolChange, CHANGE_DECIMAL_PRECISION)} /day)
+                                {truncateToDecimalPlaces(solBalanceUi, 5)} SOL {rates && 
+                                    <span>
+                                        ({getSign(dailySolChange, CHANGE_DECIMAL_PRECISION)}${truncateToDecimalPlacesAbsolute(dailySolChange, CHANGE_DECIMAL_PRECISION)} /day)
+                                    </span>
+                                }
                             </p>
                         </div>
                     }
@@ -97,7 +100,11 @@ export default function LoanView({
                                 ${usdcBalanceUi.toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </p>
                             <p className={styles.subBalance}>
-                                USDC ({getSign(dailyUsdcChange, CHANGE_DECIMAL_PRECISION)}${truncateToDecimalPlacesAbsolute(dailyUsdcChange, CHANGE_DECIMAL_PRECISION)} /day)
+                                USDC {rates &&
+                                    <span>
+                                        ({getSign(dailyUsdcChange, CHANGE_DECIMAL_PRECISION)}${truncateToDecimalPlacesAbsolute(dailyUsdcChange, CHANGE_DECIMAL_PRECISION)} /day)
+                                    </span>
+                                }
                             </p>
                         </div>
                     }
@@ -122,9 +129,11 @@ export default function LoanView({
                                 ${(netSolBalance * solPrice).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </p>
                             <p className={styles.subBalance}>
-                                After outstanding loans ({
-                                    getSign(dailyNetChange, CHANGE_DECIMAL_PRECISION)
-                                }${truncateToDecimalPlacesAbsolute(dailyNetChange, CHANGE_DECIMAL_PRECISION)} /day)
+                                After outstanding loans {rates &&
+                                    <span>
+                                        ({getSign(dailyNetChange, CHANGE_DECIMAL_PRECISION)}${truncateToDecimalPlacesAbsolute(dailyNetChange, CHANGE_DECIMAL_PRECISION)} /day)
+                                    </span>
+                                }
                             </p>
                         </div>
                     }

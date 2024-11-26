@@ -5,7 +5,6 @@ import { captureError } from "./errors";
 import { useError } from "@/context/error-provider";
 import { useAnchorWallet } from "@solana/wallet-adapter-react"
 import { Balance } from "@/interfaces/balance.interface";
-import { Rates } from "@/interfaces/rates.interface";
 
 const DEFAULT_REFETCH_INTERVAL = 60_000;
 
@@ -83,14 +82,14 @@ export const useSolPriceQuery = createQuery<number>({
 });
 
 
-export const useDriftRateQuery = createQuery<Rates>({
+export const useDriftRateQuery = createQuery<Balance>({
     path: 'drift/rate',
     params: { 
         marketIndices: [DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC].join(',') 
     },
     transformResponse: (body) => ({
-        depositRate: body.depositRate,
-        withdrawRate: body.withdrawRate
+        lamports: body[0].depositRate,
+        usdc: body[1].withdrawRate
     }),
     errorMessage: "Could not fetch Drift rate"
 });

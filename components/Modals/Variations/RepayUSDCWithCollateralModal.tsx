@@ -8,18 +8,19 @@ import { useError } from "@/context/error-provider";
 import { DECIMALS_USDC, MICRO_CENTS_PER_USDC } from "@/utils/constants";
 import { baseUnitToUi, uiToBaseUnit } from "@/utils/helpers";
 import { repayUsdcWithSol } from "@/utils/instructions";
-import { AccountData } from "@/utils/accountData";
 import { useTxStatus } from "@/context/tx-status-provider";
 
 interface RepayUSDCWithCollateralModalProps {
-    accountData: AccountData | undefined,
+    balanceUsdc?: number;
     isValid: (amountBaseUnits: number, minAmountBaseUnits: number, maxAmountBaseUnits: number, minAmountUi: string, maxAmountUi: string) => string;
     closeModal: (signature?: string) => void;
 }
 
-export default function RepayUSDCWithCollateralModal(
-    {accountData, isValid, closeModal} : RepayUSDCWithCollateralModalProps
-) {
+export default function RepayUSDCWithCollateralModal({
+    balanceUsdc,
+    isValid, 
+    closeModal
+} : RepayUSDCWithCollateralModalProps) {
     const { connection } = useConnection();
     const { showError } = useError();
     const { showTxStatus } = useTxStatus();
@@ -31,7 +32,7 @@ export default function RepayUSDCWithCollateralModal(
     const amount = Number(amountStr);
 
     const MIN_AMOUNT_BASE_UNITS = 0.01 * MICRO_CENTS_PER_USDC;
-    const maxAmountBaseUnits = accountData?.usdcBalanceBaseUnits ?? 0;
+    const maxAmountBaseUnits = balanceUsdc ?? 0;
 
     const handleConfirm = async () => {
         const amountBaseUnits = uiToBaseUnit(amount, DECIMALS_USDC).toNumber();
@@ -71,8 +72,8 @@ export default function RepayUSDCWithCollateralModal(
                 minDecimals={2}
                 errorText={errorText}
             >
-                {(accountData != null) &&
-                    <p>Loan remaining: {baseUnitToUi(accountData.usdcBalanceBaseUnits, DECIMALS_USDC)}</p>
+                {(balanceUsdc != null) &&
+                    <p>Loan remaining: {baseUnitToUi(balanceUsdc, DECIMALS_USDC)}</p>
                 }
             </ModalInfoSection>
 
