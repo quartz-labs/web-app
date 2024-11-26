@@ -8,6 +8,7 @@ import { hasBetaKey, isVaultClosed, isVaultInitialized } from '@/utils/helpers';
 import { useError } from '@/context/error-provider';
 import Logo from '@/components/Logo/Logo';
 import { WalletButton } from '@/context/solana/solana-provider';
+import { MAINTENANCE_MODE_RETURN_TIME } from '@/utils/constants';
 
 export default function AccountClosed() {
     const { connection } = useConnection();
@@ -17,6 +18,8 @@ export default function AccountClosed() {
     
     useEffect(() => {
         const isLoggedIn = async () => {
+            if (MAINTENANCE_MODE_RETURN_TIME !== "") router.push("/");
+
             if (!wallet) router.push("/");
             else if (!await hasBetaKey(wallet.publicKey, showError)) router.push("/");
             else if (!await isVaultClosed(connection, wallet.publicKey)) {

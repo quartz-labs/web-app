@@ -15,6 +15,7 @@ import { useDriftDataQuery, useSolPriceQuery } from '@/utils/queries';
 import { hasBetaKey, isVaultInitialized, isVaultClosed } from '@/utils/helpers';
 import { TxStatus, useTxStatus } from '@/context/tx-status-provider';
 import { captureError } from '@/utils/errors';
+import { MAINTENANCE_MODE_RETURN_TIME } from '@/utils/constants';
 
 export interface ViewProps {
     solPrice: number | undefined;
@@ -39,6 +40,8 @@ export default function Dashboard() {
 
     useEffect(() => {
         const isLoggedIn = async () => {
+            if (MAINTENANCE_MODE_RETURN_TIME !== "") router.push("/");
+
             if (!wallet) router.push("/");
             else if (!await hasBetaKey(wallet.publicKey, showError)) router.push("/");
             else if (await isVaultClosed(connection, wallet.publicKey)) router.push("/account-closed");

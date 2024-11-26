@@ -2,8 +2,7 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    // const response = await fetch('http://localhost:8080/get-price?asset=solana');
-    const response = await fetch('https://quartz-server-puoxw.ondigitalocean.app/get-price?asset=solana');
+    const response = await fetch('https://api.quartzpay.io/data/price?asset=solana');
     if (!response.ok) {
       const errorResponse = await response.json();
       throw new Error(errorResponse.error || "An unknown error occurred");
