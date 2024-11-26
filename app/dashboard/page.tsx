@@ -54,10 +54,10 @@ export default function Dashboard() {
     }, [wallet, connection, router, showError]); 
 
     useEffect(() => {
-        if (wallet?.publicKey) queryClient.invalidateQueries({ queryKey: ['driftData'] });
+        if (wallet?.publicKey) queryClient.invalidateQueries({ queryKey: ["drift-balance", "drift-withdraw-limit", "drift-health"] });
     }, [wallet?.publicKey, queryClient]);
 
-    const updateDriftData = async (signature?: string) => {
+    const updateDriftUserData = async (signature?: string) => {
         if (signature) {
             try {
                 await connection.confirmTransaction({ signature, ...(await connection.getLatestBlockhash()) }, "finalized");
@@ -67,7 +67,7 @@ export default function Dashboard() {
             }
         }
 
-        queryClient.invalidateQueries({ queryKey: ['driftData'] });
+        queryClient.invalidateQueries({ queryKey: ["drift-balance", "drift-withdraw-limit", "drift-health"] });
     };
 
     const handleCloseAccount = async (signature: string) => {
@@ -85,7 +85,7 @@ export default function Dashboard() {
             if (signature) handleCloseAccount(signature);
             return;
         }
-        if (signature) updateDriftData(signature);
+        if (signature) updateDriftUserData(signature);
         setModal(ModalVariation.Disabled);
     }
 
