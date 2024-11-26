@@ -1,6 +1,6 @@
 import { PublicKey } from "@solana/web3.js";
 
-export const MAINTENANCE_MODE_RETURN_TIME: string = "23:00"; // Leave blank to disable maintenance mode
+export const MAINTENANCE_MODE_RETURN_TIME: string = "23:15"; // Leave blank to disable maintenance mode
 
 export const FUNDS_PROGRAM_ID = new PublicKey("6JjHXLheGSNvvexgzMthEcgjkcirDrGduc3HAKB2P1v2");
 export const MARGINFI_PROGRAM_ID = new PublicKey("MFv2hWf31Z9kbCa1snEPYctwafyhdvnV7FZnsebVacA");
