@@ -4,6 +4,8 @@ import { getVault } from "./getAccounts";
 import { captureError } from "./errors";
 import { useError } from "@/context/error-provider";
 import { useAnchorWallet } from "@solana/wallet-adapter-react"
+import { Balance } from "@/interfaces/balance.interface";
+import { Rates } from "@/interfaces/rates.interface";
 
 const DEFAULT_REFETCH_INTERVAL = 60_000;
 
@@ -65,7 +67,7 @@ function createQuery<T>({
                 url, 
                 response.error, 
                 wallet?.publicKey, 
-                // true - TODO: Add back in if getting errors on refresh, remove otherwise
+                // true  // TODO: Add back in if getting errors on refresh, remove otherwise
             );
         }
 
@@ -81,10 +83,7 @@ export const useSolPriceQuery = createQuery<number>({
 });
 
 
-export const useDriftRateQuery = createQuery<{
-    depositRate: number;
-    withdrawRate: number;
-}>({
+export const useDriftRateQuery = createQuery<Rates>({
     path: 'drift/rate',
     params: { 
         marketIndices: [DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC].join(',') 
@@ -97,10 +96,7 @@ export const useDriftRateQuery = createQuery<{
 });
 
 
-export const useDriftBalanceQuery = createQuery<{
-    lamports: number;
-    usdc: number;
-}>({
+export const useDriftBalanceQuery = createQuery<Balance>({
     path: 'drift/balance',
     params: { 
         marketIndices: [DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC].join(',') 
@@ -114,10 +110,7 @@ export const useDriftBalanceQuery = createQuery<{
 });
 
 
-export const useDriftWithdrawLimitQuery = createQuery<{
-    lamports: number;
-    usdc: number;
-}>({
+export const useDriftWithdrawLimitQuery = createQuery<Balance>({
     path: 'drift/withdraw-limit',
     params: { 
         marketIndices: [DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC].join(',') 

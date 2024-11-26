@@ -7,7 +7,6 @@ import Account from '@/components/Account/Account';
 import MainView from '@/components/Views/MainView';
 import LoanView from '@/components/Views/LoanView';
 import styles from "./page.module.css";
-import { AccountData } from '@/utils/accountData';
 import { useError } from '@/context/error-provider';
 import Modal, { ModalVariation } from '@/components/Modals/Modal';
 import { useQueryClient } from '@tanstack/react-query';
@@ -16,11 +15,14 @@ import { hasBetaKey, isVaultInitialized, isVaultClosed } from '@/utils/helpers';
 import { TxStatus, useTxStatus } from '@/context/tx-status-provider';
 import { captureError } from '@/utils/errors';
 import { MAINTENANCE_MODE_RETURN_TIME } from '@/utils/constants';
+import { Balance } from '@/interfaces/balance.interface';
 
 export interface ViewProps {
-    solPrice: number | undefined;
-    accountData: AccountData | undefined;
-    accountStale: boolean;
+    solPrice?: number;
+    balance?: Balance;
+    balanceStale: boolean;
+    solRate?: number;
+    usdcRate?: number;
     swapView: () => void;
 }
 
@@ -104,8 +106,10 @@ export default function Dashboard() {
                 {mainView &&
                     <MainView
                         solPrice={solPrice}
-                        accountData={driftData}
-                        accountStale={driftStale || driftPending}
+                        balance={balanceData}
+                        balanceStale={balanceStale}
+                        solRate={rateData?.depositRate}
+                        usdcRate={rateData?.withdrawRate}
                         swapView={() => setMainView(false)}
 
                         handleDepositSol={() => setModal(ModalVariation.DepositSOL)}
@@ -117,10 +121,13 @@ export default function Dashboard() {
                 {!mainView &&
                     <LoanView
                         solPrice={solPrice}
-                        accountData={driftData}
-                        accountStale={driftStale || driftPending}
+                        balance={balanceData}
+                        balanceStale={balanceStale}
+                        solRate={rateData?.depositRate}
+                        usdcRate={rateData?.withdrawRate}
                         swapView={() => setMainView(true)}
 
+                        health={healthData}
                         handleRepayUsdc={() => setModal(ModalVariation.RepayUSDC)}
                         handleRepayUsdcWithCollateral={() => setModal(ModalVariation.RepayUSDCWithCollateral)}
                         handleTelegram={() => setModal(ModalVariation.Telegram)}

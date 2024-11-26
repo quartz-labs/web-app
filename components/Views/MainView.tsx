@@ -12,15 +12,20 @@ interface MainViewProps extends ViewProps {
 }
 
 export default function MainView({ 
-    solPrice, 
-    accountData,
-    accountStale,
+    solPrice,
+    balance,
+    balanceStale,
+    solRate,
+    usdcRate,
     swapView,
     handleDepositSol,
     handleWithdrawSol,
     handleWithdrawUSDC
 }: MainViewProps) {
-    const loading = (!accountData || accountStale);
+    const DAYS_IN_YEAR = 365;
+    const CHANGE_DECIMAL_PRECISION = 4;
+
+    const loadingBalance = (balanceStale || !balance);
 
     solPrice = solPrice ?? 0;
 
@@ -28,19 +33,23 @@ export default function MainView({
     let dailySolChange = 0;
     let dailyUsdcChange = 0;
 
-    if (accountData) {
-        netSolBalance = ((Number(baseUnitToUi(accountData.solBalanceBaseUnits, DECIMALS_SOL)) * solPrice) - Number(baseUnitToUi(accountData.usdcBalanceBaseUnits, DECIMALS_USDC))) / solPrice;
-        dailySolChange = Number(baseUnitToUi(accountData.solBalanceBaseUnits, DECIMALS_SOL)) * (accountData.solRate / 365) * solPrice;
-        dailyUsdcChange = Number(baseUnitToUi(accountData.usdcBalanceBaseUnits, DECIMALS_USDC)) * (accountData.usdcRate / 365);
+    if (balance && solPrice > 0) {
+        const solBalanceUi = Number(baseUnitToUi(balance.lamports, DECIMALS_SOL));
+        const usdcBalanceUi = Number(baseUnitToUi(balance.usdc, DECIMALS_USDC));
+
+        netSolBalance = ((solBalanceUi * solPrice) - usdcBalanceUi) / solPrice;
+
+        if (solRate && usdcRate) {
+            dailySolChange = solBalanceUi * (solRate / DAYS_IN_YEAR) * solPrice;
+            dailyUsdcChange = usdcBalanceUi * (usdcRate / DAYS_IN_YEAR);
+        }
     }
 
     const dailyNetChange = dailySolChange - dailyUsdcChange;
 
-    const CHANGE_DECIMAL_PRECISION = 4;
-
     return (
         <div className="dashboard-wrapper">
-            {loading &&
+            {!loadingBalance &&
                 <div className={styles.balanceWrapper}>
                     <div className={styles.loadingBalance}>
                         <p className={`${styles.fiatAmount} ${styles.smallMargin}`}>$</p>
@@ -54,7 +63,7 @@ export default function MainView({
                 </div>
             }
 
-            {!loading &&
+            {loadingBalance &&
                 <div className={styles.balanceWrapper}>
                     <div>
                         <p className={styles.title}>
@@ -64,9 +73,11 @@ export default function MainView({
                             <p className={styles.fiatAmount}>
                                 ${(netSolBalance * solPrice).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </p>
-                            <p className={styles.subBalance}>
-                                {getSign(dailyNetChange, CHANGE_DECIMAL_PRECISION)}${truncateToDecimalPlacesAbsolute(dailyNetChange, CHANGE_DECIMAL_PRECISION)} /day
-                            </p>
+                            {solRate && usdcRate &&
+                                <p className={styles.subBalance}>
+                                    {getSign(dailyNetChange, CHANGE_DECIMAL_PRECISION)}${truncateToDecimalPlacesAbsolute(dailyNetChange, CHANGE_DECIMAL_PRECISION)} /day
+                                </p>
+                            }
                         </div>
                     </div>
                 </div>
