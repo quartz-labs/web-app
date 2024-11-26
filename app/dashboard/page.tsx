@@ -11,7 +11,7 @@ import { AccountData } from '@/utils/accountData';
 import { useError } from '@/context/error-provider';
 import Modal, { ModalVariation } from '@/components/Modals/Modal';
 import { useQueryClient } from '@tanstack/react-query';
-import { useDriftDataQuery, useSolPriceQuery } from '@/utils/queries';
+import { useDriftBalanceQuery, useDriftHealthQuery, useDriftRateQuery, useDriftWithdrawLimitQuery, useSolPriceQuery } from '@/utils/queries';
 import { hasBetaKey, isVaultInitialized, isVaultClosed } from '@/utils/helpers';
 import { TxStatus, useTxStatus } from '@/context/tx-status-provider';
 import { captureError } from '@/utils/errors';
@@ -36,7 +36,10 @@ export default function Dashboard() {
     const [modal, setModal] = useState(ModalVariation.Disabled);
 
     const { data: solPrice } = useSolPriceQuery();
-    const { isPending: driftPending, isStale: driftStale, data: driftData } = useDriftDataQuery();
+    const { isPending: ratePending, isStale: rateStale, data: rateData } = useDriftRateQuery();
+    const { isPending: balancePending, isStale: balanceStale, data: balanceData } = useDriftBalanceQuery();
+    const { isPending: withdrawLimitPending, isStale: withdrawLimitStale, data: withdrawLimitData } = useDriftWithdrawLimitQuery();
+    const { isPending: healthPending, isStale: healthStale, data: healthData } = useDriftHealthQuery();
 
     useEffect(() => {
         const isLoggedIn = async () => {
@@ -48,7 +51,7 @@ export default function Dashboard() {
             else if (!await isVaultInitialized(connection, wallet.publicKey)) router.push("/onboarding");
         }
         isLoggedIn();
-    }, [wallet, connection, router, showError, queryClient]); 
+    }, [wallet, connection, router, showError]); 
 
     useEffect(() => {
         if (wallet?.publicKey) queryClient.invalidateQueries({ queryKey: ['driftData'] });
