@@ -55,7 +55,7 @@ export default function Page() {
 
       {(MAINTENANCE_MODE_RETURN_TIME !== "") &&
         <div className={styles.serviceAnnouncement}>
-          <h2>We&apos;re currently deploying a new program upgrade. The website will be offline until {MAINTENANCE_MODE_RETURN_TIME} UTC</h2>
+          <h2>We&apos;re currently deploying an update. The website will be offline until {MAINTENANCE_MODE_RETURN_TIME} UTC</h2>
           <p>You can find more info on our <a href="https://x.com/quartzpay" target="_blank">X</a> and <a href="https://quartzpay.io/">main website</a>.</p>
         </div>
       }
