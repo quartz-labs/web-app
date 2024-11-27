@@ -11,7 +11,6 @@ import RepayUSDCWithCollateralModal from "./Variations/RepayUSDCWithCollateralMo
 import TelegramModal from "./Variations/TelegramModal";
 import CloseAccountModal from "./Variations/CloseAccountModal";
 import { Balance } from "@/interfaces/balance.interface";
-import { useQueryClient } from "@tanstack/react-query";
 
 export enum ModalVariation {
     Disabled,
@@ -48,11 +47,6 @@ export default function Modal({
     onClose
 } : ModalProps) {
     const wallet = useAnchorWallet();
-
-    const queryClient = useQueryClient();
-    queryClient.invalidateQueries({ queryKey: ["drift-balance"], refetchType: "all" });
-    queryClient.invalidateQueries({ queryKey: ["drift-withdraw-limit"], refetchType: "all" });
-    queryClient.invalidateQueries({ queryKey: ["drift-rate"], refetchType: "all" });
 
     const handleWrapperClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         if (e.target === e.currentTarget) {

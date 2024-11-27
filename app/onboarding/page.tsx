@@ -57,10 +57,11 @@ export default function Onboarding() {
         setAwaitingSign(true);
         
         const signature = await initAccount(wallet, connection, showError, showTxStatus);
-
         
-        if (signature) router.push("/dashboard");
-        else {
+        if (signature) {
+            await connection.confirmTransaction({ signature, ...(await connection.getLatestBlockhash()) }, "confirmed"); 
+            router.push("/dashboard");
+        } else {
             if (!wallet || !await hasBetaKey(wallet.publicKey, showError)) router.push("/");
             else if (await isVaultClosed(connection, wallet.publicKey)) router.push("/account-closed");
             else if (await isVaultInitialized(connection, wallet.publicKey)) router.push("/dashboard");

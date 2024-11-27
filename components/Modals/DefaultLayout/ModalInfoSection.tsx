@@ -1,5 +1,6 @@
 import React from "react";
 import styles from "./DefaultLayout.module.css";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface ModalInfoSection {
     maxAmountUi?: number;
@@ -9,6 +10,11 @@ interface ModalInfoSection {
 }
 
 export default function ModalInfoSection({maxAmountUi, minDecimals, errorText, children} : ModalInfoSection) {
+    const queryClient = useQueryClient();
+    queryClient.invalidateQueries({ queryKey: ["drift-balance"], refetchType: "all" });
+    queryClient.invalidateQueries({ queryKey: ["drift-withdraw-limit"], refetchType: "all" });
+    queryClient.invalidateQueries({ queryKey: ["drift-rate"], refetchType: "all" });
+    
     return (
         <div className={styles.infoSectionWrapper}>
             <div className={`${styles.infoSection} ${styles.stretchWidth}`}>
