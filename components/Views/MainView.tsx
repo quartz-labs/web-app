@@ -48,7 +48,7 @@ export default function MainView({
 
     return (
         <div className="dashboard-wrapper">
-            {!loadingBalance &&
+            {loadingBalance &&
                 <div className={styles.balanceWrapper}>
                     <div className={styles.loadingBalance}>
                         <p className={`${styles.fiatAmount} ${styles.smallMargin}`}>$</p>
@@ -62,7 +62,7 @@ export default function MainView({
                 </div>
             }
 
-            {loadingBalance &&
+            {!loadingBalance &&
                 <div className={styles.balanceWrapper}>
                     <div>
                         <p className={styles.title}>

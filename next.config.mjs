@@ -9,14 +9,6 @@ const nextConfig = {
     },
     env: {
       NEXT_PUBLIC_REQUIRE_BETA_KEY: process.env.NEXT_PUBLIC_REQUIRE_BETA_KEY,
-    },
-    rewrites: async () => {
-      return [
-        {
-          source: '/api/:path*',
-          destination: 'https://api.quartzpay.io/:path*'
-        }
-      ]
     }
   };
   

@@ -69,7 +69,11 @@ export default function WithdrawUSDCModal({
             />
 
             <ModalInfoSection 
-                maxAmountUi={Number(baseUnitToUi(maxAmountBaseUnits, DECIMALS_USDC))} 
+                maxAmountUi={
+                    (withdrawLimitsUsdc === undefined)
+                        ? undefined
+                        : Number(baseUnitToUi(maxAmountBaseUnits, DECIMALS_USDC))
+                } 
                 minDecimals={2} 
                 errorText={errorText}
             >

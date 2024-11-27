@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC } from "./constants";
-import { getVault } from "./getAccounts";
 import { captureError } from "./errors";
 import { useError } from "@/context/error-provider";
 import { useAnchorWallet } from "@solana/wallet-adapter-react"
@@ -33,7 +32,7 @@ function createQuery<T>({
         if (requiresAddress && wallet) {
             params = {
                 ...params,
-                address: getVault(wallet.publicKey).toBase58()
+                address: wallet.publicKey.toBase58()
             };
         }
 
@@ -46,7 +45,8 @@ function createQuery<T>({
 
             const response = await fetch(url);
             const body = await response.json();
-            if (!response.ok) throw new Error(body.error);
+
+            if (!response.ok) throw new Error(body.message || errorMessage);
 
             return transformResponse ? transformResponse(body) : body;
         };
@@ -66,7 +66,7 @@ function createQuery<T>({
                 url, 
                 response.error, 
                 wallet?.publicKey, 
-                // true  // TODO: Add back in if getting errors on refresh, remove otherwise
+                true // TODO - This is silent to prevent infinite refresh, add some way of showing feedback
             );
         }
 
@@ -78,6 +78,7 @@ function createQuery<T>({
 export const useSolPriceQuery = createQuery<number>({
     path: 'data/price',
     params: { ids: "solana" },
+    transformResponse: (body) => body.solana,
     errorMessage: "Could not fetch SOL price"
 });
 
@@ -89,7 +90,7 @@ export const useDriftRateQuery = createQuery<Balance>({
     },
     transformResponse: (body) => ({
         lamports: body[0].depositRate,
-        usdc: body[1].withdrawRate
+        usdc: body[1].borrowRate
     }),
     errorMessage: "Could not fetch Drift rate"
 });

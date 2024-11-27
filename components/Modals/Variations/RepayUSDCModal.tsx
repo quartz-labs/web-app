@@ -81,7 +81,11 @@ export default function RepayUSDCModal({
             />
 
             <ModalInfoSection 
-                maxAmountUi={Number(baseUnitToUi(maxAmountBaseUnits, DECIMALS_USDC))} 
+                maxAmountUi={
+                    (balanceUsdc === undefined)
+                        ? undefined
+                        : Number(baseUnitToUi(maxAmountBaseUnits, DECIMALS_USDC))
+                } 
                 minDecimals={2} 
                 errorText={errorText}
             >
