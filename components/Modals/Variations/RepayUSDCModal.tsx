@@ -9,18 +9,19 @@ import { DECIMALS_USDC, MICRO_CENTS_PER_USDC, USDC_MINT } from "@/utils/constant
 import { baseUnitToUi, uiToBaseUnit } from "@/utils/helpers";
 import { depositUsdc } from "@/utils/instructions";
 import { getAssociatedTokenAddress } from "@solana/spl-token";
-import { AccountData } from "@/utils/accountData";
 import { useTxStatus } from "@/context/tx-status-provider";
 
 interface RepayUSDCModalProps {
-    accountData: AccountData | undefined;
+    balanceUsdc?: number;
     isValid: (amountBaseUnits: number, minAmountBaseUnits: number, maxAmountBaseUnits: number, minAmountUi: string, maxAmountUi: string) => string;
     closeModal: (signature?: string) => void;
 }
 
-export default function RepayUSDCModal(
-    {accountData, isValid, closeModal} : RepayUSDCModalProps
-) {
+export default function RepayUSDCModal({
+    balanceUsdc,
+    isValid, 
+    closeModal
+} : RepayUSDCModalProps) {
     const { connection } = useConnection();
     const { showError } = useError();
     const { showTxStatus } = useTxStatus();
@@ -34,7 +35,7 @@ export default function RepayUSDCModal(
     const MIN_AMOUNT_BASE_UNITS = 0.01 * MICRO_CENTS_PER_USDC;
 
     const [usdcWalletBalance, setUsdcWalletBalance] = useState(0);
-    const maxAmountBaseUnits = (accountData) ? Math.min(accountData.usdcBalanceBaseUnits, usdcWalletBalance) : 0;
+    const maxAmountBaseUnits = (balanceUsdc) ? Math.min(balanceUsdc, usdcWalletBalance) : 0;
 
     useEffect(() => {
         const fetchUsdcWalletBalance = async () => {
@@ -80,12 +81,16 @@ export default function RepayUSDCModal(
             />
 
             <ModalInfoSection 
-                maxAmountUi={Number(baseUnitToUi(maxAmountBaseUnits, DECIMALS_USDC))} 
+                maxAmountUi={
+                    (balanceUsdc === undefined)
+                        ? undefined
+                        : Number(baseUnitToUi(maxAmountBaseUnits, DECIMALS_USDC))
+                } 
                 minDecimals={2} 
                 errorText={errorText}
             >
-                {accountData &&
-                    <p>Loan remaining: {baseUnitToUi(accountData.usdcBalanceBaseUnits, DECIMALS_USDC)}</p>
+                {balanceUsdc &&
+                    <p>Loan remaining: {baseUnitToUi(balanceUsdc, DECIMALS_USDC)}</p>
                 }
             </ModalInfoSection>
 

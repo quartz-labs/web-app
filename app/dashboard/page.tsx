@@ -7,20 +7,21 @@ import Account from '@/components/Account/Account';
 import MainView from '@/components/Views/MainView';
 import LoanView from '@/components/Views/LoanView';
 import styles from "./page.module.css";
-import { AccountData } from '@/utils/accountData';
 import { useError } from '@/context/error-provider';
 import Modal, { ModalVariation } from '@/components/Modals/Modal';
 import { useQueryClient } from '@tanstack/react-query';
-import { useDriftDataQuery, useSolPriceQuery } from '@/utils/queries';
+import { useDriftBalanceQuery, useDriftHealthQuery, useDriftRateQuery, useDriftWithdrawLimitQuery, useSolPriceQuery } from '@/utils/queries';
 import { hasBetaKey, isVaultInitialized, isVaultClosed } from '@/utils/helpers';
 import { TxStatus, useTxStatus } from '@/context/tx-status-provider';
 import { captureError } from '@/utils/errors';
 import { MAINTENANCE_MODE_RETURN_TIME } from '@/utils/constants';
+import { Balance } from '@/interfaces/balance.interface';
 
 export interface ViewProps {
-    solPrice: number | undefined;
-    accountData: AccountData | undefined;
-    accountStale: boolean;
+    solPrice?: number;
+    balance?: Balance;
+    balanceStale: boolean;
+    rates?: Balance;
     swapView: () => void;
 }
 
@@ -36,7 +37,10 @@ export default function Dashboard() {
     const [modal, setModal] = useState(ModalVariation.Disabled);
 
     const { data: solPrice } = useSolPriceQuery();
-    const { isPending: driftPending, isStale: driftStale, data: driftData } = useDriftDataQuery();
+    const { data: rateData } = useDriftRateQuery();
+    const { isPending: balancePending, isStale: balanceStale, data: balanceData } = useDriftBalanceQuery();
+    const { data: withdrawLimitData } = useDriftWithdrawLimitQuery();
+    const { data: healthData } = useDriftHealthQuery();
 
     useEffect(() => {
         const isLoggedIn = async () => {
@@ -48,13 +52,13 @@ export default function Dashboard() {
             else if (!await isVaultInitialized(connection, wallet.publicKey)) router.push("/onboarding");
         }
         isLoggedIn();
-    }, [wallet, connection, router, showError, queryClient]); 
+    }, [wallet, connection, router, showError]); 
 
     useEffect(() => {
-        if (wallet?.publicKey) queryClient.invalidateQueries({ queryKey: ['driftData'] });
+        if (wallet?.publicKey) queryClient.invalidateQueries({ queryKey: ["drift-balance", "drift-withdraw-limit", "drift-health"] });
     }, [wallet?.publicKey, queryClient]);
 
-    const updateDriftData = async (signature?: string) => {
+    const updateDriftUserData = async (signature?: string) => {
         if (signature) {
             try {
                 await connection.confirmTransaction({ signature, ...(await connection.getLatestBlockhash()) }, "finalized");
@@ -64,7 +68,7 @@ export default function Dashboard() {
             }
         }
 
-        queryClient.invalidateQueries({ queryKey: ['driftData'] });
+        queryClient.invalidateQueries({ queryKey: ["drift-balance", "drift-withdraw-limit", "drift-health"] });
     };
 
     const handleCloseAccount = async (signature: string) => {
@@ -82,7 +86,7 @@ export default function Dashboard() {
             if (signature) handleCloseAccount(signature);
             return;
         }
-        if (signature) updateDriftData(signature);
+        if (signature) updateDriftUserData(signature);
         setModal(ModalVariation.Disabled);
     }
 
@@ -90,8 +94,10 @@ export default function Dashboard() {
         <main className={styles.maxHeight}>
             <Modal 
                 variation={modal}
-                accountData={driftData}
                 solPriceUSD={solPrice}
+                balance={balanceData}
+                rates={rateData}
+                withdrawLimits={withdrawLimitData}
                 onClose={onModalClose} 
             />
 
@@ -101,8 +107,9 @@ export default function Dashboard() {
                 {mainView &&
                     <MainView
                         solPrice={solPrice}
-                        accountData={driftData}
-                        accountStale={driftStale || driftPending}
+                        balance={balanceData}
+                        balanceStale={balanceStale || balancePending}
+                        rates={rateData}
                         swapView={() => setMainView(false)}
 
                         handleDepositSol={() => setModal(ModalVariation.DepositSOL)}
@@ -114,10 +121,12 @@ export default function Dashboard() {
                 {!mainView &&
                     <LoanView
                         solPrice={solPrice}
-                        accountData={driftData}
-                        accountStale={driftStale || driftPending}
+                        balance={balanceData}
+                        balanceStale={balanceStale || balancePending}
+                        rates={rateData}
                         swapView={() => setMainView(true)}
 
+                        health={healthData}
                         handleRepayUsdc={() => setModal(ModalVariation.RepayUSDC)}
                         handleRepayUsdcWithCollateral={() => setModal(ModalVariation.RepayUSDCWithCollateral)}
                         handleTelegram={() => setModal(ModalVariation.Telegram)}

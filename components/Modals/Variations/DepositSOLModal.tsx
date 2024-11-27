@@ -12,18 +12,17 @@ import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { captureError } from "@/utils/errors";
 import { getPriorityFeeEstimate } from "@/utils/transactionSender";
 import { AccountLayout } from "@solana/spl-token";
-import { AccountData } from "@/utils/accountData";
 import { useTxStatus } from "@/context/tx-status-provider";
 
 interface DepositSOLModalProps {
-    solPriceUSD: number | undefined;
-    accountData: AccountData | undefined;
+    solPriceUSD?: number;
+    solRate?: number;
     isValid: (amountBaseUnits: number, minAmountBaseUnits: number, maxAmountBaseUnits: number, minAmountUi: string, maxAmountUi: string) => string;
     closeModal: (signature?: string) => void;
 }
 
 export default function DepositSOLModal(
-    {accountData, solPriceUSD, isValid, closeModal} : DepositSOLModalProps
+    {solPriceUSD, solRate, isValid, closeModal} : DepositSOLModalProps
 ) {
     const { connection } = useConnection();
     const { showError } = useError();
@@ -102,8 +101,8 @@ export default function DepositSOLModal(
                 errorText={errorText}
             >
                 {(solPriceUSD !== undefined) &&
-                    <p>${(solPriceUSD * amount).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {accountData &&
-                        <span className="tiny-text">({(accountData.solRate * 100).toFixed(4)}% APY)</span>
+                    <p>${(solPriceUSD * amount).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {(solRate !== undefined) &&
+                        <span className="tiny-text">({(solRate * 100).toFixed(4)}% APY)</span>
                     }</p>
                 }
             </ModalInfoSection>

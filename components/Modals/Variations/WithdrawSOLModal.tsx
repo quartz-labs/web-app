@@ -7,22 +7,24 @@ import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useError } from "@/context/error-provider";
 import { DECIMALS_SOL } from "@/utils/constants";
 import { withdrawLamports } from "@/utils/instructions";
-import { AccountData } from "@/utils/accountData";
 import { useTxStatus } from "@/context/tx-status-provider";
 import { uiToBaseUnit } from "@/utils/helpers";
 import { baseUnitToUi } from "@/utils/helpers";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 
 interface WithdrawSOLModalProps {
-    accountData: AccountData | undefined;
-    solPriceUSD: number | undefined;
+    solPriceUSD?: number;
+    withdrawLimitsSol?: number;
     isValid: (amountBaseUnits: number, minAmountBaseUnits: number, maxAmountBaseUnits: number, minAmountUi: string, maxAmountUi: string) => string;
     closeModal: (signature?: string) => void;
 }
 
-export default function WithdrawSOLModal(
-    {accountData, solPriceUSD, isValid, closeModal} : WithdrawSOLModalProps
-) {
+export default function WithdrawSOLModal({
+    solPriceUSD, 
+    withdrawLimitsSol, 
+    isValid, 
+    closeModal
+} : WithdrawSOLModalProps) {
     const { connection } = useConnection();
     const { showError } = useError();
     const { showTxStatus } = useTxStatus();
@@ -34,7 +36,7 @@ export default function WithdrawSOLModal(
     const amount = Number(amountStr);
 
     const MIN_AMOUNT_BASE_UNITS = 0.00001 * LAMPORTS_PER_SOL;
-    const maxAmountBaseUnits = accountData?.solWithdrawLimitBaseUnits ?? 0;
+    const maxAmountBaseUnits = withdrawLimitsSol ?? 0;
     
     const handleConfirm = async () => {
         const amountBaseUnits = uiToBaseUnit(amount, DECIMALS_SOL).toNumber();
