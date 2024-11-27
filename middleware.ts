@@ -18,8 +18,8 @@ export function middleware(request: NextRequest) {
     });
 
     // Rewrite the request
-    return NextResponse.redirect(new URL(newUrl), {
-        headers,
+    return NextResponse.rewrite(new URL(newUrl), {
+        headers
     });
 }
  
