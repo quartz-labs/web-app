@@ -16,6 +16,8 @@ import { TxStatus, useTxStatus } from '@/context/tx-status-provider';
 import { captureError } from '@/utils/errors';
 import { MAINTENANCE_MODE_RETURN_TIME } from '@/utils/constants';
 import { Balance } from '@/interfaces/balance.interface';
+import { fetchMaxDepositLamports } from '@/utils/maxDeposit';
+import { fetchMaxDepositUsdc } from '@/utils/maxDeposit';
 
 export interface ViewProps {
     solPrice?: number;
@@ -41,6 +43,9 @@ export default function Dashboard() {
     const { data: withdrawLimitData } = useDriftWithdrawLimitQuery();
     const { data: healthData } = useDriftHealthQuery();
 
+    const [maxDepositLamports, setMaxDepositLamports] = useState(0);
+    const [maxDepositUsdc, setMaxDepositUsdc] = useState(0);
+
     useEffect(() => {
         const isLoggedIn = async () => {
             if (MAINTENANCE_MODE_RETURN_TIME !== "") router.push("/");
@@ -56,6 +61,13 @@ export default function Dashboard() {
     useEffect(() => {
         if (wallet?.publicKey) queryClient.invalidateQueries({ queryKey: ["drift-balance", "drift-withdraw-limit", "drift-health"] });
     }, [wallet?.publicKey, queryClient]);
+
+    useEffect(() => {
+        if (wallet) {
+            fetchMaxDepositLamports(wallet, connection, showError).then(setMaxDepositLamports);
+            fetchMaxDepositUsdc(wallet, connection).then(setMaxDepositUsdc);
+        }
+    }, [wallet, connection, showError]);
 
     const updateDriftUserData = async (signature?: string) => {
         if (signature) {
@@ -101,6 +113,8 @@ export default function Dashboard() {
                 balance={balanceData}
                 rates={rateData}
                 withdrawLimits={withdrawLimitData}
+                maxDepositLamports={maxDepositLamports}
+                maxDepositUsdc={maxDepositUsdc}
                 onClose={onModalClose} 
             />
 

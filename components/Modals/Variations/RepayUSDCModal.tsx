@@ -5,20 +5,22 @@ import ModalButtons from "../DefaultLayout/ModalButtons";
 import { useConnection } from "@solana/wallet-adapter-react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useError } from "@/context/error-provider";
-import { DECIMALS_USDC, MICRO_CENTS_PER_USDC, USDC_MINT } from "@/utils/constants";
+import { DECIMALS_USDC, MICRO_CENTS_PER_USDC } from "@/utils/constants";
 import { baseUnitToUi, uiToBaseUnit } from "@/utils/helpers";
 import { depositUsdc } from "@/utils/instructions";
-import { getAssociatedTokenAddress } from "@solana/spl-token";
 import { useTxStatus } from "@/context/tx-status-provider";
+import { fetchMaxDepositUsdc } from "@/utils/maxDeposit";
 
 interface RepayUSDCModalProps {
     balanceUsdc?: number;
+    maxDepositUsdc: number;
     isValid: (amountBaseUnits: number, minAmountBaseUnits: number, maxAmountBaseUnits: number, minAmountUi: string, maxAmountUi: string) => string;
     closeModal: (signature?: string) => void;
 }
 
 export default function RepayUSDCModal({
     balanceUsdc,
+    maxDepositUsdc,
     isValid, 
     closeModal
 } : RepayUSDCModalProps) {
@@ -34,17 +36,12 @@ export default function RepayUSDCModal({
 
     const MIN_AMOUNT_BASE_UNITS = 0.01 * MICRO_CENTS_PER_USDC;
 
-    const [usdcWalletBalance, setUsdcWalletBalance] = useState(0);
+    const [usdcWalletBalance, setUsdcWalletBalance] = useState(maxDepositUsdc);
     const maxAmountBaseUnits = (balanceUsdc) ? Math.min(balanceUsdc, usdcWalletBalance) : 0;
 
     useEffect(() => {
-        const fetchUsdcWalletBalance = async () => {
-            if (!wallet) return;
-            const tokenAccount = await getAssociatedTokenAddress(USDC_MINT, wallet.publicKey);
-            const balance = await connection.getTokenAccountBalance(tokenAccount);
-            setUsdcWalletBalance(Number(balance.value.amount));
-        }
-        fetchUsdcWalletBalance();
+        if (!wallet) return;
+        fetchMaxDepositUsdc(wallet, connection).then(setUsdcWalletBalance);
     }, [connection, wallet])
 
     const handleConfirm = async () => {

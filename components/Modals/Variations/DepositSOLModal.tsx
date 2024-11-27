@@ -5,25 +5,28 @@ import ModalButtons from "../DefaultLayout/ModalButtons";
 import { useConnection } from "@solana/wallet-adapter-react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useError } from "@/context/error-provider";
-import { DECIMALS_SOL, MICRO_LAMPORTS_PER_LAMPORT } from "@/utils/constants";
-import { baseUnitToUi, getAccountsFromInstructions, uiToBaseUnit } from "@/utils/helpers";
-import { depositLamports, makeDepositLamportsInstructions } from "@/utils/instructions";
+import { DECIMALS_SOL } from "@/utils/constants";
+import { baseUnitToUi, uiToBaseUnit } from "@/utils/helpers";
+import { depositLamports } from "@/utils/instructions";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
-import { captureError } from "@/utils/errors";
-import { getPriorityFeeEstimate } from "@/utils/transactionSender";
-import { AccountLayout } from "@solana/spl-token";
 import { useTxStatus } from "@/context/tx-status-provider";
+import { fetchMaxDepositLamports } from "@/utils/maxDeposit";
 
 interface DepositSOLModalProps {
     solPriceUSD?: number;
     solRate?: number;
+    maxDepositLamports: number;
     isValid: (amountBaseUnits: number, minAmountBaseUnits: number, maxAmountBaseUnits: number, minAmountUi: string, maxAmountUi: string) => string;
     closeModal: (signature?: string) => void;
 }
 
-export default function DepositSOLModal(
-    {solPriceUSD, solRate, isValid, closeModal} : DepositSOLModalProps
-) {
+export default function DepositSOLModal({
+    solPriceUSD, 
+    solRate, 
+    maxDepositLamports, 
+    isValid, 
+    closeModal
+} : DepositSOLModalProps) {
     const { connection } = useConnection();
     const { showError } = useError();
     const { showTxStatus } = useTxStatus();
@@ -36,31 +39,10 @@ export default function DepositSOLModal(
 
     const MIN_AMOUNT_BASE_UNITS = 0.00001 * LAMPORTS_PER_SOL;
 
-    const [maxAmountBaseUnits, setMaxDepositBaseUnits] = useState(0);
+    const [maxAmountBaseUnits, setMaxDepositBaseUnits] = useState(maxDepositLamports);
     useEffect(() => {
-        const fetchMaxDeposit = async () => {
-            if (!wallet) return;
-            const balanceLamports = await connection.getBalance(wallet?.publicKey);
-
-            const ataSize = AccountLayout.span;
-            const wSolAtaRent = await connection.getMinimumBalanceForRentExemption(ataSize);
-            
-            try {
-                const depositIxs = await makeDepositLamportsInstructions(wallet, connection, balanceLamports, showError);
-                const accountKeys = await getAccountsFromInstructions(connection, depositIxs);
-
-                const computeUnitPriceMicroLamports = await getPriorityFeeEstimate(accountKeys);
-                const baseSignerFeeLamports = 5000;
-                const priorityFeeLamports = (computeUnitPriceMicroLamports * 200_000 ) / MICRO_LAMPORTS_PER_LAMPORT;
-                const maxDeposit = balanceLamports - (wSolAtaRent * 2) - (baseSignerFeeLamports + priorityFeeLamports);
-
-                setMaxDepositBaseUnits(Math.max(maxDeposit, 0));
-            } catch (error) {
-                captureError(showError, "Could not calculate max SOL deposit value", "/DepositSOLModal.tsx", error, wallet.publicKey);
-                setMaxDepositBaseUnits(0);
-            }
-        }
-        fetchMaxDeposit();
+        if (!wallet) return;
+        fetchMaxDepositLamports(wallet, connection, showError).then(setMaxDepositBaseUnits);
     }, [connection, wallet, showError]);
 
     const handleConfirm = async () => {

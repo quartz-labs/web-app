@@ -11,6 +11,7 @@ import RepayUSDCWithCollateralModal from "./Variations/RepayUSDCWithCollateralMo
 import TelegramModal from "./Variations/TelegramModal";
 import CloseAccountModal from "./Variations/CloseAccountModal";
 import { Balance } from "@/interfaces/balance.interface";
+import { useQueryClient } from "@tanstack/react-query";
 
 export enum ModalVariation {
     Disabled,
@@ -31,6 +32,8 @@ interface ModalProps{
     balance?: Balance;
     rates?: Balance;
     withdrawLimits?: Balance;
+    maxDepositLamports: number;
+    maxDepositUsdc: number;
     onClose: (signature?: string, accountClosed?: boolean) => void;
 }
 
@@ -40,9 +43,16 @@ export default function Modal({
     balance,
     rates,
     withdrawLimits, 
+    maxDepositLamports,
+    maxDepositUsdc,
     onClose
 } : ModalProps) {
     const wallet = useAnchorWallet();
+
+    const queryClient = useQueryClient();
+    queryClient.invalidateQueries({ queryKey: ["drift-balance"], refetchType: "all" });
+    queryClient.invalidateQueries({ queryKey: ["drift-withdraw-limit"], refetchType: "all" });
+    queryClient.invalidateQueries({ queryKey: ["drift-rate"], refetchType: "all" });
 
     const handleWrapperClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         if (e.target === e.currentTarget) {
@@ -78,6 +88,7 @@ export default function Modal({
                             return <DepositSOLModal
                                 solPriceUSD={solPriceUSD}
                                 solRate={rates?.lamports}
+                                maxDepositLamports={maxDepositLamports}
                                 isValid={isValid} 
                                 closeModal={onClose}
                             />;
@@ -115,6 +126,7 @@ export default function Modal({
                         case ModalVariation.RepayUSDC:
                             return <RepayUSDCModal
                                 balanceUsdc={balance?.usdc}
+                                maxDepositUsdc={maxDepositUsdc}
                                 isValid={isValid}
                                 closeModal={onClose}
                             />;
