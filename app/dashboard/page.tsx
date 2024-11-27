@@ -20,7 +20,6 @@ import { Balance } from '@/interfaces/balance.interface';
 export interface ViewProps {
     solPrice?: number;
     balance?: Balance;
-    balanceStale: boolean;
     rates?: Balance;
     swapView: () => void;
 }
@@ -38,7 +37,7 @@ export default function Dashboard() {
 
     const { data: solPrice } = useSolPriceQuery();
     const { data: rateData } = useDriftRateQuery();
-    const { isPending: balancePending, isStale: balanceStale, data: balanceData } = useDriftBalanceQuery();
+    const { data: balanceData } = useDriftBalanceQuery();
     const { data: withdrawLimitData } = useDriftWithdrawLimitQuery();
     const { data: healthData } = useDriftHealthQuery();
 
@@ -61,19 +60,23 @@ export default function Dashboard() {
     const updateDriftUserData = async (signature?: string) => {
         if (signature) {
             try {
-                await connection.confirmTransaction({ signature, ...(await connection.getLatestBlockhash()) }, "finalized");
+                await connection.confirmTransaction({ signature, ...(await connection.getLatestBlockhash()) }, "confirmed");
             } catch (error) {
                 showTxStatus({status: TxStatus.TIMEOUT});
                 captureError(showError, "Transaction timed out.", "utils: /instructions.ts", error, wallet?.publicKey, true);
             }
         }
 
-        queryClient.invalidateQueries({ queryKey: ["drift-balance", "drift-withdraw-limit", "drift-health"] });
+        setTimeout(() => {
+            queryClient.invalidateQueries({ queryKey: ["drift-balance"], refetchType: "all" });
+            queryClient.invalidateQueries({ queryKey: ["drift-withdraw-limit"], refetchType: "all" });
+            queryClient.invalidateQueries({ queryKey: ["drift-health"], refetchType: "all" });
+        }, 500);
     };
 
     const handleCloseAccount = async (signature: string) => {
         try {
-            await connection.confirmTransaction({ signature, ...(await connection.getLatestBlockhash()) }, "finalized");
+            await connection.confirmTransaction({ signature, ...(await connection.getLatestBlockhash()) }, "confirmed");
             router.push("/account-closed");
         } catch (error) {
             showTxStatus({status: TxStatus.TIMEOUT});
@@ -108,7 +111,6 @@ export default function Dashboard() {
                     <MainView
                         solPrice={solPrice}
                         balance={balanceData}
-                        balanceStale={balanceStale || balancePending}
                         rates={rateData}
                         swapView={() => setMainView(false)}
 
@@ -122,7 +124,6 @@ export default function Dashboard() {
                     <LoanView
                         solPrice={solPrice}
                         balance={balanceData}
-                        balanceStale={balanceStale || balancePending}
                         rates={rateData}
                         swapView={() => setMainView(true)}
 

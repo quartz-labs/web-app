@@ -14,7 +14,6 @@ interface MainViewProps extends ViewProps {
 export default function MainView({ 
     solPrice,
     balance,
-    balanceStale,
     rates,
     swapView,
     handleDepositSol,
@@ -23,8 +22,6 @@ export default function MainView({
 }: MainViewProps) {
     const DAYS_IN_YEAR = 365;
     const CHANGE_DECIMAL_PRECISION = 4;
-
-    const loadingBalance = (balanceStale || !balance);
 
     solPrice = solPrice ?? 0;
 
@@ -48,7 +45,7 @@ export default function MainView({
 
     return (
         <div className="dashboard-wrapper">
-            {loadingBalance &&
+            {!balance &&
                 <div className={styles.balanceWrapper}>
                     <div className={styles.loadingBalance}>
                         <p className={`${styles.fiatAmount} ${styles.smallMargin}`}>$</p>
@@ -62,7 +59,7 @@ export default function MainView({
                 </div>
             }
 
-            {!loadingBalance &&
+            {balance &&
                 <div className={styles.balanceWrapper}>
                     <div>
                         <p className={styles.title}>

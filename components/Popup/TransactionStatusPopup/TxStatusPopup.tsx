@@ -29,9 +29,6 @@ export default function TxStatusPopup() {
                 await connection.confirmTransaction({ signature, ...(await connection.getLatestBlockhash()) }, "confirmed");
                 setStatus(TxStatus.CONFIRMED);
 
-                await connection.confirmTransaction({ signature, ...(await connection.getLatestBlockhash()) }, "finalized");
-                setStatus(TxStatus.FINALIZED);
-
                 setTimeout(() => {
                     hideTxStatus();
                     setStatus(TxStatus.NONE);
@@ -113,7 +110,7 @@ export default function TxStatusPopup() {
     );
 
 
-    if (status === TxStatus.FINALIZED) return (
+    if (status === TxStatus.CONFIRMED) return (
         <div className={styles.popup}>
             <div className={styles.heading}>
                 <p>Transaction confirmed</p>
@@ -134,13 +131,7 @@ export default function TxStatusPopup() {
     return (
         <div className={styles.popup}>
             <div className={styles.heading}>
-                {(status === TxStatus.SENT) &&
-                    <p>Processing transaction...</p>
-                }
-
-                {(status === TxStatus.CONFIRMED) &&
-                    <p>Confirming transaction...</p>
-                }
+                <p>Confirming transaction...</p>
             </div>
 
             <div className={styles.message}>

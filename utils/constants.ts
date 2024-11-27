@@ -2,6 +2,9 @@ import { PublicKey } from "@solana/web3.js";
 
 export const MAINTENANCE_MODE_RETURN_TIME: string = ""; // Leave blank to disable maintenance mode
 
+
+export const DEFAULT_REFETCH_INTERVAL = 60_000;
+
 export const FUNDS_PROGRAM_ID = new PublicKey("6JjHXLheGSNvvexgzMthEcgjkcirDrGduc3HAKB2P1v2");
 export const MARGINFI_PROGRAM_ID = new PublicKey("MFv2hWf31Z9kbCa1snEPYctwafyhdvnV7FZnsebVacA");
 export const FUNDS_PROGRAM_ADDRESS_TABLE = new PublicKey("96BmeKKVGX3LKYSKo3FCEom1YpNY11kCnGscKq6ouxLx"); // Mainnet

@@ -1,11 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC } from "./constants";
+import { DEFAULT_REFETCH_INTERVAL, DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC } from "./constants";
 import { captureError } from "./errors";
 import { useError } from "@/context/error-provider";
 import { useAnchorWallet } from "@solana/wallet-adapter-react"
 import { Balance } from "@/interfaces/balance.interface";
-
-const DEFAULT_REFETCH_INTERVAL = 60_000;
 
 type QueryConfig = {
     path: string;
@@ -54,9 +52,7 @@ function createQuery<T>({
         const response = useQuery({
             queryKey,
             queryFn,
-            refetchInterval: refetchInterval ?? DEFAULT_REFETCH_INTERVAL,
-            staleTime: Infinity,
-            enabled: requiresAddress ? !!wallet : true
+            refetchInterval: refetchInterval ?? DEFAULT_REFETCH_INTERVAL
         });
 
         if (response.error) {

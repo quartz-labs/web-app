@@ -8,7 +8,6 @@ export enum TxStatus {
   SIGN_REJECTED,
   SENT,
   CONFIRMED,
-  FINALIZED,
   TIMEOUT
 }
 

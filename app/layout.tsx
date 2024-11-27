@@ -34,6 +34,7 @@ export default function RootLayout({
       <body>
         <ErrorProvider>
           <ReactQueryProvider>
+            {/* <ReactQueryDevtools initialIsOpen={false} /> */}
             <PostHogClient>
               <ClusterProvider>
                 <SolanaProvider>

@@ -8,7 +8,7 @@ function makeQueryClient() {
   return new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 60_000,
+        staleTime: 0,
       },
     },
   })

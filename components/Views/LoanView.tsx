@@ -14,7 +14,6 @@ interface LoanViewProps extends ViewProps {
 export default function LoanView({
     solPrice,
     balance,
-    balanceStale,
     rates,
     health,
     swapView,
@@ -24,8 +23,6 @@ export default function LoanView({
 }: LoanViewProps) {
     const DAYS_IN_YEAR = 365;
     const CHANGE_DECIMAL_PRECISION = 4;
-
-    const loadingBalance = (balanceStale || !balance);
 
     solPrice = solPrice ?? 0;
 
@@ -55,7 +52,7 @@ export default function LoanView({
                 <div>
                     <p className={styles.title}>Total Asset Value</p>
 
-                    {loadingBalance &&
+                    {!balance &&
                         <PuffLoader
                             color={"#ffffff"}
                             size={50}
@@ -65,7 +62,7 @@ export default function LoanView({
                         />
                     }
 
-                    {!loadingBalance &&
+                    {balance &&
                         <div>
                             <p className={styles.fiatAmount}>
                                 ${(solBalanceUi * solPrice).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -84,7 +81,7 @@ export default function LoanView({
                 <div>
                     <p className={styles.title}>Loans {health && <span>(Health: {health}%)</span>}</p>
 
-                    {loadingBalance &&
+                    {!balance &&
                         <PuffLoader
                             color={"#ffffff"}
                             size={50}
@@ -94,7 +91,7 @@ export default function LoanView({
                         />
                     }
 
-                    {!loadingBalance &&
+                    {balance &&
                         <div>
                             <p className={styles.fiatAmount}>
                                 ${usdcBalanceUi.toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -113,7 +110,7 @@ export default function LoanView({
                 <div>
                     <p className={styles.title}>Net Balance</p>
 
-                    {loadingBalance &&
+                    {!balance &&
                         <PuffLoader
                             color={"#ffffff"}
                             size={50}
@@ -123,7 +120,7 @@ export default function LoanView({
                         />
                     }
 
-                    {!loadingBalance &&
+                    {balance &&
                         <div>
                             <p className={styles.fiatAmount}>
                                 ${(netSolBalance * solPrice).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
