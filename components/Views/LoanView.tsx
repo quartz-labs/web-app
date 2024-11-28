@@ -79,7 +79,7 @@ export default function LoanView({
                 </div>
 
                 <div>
-                    <p className={styles.title}>Loans {health && <span>(Health: {health}%)</span>}</p>
+                    <p className={styles.title}>Loans {health !== undefined && <span>(Health: {health}%)</span>}</p>
 
                     {!balance &&
                         <PuffLoader

@@ -34,8 +34,8 @@ export default function WithdrawUSDCModal({
     const amount = Number(amountStr);
 
     const MIN_AMOUNT_BASE_UNITS = 0.01 * MICRO_CENTS_PER_USDC;
-    const maxAmountBaseUnits = withdrawLimitsUsdc ?? 0;
 
+    const maxAmountBaseUnits = withdrawLimitsUsdc ?? 0;
     const handleConfirm = async () => {
         const amountBaseUnits = uiToBaseUnit(amount, DECIMALS_USDC).toNumber();
         const error = isValid(
