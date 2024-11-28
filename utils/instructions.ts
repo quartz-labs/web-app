@@ -102,7 +102,7 @@ export const initAccount = async (
 
         trackTx({status: TxStatus.SIGNING});
         const signedTx = await wallet.signTransaction(tx);
-        if (oix_initMarginfiAccount) signedTx.sign([marginfiAccount]);  // Only sign if initing new MarginFi account
+        if (oix_initMarginfiAccount.length > 0) signedTx.sign([marginfiAccount]);  // Only sign if initing new MarginFi account
 
         const signature = await sendTransactionHandler(trackTx, connection, signedTx);
         return signature;
