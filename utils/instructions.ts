@@ -1,5 +1,5 @@
-import quartzIdl from "../idl/funds_program.json";
-import { FundsProgram } from "@/types/funds_program";
+import quartzIdl from "../idl/quartz.json";
+import { Quartz } from "@/types/quartz";
 import marginfiIdl from "../idl/marginfi.json";
 
 import { AnchorProvider, BN, Idl, Program, setProvider, web3 } from "@coral-xyz/anchor";
@@ -10,8 +10,8 @@ import {
     USDC_MINT, WSOL_MINT,
     MARGINFI_GROUP_1,
     DECIMALS_USDC,
-    FUNDS_PROGRAM_ADDRESS_TABLE,
-    FUNDS_PROGRAM_ID,
+    QUARTZ_ADDRESS_TABLE,
+    QUARTZ_PROGRAM_ID,
     MARGINFI_PROGRAM_ID
 } from "./constants";
 import { ASSOCIATED_PROGRAM_ID, TOKEN_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/utils/token";
@@ -37,7 +37,7 @@ export const initAccount = async (
 ) => {
     const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
     setProvider(provider);
-    const quartzProgram = new Program(quartzIdl as Idl, FUNDS_PROGRAM_ID, provider) as unknown as Program<FundsProgram>;
+    const quartzProgram = new Program(quartzIdl as Idl, QUARTZ_PROGRAM_ID, provider) as unknown as Program<Quartz>;
     const marginfiProgram = new Program(marginfiIdl as Idl, MARGINFI_PROGRAM_ID, provider);
     const marginfiClient = await MarginfiClient.fetch(getConfig(), wallet, connection);
 
@@ -125,7 +125,7 @@ export const closeAccount = async (
 ) => {
     const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
     setProvider(provider);
-    const program = new Program(quartzIdl as Idl, FUNDS_PROGRAM_ID, provider) as unknown as Program<FundsProgram>;
+    const program = new Program(quartzIdl as Idl, QUARTZ_PROGRAM_ID, provider) as unknown as Program<Quartz>;
 
     const vaultPda = getVault(wallet.publicKey);
 
@@ -184,7 +184,7 @@ export const closeAccount = async (
 export const makeDepositLamportsInstructions = async (wallet: AnchorWallet, connection: web3.Connection, amountLamports: number, showError: (props: ShowErrorProps) => void) => {
     const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
     setProvider(provider);
-    const program = new Program(quartzIdl as Idl, FUNDS_PROGRAM_ID, provider) as unknown as Program<FundsProgram>;
+    const program = new Program(quartzIdl as Idl, QUARTZ_PROGRAM_ID, provider) as unknown as Program<Quartz>;
 
     const walletWSol = await getAssociatedTokenAddress(WSOL_MINT, wallet.publicKey);
     const vaultPda = getVault(wallet.publicKey);
@@ -286,7 +286,7 @@ export const withdrawLamports = async (
 ) => {
     const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
     setProvider(provider);
-    const program = new Program(quartzIdl as Idl, FUNDS_PROGRAM_ID, provider) as unknown as Program<FundsProgram>;
+    const program = new Program(quartzIdl as Idl, QUARTZ_PROGRAM_ID, provider) as unknown as Program<Quartz>;
 
     const walletWSol = await getAssociatedTokenAddress(WSOL_MINT, wallet.publicKey);
     const vaultPda = getVault(wallet.publicKey);
@@ -363,7 +363,7 @@ export const depositUsdc = async (
 ) => {
     const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
     setProvider(provider);
-    const program = new Program(quartzIdl as Idl, FUNDS_PROGRAM_ID, provider) as unknown as Program<FundsProgram>;
+    const program = new Program(quartzIdl as Idl, QUARTZ_PROGRAM_ID, provider) as unknown as Program<Quartz>;
     
     const vaultPda = getVault(wallet.publicKey);
     const walletUsdc = await getAssociatedTokenAddress(USDC_MINT, wallet.publicKey);
@@ -433,7 +433,7 @@ export const withdrawUsdc = async (
 ) => {
     const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
     setProvider(provider);
-    const program = new Program(quartzIdl as Idl, FUNDS_PROGRAM_ID, provider) as unknown as Program<FundsProgram>;
+    const program = new Program(quartzIdl as Idl, QUARTZ_PROGRAM_ID, provider) as unknown as Program<Quartz>;
     
     const vaultPda = getVault(wallet.publicKey);
     const walletUsdc = await getAssociatedTokenAddress(USDC_MINT, wallet.publicKey);
@@ -504,15 +504,15 @@ export const repayUsdcWithSol = async (
 ) => {
     const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
     setProvider(provider);
-    const quartzProgram = new Program(quartzIdl as Idl, FUNDS_PROGRAM_ID, provider) as unknown as Program<FundsProgram>;
+    const quartzProgram = new Program(quartzIdl as Idl, QUARTZ_PROGRAM_ID, provider) as unknown as Program<Quartz>;
 
     const vaultPda = getVault(wallet.publicKey);
     const walletUsdc = await getAssociatedTokenAddress(USDC_MINT, wallet.publicKey);
     const walletWSol = await getAssociatedTokenAddress(WSOL_MINT, wallet.publicKey);
 
     try {
-        const fundsProgramLookupTable = await connection.getAddressLookupTable(FUNDS_PROGRAM_ADDRESS_TABLE).then((res) => res.value);
-        if (!fundsProgramLookupTable) throw Error("Address Lookup Table account not found");
+        const QuartzLookupTable = await connection.getAddressLookupTable(QUARTZ_ADDRESS_TABLE).then((res) => res.value);
+        if (!QuartzLookupTable) throw Error("Address Lookup Table account not found");
 
         // Get MarginFi client and bank
         const marginfiClient = await MarginfiClient.fetch(getConfig(), wallet, connection);
@@ -598,7 +598,7 @@ export const repayUsdcWithSol = async (
             amountUsdcUi,
             usdcBank.address,
             [ix_createWSolIndempotent, ix_depositUsdc, ix_withdrawLamports, ix_jupiterSwap, ix_closeWSolAta],
-            [fundsProgramLookupTable, ...jupiterLookupTables],
+            [QuartzLookupTable, ...jupiterLookupTables],
             0.002,
             true
         );

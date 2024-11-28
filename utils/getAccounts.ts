@@ -1,11 +1,11 @@
 import { BN, web3 } from "@coral-xyz/anchor";
 import { PublicKey } from "@solana/web3.js";
-import { DRIFT_PROGRAM_ID, FUNDS_PROGRAM_ID } from "./constants";
+import { DRIFT_PROGRAM_ID, QUARTZ_PROGRAM_ID } from "./constants";
 
 export const getVault = (owner: PublicKey) => {
     const [vault] = PublicKey.findProgramAddressSync(
         [Buffer.from("vault"), owner.toBuffer()],
-        new PublicKey(FUNDS_PROGRAM_ID)
+        new PublicKey(QUARTZ_PROGRAM_ID)
     )
     return vault;
 }
@@ -13,7 +13,7 @@ export const getVault = (owner: PublicKey) => {
 export const getVaultSpl = (vaultPda: PublicKey, mint: PublicKey) => {
     const [vaultWSol] = web3.PublicKey.findProgramAddressSync(
         [vaultPda.toBuffer(), mint.toBuffer()],
-        FUNDS_PROGRAM_ID
+        QUARTZ_PROGRAM_ID
     );
     return vaultWSol;
 }
