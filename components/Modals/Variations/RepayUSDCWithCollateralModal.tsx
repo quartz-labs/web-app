@@ -1,23 +1,27 @@
 import { useState } from "react";
 import ModalDefaultContent from "../DefaultLayout/ModalDefaultContent";
-import ModalInfoSection from "../DefaultLayout/ModalInfoSection";
 import ModalButtons from "../DefaultLayout/ModalButtons";
 import { useConnection } from "@solana/wallet-adapter-react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useError } from "@/context/error-provider";
-import { DECIMALS_USDC, MICRO_CENTS_PER_USDC } from "@/utils/constants";
+import { DECIMALS_SOL, DECIMALS_USDC, MICRO_CENTS_PER_USDC } from "@/utils/constants";
 import { baseUnitToUi, uiToBaseUnit } from "@/utils/helpers";
 import { repayUsdcWithSol } from "@/utils/instructions";
 import { useTxStatus } from "@/context/tx-status-provider";
+import { useQueryClient } from "@tanstack/react-query";
+import styles from "../DefaultLayout/DefaultLayout.module.css";
+import { Balance } from "@/interfaces/balance.interface";
 
 interface RepayUSDCWithCollateralModalProps {
-    balanceUsdc?: number;
+    balance?: Balance;
+    solPriceUSD?: number;
     isValid: (amountBaseUnits: number, minAmountBaseUnits: number, maxAmountBaseUnits: number, minAmountUi: string, maxAmountUi: string) => string;
     closeModal: (signature?: string) => void;
 }
 
 export default function RepayUSDCWithCollateralModal({
-    balanceUsdc,
+    balance,
+    solPriceUSD,
     isValid, 
     closeModal
 } : RepayUSDCWithCollateralModalProps) {
@@ -30,9 +34,17 @@ export default function RepayUSDCWithCollateralModal({
     const [errorText, setErrorText] = useState("");
     const [amountStr, setAmountStr] = useState("");
     const amount = Number(amountStr);
+    const solEquivalent = amount / (solPriceUSD ?? 0);
+
+    const queryClient = useQueryClient();
+    queryClient.invalidateQueries({ queryKey: ["drift-balance"], refetchType: "all" });
+    queryClient.invalidateQueries({ queryKey: ["drift-withdraw-limit"], refetchType: "all" });
+    queryClient.invalidateQueries({ queryKey: ["drift-rate"], refetchType: "all" });
 
     const MIN_AMOUNT_BASE_UNITS = 0.01 * MICRO_CENTS_PER_USDC;
-    const maxAmountBaseUnits = balanceUsdc ?? 0;
+    const maxAmountBaseUnits = balance?.usdc ?? 0;
+    const maxAmountUi = baseUnitToUi(maxAmountBaseUnits, DECIMALS_USDC);
+    const solBalanceUi = Number(baseUnitToUi(balance?.lamports ?? 0, DECIMALS_SOL));
 
     const handleConfirm = async () => {
         const amountBaseUnits = uiToBaseUnit(amount, DECIMALS_USDC).toNumber();
@@ -41,7 +53,7 @@ export default function RepayUSDCWithCollateralModal({
             MIN_AMOUNT_BASE_UNITS, 
             maxAmountBaseUnits, 
             baseUnitToUi(MIN_AMOUNT_BASE_UNITS, DECIMALS_USDC), 
-            baseUnitToUi(maxAmountBaseUnits, DECIMALS_USDC)
+            maxAmountUi
         );
         
         setErrorText(error);
@@ -63,23 +75,31 @@ export default function RepayUSDCWithCollateralModal({
                 denomination="USDC"
                 amountStr={amountStr}
                 setAmountStr={setAmountStr}
-                setMaxAmount={() => setAmountStr(baseUnitToUi(maxAmountBaseUnits, DECIMALS_USDC))}
+                setMaxAmount={() => setAmountStr(maxAmountUi)}
                 setHalfAmount={() => setAmountStr(baseUnitToUi(Math.trunc(maxAmountBaseUnits / 2), DECIMALS_USDC))}
             />
 
-            <ModalInfoSection 
-                maxAmountUi={
-                    (balanceUsdc === undefined)
-                        ? undefined
-                        : Number(baseUnitToUi(maxAmountBaseUnits, DECIMALS_USDC))
-                } 
-                minDecimals={2}
-                errorText={errorText}
-            >
-                {(balanceUsdc != null) &&
-                    <p>Loan remaining: {baseUnitToUi(balanceUsdc, DECIMALS_USDC)}</p>
+            
+            <div className={styles.infoSectionWrapper}>
+                {(balance != undefined) &&
+                    <div className={`${styles.infoSection} ${styles.stretchWidth}`}>
+                        {(solPriceUSD != undefined) &&
+                            <div className={styles.infoValue}>
+                                <p>SOL: {solEquivalent.toLocaleString('en-IE', { minimumFractionDigits: 0, maximumFractionDigits: 6 })}</p>
+                            </div>
+                        }
+
+                        <div className={styles.infoRight}>
+                            <p className="small-text light-text">USDC Loan: {maxAmountUi}</p>
+                            <p className="small-text light-text">SOL balance: {solBalanceUi.toLocaleString('en-IE', { minimumFractionDigits: 0, maximumFractionDigits: 6 })}</p>
+                        </div>
+                    </div>
                 }
-            </ModalInfoSection>
+
+                {errorText &&
+                    <p className={styles.errorText}>{errorText}</p>
+                } 
+            </div>
 
             <ModalButtons 
                 label="Repay" 

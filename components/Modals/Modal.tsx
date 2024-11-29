@@ -127,7 +127,8 @@ export default function Modal({
 
                         case ModalVariation.RepayUSDCWithCollateral:
                             return <RepayUSDCWithCollateralModal
-                                balanceUsdc={balance?.usdc} 
+                                balance={balance} 
+                                solPriceUSD={solPriceUSD}
                                 isValid={isValid}
                                 closeModal={onClose}
                             />;
