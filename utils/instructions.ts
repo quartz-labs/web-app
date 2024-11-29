@@ -86,7 +86,7 @@ export const initAccount = async (
                 })
                 .instruction()
             )
-        }
+        } else if (marginfiAccounts[0].isDisabled) throw new Error("Flash loan MarginFi account is bankrupt"); // TODO - Handle disabled MarginFi Account
 
         const instructions = [ix_initUser, ix_initVaultDriftAccount, ...oix_initMarginfiAccount];
         const ix_priority = await createPriorityFeeInstructions(connection, instructions, computeBudget);
@@ -521,6 +521,7 @@ export const repayUsdcWithSol = async (
 
         const [ marginfiAccount ] = await marginfiClient.getMarginfiAccountsForAuthority(wallet.publicKey);
         if (marginfiAccount === undefined) throw new Error("Flash loan MarginFi account not found");
+        if (marginfiAccount.isDisabled) throw new Error("Flash loan MarginFi account is bankrupt"); // TODO - Handle disabled MarginFi Account
 
         // Get price info for flash loan
         const jupiterQuote = await getJupiterSwapQuote(WSOL_MINT, USDC_MINT, amountMicroCents, true);
