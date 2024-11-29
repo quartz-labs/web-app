@@ -83,7 +83,7 @@ export default function Dashboard() {
             queryClient.invalidateQueries({ queryKey: ["drift-balance"], refetchType: "all" });
             queryClient.invalidateQueries({ queryKey: ["drift-withdraw-limit"], refetchType: "all" });
             queryClient.invalidateQueries({ queryKey: ["drift-health"], refetchType: "all" });
-        }, 500);
+        }, 750);
     };
 
     const handleCloseAccount = async (signature: string) => {
