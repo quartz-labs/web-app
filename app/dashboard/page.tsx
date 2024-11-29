@@ -128,7 +128,7 @@ export default function Dashboard() {
                         rates={rateData}
                         swapView={() => setMainView(false)}
 
-                        handleDepositSol={() => setModal(ModalVariation.DepositSOL)}
+                        handleDepositSol={() => setModal(ModalVariation.AddSOL)}
                         handleWithdrawSol={() => setModal(ModalVariation.WithdrawSOL)}
                         handleWithdrawUSDC={() => setModal(ModalVariation.WithdrawUSDC)}
                     />

@@ -81,7 +81,7 @@ export default function MainView({
 
             <div className={styles.buttons}>
                 <div className={styles.buttonsRow}>
-                    <button onClick={handleDepositSol} className={"glass-button"}>Deposit SOL</button>
+                    <button onClick={handleDepositSol} className={"glass-button"}>Add SOL</button>
                     <button onClick={handleWithdrawSol} className={"glass-button"}>Withdraw SOL</button>
                 </div>
                 <button onClick={handleWithdrawUSDC} className={"glass-button"}>

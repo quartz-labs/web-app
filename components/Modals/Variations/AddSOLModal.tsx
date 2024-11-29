@@ -12,7 +12,7 @@ import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { useTxStatus } from "@/context/tx-status-provider";
 import { fetchMaxDepositLamports } from "@/utils/maxDeposit";
 
-interface DepositSOLModalProps {
+interface AddSOLModalProps {
     solPriceUSD?: number;
     solRate?: number;
     maxDepositLamports: number;
@@ -20,13 +20,13 @@ interface DepositSOLModalProps {
     closeModal: (signature?: string) => void;
 }
 
-export default function DepositSOLModal({
+export default function AddSOLModal({
     solPriceUSD, 
     solRate, 
     maxDepositLamports, 
     isValid, 
     closeModal
-} : DepositSOLModalProps) {
+} : AddSOLModalProps) {
     const { connection } = useConnection();
     const { showError } = useError();
     const { showTxStatus } = useTxStatus();
@@ -69,7 +69,7 @@ export default function DepositSOLModal({
     return (
         <>
             <ModalDefaultContent
-                title="Deposit SOL"
+                title="Add SOL"
                 denomination="SOL"
                 amountStr={amountStr}
                 setAmountStr={setAmountStr}
@@ -90,7 +90,7 @@ export default function DepositSOLModal({
             </ModalInfoSection>
 
             <ModalButtons 
-                label="Deposit" 
+                label="Add" 
                 awaitingSign={awaitingSign} 
                 onConfirm={handleConfirm} 
                 onCancel={closeModal}

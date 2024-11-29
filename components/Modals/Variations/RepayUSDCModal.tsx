@@ -69,7 +69,7 @@ export default function RepayUSDCModal({
         <>
             <ModalDefaultContent
                 title="Repay Loan with USDC"
-                subtitle="Deposit USDC from your wallet to pay off your loan"
+                subtitle="Add USDC from your wallet to pay off your loan"
                 denomination="USDC"
                 amountStr={amountStr}
                 setAmountStr={setAmountStr}

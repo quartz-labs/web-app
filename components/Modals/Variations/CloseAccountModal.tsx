@@ -47,7 +47,7 @@ export default function CloseAccountModal(
                     <ul>
                         <li>be at least 13 days old</li>
                         <li>have no outstanding loans</li>
-                        <li>have no remaining deposits</li>
+                        <li>have no remaining funds</li>
                     </ul>
                 </div>
             </div>

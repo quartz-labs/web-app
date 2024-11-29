@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import styles from "./Modal.module.css";
-import DepositSOLModal from "./Variations/DepositSOLModal";
+import AddSOLModal from "./Variations/AddSOLModal";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import WithdrawSOLModal from "./Variations/WithdrawSOLModal";
 import WithdrawUSDCModal from "./Variations/WithdrawUSDCModal";
@@ -14,7 +14,7 @@ import { Balance } from "@/interfaces/balance.interface";
 
 export enum ModalVariation {
     Disabled,
-    DepositSOL,
+    AddSOL,
     WithdrawSOL,
     WithdrawUSDC,
     OfframpUSD,
@@ -78,8 +78,8 @@ export default function Modal({
             >
                 {(() => {
                     switch (variation) {
-                        case ModalVariation.DepositSOL:
-                            return <DepositSOLModal
+                        case ModalVariation.AddSOL:
+                            return <AddSOLModal
                                 solPriceUSD={solPriceUSD}
                                 solRate={rates?.lamports}
                                 maxDepositLamports={maxDepositLamports}
