@@ -5,7 +5,7 @@ import ModalButtons from "../DefaultLayout/ModalButtons";
 import { useConnection } from "@solana/wallet-adapter-react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useError } from "@/context/error-provider";
-import { DECIMALS_USDC, MICRO_CENTS_PER_USDC } from "@/utils/constants";
+import { DECIMALS_USDC } from "@/utils/constants";
 import { baseUnitToUi, uiToBaseUnit } from "@/utils/helpers";
 import { depositUsdc } from "@/utils/instructions";
 import { useTxStatus } from "@/context/tx-status-provider";
@@ -32,9 +32,9 @@ export default function RepayUSDCModal({
     const [awaitingSign, setAwaitingSign] = useState(false);
     const [errorText, setErrorText] = useState("");
     const [amountStr, setAmountStr] = useState("");
-    const amount = Number(amountStr);
+    const amount = uiToBaseUnit(Number(amountStr), DECIMALS_USDC).toNumber();
 
-    const MIN_AMOUNT_BASE_UNITS = 0.01 * MICRO_CENTS_PER_USDC;
+    const MIN_AMOUNT_BASE_UNITS = 1;
 
     const [usdcWalletBalance, setUsdcWalletBalance] = useState(maxDepositUsdc);
     const maxAmountBaseUnits = (balanceUsdc) ? Math.min(balanceUsdc, usdcWalletBalance) : 0;
@@ -45,9 +45,10 @@ export default function RepayUSDCModal({
     }, [connection, wallet])
 
     const handleConfirm = async () => {
-        const amountBaseUnits = uiToBaseUnit(amount, DECIMALS_USDC).toNumber();
+        console.log("amountStr", amountStr);
+        console.log("amount", amount);
         const error = isValid(
-            amountBaseUnits, 
+            amount, 
             MIN_AMOUNT_BASE_UNITS, 
             maxAmountBaseUnits, 
             baseUnitToUi(MIN_AMOUNT_BASE_UNITS, DECIMALS_USDC), 
@@ -58,8 +59,7 @@ export default function RepayUSDCModal({
         if (error || !wallet) return;
 
         setAwaitingSign(true);
-        const baseUnits = uiToBaseUnit(amount, DECIMALS_USDC).toNumber();
-        const signature = await depositUsdc(wallet, connection, baseUnits, showError, showTxStatus);
+        const signature = await depositUsdc(wallet, connection, amount, showError, showTxStatus);
         setAwaitingSign(false);
 
         if (signature) closeModal(signature);

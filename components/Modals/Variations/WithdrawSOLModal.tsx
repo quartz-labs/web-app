@@ -10,7 +10,6 @@ import { withdrawLamports } from "@/utils/instructions";
 import { useTxStatus } from "@/context/tx-status-provider";
 import { uiToBaseUnit } from "@/utils/helpers";
 import { baseUnitToUi } from "@/utils/helpers";
-import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 
 interface WithdrawSOLModalProps {
     solPriceUSD?: number;
@@ -33,15 +32,16 @@ export default function WithdrawSOLModal({
     const [awaitingSign, setAwaitingSign] = useState(false);
     const [errorText, setErrorText] = useState("");
     const [amountStr, setAmountStr] = useState("");
-    const amount = Number(amountStr);
+    const amount = uiToBaseUnit(Number(amountStr), DECIMALS_SOL).toNumber();
 
-    const MIN_AMOUNT_BASE_UNITS = 0.00001 * LAMPORTS_PER_SOL;
+    const MIN_AMOUNT_BASE_UNITS = 1;
     const maxAmountBaseUnits = withdrawLimitsSol ?? 0;
     
     const handleConfirm = async () => {
-        const amountBaseUnits = uiToBaseUnit(amount, DECIMALS_SOL).toNumber();
+        console.log("amountStr", amountStr);
+        console.log("amount", amount);
         const error = isValid(
-            amountBaseUnits, 
+            amount, 
             MIN_AMOUNT_BASE_UNITS, 
             maxAmountBaseUnits, 
             baseUnitToUi(MIN_AMOUNT_BASE_UNITS, DECIMALS_SOL), 
@@ -52,8 +52,7 @@ export default function WithdrawSOLModal({
         if (error || !wallet) return;
 
         setAwaitingSign(true);
-        const baseUnits = uiToBaseUnit(amount, DECIMALS_SOL).toNumber();
-        const signature = await withdrawLamports(wallet, connection, baseUnits, showError, showTxStatus);
+        const signature = await withdrawLamports(wallet, connection, amount, showError, showTxStatus);
         setAwaitingSign(false);
 
         if (signature) closeModal(signature);
@@ -76,7 +75,7 @@ export default function WithdrawSOLModal({
                 errorText={errorText}
             >
                 {(solPriceUSD !== undefined) &&
-                    <p>${(solPriceUSD * amount).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    <p>${(solPriceUSD * Number(amountStr)).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                 }
             </ModalInfoSection>
 
