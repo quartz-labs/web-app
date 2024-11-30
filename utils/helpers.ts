@@ -160,7 +160,6 @@ export async function hasBetaKey(wallet: PublicKey, showError: (props: ShowError
             }
         }
     } catch (error: any) {
-        console.error("Error fetching NFTs:", error);
         captureError(showError, "Could not fetch NFTs", "utils: /helpers.ts", error);
     }
 

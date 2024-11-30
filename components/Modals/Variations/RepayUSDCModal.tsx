@@ -45,8 +45,6 @@ export default function RepayUSDCModal({
     }, [connection, wallet])
 
     const handleConfirm = async () => {
-        console.log("amountStr", amountStr);
-        console.log("amount", amount);
         const error = isValid(
             amount, 
             MIN_AMOUNT_BASE_UNITS, 

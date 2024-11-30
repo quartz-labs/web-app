@@ -4,7 +4,7 @@ import ModalButtons from "../DefaultLayout/ModalButtons";
 import { useConnection } from "@solana/wallet-adapter-react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useError } from "@/context/error-provider";
-import { DECIMALS_SOL, DECIMALS_USDC, MICRO_CENTS_PER_USDC } from "@/utils/constants";
+import { DECIMALS_SOL, DECIMALS_USDC } from "@/utils/constants";
 import { baseUnitToUi, uiToBaseUnit } from "@/utils/helpers";
 import { repayUsdcWithSol } from "@/utils/instructions";
 import { useTxStatus } from "@/context/tx-status-provider";
@@ -33,23 +33,22 @@ export default function RepayUSDCWithCollateralModal({
     const [awaitingSign, setAwaitingSign] = useState(false);
     const [errorText, setErrorText] = useState("");
     const [amountStr, setAmountStr] = useState("");
-    const amount = Number(amountStr);
-    const solEquivalent = amount / (solPriceUSD ?? 0);
+    const amount = uiToBaseUnit(Number(amountStr), DECIMALS_USDC).toNumber();
+    const solEquivalent = Number(amountStr) / (solPriceUSD ?? 0);
 
     const queryClient = useQueryClient();
     queryClient.invalidateQueries({ queryKey: ["drift-balance"], refetchType: "all" });
     queryClient.invalidateQueries({ queryKey: ["drift-withdraw-limit"], refetchType: "all" });
     queryClient.invalidateQueries({ queryKey: ["drift-rate"], refetchType: "all" });
 
-    const MIN_AMOUNT_BASE_UNITS = 0.01 * MICRO_CENTS_PER_USDC;
+    const MIN_AMOUNT_BASE_UNITS = 1;
     const maxAmountBaseUnits = balance?.usdc ?? 0;
     const maxAmountUi = baseUnitToUi(maxAmountBaseUnits, DECIMALS_USDC);
     const solBalanceUi = Number(baseUnitToUi(balance?.lamports ?? 0, DECIMALS_SOL));
 
     const handleConfirm = async () => {
-        const amountBaseUnits = uiToBaseUnit(amount, DECIMALS_USDC).toNumber();
         const error = isValid(
-            amountBaseUnits, 
+            amount, 
             MIN_AMOUNT_BASE_UNITS, 
             maxAmountBaseUnits, 
             baseUnitToUi(MIN_AMOUNT_BASE_UNITS, DECIMALS_USDC), 
@@ -60,8 +59,7 @@ export default function RepayUSDCWithCollateralModal({
         if (error || !wallet) return;
 
         setAwaitingSign(true);
-        const baseUnits = uiToBaseUnit(amount, DECIMALS_USDC).toNumber();
-        const signature = await repayUsdcWithSol(wallet, connection, baseUnits, showError, showTxStatus);
+        const signature = await repayUsdcWithSol(wallet, connection, amount, showError, showTxStatus);
         setAwaitingSign(false);
 
         if (signature) closeModal(signature);
