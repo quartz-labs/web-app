@@ -1,7 +1,16 @@
 import './global.css';
 import { Inter } from 'next/font/google';
+import { ReactQueryProvider } from '@/context/react-query-provider';
+import dynamic from 'next/dynamic';
+import { PostHogClient } from '@/context/posthog-provider';
 
 const inter = Inter({ subsets: ['latin'] });
+
+const PostHogPageView = dynamic(() => import('@/context/posthog-provider').then(mod => ({
+  default: mod.PostHogPageView,
+})), {
+  ssr: false,
+});
 
 export const metadata = {
   title: 'Quartz',
@@ -16,7 +25,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.className}>
       <body>
-        {children}
+        <ReactQueryProvider>
+          <PostHogClient>
+            <PostHogPageView />
+            {children}
+          </PostHogClient>
+        </ReactQueryProvider>
       </body>
     </html>
   );
