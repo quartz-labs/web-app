@@ -112,26 +112,6 @@ a:hover {
   border: var(--glass-border);
 }
 
-.two-col-grid {
-  margin: 0px auto;
-  padding: 0px 20px;
-  height: 100%;
-  max-width: 1080px;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  justify-items: center;
-  align-itmes: center;
-  gap: 50px;
-}
-
-.two-col-grid > * {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-}
-
 :root {
   --overlay-color: rgba(255, 255, 255, 0.03);
   --overlay: linear-gradient(var(--overlay-color), var(--overlay-color));
@@ -163,15 +143,6 @@ a:hover {
   --color-error: #FF8080;
   --color-link-hover: #d8f3ff;
 
-  --logo-width: 360px;
-  --logo-margin: 80px;
-  --modal-width: 680px;
-  --modal-content-width: 75%;
-  --input-field-height: 80px;
-  --address-copy-button-height: 57px;
-  --popup-position-bottom: 50px;
-  --popup-position-left: 100px;
-
   --text-size-h1-base: 50.16px;
   --text-size-h2-base: 41.8px;
   --text-size-h3-base: 29.03px;
@@ -193,11 +164,6 @@ a:hover {
 
 @media only screen and (max-width: 800px) {
   :root {
-    --logo-width: 288px;
-    --logo-margin: 45px;
-    --modal-width: 90%;
-    --modal-content-width: 80%;
-
     --text-size-h1: calc(0.9 * var(--text-size-h1-base));
     --text-size-h2: calc(0.9 * var(--text-size-h2-base));
     --text-size-h3: calc(0.9 * var(--text-size-h3-base));
@@ -207,36 +173,10 @@ a:hover {
     --text-size-small: calc(0.9 * var(--text-size-small-base));
     --text-size-tiny: calc(0.9 * var(--text-size-tiny-base));
   }
-
-  .two-col-grid {
-    grid-template-columns: 1fr;
-    height: auto;
-    margin-top: 80px;
-    padding-bottom: 100px;
-    max-width: 90%;
-    gap: 80px;
-  }
-
-  .login-grid {
-    height: 100%;
-    margin-top: 0px;
-    padding: 80px 0px;
-    gap: 0px;
-  }
-
-  .dashboard-wrapper {
-    max-width: 80%;
-  }
 }
 
 @media only screen and (max-width: 568px) {
   :root {
-    --logo-width: 245px;
-    --logo-margin: 40px;
-    --modal-content-width: 90%;
-    --input-field-height: 75px;
-    --address-copy-button-height: 53.4px;
-
     --text-size-h1: calc(0.8 * var(--text-size-h1-base));
     --text-size-h2: calc(0.8 * var(--text-size-h2-base));
     --text-size-h3: calc(0.8 * var(--text-size-h3-base));
@@ -245,30 +185,5 @@ a:hover {
     --text-size-p: calc(0.8 * var(--text-size-p-base));
     --text-size-small: calc(0.8 * var(--text-size-small-base));
     --text-size-tiny: calc(0.8 * var(--text-size-tiny-base));
-  }
-
-  .two-col-grid {
-    gap: 60px;
-  }
-
-  .dashboard-wrapper {
-    max-width: 90%;
-  }
-}
-
-@media only screen and (max-width: 428px) {
-  :root {
-    --logo-width: 208px;
-    --logo-margin: 30px;
-    --input-field-height: 65px;
-    --address-copy-button-height: 46.3px;
-  }
-
-  .two-col-grid {
-    gap: 40px;
-  }
-
-  .dashboard-wrapper {
-    max-width: 100%;
   }
 }
