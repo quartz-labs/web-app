@@ -7,9 +7,6 @@ const nextConfig = {
     };
     return config;
   },
-  env: {
-    NEXT_PUBLIC_REQUIRE_BETA_KEY: process.env.NEXT_PUBLIC_REQUIRE_BETA_KEY,
-  },
   async rewrites() {
     return [
       {

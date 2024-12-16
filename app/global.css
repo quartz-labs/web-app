@@ -160,6 +160,8 @@ a:hover {
   --text-size-p: var(--text-size-p-base);
   --text-size-small: var(--text-size-small-base);
   --text-size-tiny: var(--text-size-tiny-base);
+
+  --nav-height: 45px;
 }
 
 @media only screen and (max-width: 800px) {

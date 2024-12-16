@@ -1,11 +1,11 @@
 "use client";
 
+import config from '@/config/config';
 import { useSearchParams } from 'next/navigation';
 import { usePathname } from 'next/navigation';
 import posthog from 'posthog-js';
 import { PostHogProvider, usePostHog } from 'posthog-js/react';
 import { useEffect } from 'react';
-import config from '@/config/config';
 
 if (typeof window !== 'undefined') {
   posthog.init(config.NEXT_PUBLIC_POSTHOG_KEY, {
