@@ -112,6 +112,27 @@ a:hover {
   border: var(--glass-border);
 }
 
+.panel {
+  flex-grow: 1;
+  border-radius: var(--panel-padding);
+}
+
+.center-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.central-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 20px;
+
+  max-width: 600px;
+}
+
 .image-fill {
   max-height: 100%;
   width: auto;
@@ -130,7 +151,7 @@ a:hover {
   --placeholder-glass-stroke-error: #83484E;
   --placeholder-glass-icon-error: #695563;
 
-  --glass-border: 2px solid var(--placeholder-glass-stroke); /* TODO: Make gradient */
+  --glass-border: 1.8px solid var(--placeholder-glass-stroke); /* TODO: Make gradient */
   --glass-border-error: 1.5px solid var(--placeholder-glass-stroke-error);
   --glass-border-popup: 1.5px solid var(--placeholder-glass-stroke);
   --glass-background: 
