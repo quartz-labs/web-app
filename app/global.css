@@ -112,6 +112,11 @@ a:hover {
   border: var(--glass-border);
 }
 
+.image-fill {
+  max-height: 100%;
+  width: auto;
+}
+
 :root {
   --overlay-color: rgba(255, 255, 255, 0.03);
   --overlay: linear-gradient(var(--overlay-color), var(--overlay-color));

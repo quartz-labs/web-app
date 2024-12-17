@@ -1,12 +1,18 @@
 import Image from "next/image";
 import styles from "./Nav.module.css";
+import { WalletButton } from "@/context/solana/solana-provider";
+import { useWallet } from "@solana/wallet-adapter-react";
 
 export default function Nav() {
+  const wallet = useWallet();
+
+  const isAccountCreated = true;
+
   return (
     <div className={styles["nav"]}>
-      <a href="https://quartzpay.io/" className={styles.logoContainer}>
+      <a href="https://quartzpay.io/" target="_blank" className={styles.logoContainer}>
         <Image 
-            className={styles.logo}
+            className={"image-fill"}
             src="/logo.svg" 
             alt="Quartz" 
             priority
@@ -17,8 +23,26 @@ export default function Nav() {
       </a>
 
       <div className={styles.navItems}>
-        <a href="/">Notifications</a>
-        <a href="/">Wallet</a>
+        {wallet.publicKey && 
+          <button 
+            className={styles.notificationsButton}
+            onClick={() => {}}
+          >
+            <Image 
+                className={"image-fill"}
+                src="/bell.svg" 
+                alt="Notifications" 
+                priority
+                // Initial size values below are changed by css class
+                width={30}
+                height={30} 
+            />
+          </button>
+        }
+        
+        <WalletButton 
+            disableCloseAccount={!isAccountCreated}
+        />
       </div>
     </div>
   );

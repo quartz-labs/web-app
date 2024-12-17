@@ -3,6 +3,8 @@ import { Inter } from 'next/font/google';
 import { ReactQueryProvider } from '@/context/react-query-provider';
 import dynamic from 'next/dynamic';
 import { PostHogClient } from '@/context/posthog-provider';
+import { SolanaProvider } from '@/context/solana/solana-provider';
+import { ClusterProvider } from '@/context/solana/cluster-data-access';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -27,8 +29,12 @@ export default function RootLayout({
       <body>
         <ReactQueryProvider>
           <PostHogClient>
-            <PostHogPageView />
-            {children}
+            <ClusterProvider>
+              <SolanaProvider>
+                <PostHogPageView />
+                {children}
+              </SolanaProvider>
+            </ClusterProvider>
           </PostHogClient>
         </ReactQueryProvider>
       </body>
