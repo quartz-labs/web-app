@@ -161,6 +161,7 @@ a:hover {
   --text-size-small: var(--text-size-small-base);
   --text-size-tiny: var(--text-size-tiny-base);
 
+  --panel-padding: 9px;
   --nav-height: 45px;
 }
 

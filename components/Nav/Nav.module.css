@@ -1,11 +1,27 @@
 .nav {
     display: flex;
     flex-direction: row;
+    justify-content: space-between;
+    height: var(--nav-height);
+    margin: var(--panel-padding);
+    padding: 0px var(--panel-padding);
+}
 
-    margin: 9px;
+.logoContainer {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 3px 0px;
 }
 
 .logo {
-    height: 100%;
-    width: 100%;
+    max-height: 100%;
+    width: auto;
+}
+
+.navItems {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
 }
