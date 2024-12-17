@@ -33,5 +33,9 @@
     "ts-node": "^10.9.2",
     "typescript": "^5"
   },
+  "resolutions": {
+    "rpc-websockets": "^9.0.2",
+    "@solana/web3.js": "^1.95.8"
+  },
   "packageManager": "yarn@1.22.22"
 }

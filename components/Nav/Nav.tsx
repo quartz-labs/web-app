@@ -3,10 +3,14 @@ import styles from "./Nav.module.css";
 import { WalletButton } from "@/context/solana/solana-provider";
 import { useWallet } from "@solana/wallet-adapter-react";
 
-export default function Nav() {
-  const wallet = useWallet();
+export interface NavProps {
+  isAccountInitialized: boolean;
+}
 
-  const isAccountCreated = true;
+export default function Nav(
+  { isAccountInitialized }: NavProps
+) {
+  const wallet = useWallet();
 
   return (
     <div className={styles["nav"]}>
@@ -41,7 +45,7 @@ export default function Nav() {
         }
         
         <WalletButton 
-            disableCloseAccount={!isAccountCreated}
+            disableCloseAccount={!isAccountInitialized}
         />
       </div>
     </div>

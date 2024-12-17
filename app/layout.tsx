@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import { PostHogClient } from '@/context/posthog-provider';
 import { SolanaProvider } from '@/context/solana/solana-provider';
 import { ClusterProvider } from '@/context/solana/cluster-data-access';
+import { ErrorProvider } from '@/context/error-provider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -27,16 +28,18 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.className}>
       <body>
-        <ReactQueryProvider>
-          <PostHogClient>
-            <ClusterProvider>
-              <SolanaProvider>
-                <PostHogPageView />
-                {children}
-              </SolanaProvider>
-            </ClusterProvider>
-          </PostHogClient>
-        </ReactQueryProvider>
+        <ErrorProvider>
+          <ReactQueryProvider>
+            <PostHogClient>
+              <ClusterProvider>
+                <SolanaProvider>
+                  <PostHogPageView />
+                  {children}
+                </SolanaProvider>
+              </ClusterProvider>
+            </PostHogClient>
+          </ReactQueryProvider>
+        </ErrorProvider>
       </body>
     </html>
   );
