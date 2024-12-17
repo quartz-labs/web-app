@@ -27,7 +27,7 @@ export default function Nav(
       </a>
 
       <div className={styles.navItems}>
-        {wallet.publicKey && 
+        {wallet.publicKey && isAccountInitialized &&
           <button 
             className={styles.notificationsButton}
             onClick={() => {}}

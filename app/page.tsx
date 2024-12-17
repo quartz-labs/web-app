@@ -11,6 +11,7 @@ import { useError } from "@/context/error-provider";
 import { AccountStatus } from "@/types/enums/accountStatus.enum";
 import ClosedAccount from "@/components/ClosedAccount/ClosedAccount";
 import NoBetaKey from "@/components/NoBetaKey/NoBetaKey";
+import styles from "./page.module.css";
 
 export default function Page() {
   const { showError } = useError();
@@ -30,26 +31,25 @@ export default function Page() {
   }, [wallet.publicKey, connection, showError])
   
   return (
-    <main>
+    <main className={styles.container}>
       <Nav 
         isAccountInitialized={accountStatus === AccountStatus.INITIALIZED} 
       />
 
-      {accountStatus === AccountStatus.NO_BETA_KEY && 
-        <NoBetaKey />
-      }
-
-      {accountStatus === AccountStatus.NOT_INITIALIZED && 
-        <Onboarding />
-      }
-
-      {accountStatus === AccountStatus.CLOSED && 
-        <ClosedAccount />
-      }
-
-      {(accountStatus === AccountStatus.INITIALIZED || accountStatus === AccountStatus.DISCONNECTED) && 
-        <Dashboard />
-      }
+      <div className={styles.content}>
+        {accountStatus === AccountStatus.NO_BETA_KEY && 
+          <NoBetaKey />
+        }
+        {accountStatus === AccountStatus.NOT_INITIALIZED && 
+          <Onboarding />
+        }
+        {accountStatus === AccountStatus.CLOSED && 
+          <ClosedAccount />
+        }
+        {(accountStatus === AccountStatus.INITIALIZED || accountStatus === AccountStatus.DISCONNECTED) && 
+          <Dashboard />
+        }
+      </div>
     </main>
   );
 }

@@ -21,9 +21,8 @@ export const isVaultClosed = async (connection: Connection, wallet: PublicKey) =
     return isSignatureHistory;
 }
 
-export async function isMissingBetaKey(wallet: PublicKey, showError: (props: ShowErrorProps) => void) {
-    const requireBetaKey = (process.env.NEXT_PUBLIC_REQUIRE_BETA_KEY === "true");
-    if (!requireBetaKey) return false;
+export async function isMissingBetaKey(wallet: PublicKey, showError: (props: ShowErrorProps) => void) {    
+    if (!config.NEXT_PUBLIC_REQUIRE_BETA_KEY) return false;
 
     try {
         // Check compressed NFTs using Read API
@@ -32,7 +31,7 @@ export async function isMissingBetaKey(wallet: PublicKey, showError: (props: Sho
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 jsonrpc: '2.0',
-                id: 'User-NFTs',
+                id: 1,
                 method: 'getAssetsByOwner',
                 params: {
                     ownerAddress: wallet.toBase58(),
