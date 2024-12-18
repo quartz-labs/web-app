@@ -27,6 +27,14 @@ export function plusOrMinus(value: number, currency?: string): string {
     return value >= 0 ? `+${currency ?? ""}${value}` : `-${currency ?? ""}${Math.abs(value)}`;
 }
 
+export function rgb(hex: string): { r: number; g: number; b: number } {
+    return {
+        r: parseInt(hex.slice(0, 2), 16),
+        g: parseInt(hex.slice(2, 4), 16),
+        b: parseInt(hex.slice(4, 6), 16)
+    };
+}
+
 export function formatDollarValue(num: number, decimalPlaces: number = 1): [string, string] {
     const integerPart = Math.trunc(num).toLocaleString("en-US");
 
