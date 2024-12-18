@@ -3,6 +3,9 @@ import { captureError } from "./errors";
 import { useQuery, type QueryKey, type StaleTime } from "@tanstack/react-query";
 import { AccountStatus } from "@/types/enums/accountStatus.enum";
 import type { PublicKey } from "@solana/web3.js";
+import { DRIFT_MARKET_INDEX_SOL, SUPPORTED_DRIFT_MARKETS } from "@quartz-labs/sdk";
+import type { MarketIndex } from "@/config/constants";
+import type { Rate } from "@/types/interfaces/rate.interface";
 
 interface QueryConfig {
     queryKey: string[];
@@ -63,12 +66,12 @@ function createQuery<T>({
     }
 }
 
-export const useAccountStatusQuery = (wallet: PublicKey | null) => {
+export const useAccountStatusQuery = (address: PublicKey | null) => {
     const query = createQuery<AccountStatus>({
-        queryKey: ["account-status", wallet?.toBase58() ?? ""],
+        queryKey: ["account-status", address?.toBase58() ?? ""],
         url: "/api/account-status",
-        params: wallet ? {
-            wallet: wallet.toBase58()
+        params: address ? {
+            wallet: address.toBase58()
         } : undefined,
         transformResponse: (data) => {
             if (typeof data.status !== 'string' || !Object.values(AccountStatus).includes(data.status as AccountStatus)) {
@@ -77,8 +80,71 @@ export const useAccountStatusQuery = (wallet: PublicKey | null) => {
             return data.status as unknown as AccountStatus;
         },
         errorMessage: "Could not fetch account status",
-        enabled: wallet != null,
+        enabled: address != null,
         staleTime: Infinity
+    });
+    return query();
+};
+
+export const usePricesQuery = createQuery<Record<MarketIndex, number>>({
+    // TODO - Add support for other assets
+    queryKey: ["prices"],
+    url: "https://api.quartzpay.io/data/price",
+    params: { ids: "solana" },
+    transformResponse: (body) => {
+        return {
+            [DRIFT_MARKET_INDEX_SOL]: body.solana
+        }
+    },
+    errorMessage: "Could not fetch prices"
+});
+
+export const useRatesQuery = createQuery<Record<MarketIndex, Rate>>({
+    queryKey: ["rates"],
+    url: "https://api.quartzpay.io/drift/rate", 
+    params: { 
+        marketIndices: SUPPORTED_DRIFT_MARKETS.join(',') 
+    },
+    errorMessage: "Could not fetch rates"
+});
+
+export const useBalancesQuery = (address: PublicKey | null) => {
+    const query = createQuery<Record<MarketIndex, number>>({
+        queryKey: ["balances"],
+        url: "https://api.quartzpay.io/drift/balance",
+        params: address ? { 
+            address: address.toBase58(),
+            marketIndices: SUPPORTED_DRIFT_MARKETS.join(',')
+        } : undefined,
+        errorMessage: "Could not fetch balances",
+        enabled: address != null,
+    });
+    return query();
+};
+
+export const useWithdrawLimitsQuery = (address: PublicKey | null) => {
+    const query = createQuery<Record<MarketIndex, number>>({
+        queryKey: ["withdraw-limits"],
+        url: "https://api.quartzpay.io/drift/withdraw-limit",
+        params: address ? { 
+            address: address.toBase58(),
+            marketIndices: SUPPORTED_DRIFT_MARKETS.join(',')
+        } : undefined,
+        errorMessage: "Could not fetch withdraw limits",
+        enabled: address != null,
+    });
+    return query();
+};
+
+export const useHealthQuery = (address: PublicKey | null) => {
+    const query = createQuery<number>({
+        queryKey: ["health"],
+        url: "https://api.quartzpay.io/drift/health",
+        params: address ? { 
+            address: address.toBase58()
+        } : undefined,
+        errorMessage: "Could not fetch health",
+        enabled: address != null,
     });
     return query();
 };

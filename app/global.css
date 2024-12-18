@@ -115,6 +115,7 @@ a:hover {
 .panel {
   flex-grow: 1;
   border-radius: var(--panel-padding);
+  padding: 20px;
 }
 
 .center-content {
@@ -199,6 +200,8 @@ a:hover {
     --text-size-p: calc(0.9 * var(--text-size-p-base));
     --text-size-small: calc(0.9 * var(--text-size-small-base));
     --text-size-tiny: calc(0.9 * var(--text-size-tiny-base));
+
+    --nav-height: 45px;
   }
 }
 
@@ -212,5 +215,13 @@ a:hover {
     --text-size-p: calc(0.8 * var(--text-size-p-base));
     --text-size-small: calc(0.8 * var(--text-size-small-base));
     --text-size-tiny: calc(0.8 * var(--text-size-tiny-base));
+
+    --nav-height: 40px;
+  }
+}
+
+@media only screen and (max-width: 375px) {
+  :root {
+    --nav-height: 35px;
   }
 }

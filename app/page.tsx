@@ -8,17 +8,46 @@ import NoBetaKey from "@/components/OtherViews/NoBetaKey";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { AccountStatus } from "@/types/enums/accountStatus.enum";
 import styles from "./page.module.css";
-import { useAccountStatusQuery } from "@/utils/queries";
+import { useAccountStatusQuery, useBalancesQuery, useHealthQuery, usePricesQuery, useRatesQuery, useWithdrawLimitsQuery } from "@/utils/queries";
+import { useStore } from "@/utils/store";
+import { useEffect } from 'react';
 
 export default function Page() {
   const wallet = useWallet();
+  const { 
+    setIsInitialized,
+    setPrices, 
+    setRates, 
+    setBalances, 
+    setWithdrawLimits, 
+    setHealth 
+  } = useStore();
 
   const { data: accountStatus, isLoading: isAccountStatusLoading } = useAccountStatusQuery(wallet.publicKey);
+  const isInitialized = (accountStatus === AccountStatus.INITIALIZED && !isAccountStatusLoading);
+
+  const { data: prices } = usePricesQuery();
+  const { data: rates } = useRatesQuery();
+  const { data: balances } = useBalancesQuery(isInitialized ? wallet.publicKey : null);
+  const { data: withdrawLimits } = useWithdrawLimitsQuery(isInitialized ? wallet.publicKey : null);
+  const { data: health } = useHealthQuery(isInitialized ? wallet.publicKey : null);
+
+  useEffect(() => {
+    setPrices(prices);
+    setRates(rates);
+    setBalances(balances);
+    setWithdrawLimits(withdrawLimits);
+    setHealth(health);
+    setIsInitialized(isInitialized);
+  }, [
+    isInitialized, prices, rates, balances, withdrawLimits, health, 
+    setPrices, setRates, setBalances, setWithdrawLimits, setHealth, setIsInitialized
+  ]);
 
   return (
     <main className={styles.container}>
       <Nav 
-        isAccountInitialized={accountStatus === AccountStatus.INITIALIZED} 
+        isAccountInitialized={isInitialized} 
         isAccountStatusLoading={isAccountStatusLoading}
       />
 
