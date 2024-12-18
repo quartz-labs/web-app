@@ -36,7 +36,7 @@ export default function Health() {
     const color = getHealthColor();
 
     return (
-        <div>
+        <div className={styles.healthWrapper}>
             <p>Account Health: {health}%</p>
             <progress
                 value={health}

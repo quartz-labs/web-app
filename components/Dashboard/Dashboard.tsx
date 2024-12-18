@@ -2,6 +2,7 @@ import styles from "./Dashboard.module.css";
 import { useStore } from "@/utils/store";
 import Balances from "./Balances/Balances";
 import Health from "./Health/Health";
+import ButtonRow from "./ButtonRow/ButtonRow";
 
 export default function Dashboard() {
   const { isInitialized } = useStore(); // TODO: Add not initialized view
@@ -12,6 +13,7 @@ export default function Dashboard() {
         <h1 className={styles.title}>Balance</h1>
         <Balances />
         <Health />
+        <ButtonRow />
       </div>
 
       <div className={`glass panel ${styles.assetsPanel}`}>

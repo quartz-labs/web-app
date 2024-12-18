@@ -1,7 +1,7 @@
 .balanceOverview {
-    width: 85%;
+    width: 80%;
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr;
+    grid-template-columns: 2.2fr 1fr 1fr;
     align-items: flex-end;
     margin-bottom: 30px;
 }
