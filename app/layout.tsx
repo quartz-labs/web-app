@@ -31,12 +31,10 @@ export default function RootLayout({
         <ErrorProvider>
           <ReactQueryProvider>
             <PostHogClient>
-              <ClusterProvider>
-                <SolanaProvider>
-                  <PostHogPageView />
-                  {children}
-                </SolanaProvider>
-              </ClusterProvider>
+              <SolanaProvider>
+                <PostHogPageView />
+                {children}
+              </SolanaProvider>
             </PostHogClient>
           </ReactQueryProvider>
         </ErrorProvider>

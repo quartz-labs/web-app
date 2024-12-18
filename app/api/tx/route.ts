@@ -17,8 +17,8 @@ export async function POST(request: Request) {
     }
 
     try {
-        sendTransaction(env.RPC_URL);
-        return NextResponse.json({ success: true });
+        const signature = await sendTransaction(env.RPC_URL);
+        return NextResponse.json({ signature: signature });
     } catch (error) {
         console.error(error);
         return NextResponse.json(
@@ -28,6 +28,7 @@ export async function POST(request: Request) {
     }
 }
 
-function sendTransaction(rpcUrl: string) {
-
+async function sendTransaction(rpcUrl: string): Promise<string> {
+    // TODO: Implement
+    throw new Error("Not implemented");
 }

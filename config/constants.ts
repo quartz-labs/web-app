@@ -1,0 +1,1 @@
+export const DEFAULT_REFETCH_INTERVAL = 60_000;
