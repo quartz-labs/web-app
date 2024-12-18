@@ -24,11 +24,11 @@
 .notificationsButton {
     height: 100%;
     width: auto;
-    padding: 5px 0px;
+    padding: 10px 0px;
 }
 
 .loadingSpinner {
     height: 100%;
     width: 100%;
-    padding: 5px 0px;
+    padding: 10px 0px;
 }

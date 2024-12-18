@@ -8,7 +8,7 @@ body {
   background-color: black;
   color: var(--color-text);
   font-weight: 200;
-  font-size: var(--text-size-p);
+  font-size: var(--font-size-p);
 }
 
 a {
@@ -32,15 +32,15 @@ a:hover {
 }
 
 .large-text {
-  font-size: var(--text-size-large);
+  font-size: var(--font-size-large);
 }
 
 .small-text {
-  font-size: var(--text-size-small);
+  font-size: var(--font-size-small);
 }
 
 .tiny-text {
-  font-size: var(--text-size-tiny);
+  font-size: var(--font-size-tiny);
 }
 
 .glass-button {
@@ -53,7 +53,7 @@ a:hover {
   padding: 14px 28px;
   background: var(--gradient-glass-stroke);
 
-  font-size: var(--text-size-p);
+  font-size: var(--font-size-p);
   border-radius: 5px;
   background-image: var(--gradient-glass-stroke);
   background-origin: border-box;
@@ -167,24 +167,30 @@ a:hover {
   --color-text-light: #ffffffA5;
   --color-error: #FF8080;
   --color-link-hover: #d8f3ff;
+  --color-light-green: #DCFFEA;
+  --color-light-red: #FFC1C1;
 
-  --text-size-h1-base: 50.16px;
-  --text-size-h2-base: 41.8px;
-  --text-size-h3-base: 29.03px;
-  --text-size-h4-base: 24.19px;
-  --text-size-large-base: 20.16px;
-  --text-size-p-base: 16.8px;
-  --text-size-small-base: 14px;
-  --text-size-tiny-base: 12px;
+  --font-size-h0-base: 60px;
+  --font-size-h1-base: 50.16px;
+  --font-size-h2-base: 41.8px;
+  --font-size-h3-base: 29.03px;
+  --font-size-h4-base: 24.19px;
+  --font-size-large-base: 20.16px;
+  --font-size-p-base: 16.8px;
+  --font-size-small-base: 14px;
+  --font-size-tiny-base: 12px;
+  --font-size-balance-detail-base: 35px;
 
-  --text-size-h1: var(--text-size-h1-base);
-  --text-size-h2: var(--text-size-h2-base);
-  --text-size-h3: var(--text-size-h3-base);
-  --text-size-h4: var(--text-size-h4-base);
-  --text-size-large: var(--text-size-large-base);
-  --text-size-p: var(--text-size-p-base);
-  --text-size-small: var(--text-size-small-base);
-  --text-size-tiny: var(--text-size-tiny-base);
+  --font-size-h0: var(--font-size-h0-base);
+  --font-size-h1: var(--font-size-h1-base);
+  --font-size-h2: var(--font-size-h2-base);
+  --font-size-h3: var(--font-size-h3-base);
+  --font-size-h4: var(--font-size-h4-base);
+  --font-size-large: var(--font-size-large-base);
+  --font-size-p: var(--font-size-p-base);
+  --font-size-small: var(--font-size-small-base);
+  --font-size-tiny: var(--font-size-tiny-base);
+  --font-size-balance-detail: var(--font-size-balance-detail-base);
 
   --panel-padding: 9px;
   --nav-height: 50px;
@@ -192,14 +198,16 @@ a:hover {
 
 @media only screen and (max-width: 800px) {
   :root {
-    --text-size-h1: calc(0.9 * var(--text-size-h1-base));
-    --text-size-h2: calc(0.9 * var(--text-size-h2-base));
-    --text-size-h3: calc(0.9 * var(--text-size-h3-base));
-    --text-size-h4: calc(0.9 * var(--text-size-h4-base));
-    --text-size-large: calc(0.9 * var(--text-size-large-base));
-    --text-size-p: calc(0.9 * var(--text-size-p-base));
-    --text-size-small: calc(0.9 * var(--text-size-small-base));
-    --text-size-tiny: calc(0.9 * var(--text-size-tiny-base));
+    --font-size-h0: calc(0.9 * var(--font-size-h0-base));
+    --font-size-h1: calc(0.9 * var(--font-size-h1-base));
+    --font-size-h2: calc(0.9 * var(--font-size-h2-base));
+    --font-size-h3: calc(0.9 * var(--font-size-h3-base));
+    --font-size-h4: calc(0.9 * var(--font-size-h4-base));
+    --font-size-large: calc(0.9 * var(--font-size-large-base));
+    --font-size-p: calc(0.9 * var(--font-size-p-base));
+    --font-size-small: calc(0.9 * var(--font-size-small-base));
+    --font-size-tiny: calc(0.9 * var(--font-size-tiny-base));
+    --font-size-balance-detail: calc(0.9 * var(--font-size-balance-detail-base));
 
     --nav-height: 45px;
   }
@@ -207,14 +215,16 @@ a:hover {
 
 @media only screen and (max-width: 568px) {
   :root {
-    --text-size-h1: calc(0.8 * var(--text-size-h1-base));
-    --text-size-h2: calc(0.8 * var(--text-size-h2-base));
-    --text-size-h3: calc(0.8 * var(--text-size-h3-base));
-    --text-size-h4: calc(0.8 * var(--text-size-h4-base));
-    --text-size-large: calc(0.8 * var(--text-size-large-base));
-    --text-size-p: calc(0.8 * var(--text-size-p-base));
-    --text-size-small: calc(0.8 * var(--text-size-small-base));
-    --text-size-tiny: calc(0.8 * var(--text-size-tiny-base));
+    --font-size-h0: calc(0.8 * var(--font-size-h0-base));
+    --font-size-h1: calc(0.8 * var(--font-size-h1-base));
+    --font-size-h2: calc(0.8 * var(--font-size-h2-base));
+    --font-size-h3: calc(0.8 * var(--font-size-h3-base));
+    --font-size-h4: calc(0.8 * var(--font-size-h4-base));
+    --font-size-large: calc(0.8 * var(--font-size-large-base));
+    --font-size-p: calc(0.8 * var(--font-size-p-base));
+    --font-size-small: calc(0.8 * var(--font-size-small-base));
+    --font-size-tiny: calc(0.8 * var(--font-size-tiny-base));
+    --font-size-balance-detail: calc(0.8 * var(--font-size-balance-detail-base));
 
     --nav-height: 40px;
   }

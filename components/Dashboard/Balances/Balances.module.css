@@ -1,0 +1,49 @@
+.balanceOverview {
+    width: 85%;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    align-items: flex-end;
+    margin-bottom: 30px;
+}
+
+.netBalanceWrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.netBalance {
+    font-size: var(--font-size-h0);
+}
+
+.netBalanceDecimal {
+    font-size: calc(var(--font-size-h0) * 0.55);
+}
+
+.netRatePositive {
+    color: var(--color-light-green);
+}
+
+.netRateNegative {
+    color: var(--color-light-red);
+}
+
+.detailBalanceTitle {
+    font-size: var(--font-size-p);
+}
+
+.detailBalance {
+    font-size: var(--font-size-balance-detail);
+}
+
+.detailBalanceDecimal {
+    font-size: calc(var(--font-size-balance-detail) * 0.55);
+}
+
+.detailBalanceRate {
+    font-size: var(--font-size-small);
+}
+
+.rateHeight {
+    line-height: 25px;
+}

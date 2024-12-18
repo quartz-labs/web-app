@@ -11,9 +11,12 @@ import styles from "./page.module.css";
 import { useAccountStatusQuery, useBalancesQuery, useHealthQuery, usePricesQuery, useRatesQuery, useWithdrawLimitsQuery } from "@/utils/queries";
 import { useStore } from "@/utils/store";
 import { useEffect } from 'react';
+import { useQueryClient } from "@tanstack/react-query";
+import { waitForSignature } from "@/utils/helpers";
 
 export default function Page() {
   const wallet = useWallet();
+  const queryClient = useQueryClient();
   const { 
     setIsInitialized,
     setPrices, 
@@ -43,6 +46,19 @@ export default function Page() {
     isInitialized, prices, rates, balances, withdrawLimits, health, 
     setPrices, setRates, setBalances, setWithdrawLimits, setHealth, setIsInitialized
   ]);
+
+  const refetchAccountData = async (signature?: string) => {
+    if (signature) await waitForSignature(signature);
+    queryClient.invalidateQueries({ queryKey: ["user"], refetchType: "all" });
+  };
+
+  const refetchAccountStatus = async (signature?: string) => {
+    if (signature) await waitForSignature(signature);
+    queryClient.invalidateQueries({ 
+      predicate: (query) => query.queryKey.includes(wallet.publicKey?.toBase58()), 
+      refetchType: "all" 
+    });
+  };
 
   return (
     <main className={styles.container}>

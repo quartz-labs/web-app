@@ -1,29 +1,21 @@
+import styles from "./Dashboard.module.css";
 import { useStore } from "@/utils/store";
+import Balances from "./Balances/Balances";
+import Health from "./Health/Health";
 
 export default function Dashboard() {
-  const isInitialized = useStore((state) => state.isInitialized);
-  const health = useStore((state) => state.health);
-  const prices = useStore((state) => state.prices);
-  const balances = useStore((state) => state.balances);
-  const rates = useStore((state) => state.rates);
-  const withdrawLimits = useStore((state) => state.withdrawLimits);
+  const { isInitialized } = useStore(); // TODO: Add not initialized view
 
   return (
     <>
-      <div className={"glass panel"}>
-        {isInitialized ? (
-          <>
-            <p>Health: {health}</p>
-            <p>Prices: {JSON.stringify(prices)}</p>
-          </>
-        ) : (
-          <p>Please connect wallet</p>
-        )}
+      <div className={`glass panel ${styles.mainPanel}`}>
+        <h1 className={styles.title}>Balance</h1>
+        <Balances />
+        <Health />
       </div>
-      <div className={"glass panel"}>
-        <p>Balances: {JSON.stringify(balances)}</p>
-        <p>Rates: {JSON.stringify(rates)}</p>
-        <p>Withdraw Limits: {JSON.stringify(withdrawLimits)}</p>
+
+      <div className={`glass panel ${styles.assetsPanel}`}>
+        <h2 className={styles.title}>Assets</h2>
       </div>
     </>
   );

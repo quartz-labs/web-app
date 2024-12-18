@@ -1,3 +1,4 @@
+import config from '@/config/config';
 import { AccountStatus } from '@/types/enums/accountStatus.enum';
 import { getVaultPublicKey } from '@quartz-labs/sdk';
 import { Connection, PublicKey } from '@solana/web3.js';
@@ -59,6 +60,8 @@ async function checkHasVaultHistory(connection: Connection, wallet: PublicKey): 
 }
 
 async function checkIsMissingBetaKey(connection: Connection, address: PublicKey): Promise<boolean> {
+    if (!config.NEXT_PUBLIC_REQUIRE_BETA_KEY) return false;
+
     const response = await fetch(connection.rpcEndpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

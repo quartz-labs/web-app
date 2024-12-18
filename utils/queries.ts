@@ -3,7 +3,7 @@ import { captureError } from "./errors";
 import { useQuery, type QueryKey, type StaleTime } from "@tanstack/react-query";
 import { AccountStatus } from "@/types/enums/accountStatus.enum";
 import type { PublicKey } from "@solana/web3.js";
-import { DRIFT_MARKET_INDEX_SOL, SUPPORTED_DRIFT_MARKETS } from "@quartz-labs/sdk";
+import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC, SUPPORTED_DRIFT_MARKETS } from "@quartz-labs/sdk";
 import type { MarketIndex } from "@/config/constants";
 import type { Rate } from "@/types/interfaces/rate.interface";
 
@@ -90,10 +90,11 @@ export const usePricesQuery = createQuery<Record<MarketIndex, number>>({
     // TODO - Add support for other assets
     queryKey: ["prices"],
     url: "https://api.quartzpay.io/data/price",
-    params: { ids: "solana" },
+    params: { ids: ["solana", "usd-coin"].join(',') },
     transformResponse: (body) => {
         return {
-            [DRIFT_MARKET_INDEX_SOL]: body.solana
+            [DRIFT_MARKET_INDEX_SOL]: body["solana"],
+            [DRIFT_MARKET_INDEX_USDC]: body["usd-coin"]
         }
     },
     errorMessage: "Could not fetch prices"
@@ -110,7 +111,7 @@ export const useRatesQuery = createQuery<Record<MarketIndex, Rate>>({
 
 export const useBalancesQuery = (address: PublicKey | null) => {
     const query = createQuery<Record<MarketIndex, number>>({
-        queryKey: ["balances"],
+        queryKey: ["user", "balances", address?.toBase58() ?? ""],
         url: "https://api.quartzpay.io/drift/balance",
         params: address ? { 
             address: address.toBase58(),
@@ -124,7 +125,7 @@ export const useBalancesQuery = (address: PublicKey | null) => {
 
 export const useWithdrawLimitsQuery = (address: PublicKey | null) => {
     const query = createQuery<Record<MarketIndex, number>>({
-        queryKey: ["withdraw-limits"],
+        queryKey: ["user", "withdraw-limits", address?.toBase58() ?? ""],
         url: "https://api.quartzpay.io/drift/withdraw-limit",
         params: address ? { 
             address: address.toBase58(),
@@ -138,7 +139,7 @@ export const useWithdrawLimitsQuery = (address: PublicKey | null) => {
 
 export const useHealthQuery = (address: PublicKey | null) => {
     const query = createQuery<number>({
-        queryKey: ["health"],
+        queryKey: ["user", "health", address?.toBase58() ?? ""],
         url: "https://api.quartzpay.io/drift/health",
         params: address ? { 
             address: address.toBase58()

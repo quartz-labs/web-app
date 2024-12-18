@@ -1,0 +1,13 @@
+.title {
+    font-size: var(--font-size-h3);
+}
+
+.mainPanel {
+    padding: 45px 50px;
+}
+
+.assetsPanel {
+    padding: 45px 40px;
+    flex-grow: 0;
+    width: 30%;
+}
