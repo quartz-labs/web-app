@@ -5,7 +5,7 @@
 html,
 body {
   height: 100%;
-  background: var(--color-background);
+  background-color: black;
   color: var(--color-text);
   font-weight: 200;
   font-size: var(--text-size-p);
@@ -50,11 +50,11 @@ a:hover {
   align-items: center;
 
   gap: 15px;
-  padding: 14px 16px;
+  padding: 14px 28px;
   background: var(--gradient-glass-stroke);
 
   font-size: var(--text-size-p);
-  border-radius: 10px;
+  border-radius: 5px;
   background-image: var(--gradient-glass-stroke);
   background-origin: border-box;
   background-clip: padding-box, border-box;
@@ -157,9 +157,7 @@ a:hover {
   --glass-background: 
     url("/noise.png"),
     radial-gradient(circle at 80% 20%, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%),
-    linear-gradient(#ffffff03, #ffffff03),
-    linear-gradient(#0B111D99, #0B111D99),
-    linear-gradient(#060910, #060910); /* TODO - Remove this and get background blur or fallback working on mobile */
+    linear-gradient(#0B111DC0, #0B111DC0);
 
   --background-linear-gradient: linear-gradient(var(--color-background), var(--color-background));
 
@@ -188,7 +186,7 @@ a:hover {
   --text-size-tiny: var(--text-size-tiny-base);
 
   --panel-padding: 9px;
-  --nav-height: 45px;
+  --nav-height: 50px;
 }
 
 @media only screen and (max-width: 800px) {

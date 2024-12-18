@@ -4,6 +4,7 @@
     justify-content: space-between;
     height: var(--nav-height);
     margin: var(--panel-padding);
+    margin-bottom: 0px;
     padding: 0px var(--panel-padding);
 }
 
