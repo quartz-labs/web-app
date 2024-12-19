@@ -3,6 +3,7 @@ import { useStore } from "@/utils/store";
 import Balances from "./Balances/Balances";
 import Health from "./Health/Health";
 import ButtonRow from "./ButtonRow/ButtonRow";
+import Assets from "./Assets/Assets";
 
 export default function Dashboard() {
   const { isInitialized } = useStore(); // TODO: Add not initialized view
@@ -12,12 +13,22 @@ export default function Dashboard() {
       <div className={`glass panel ${styles.mainPanel}`}>
         <h1 className={styles.title}>Balance</h1>
         <Balances />
-        <Health />
-        <ButtonRow />
+
+        {isInitialized && (
+          <>
+            <Health />
+            <ButtonRow />
+          </>
+        )}
+
+        {!isInitialized && (
+          <p className={styles.notInitialized}>No wallet connected</p>
+        )}
       </div>
 
       <div className={`glass panel ${styles.assetsPanel}`}>
         <h2 className={styles.title}>Assets</h2>
+        <Assets />
       </div>
     </>
   );

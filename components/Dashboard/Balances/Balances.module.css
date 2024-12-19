@@ -47,3 +47,7 @@
 .rateHeight {
     line-height: 25px;
 }
+
+.notInitialized {
+    color: var(--color-text-extra-light);
+}

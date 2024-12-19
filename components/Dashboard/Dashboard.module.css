@@ -11,3 +11,8 @@
     flex-grow: 0;
     width: 30%;
 }
+
+.notInitialized {
+    font-size: var(--font-size-large);
+    color: var(--color-text-extra-light);
+}

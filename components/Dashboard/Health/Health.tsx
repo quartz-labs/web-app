@@ -37,7 +37,7 @@ export default function Health() {
 
     return (
         <div className={styles.healthWrapper}>
-            <p>Account Health: {health}%</p>
+            <p>Account Health: {(health !== undefined) ? `${health}%` : "--"}</p>
             <progress
                 value={health}
                 max={100}

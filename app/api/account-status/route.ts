@@ -77,6 +77,9 @@ async function checkIsMissingBetaKey(connection: Connection, address: PublicKey)
         }),
     });
     const { result } = await response.json();
+    console.log("Endpoint: ", connection.rpcEndpoint);
+    console.log("Address: ", address.toBase58());
+    console.log(result);
 
     for (const asset of result.items) {
         if (asset.content.metadata.name && asset.content.metadata.name.includes("Quartz Pin")) {
