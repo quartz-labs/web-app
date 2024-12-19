@@ -1,0 +1,242 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  height: 100%;
+  background-color: black;
+  color: var(--color-text);
+  font-weight: 200;
+  font-size: var(--font-size-p);
+}
+
+a {
+  text-decoration: underline;
+}
+
+a:hover {
+  color: var(--color-link-hover);
+}
+
+.no-wrap {
+  white-space: nowrap;
+}
+
+.light-text {
+  color: var(--color-text-light);
+}
+
+.error-text {
+  color: var(--color-error);
+}
+
+.large-text {
+  font-size: var(--font-size-large);
+}
+
+.small-text {
+  font-size: var(--font-size-small);
+}
+
+.tiny-text {
+  font-size: var(--font-size-tiny);
+}
+
+.glass-button {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
+  gap: 15px;
+  padding: 14px 28px;
+  background: var(--gradient-glass-stroke);
+
+  font-size: var(--font-size-p);
+  border-radius: 5px;
+  background-image: var(--gradient-glass-stroke);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+
+.glass-button:hover {
+  background-image: 
+    var(--overlay), 
+    var(--gradient-glass-stroke);
+}
+
+.glass-button:active {
+  background-image: 
+    var(--overlay), 
+    var(--overlay), 
+    var(--gradient-glass-stroke);
+}
+
+.glass-button.ghost {
+  background: transparent;
+  border: 1.5px solid var(--placeholder-glass-stroke);
+}
+
+.glass-button.ghost:hover {
+  background: var(--overlay);
+}
+
+.glass-button.ghost:active {
+  background: var(--overlay), var(--overlay);
+}
+
+.glass-button.ghost.error {
+  border: 1.5px solid var(--placeholder-glass-stroke-error);
+}
+
+.glass {
+  position: relative;
+
+  /* Black Shadow */
+  -webkit-box-shadow: -10px 10px 24px 0px rgba(0,0,0,0.3);
+  -moz-box-shadow: -10px 10px 24px 0px rgba(0,0,0,0.3);
+  box-shadow: -10px 10px 24px 0px rgba(0,0,0,0.3);
+
+  /* Primary Shadow */
+  -webkit-box-shadow: -10px 10px 24px 0px rgba(41,135,200,0.08);
+  -moz-box-shadow: -10px 10px 24px 0px rgba(41,135,200,0.08);
+  box-shadow: -10px 10px 24px 0px rgba(41,135,200,0.08);
+
+  /* Background */
+  background-image: var(--glass-background);
+  background-size: 17% auto, auto, auto, auto;
+  backdrop-filter: blur(22px);
+
+  /* Border */
+  border: var(--glass-border);
+}
+
+.panel {
+  flex-grow: 1;
+  border-radius: var(--panel-padding);
+  padding: 20px;
+}
+
+.center-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.central-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 20px;
+
+  max-width: 600px;
+}
+
+.image-fill {
+  max-height: 100%;
+  width: auto;
+}
+
+:root {
+  --overlay-color: rgba(255, 255, 255, 0.03);
+  --overlay: linear-gradient(var(--overlay-color), var(--overlay-color));
+
+  --gradient-glass-stroke:
+    linear-gradient(65deg, rgba(41,135,200,0.02) 0%, rgba(41,135,200,0.22) 100%),
+    linear-gradient(65deg, rgba(188,188,188,0.12) 0%, rgba(235,235,235,0.25) 100%),
+    linear-gradient(#FFFFFF08, #FFFFFF08);
+  
+  --placeholder-glass-stroke: #2B3A4A;
+  --placeholder-glass-stroke-accent: #5A355A;
+  --placeholder-glass-stroke-error: #83484E;
+  --placeholder-glass-icon-error: #695563;
+
+  --glass-border: 1.8px solid var(--placeholder-glass-stroke); /* TODO: Make gradient */
+  --glass-border-error: 1.5px solid var(--placeholder-glass-stroke-error);
+  --glass-border-popup: 1.5px solid var(--placeholder-glass-stroke);
+  --glass-background: 
+    url("/noise.png"),
+    radial-gradient(circle at 80% 20%, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%),
+    linear-gradient(#0B111DC0, #0B111DC0);
+
+  --background-linear-gradient: linear-gradient(var(--color-background), var(--color-background));
+
+  --color-background: #0B111D;
+  --color-text: #ffffff;
+  --color-text-light: #ffffffA5;
+  --color-text-extra-light: #ffffff99;
+  --color-error: #FF8080;
+  --color-link-hover: #d8f3ff;
+  --color-light-green: #DCFFEA;
+  --color-light-red: #FFC1C1;
+
+  --font-size-h0-base: 60px;
+  --font-size-h1-base: 50.16px;
+  --font-size-h2-base: 41.8px;
+  --font-size-h3-base: 29.03px;
+  --font-size-h4-base: 24.19px;
+  --font-size-large-base: 20.16px;
+  --font-size-p-base: 16.8px;
+  --font-size-small-base: 14px;
+  --font-size-tiny-base: 12px;
+  --font-size-balance-detail-base: 35px;
+  --font-size-asset-amount-base: 22px;
+
+  --font-size-h0: var(--font-size-h0-base);
+  --font-size-h1: var(--font-size-h1-base);
+  --font-size-h2: var(--font-size-h2-base);
+  --font-size-h3: var(--font-size-h3-base);
+  --font-size-h4: var(--font-size-h4-base);
+  --font-size-large: var(--font-size-large-base);
+  --font-size-p: var(--font-size-p-base);
+  --font-size-small: var(--font-size-small-base);
+  --font-size-tiny: var(--font-size-tiny-base);
+  --font-size-balance-detail: var(--font-size-balance-detail-base);
+  --font-size-asset-amount: var(--font-size-asset-amount-base);
+
+  --panel-padding: 9px;
+  --nav-height: 50px;
+}
+
+@media only screen and (max-width: 800px) {
+  :root {
+    --font-size-h0: calc(0.9 * var(--font-size-h0-base));
+    --font-size-h1: calc(0.9 * var(--font-size-h1-base));
+    --font-size-h2: calc(0.9 * var(--font-size-h2-base));
+    --font-size-h3: calc(0.9 * var(--font-size-h3-base));
+    --font-size-h4: calc(0.9 * var(--font-size-h4-base));
+    --font-size-large: calc(0.9 * var(--font-size-large-base));
+    --font-size-p: calc(0.9 * var(--font-size-p-base));
+    --font-size-small: calc(0.9 * var(--font-size-small-base));
+    --font-size-tiny: calc(0.9 * var(--font-size-tiny-base));
+    --font-size-balance-detail: calc(0.9 * var(--font-size-balance-detail-base));
+    --font-size-asset-amount: calc(0.9 * var(--font-size-asset-amount-base));
+    --nav-height: 45px;
+  }
+}
+
+@media only screen and (max-width: 568px) {
+  :root {
+    --font-size-h0: calc(0.8 * var(--font-size-h0-base));
+    --font-size-h1: calc(0.8 * var(--font-size-h1-base));
+    --font-size-h2: calc(0.8 * var(--font-size-h2-base));
+    --font-size-h3: calc(0.8 * var(--font-size-h3-base));
+    --font-size-h4: calc(0.8 * var(--font-size-h4-base));
+    --font-size-large: calc(0.8 * var(--font-size-large-base));
+    --font-size-p: calc(0.8 * var(--font-size-p-base));
+    --font-size-small: calc(0.8 * var(--font-size-small-base));
+    --font-size-tiny: calc(0.8 * var(--font-size-tiny-base));
+    --font-size-balance-detail: calc(0.8 * var(--font-size-balance-detail-base));
+    --font-size-asset-amount: calc(0.8 * var(--font-size-asset-amount-base));
+
+    --nav-height: 40px;
+  }
+}
+
+@media only screen and (max-width: 375px) {
+  :root {
+    --nav-height: 35px;
+  }
+}

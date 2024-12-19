@@ -1,0 +1,14 @@
+.listWrapper {
+    margin-top: 26px;
+    width: 100%;
+}
+
+.title {
+    font-size: var(--font-size-p);
+    color: var(--color-text-light);
+}
+
+.assetList {
+    margin-top: 12px;
+    gap: 8px;
+}

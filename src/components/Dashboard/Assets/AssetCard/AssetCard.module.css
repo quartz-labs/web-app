@@ -1,0 +1,47 @@
+.assetCard {
+    border-radius: 10px;
+    padding: 10px;
+    background-image: 
+        url("/noise.png"),
+        radial-gradient(circle at 80% 20%, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%),
+        linear-gradient(#0B111D80, #0B111D80);
+    height: 75px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.emptyCardText {
+    color: var(--color-text-extra-light);
+    padding-left: 10px;
+}
+
+.tokenInfo {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    gap: 8px;
+}
+
+.tokenInfo p {
+    font-size: var(--font-size-asset-amount);
+}
+
+.assetIcon {
+    border-radius: 100%;
+}
+
+.details {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.value {
+    font-size: var(--font-size-large);
+}
+
+.valueDecimal {
+    font-size: calc(var(--font-size-large) * 0.55);
+}
