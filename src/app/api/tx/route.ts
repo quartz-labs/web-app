@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
+import { Connection } from '@solana/web3.js';
 
 const envSchema = z.object({
     RPC_URL: z.string().url(),
@@ -16,8 +17,10 @@ export async function POST(request: Request) {
         return new Response("Internal server configuration error", { status: 500 });
     }
 
+    const connection = new Connection(env.RPC_URL);
+
     try {
-        const signature = await sendTransaction(env.RPC_URL);
+        const signature = await sendTransaction(connection);
         return NextResponse.json({ signature: signature });
     } catch (error) {
         console.error(error);
@@ -28,7 +31,7 @@ export async function POST(request: Request) {
     }
 }
 
-async function sendTransaction(rpcUrl: string): Promise<string> {
+async function sendTransaction(connection: Connection): Promise<string> {
     // TODO: Implement
     throw new Error("Not implemented");
 }

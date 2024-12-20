@@ -1,7 +1,7 @@
 import Image from "next/image";
 import styles from "./AssetCard.module.css";
 import type { AssetInfo } from "@/src/types/interfaces/AssetInfo.interface";
-import { formatDollarValue, truncToDecimalPlaces } from "@/src/utils/helpers";
+import { formatDollarValue, formatTokenDisplay, truncToDecimalPlaces } from "@/src/utils/helpers";
 import { TOKENS } from "@/src/config/tokens";
 
 export interface AssetCardProps {
@@ -13,11 +13,6 @@ export default function AssetCard({ assetInfo }: AssetCardProps) {
     const valueDisplay = formatDollarValue(value, 2);
     
     const balance = Math.abs(assetInfo.balance);
-    const balanceDisplay = balance < 999 
-        ? truncToDecimalPlaces(balance, 5) 
-        : balance < 99999
-            ? truncToDecimalPlaces(balance, 2)
-            : truncToDecimalPlaces(balance, 0);
 
     const rateDisplay = (assetInfo.rate * 100).toFixed(2);
     
@@ -31,7 +26,7 @@ export default function AssetCard({ assetInfo }: AssetCardProps) {
                     height={36} 
                     className={styles.assetIcon}
                 />
-                <p>{balanceDisplay}</p>
+                <p>{formatTokenDisplay(balance)}</p>
                 <p className={"light-text"}>{TOKENS[assetInfo.marketIndex].name}</p>
             </div>
 

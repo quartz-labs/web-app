@@ -20,6 +20,7 @@ export default function CloseAccountModal() {
         if (!wallet) return captureError(showError, "No wallet connected", "/CloseAccountModal.tsx", undefined);
 
         setAwaitingSign(true);
+        // TODO - Implement
         const signature = ""; //await closeAccount(wallet, connection, showError, showTxStatus);
         setAwaitingSign(false);
         if (signature) {

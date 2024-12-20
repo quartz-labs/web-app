@@ -1,4 +1,4 @@
-import { ModalComponents } from "@/src/config/constants";
+import { ModalComponents } from "@/src/config/modalComponents";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
 import { useStore } from "@/src/utils/store";
 import styles from "./Modal.module.css";

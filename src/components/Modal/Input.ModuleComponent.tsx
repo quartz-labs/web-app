@@ -1,6 +1,7 @@
 import type { MarketIndex } from "@/src/config/constants";
 import styles from "./Modal.module.css";
 import TokenSelect from "./TokenSelect/TokenSelect";
+import { formatTokenDisplay } from "@/src/utils/helpers";
 
 interface InputSectionProps {
     label?: string;
@@ -61,7 +62,7 @@ export default function InputSection({
 
                 <div className={styles.amount}>
                     {(available !== undefined) && (
-                        <p className={"light-text small-text"}>Available: ${available}</p>
+                        <p className={"light-text small-text"}>Available: {formatTokenDisplay(available)}</p>
                     )}
                     
                     <button className={`glass-button ghost ${styles.balanceButton}`} onClick={setHalfAmount}>

@@ -1,9 +1,13 @@
-import { type MarketIndex } from "@/src/config/constants";
+import { MICRO_LAMPORTS_PER_LAMPORT, type MarketIndex } from "@/src/config/constants";
 import type { Rate } from "@/src/types/interfaces/Rate.interface";
 import type { AssetInfo } from "@/src/types/interfaces/AssetInfo.interface";
-import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC, SUPPORTED_DRIFT_MARKETS } from "@quartz-labs/sdk";
-import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC, QuartzClient, SUPPORTED_DRIFT_MARKETS, USDC_MINT, WSOL_MINT } from "@quartz-labs/sdk";
+import { Connection, Keypair, LAMPORTS_PER_SOL, PublicKey, Transaction, TransactionInstruction } from "@solana/web3.js";
 import { TOKENS } from "../config/tokens";
+import { captureError } from "./errors";
+import type { AnchorWallet } from "@solana/wallet-adapter-react";
+import { AccountLayout, getAssociatedTokenAddress } from "@solana/spl-token";
+import type { ShowErrorProps } from "../context/error-provider";
 
 export async function waitForSignature(signature: string): Promise<void> {
     try {
@@ -18,6 +22,11 @@ export async function waitForSignature(signature: string): Promise<void> {
 export function baseUnitToDecimal(baseUnits: number, marketIndex: MarketIndex): number {
     const token = TOKENS[marketIndex];
     return baseUnits / (10 ** token.decimalPrecision);
+}
+
+export function decimalToBaseUnit(decimal: number, marketIndex: MarketIndex): number {
+    const token = TOKENS[marketIndex];
+    return Math.trunc(decimal * (10 ** token.decimalPrecision));
 }
 
 export function truncToDecimalPlaces(value: number, decimalPlaces: number): number {
@@ -120,4 +129,12 @@ export function generateAssetInfos(prices: Record<MarketIndex, number>, balances
 
 export function getDisplayWalletAddress(address: string) {
     return `(${address.slice(0, 4)}...${address.slice(-4)})` 
+}
+
+export function formatTokenDisplay(balance: number) {
+    return balance < 999 
+        ? truncToDecimalPlaces(balance, 5) 
+        : balance < 99999
+            ? truncToDecimalPlaces(balance, 2)
+            : truncToDecimalPlaces(balance, 0);
 }

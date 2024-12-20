@@ -142,6 +142,20 @@ export const useWithdrawLimitsQuery = (address: PublicKey | null) => {
     return query();
 };
 
+export const useDepositLimitsQuery = (address: PublicKey | null, marketIndex: MarketIndex) => {
+    const query = createQuery<number>({
+        queryKey: ["user", "deposit-limits", address?.toBase58() ?? "", marketIndex.toString()],
+        url: "/api/deposit-limit",
+        params: address ? { 
+            address: address.toBase58(),
+            marketIndex: marketIndex.toString()
+        } : undefined,
+        enabled: address != null,
+        errorMessage: "Could not fetch deposit limits",
+    });
+    return query();
+};
+
 export const useHealthQuery = (address: PublicKey | null) => {
     const query = createQuery<number>({
         queryKey: ["user", "health", address?.toBase58() ?? ""],
