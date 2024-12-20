@@ -36,9 +36,6 @@ export default function AddFundsModal() {
         if (depositLimit) setAvailable(baseUnitToDecimal(depositLimit, marketIndex));
     }, [depositLimit]);
 
-    const value = prices?.[marketIndex] ?? 0;
-    const rate = rates?.[marketIndex]?.depositRate ?? 0;
-
     const handleConfirm = async () => {
         const minAmount = baseUnitToDecimal(1, marketIndex);
 
@@ -62,8 +59,8 @@ export default function AddFundsModal() {
 
             <InputSection
                 borrowing={false}
-                value={value * amount}
-                rate={rate * 100}
+                price={prices?.[marketIndex]}
+                rate={rates?.[marketIndex]?.depositRate}
                 available={available}
                 amountStr={amountStr}
                 setAmountStr={setAmountStr}

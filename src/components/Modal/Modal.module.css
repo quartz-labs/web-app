@@ -43,6 +43,10 @@
     margin-bottom: 50px;
 }
 
+.headingRepayLoan {
+    margin-bottom: 35px;
+}
+
 .subheading {
     font-size: var(--font-size-large);
     margin-top: -30px;
@@ -54,6 +58,10 @@
     display: flex;
     flex-direction: column;
     align-items: start;
+}
+
+.inputSectionCollateral {
+    margin-top: 20px;
 }
 
 .inputFieldWrapper {
@@ -75,6 +83,13 @@
 
 .inputFieldAmount {
     flex-grow: 1;
+}
+
+.inputFieldCollateral {
+    background: var(--color-background-light);
+    display: flex;
+    align-items: center;
+    justify-content: start;
 }
 
 .addressCopyLabel {

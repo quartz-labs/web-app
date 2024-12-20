@@ -7,9 +7,14 @@ import type { MarketIndex } from "@/src/config/constants";
 export interface TokenSelectProps {
     marketIndex: MarketIndex;
     setMarketIndex: (marketIndex: MarketIndex) => void;
+    selectableMarketIndices?: MarketIndex[];
 }
 
-export default function TokenSelect({ marketIndex, setMarketIndex }: TokenSelectProps) {
+export default function TokenSelect({ 
+    marketIndex, 
+    setMarketIndex, 
+    selectableMarketIndices 
+}: TokenSelectProps) {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -23,6 +28,8 @@ export default function TokenSelect({ marketIndex, setMarketIndex }: TokenSelect
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
+
+    const tokens = selectableMarketIndices ? selectableMarketIndices.map(index => TOKENS[index]) : Object.values(TOKENS);
 
     return (
         <div className={styles.tokenSelectWrapper} ref={dropdownRef}>
@@ -44,7 +51,7 @@ export default function TokenSelect({ marketIndex, setMarketIndex }: TokenSelect
             
             {isOpen && (
                 <div className={styles.dropdownMenu} role="menu">
-                    {Object.values(TOKENS).map((token, index) => (
+                    {tokens.map((token, index) => (
                         <button
                             key={index}
                             className={styles.dropdownItem}

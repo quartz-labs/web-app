@@ -31,8 +31,6 @@ export default function WithdrawModal() {
         return () => clearInterval(interval);
     }, [refetchAccountData, refetchWithdrawLimits]);
 
-    const value = prices?.[marketIndex] ?? 0;
-    const rate = rates?.[marketIndex]?.depositRate ?? 0;
     const maxAmountBaseUnits = withdrawLimits?.[marketIndex] ?? 0;
 
     const handleConfirm = async () => {
@@ -57,9 +55,9 @@ export default function WithdrawModal() {
             <h2 className={styles.heading}>Withdraw Funds</h2>
 
             <InputSection
-                borrowing={false}
-                value={value * amount}
-                rate={rate * 100}
+                borrowing={true}
+                price={prices?.[marketIndex]}
+                rate={rates?.[marketIndex]?.borrowRate}
                 available={baseUnitToDecimal(maxAmountBaseUnits, marketIndex)}
                 amountStr={amountStr}
                 setAmountStr={setAmountStr}

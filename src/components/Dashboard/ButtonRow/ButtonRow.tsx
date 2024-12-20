@@ -3,7 +3,8 @@ import styles from "./ButtonRow.module.css";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
 
 export default function ButtonRow() {
-    const { setModalVariation } = useStore();
+    const { setModalVariation, balances } = useStore();
+    const hasLoan = balances ? Object.values(balances).some(balance => balance < 0) : false;
 
     return (
         <div className={styles.buttonRow}>
@@ -20,13 +21,15 @@ export default function ButtonRow() {
             >
                 Withdraw
             </button>
-            
-            <button 
-                className={"glass-button ghost"} 
-                onClick={() => setModalVariation(ModalVariation.REPAY_LOAN)}
-            >
-                Repay Loan
-            </button>
+
+            {hasLoan && (
+                <button 
+                    className={"glass-button ghost"} 
+                    onClick={() => setModalVariation(ModalVariation.REPAY_LOAN)}
+                >
+                    Repay Loan
+                </button>
+            )}
         </div>
     );
 }

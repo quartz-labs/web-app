@@ -5,8 +5,9 @@ import { formatTokenDisplay } from "@/src/utils/helpers";
 
 interface InputSectionProps {
     label?: string;
+    availableLabel?: string;
     borrowing: boolean;
-    value?: number;
+    price?: number;
     rate?: number;
     available?: number;
     amountStr: string;
@@ -15,22 +16,26 @@ interface InputSectionProps {
     setHalfAmount: () => void;
     marketIndex: MarketIndex;
     setMarketIndex: (marketIndex: MarketIndex) => void;
+    selectableMarketIndices?: MarketIndex[];
 }
 
 export default function InputSection({
     label, 
+    availableLabel,
     amountStr, 
     borrowing, 
-    value,
+    price,
     rate,
     available,
     setAmountStr,
     setMaxAmount, 
     setHalfAmount,
     marketIndex, 
-    setMarketIndex
+    setMarketIndex,
+    selectableMarketIndices
 } : InputSectionProps ) {
     const CHARACTER_LIMIT = 20;
+    const value = price ? price * Number(amountStr) : undefined;
 
     return (
         <div className={styles.inputSection}>
@@ -47,14 +52,18 @@ export default function InputSection({
                     }
                 />
 
-                <TokenSelect marketIndex={marketIndex} setMarketIndex={setMarketIndex} />
+                <TokenSelect 
+                    marketIndex={marketIndex} 
+                    setMarketIndex={setMarketIndex} 
+                    selectableMarketIndices={selectableMarketIndices}
+                />
             </div>
 
             <div className={styles.infoWrapper}>
                 {(value !== undefined) && (
                     <p className={"light-text small-text"}>
                         ${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {(rate !== undefined) && (
-                            <span className={"tiny-text"}>({rate.toFixed(2)}% {borrowing ? "APR" : "APY"})</span>
+                            <span className={"tiny-text"}>({(rate * 100).toFixed(2)}% {borrowing ? "APR" : "APY"})</span>
                         )}
                     </p>
                 )}
@@ -62,7 +71,7 @@ export default function InputSection({
 
                 <div className={styles.amount}>
                     {(available !== undefined) && (
-                        <p className={"light-text small-text"}>Available: {formatTokenDisplay(available)}</p>
+                        <p className={"light-text small-text"}>{availableLabel ?? "Available"}: {formatTokenDisplay(available)}</p>
                     )}
                     
                     <button className={`glass-button ghost ${styles.balanceButton}`} onClick={setHalfAmount}>

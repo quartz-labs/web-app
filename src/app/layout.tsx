@@ -6,6 +6,10 @@ import { PostHogClient } from '@/src/context/posthog-provider';
 import { SolanaProvider } from '@/src/context/solana/solana-provider';
 import { ClusterProvider } from '@/src/context/solana/cluster-data-access';
 import { ErrorProvider } from '@/src/context/error-provider';
+import { TxStatus, TxStatusProvider } from '../context/tx-status-provider';
+import ErrorPopup from '../components/Popup/ErrorPopup/ErrorPopup';
+import TxStatusPopup from '../components/Popup/TransactionStatusPopup/TxStatusPopup';
+import ErrorModal from '../components/Modal/Variations/ErrorModal';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -32,8 +36,13 @@ export default function RootLayout({
           <ReactQueryProvider>
             <PostHogClient>
               <SolanaProvider>
-                <PostHogPageView />
-                {children}
+                <TxStatusProvider>
+                  <PostHogPageView />
+                  <ErrorPopup />
+                  <ErrorModal />
+                  <TxStatusPopup />
+                  {children}
+                </TxStatusProvider>
               </SolanaProvider>
             </PostHogClient>
           </ReactQueryProvider>
