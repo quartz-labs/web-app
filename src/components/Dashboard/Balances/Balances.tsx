@@ -14,7 +14,7 @@ export default function Balances() {
     const [loanRate, setLoanRate] = useState<number>(0);
     const [collateralRate, setCollateralRate] = useState<number>(0);
 
-    const displayBalances = isInitialized && prices && balances;
+    const displayBalances = isInitialized && prices !== undefined && balances !== undefined;
 
     useEffect(() => {
         if (!balances || !prices) return;
@@ -46,7 +46,9 @@ export default function Balances() {
                         <p className={styles.netBalance}>
                             ${netBalance[0]}<span className={styles.netBalanceDecimal}>.{netBalance[1]}</span>
                         </p>
-                        <p className={`${styles.rateHeight} ${netRateClass}`}>{plusOrMinus(netRate, "$")} /day</p>
+                        {rates !== undefined && (
+                            <p className={`${styles.rateHeight} ${netRateClass}`}>{plusOrMinus(netRate, "$")} /day</p>
+                        )}
                     </>
                 )}
                 {!displayBalances && (
@@ -63,7 +65,9 @@ export default function Balances() {
                         <p className={styles.detailBalance}>    
                             ${loanBalance[0]}<span className={styles.detailBalanceDecimal}>.{loanBalance[1]}</span>
                         </p>
-                        <p className={`${styles.detailBalanceRate} ${styles.rateHeight}`}>{plusOrMinus(loanRate)} /day</p>
+                        {rates !== undefined && (
+                            <p className={`${styles.detailBalanceRate} ${styles.rateHeight}`}>{plusOrMinus(loanRate)} /day</p>
+                        )}
                     </>
                 )}
                 {!displayBalances && (
@@ -82,7 +86,9 @@ export default function Balances() {
                         <p className={styles.detailBalance}>
                             ${collateralBalance[0]}<span className={styles.detailBalanceDecimal}>.{collateralBalance[1]}</span>
                         </p>
-                        <p className={`${styles.detailBalanceRate} ${styles.rateHeight}`}>{plusOrMinus(collateralRate)} /day</p>
+                        {rates !== undefined && (
+                            <p className={`${styles.detailBalanceRate} ${styles.rateHeight}`}>{plusOrMinus(collateralRate)} /day</p>
+                        )}
                     </>
                 )}
                 {!displayBalances && (

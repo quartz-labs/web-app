@@ -144,6 +144,8 @@ a:hover {
   --overlay: linear-gradient(var(--overlay-color), var(--overlay-color));
   --overlay-color-heavy: rgba(255, 255, 255, 0.1);
   --overlay-heavy: linear-gradient(var(--overlay-color-heavy), var(--overlay-color-heavy));
+  --overlay-color-light: rgba(255, 255, 255, 0.01);
+
   --gradient-glass-stroke:
     linear-gradient(65deg, rgba(41,135,200,0.02) 0%, rgba(41,135,200,0.22) 100%),
     linear-gradient(65deg, rgba(188,188,188,0.12) 0%, rgba(235,235,235,0.25) 100%),

@@ -1,14 +1,14 @@
 import { PuffLoader } from "react-spinners";
-import styles from "./DefaultLayout.module.css";
+import styles from "./Modal.module.css";
 
-interface ModalButtonsProps {
+interface ButtonsProps {
     label: string;
     awaitingSign: boolean;
     onConfirm: () => void;
     onCancel: () => void;
 }
 
-export default function ModalButtons({label, awaitingSign, onConfirm, onCancel} : ModalButtonsProps) {
+export default function Buttons({label, awaitingSign, onConfirm, onCancel} : ButtonsProps) {
     return (
         <div className={styles.buttons}>
             <button 

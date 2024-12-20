@@ -1,0 +1,60 @@
+.tokenSelectWrapper {
+    min-width: 130px;
+    display: flex;
+    align-items: center;
+    font-size: var(--font-size-large);
+    height: 100%;
+    background: var(--color-background);
+    border-radius: 14px;
+    border: 1px solid var(--placeholder-glass-stroke);
+    position: relative;
+}
+
+.tokenSelectWrapper:hover {
+    background: var(--overlay-color-light), var(--color-background);
+}
+
+.tokenSelect {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    gap: 8px;
+    padding: 18px;
+    height: 100%;
+    width: 100%;
+}
+
+.assetIcon {
+    border-radius: 100%;
+}
+
+.dropdownMenu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    width: 100%;
+    background: var(--color-background);
+    border: 1px solid var(--placeholder-glass-stroke);
+    border-radius: 14px;
+    padding: 8px;
+    z-index: 1000;
+}
+
+.dropdownItem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    color: inherit;
+    font-size: var(--font-size-large);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.dropdownItem:hover {
+    background: var(--overlay-color);
+}
