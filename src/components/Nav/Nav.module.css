@@ -24,7 +24,17 @@
 .notificationsButton {
     height: 100%;
     width: auto;
-    padding: 10px 0px;
+    padding: 9px;
+    margin-right: -9px;
+    border-radius: 100%;
+}
+
+.notificationsButton:hover {
+    background-color: var(--overlay-color-heavy);
+}
+
+.notificationsButton:active {
+    background: var(--overlay-heavy), var(--overlay);
 }
 
 .loadingSpinner {

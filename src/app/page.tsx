@@ -6,24 +6,21 @@ import Onboarding from "@/src/components/OtherViews/Onboarding";
 import ClosedAccount from "@/src/components/OtherViews/ClosedAccount";
 import NoBetaKey from "@/src/components/OtherViews/NoBetaKey";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { AccountStatus } from "@/src/types/enums/accountStatus.enum";
+import { AccountStatus } from "@/src/types/enums/AccountStatus.enum";
 import styles from "./page.module.css";
 import { useAccountStatusQuery, useBalancesQuery, useHealthQuery, usePricesQuery, useRatesQuery, useWithdrawLimitsQuery } from "@/src/utils/queries";
 import { useStore } from "@/src/utils/store";
 import { useEffect } from 'react';
-import { useQueryClient } from "@tanstack/react-query";
-import { waitForSignature } from "@/src/utils/helpers";
 
 export default function Page() {
   const wallet = useWallet();
-  const queryClient = useQueryClient();
   const { 
     setIsInitialized,
     setPrices, 
     setRates, 
     setBalances, 
     setWithdrawLimits, 
-    setHealth 
+    setHealth
   } = useStore();
 
   const { data: accountStatus, isLoading: isAccountStatusLoading } = useAccountStatusQuery(wallet.publicKey);
@@ -46,19 +43,6 @@ export default function Page() {
     isInitialized, prices, rates, balances, withdrawLimits, health, 
     setPrices, setRates, setBalances, setWithdrawLimits, setHealth, setIsInitialized
   ]);
-
-  const refetchAccountData = async (signature?: string) => {
-    if (signature) await waitForSignature(signature);
-    queryClient.invalidateQueries({ queryKey: ["user"], refetchType: "all" });
-  };
-
-  const refetchAccountStatus = async (signature?: string) => {
-    if (signature) await waitForSignature(signature);
-    queryClient.invalidateQueries({ 
-      predicate: (query) => query.queryKey.includes(wallet.publicKey?.toBase58()), 
-      refetchType: "all" 
-    });
-  };
 
   return (
     <main className={styles.container}>

@@ -11,7 +11,14 @@ export interface AssetCardProps {
 export default function AssetCard({ assetInfo }: AssetCardProps) {
     const value = Math.abs(assetInfo.balance * assetInfo.price);
     const valueDisplay = formatDollarValue(value, 2);
-    const balanceDisplay = Math.abs(truncToDecimalPlaces(assetInfo.balance, 5));
+    
+    const balance = Math.abs(assetInfo.balance);
+    const balanceDisplay = balance < 999 
+        ? truncToDecimalPlaces(balance, 5) 
+        : balance < 99999
+            ? truncToDecimalPlaces(balance, 2)
+            : truncToDecimalPlaces(balance, 0);
+
     const rateDisplay = (assetInfo.rate * 100).toFixed(2);
     
     return (

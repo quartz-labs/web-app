@@ -1,0 +1,235 @@
+.modalWrapper {
+    position: absolute;
+    z-index: 999;
+    top: 0px;
+    left: 0px;
+    height: 100VH;
+    width: 100VW;
+    background: rgb(0, 0, 0, 0.35);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.errorModalWrapper {
+    z-index: 9999;
+}
+
+.modal {
+    width: var(--modal-width);
+    padding: 80px 0px;
+    border-radius: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.errorModal {
+    border-color: var(--placeholder-glass-stroke-error)
+}
+
+.contentWrapper {
+    width: var(--modal-content-width);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.heading {
+    font-size: var(--font-size-h2);
+    margin-bottom: 50px;
+}
+
+.subheading {
+    font-size: var(--font-size-large);
+    margin-top: -30px;
+    margin-bottom: 50px;
+}
+
+.stretchWidth {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.inputSection {
+    width: 100%;
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+}
+
+.inputFieldWrapper {
+    width: 100%;
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+    min-height: var(--input-field-height);
+}
+
+.inputField {
+    width: 100%;
+    background: var(--color-background);
+    padding: 12px;
+    border-radius: 14px;
+    border: 1px solid var(--placeholder-glass-stroke);
+    font-size: var(--font-size-h4);
+}
+
+.addressCopyLabel {
+    color: var(--color-text-light);
+    font-size: var(--font-size-tiny);
+    margin-left: 3px;
+}
+
+.addressCopyButton {
+    width: 100%;
+    height: var(--address-copy-button-height);
+
+    margin-top: 8px;
+    background: var(--color-background);
+    padding: 0px 18px;
+    border-radius: 14px;
+    border: 1px solid var(--placeholder-glass-stroke);
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.addressCopyText {
+    font-size: var(--font-size-small);
+}
+
+@media only screen and (max-width: 450px) {
+    .addressCopyText {
+        font-size: var(--font-size-tiny);
+    }
+}
+
+.addressCopyButton:hover {
+    background: 
+        var(--overlay), 
+        var(--color-background);
+}
+
+.addressCopyButton:active {
+    background: 
+        var(--overlay), 
+        var(--overlay), 
+        var(--color-background);
+}
+
+.centerContent {
+    justify-content: center;
+}
+
+.infoSection {
+    margin-bottom: 50px;
+    align-items: start;
+}
+
+.infoSectionWrapper {
+    width: var(--modal-content-width);
+}
+
+.infoValue {
+    dispaly: flex;
+    align-items: baseline;
+}
+
+.infoRight {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+}
+
+.amountButtons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
+}
+
+.balanceButton {
+    padding: 8px 10px;
+    font-size: var(--font-size-tiny);
+}
+
+.errorText {
+    margin-top: 10px;
+    color: var(--color-error);
+}
+
+.buttons {
+    display: flex;
+    width: var(--modal-content-width);
+    gap: 25px;
+}
+
+.mainButton {
+    width: 100%;
+}
+
+.errorHeading {
+    color: var(--color-error);
+    margin-bottom: 30px;
+}
+
+.errorButton {
+    border-color: var(--placeholder-glass-icon-error);
+}
+
+.errorBodyWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 36px;
+    margin-bottom: 50px;
+    width: 100%;
+}
+
+.errorBody {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 6px;
+}
+
+.errorBody p {
+    width: 100%;
+    word-wrap: break-word;
+}
+
+@media only screen and (max-width: 428px) {
+    .buttons {
+        flex-direction: column;
+    }
+}
+
+.closeRequirements {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 60px;
+}
+
+.closeRequirements ul {
+    list-style-type: disc;
+    padding-left: 15px;
+    text-align: left;
+}
+
+.closeHeading {
+    margin-bottom: 27px;
+    font-size: var(--font-size-h3);
+}

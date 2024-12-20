@@ -1,23 +1,32 @@
+import { useStore } from "@/src/utils/store";
 import styles from "./ButtonRow.module.css";
+import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
 
 export default function ButtonRow() {
-    const handleAddFunds = () => {
-        throw new Error("Not implemented");
-    };
-
-    const handleWithdraw = () => {
-        throw new Error("Not implemented");
-    };
-
-    const handleRepayLoan = () => {
-        throw new Error("Not implemented");
-    };
+    const { setModalVariation } = useStore();
 
     return (
         <div className={styles.buttonRow}>
-            <button className={"glass-button"} onClick={handleAddFunds}>Add Funds</button>
-            <button className={"glass-button"} onClick={handleWithdraw}>Withdraw</button>
-            <button className={"glass-button ghost"} onClick={handleRepayLoan}>Repay Loan</button>
+            <button 
+                className={"glass-button"} 
+                onClick={() => setModalVariation(ModalVariation.ADD_FUNDS)}
+            >
+                Add Funds
+            </button>
+
+            <button 
+                className={"glass-button"} 
+                onClick={() => setModalVariation(ModalVariation.WITHDRAW)}
+            >
+                Withdraw
+            </button>
+            
+            <button 
+                className={"glass-button ghost"} 
+                onClick={() => setModalVariation(ModalVariation.REPAY_LOAN)}
+            >
+                Repay Loan
+            </button>
         </div>
     );
 }

@@ -4,12 +4,15 @@ import Balances from "./Balances/Balances";
 import Health from "./Health/Health";
 import ButtonRow from "./ButtonRow/ButtonRow";
 import Assets from "./Assets/Assets";
+import Modal from "../Modal/Modal";
 
 export default function Dashboard() {
   const { isInitialized } = useStore();
 
   return (
     <>
+      <Modal />
+
       <div className={`glass panel ${styles.mainPanel}`}>
         <h1 className={styles.title}>Balance</h1>
         <Balances />

@@ -3,6 +3,8 @@ import styles from "./Nav.module.css";
 import { WalletButton } from "@/src/context/solana/solana-provider";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { TailSpin } from "react-loader-spinner";
+import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
+import { useStore } from "@/src/utils/store";
 
 export interface NavProps {
   isAccountInitialized: boolean;
@@ -14,6 +16,7 @@ export default function Nav({
   isAccountStatusLoading
 }: NavProps) {
   const wallet = useWallet();
+  const { setModalVariation } = useStore();
 
   return (
     <div className={styles["nav"]}>
@@ -43,7 +46,7 @@ export default function Nav({
         {wallet.publicKey && isAccountInitialized &&
           <button 
             className={styles.notificationsButton}
-            onClick={() => {}}
+            onClick={() => setModalVariation(ModalVariation.NOTIFICATIONS)}
           >
             <Image 
                 className={"image-fill"}
@@ -59,6 +62,7 @@ export default function Nav({
         
         <WalletButton 
             disableCloseAccount={!isAccountInitialized}
+            onCloseAccount={() => setModalVariation(ModalVariation.CLOSE_ACCOUNT)}
         />
       </div>
     </div>

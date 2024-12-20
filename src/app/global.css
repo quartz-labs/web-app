@@ -142,7 +142,8 @@ a:hover {
 :root {
   --overlay-color: rgba(255, 255, 255, 0.03);
   --overlay: linear-gradient(var(--overlay-color), var(--overlay-color));
-
+  --overlay-color-heavy: rgba(255, 255, 255, 0.1);
+  --overlay-heavy: linear-gradient(var(--overlay-color-heavy), var(--overlay-color-heavy));
   --gradient-glass-stroke:
     linear-gradient(65deg, rgba(41,135,200,0.02) 0%, rgba(41,135,200,0.22) 100%),
     linear-gradient(65deg, rgba(188,188,188,0.12) 0%, rgba(235,235,235,0.25) 100%),
@@ -198,6 +199,13 @@ a:hover {
 
   --panel-padding: 9px;
   --nav-height: 50px;
+  --asset-card-height: 73px;
+  --modal-width: 780px;
+  --modal-content-width: 75%;
+  --input-field-height: 80px;
+  --address-copy-button-height: 57px;
+  --popup-position-bottom: 50px;
+  --popup-position-left: 100px;
 }
 
 @media only screen and (max-width: 800px) {
@@ -213,7 +221,10 @@ a:hover {
     --font-size-tiny: calc(0.9 * var(--font-size-tiny-base));
     --font-size-balance-detail: calc(0.9 * var(--font-size-balance-detail-base));
     --font-size-asset-amount: calc(0.9 * var(--font-size-asset-amount-base));
+
     --nav-height: 45px;
+    --modal-width: 90%;
+    --modal-content-width: 80%;
   }
 }
 
@@ -232,11 +243,16 @@ a:hover {
     --font-size-asset-amount: calc(0.8 * var(--font-size-asset-amount-base));
 
     --nav-height: 40px;
+    --modal-content-width: 90%;
+    --input-field-height: 75px;
+    --address-copy-button-height: 53.4px;
   }
 }
 
 @media only screen and (max-width: 375px) {
   :root {
     --nav-height: 35px;
+    --input-field-height: 65px;
+    --address-copy-button-height: 46.3px;
   }
 }

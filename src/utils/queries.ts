@@ -1,10 +1,10 @@
 import { useError } from "@/src/context/error-provider";
 import { captureError } from "./errors";
-import { useQuery, type QueryKey, type StaleTime } from "@tanstack/react-query";
-import { AccountStatus } from "@/src/types/enums/accountStatus.enum";
+import { useQuery } from "@tanstack/react-query";
+import { AccountStatus } from "@/src/types/enums/AccountStatus.enum";
 import type { PublicKey } from "@solana/web3.js";
-import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC, SUPPORTED_DRIFT_MARKETS } from "@quartz-labs/sdk";
-import type { MarketIndex } from "@/src/config/constants";
+import { SUPPORTED_DRIFT_MARKETS } from "@quartz-labs/sdk";
+import { DEFAULT_REFETCH_INTERVAL, type MarketIndex } from "@/src/config/constants";
 import type { Rate } from "@/src/types/interfaces/Rate.interface";
 import { TOKENS } from "../config/tokens";
 
@@ -98,6 +98,7 @@ export const usePricesQuery = createQuery<Record<MarketIndex, number>>({
             return acc;
         }, {} as Record<MarketIndex, number>);
     },
+    refetchInterval: DEFAULT_REFETCH_INTERVAL,
     errorMessage: "Could not fetch prices"
 });
 
@@ -107,6 +108,7 @@ export const useRatesQuery = createQuery<Record<MarketIndex, Rate>>({
     params: { 
         marketIndices: SUPPORTED_DRIFT_MARKETS.join(',') 
     },
+    refetchInterval: DEFAULT_REFETCH_INTERVAL,
     errorMessage: "Could not fetch rates"
 });
 
@@ -119,6 +121,7 @@ export const useBalancesQuery = (address: PublicKey | null) => {
             marketIndices: SUPPORTED_DRIFT_MARKETS.join(',')
         } : undefined,
         errorMessage: "Could not fetch balances",
+        refetchInterval: DEFAULT_REFETCH_INTERVAL,
         enabled: address != null,
     });
     return query();
@@ -133,6 +136,7 @@ export const useWithdrawLimitsQuery = (address: PublicKey | null) => {
             marketIndices: SUPPORTED_DRIFT_MARKETS.join(',')
         } : undefined,
         errorMessage: "Could not fetch withdraw limits",
+        refetchInterval: DEFAULT_REFETCH_INTERVAL,
         enabled: address != null,
     });
     return query();
@@ -146,6 +150,7 @@ export const useHealthQuery = (address: PublicKey | null) => {
             address: address.toBase58()
         } : undefined,
         errorMessage: "Could not fetch health",
+        refetchInterval: DEFAULT_REFETCH_INTERVAL,
         enabled: address != null,
     });
     return query();

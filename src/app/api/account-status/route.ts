@@ -1,5 +1,5 @@
 import config from '@/src/config/config';
-import { AccountStatus } from '@/src/types/enums/accountStatus.enum';
+import { AccountStatus } from '@/src/types/enums/AccountStatus.enum';
 import { getVaultPublicKey } from '@quartz-labs/sdk';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { NextResponse } from 'next/server';
@@ -77,9 +77,6 @@ async function checkIsMissingBetaKey(connection: Connection, address: PublicKey)
         }),
     });
     const { result } = await response.json();
-    console.log("Endpoint: ", connection.rpcEndpoint);
-    console.log("Address: ", address.toBase58());
-    console.log(result);
 
     for (const asset of result.items) {
         if (asset.content.metadata.name && asset.content.metadata.name.includes("Quartz Pin")) {

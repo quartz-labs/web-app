@@ -1,0 +1,9 @@
+export enum ModalVariation {
+    DISABLED = "DISABLED",
+    NOTIFICATIONS = "NOTIFICATIONS",
+    ADD_FUNDS = "ADD_FUNDS",
+    WITHDRAW = "WITHDRAW",  
+    REPAY = "REPAY",
+    REPAY_LOAN = "REPAY_LOAN",
+    CLOSE_ACCOUNT = "CLOSE_ACCOUNT"
+}
