@@ -1,5 +1,4 @@
 import styles from "./AssetCard.module.css";
-import type { AssetInfo } from "@/src/types/interfaces/Asset.interface";
 
 export interface EmptyAssetCardProps {
     category: string;

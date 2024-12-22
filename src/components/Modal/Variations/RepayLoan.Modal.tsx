@@ -5,10 +5,10 @@ import { SUPPORTED_DRIFT_MARKETS } from "@quartz-labs/sdk";
 import { useConnection, useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useEffect, useState } from "react";
 import styles from "../Modal.module.css";
-import InputSection from "../Input.ModuleComponent";
+import InputSection from "../Input.ModalComponent";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
 import Buttons from "../Buttons.ModalComponent";
-import { baseUnitToDecimal, buildAndSendFlashLoanTransaction, buildAndSendTransaction, decimalToBaseUnit, formatTokenDisplay, truncToDecimalPlaces } from "@/src/utils/helpers";
+import { baseUnitToDecimal, buildAndSendFlashLoanTransaction, decimalToBaseUnit, formatTokenDisplay, truncToDecimalPlaces } from "@/src/utils/helpers";
 import TokenSelect from "../TokenSelect/TokenSelect";
 import { TOKENS } from "@/src/config/tokens";
 import { makeCollateralRepayIxs } from "@/src/utils/instructions";
@@ -52,13 +52,13 @@ export default function RepayLoanModal() {
 
     const loanMarketIndices = balances
         ? Object.entries(balances)
-            .filter(([_, balance]) => balance < 0)
+            .filter(([, balance]) => balance < 0)
             .map(([marketIndex]) => Number(marketIndex) as MarketIndex)
         : [];
 
     const collateralMarketIndices = balances
         ? Object.entries(balances)
-            .filter(([_, balance]) => balance > 0)
+            .filter(([, balance]) => balance > 0)
             .map(([marketIndex]) => Number(marketIndex) as MarketIndex)
         : [];
 

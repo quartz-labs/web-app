@@ -9,7 +9,7 @@ import {
 } from '@solana/wallet-adapter-react';
 import { WalletModalProvider, WalletMultiButton } from './wallet-adapter-react-ui';
 import { type ReactNode, useCallback, useMemo } from 'react';
-import { ClusterProvider, useCluster } from './cluster-data-access';
+import { useCluster } from './cluster-data-access';
 
 import './wallet-adapter-react-ui/styles.css';
 

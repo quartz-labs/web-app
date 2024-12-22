@@ -1,7 +1,7 @@
 import Image from "next/image";
 import styles from "./AssetCard.module.css";
 import type { AssetInfo } from "@/src/types/interfaces/AssetInfo.interface";
-import { formatDollarValue, formatTokenDisplay, truncToDecimalPlaces } from "@/src/utils/helpers";
+import { formatDollarValue, formatTokenDisplay } from "@/src/utils/helpers";
 import { TOKENS } from "@/src/config/tokens";
 import { useState, useEffect } from "react";
 

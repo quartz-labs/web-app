@@ -2,8 +2,6 @@ import type { MarketIndex } from "@/src/config/constants";
 import styles from "./Modal.module.css";
 import TokenSelect from "./TokenSelect/TokenSelect";
 import { formatTokenDisplay } from "@/src/utils/helpers";
-import { useState } from "react";
-import { useEffect } from "react";
 
 interface InputSectionProps {
     label?: string;

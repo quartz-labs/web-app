@@ -2,7 +2,7 @@
 
 import { useRefetchAccountData } from "@/src/utils/hooks";
 import { useEffect, useState } from "react";
-import InputSection from "../Input.ModuleComponent";
+import InputSection from "../Input.ModalComponent";
 import Buttons from "../Buttons.ModalComponent";
 import styles from "../Modal.module.css";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
@@ -42,7 +42,7 @@ export default function AddFundsModal() {
     const { data: depositLimitBaseUnits } = useDepositLimitsQuery(wallet?.publicKey ?? null, marketIndex);
     useEffect(() => {
         if (depositLimitBaseUnits) setAvailable(baseUnitToDecimal(depositLimitBaseUnits, marketIndex));
-    }, [depositLimitBaseUnits]);
+    }, [depositLimitBaseUnits, marketIndex]);
 
     const handleConfirm = async () => {
         if (!wallet?.publicKey) return setErrorText("Wallet not connected");

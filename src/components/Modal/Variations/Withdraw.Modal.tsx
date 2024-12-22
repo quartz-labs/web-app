@@ -7,7 +7,7 @@ import { useConnection, useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useEffect, useState } from "react";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
 import styles from "../Modal.module.css";
-import InputSection from "../Input.ModuleComponent";
+import InputSection from "../Input.ModalComponent";
 import Buttons from "../Buttons.ModalComponent";
 import { makeWithdrawIxs } from "@/src/utils/instructions";
 import { useError } from "@/src/context/error-provider";

@@ -94,7 +94,7 @@ export default function NotificationsModal() {
             </div>
                 
             <p style={{marginBottom: "55px"}}>
-                If you don't repay your loan before reaching 0% health, your collateral will automatically be sold at market rate to <span className={"no-wrap"}>cover your loan.</span>
+                If you don&apos;t repay your loan before reaching 0% health, your collateral will automatically be sold at market rate to <span className={"no-wrap"}>cover your loan.</span>
             </p>
             
 

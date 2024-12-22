@@ -6,7 +6,7 @@ import type { Connection } from "@solana/web3.js";
 import type { PublicKey } from "@solana/web3.js";
 import { JUPITER_SLIPPAGE_BPS, type MarketIndex } from "../config/constants";
 import { TOKENS } from "../config/tokens";
-import { createAssociatedTokenAccountInstruction, createCloseAccountInstruction, createSyncNativeInstruction, getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { createAssociatedTokenAccountInstruction, createCloseAccountInstruction, createSyncNativeInstruction, getAssociatedTokenAddress } from "@solana/spl-token";
 import { Keypair, SystemProgram } from "@solana/web3.js";
 import type { AddressLookupTableAccount } from "@solana/web3.js";
 import { getJupiterSwapQuote, getTokenAccountBalance } from "./helpers";

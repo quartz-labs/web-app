@@ -2,7 +2,6 @@ import { useStore } from "@/src/utils/store";
 import styles from "./Health.module.css";
 import type React from "react";
 import { rgb } from "@/src/utils/helpers";
-import { useEffect, useState } from "react";
 
 export default function Health() {
     const { health } = useStore();

@@ -59,7 +59,7 @@ export default function TxStatusPopup() {
                 setStatus(TxStatus.NONE);
             }, TIMEOUT_TIME);
         }
-    }, [props, enabled, hideTxStatus, showError, wallet]);
+    }, [props, enabled, hideTxStatus, showError, wallet, refetchAccountData]);
 
 
     if (!props || !enabled || status === TxStatus.NONE) return (<></>);
