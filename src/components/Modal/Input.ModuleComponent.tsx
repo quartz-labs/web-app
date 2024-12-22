@@ -2,6 +2,8 @@ import type { MarketIndex } from "@/src/config/constants";
 import styles from "./Modal.module.css";
 import TokenSelect from "./TokenSelect/TokenSelect";
 import { formatTokenDisplay } from "@/src/utils/helpers";
+import { useState } from "react";
+import { useEffect } from "react";
 
 interface InputSectionProps {
     label?: string;
@@ -40,6 +42,7 @@ export default function InputSection({
     return (
         <div className={styles.inputSection}>
             <p>{label ?? "Amount"}</p>
+            
 
             <div className={styles.inputFieldWrapper}>
                 <input 
@@ -60,20 +63,21 @@ export default function InputSection({
             </div>
 
             <div className={styles.infoWrapper}>
-                {(value !== undefined) && (
-                    <p className={"light-text small-text"}>
-                        ${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {(rate !== undefined) && (
-                            <span className={"tiny-text"}>({(rate * 100).toFixed(2)}% {borrowing ? "APR" : "APY"})</span>
-                        )}
-                    </p>
-                )}
-                <div/>
+                <div className={styles.infoLeft}>
+                    {(value !== undefined) && (
+                        <p className={"light-text small-text"}>
+                            ${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {(rate !== undefined) && (
+                                <span className={"tiny-text"}>({(rate * 100).toFixed(2)}% {borrowing ? "APR" : "APY"})</span>
+                            )}
+                        </p>
+                    )}
 
-                <div className={styles.amount}>
                     {(available !== undefined) && (
                         <p className={"light-text small-text"}>{availableLabel ?? "Available"}: {formatTokenDisplay(available)}</p>
                     )}
-                    
+                </div>
+            
+                <div className={styles.amount}>
                     <button className={`glass-button ghost ${styles.balanceButton}`} onClick={setHalfAmount}>
                         Half
                     </button>
@@ -84,5 +88,5 @@ export default function InputSection({
                 </div>
             </div>
         </div>
-    )
+    );
 }

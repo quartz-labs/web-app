@@ -3,7 +3,7 @@
     display: flex;
     align-items: center;
     font-size: var(--font-size-large);
-    height: 100%;
+    height: var(--input-field-height);
     background: var(--color-background);
     border-radius: 14px;
     border: 1px solid var(--placeholder-glass-stroke);

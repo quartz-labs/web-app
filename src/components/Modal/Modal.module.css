@@ -3,7 +3,7 @@
     z-index: 999;
     top: 0px;
     left: 0px;
-    height: 100VH;
+    min-height: 100VH;
     width: 100VW;
     background: rgb(0, 0, 0, 0.35);
 
@@ -67,10 +67,9 @@
 .inputFieldWrapper {
     width: 100%;
     display: flex;
-    gap: 10px;
+    gap: var(--input-field-wrapper-gap);
     margin-top: 8px;
     margin-bottom: 16px;
-    height: var(--input-field-height);
 }
 
 .inputField {
@@ -79,10 +78,12 @@
     border-radius: 14px;
     border: 1px solid var(--placeholder-glass-stroke);
     font-size: var(--font-size-h4);
+    height: var(--input-field-height);
 }
 
 .inputFieldAmount {
     flex-grow: 1;
+    width: 100%;
 }
 
 .inputFieldCollateral {
@@ -145,6 +146,13 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+.infoLeft {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding-right: 9px;
 }
 
 .amount {
@@ -215,6 +223,21 @@
 @media only screen and (max-width: 428px) {
     .buttons {
         flex-direction: column;
+    }
+
+    .infoLeft {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+
+    .infoWrapper {
+        align-items: flex-start;
+    }
+
+    .inputFieldWrapper {
+        flex-direction: column;
+        height: calc((var(--input-field-height) * 2) + var(--input-field-wrapper-gap));
     }
 }
 

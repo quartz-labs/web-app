@@ -40,5 +40,5 @@
 .loadingSpinner {
     height: 100%;
     width: 100%;
-    padding: 10px 0px;
+    padding: calc(var(--notifications-button-padding) + 1px) 0px;
 }

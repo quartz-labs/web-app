@@ -217,6 +217,7 @@ a:hover {
   --buttons-row-gap: 20px;
   --notifications-button-padding: 9px;
   --nav-items-gap: 15px;
+  --input-field-wrapper-gap: 10px;
 }
 
 @media only screen and (max-width: 1300px) {
