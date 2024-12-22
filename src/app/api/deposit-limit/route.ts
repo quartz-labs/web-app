@@ -7,6 +7,7 @@ import { MICRO_LAMPORTS_PER_LAMPORT, type MarketIndex } from '@/src/config/const
 import { AccountLayout } from '@solana/spl-token';
 import { getAssociatedTokenAddress } from '@solana/spl-token';
 import { USDC_MINT } from '@quartz-labs/sdk';
+import { TOKENS } from '@/src/config/tokens';
 
 const envSchema = z.object({
     RPC_URL: z.string().url(),
@@ -56,13 +57,11 @@ export async function GET(request: Request) {
 }
 
 async function fetchDepositLimit(connection: Connection, pubkey: PublicKey, marketIndex: MarketIndex): Promise<number> {
-    if (marketIndex === DRIFT_MARKET_INDEX_USDC) {
-        return await fetchMaxDepositUsdc(pubkey, connection);
-    } else if (marketIndex === DRIFT_MARKET_INDEX_SOL) {
+    if (marketIndex === DRIFT_MARKET_INDEX_SOL) {
         return await fetchMaxDepositLamports(pubkey, connection);
-    } else {
-        throw new Error("Not implemented"); // TODO: Implement mulitple assets
     }
+    
+    return await fetchMaxDepositSpl(pubkey, connection, TOKENS[marketIndex].mintAddress);
 }
 
 export const fetchMaxDepositLamports = async (pubkey: PublicKey, connection: Connection) => {
@@ -79,8 +78,8 @@ export const fetchMaxDepositLamports = async (pubkey: PublicKey, connection: Con
     return Math.max(maxDeposit, 0);
 }
 
-export const fetchMaxDepositUsdc = async (pubkey: PublicKey, connection: Connection) => {
-    const tokenAccount = await getAssociatedTokenAddress(USDC_MINT, pubkey);
+export const fetchMaxDepositSpl = async (pubkey: PublicKey, connection: Connection, mint: PublicKey) => {
+    const tokenAccount = await getAssociatedTokenAddress(mint, pubkey);
     const balance = await connection.getTokenAccountBalance(tokenAccount);
     return Number(balance.value.amount);
 }

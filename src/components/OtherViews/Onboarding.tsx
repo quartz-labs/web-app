@@ -2,9 +2,19 @@ import { useState } from "react";
 import styles from "./OtherViews.module.css";
 import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import { PuffLoader } from "react-spinners";
+import { buildAndSendTransaction } from "@/src/utils/helpers";
+import { makeInitAccountIxs } from "@/src/utils/instructions";
+import { useError } from "@/src/context/error-provider";
+import { useRefetchAccountStatus } from "@/src/utils/hooks";
+import { captureError } from "@/src/utils/errors";
+import { TxStatus, useTxStatus } from "@/src/context/tx-status-provider";
 
 export default function Onboarding() {
   const wallet = useAnchorWallet();
+  const { connection } = useConnection();
+  const { showError } = useError();
+  const { showTxStatus } = useTxStatus();
+  const refetchAccountStatus = useRefetchAccountStatus();
 
   const [checkboxes, setCheckboxes] = useState([false, false, false]);
   const [missingCheckboxes, setMissingCheckboxes] = useState([false, false, false]);
@@ -18,19 +28,27 @@ export default function Onboarding() {
   };
 
   const handleCreateAccount = async () => {
-      if (!wallet || awaitingSign) return;
+    if (!wallet || awaitingSign) return;
 
-      setMissingCheckboxes(checkboxes.map(checked => !checked));
-      if (!checkboxes.every(checked => checked)) {
-          setAttemptFailed(true);
-          return;
-      }
+    setMissingCheckboxes(checkboxes.map(checked => !checked));
+    if (!checkboxes.every(checked => checked)) {
+        setAttemptFailed(true);
+        return;
+    }
 
-      setAttemptFailed(false);
-      setAwaitingSign(true);
-      
-      // TODO: Implement
-      throw new Error("Not implemented");
+    setAttemptFailed(false);
+    setAwaitingSign(true);
+    try {
+        const { instructions, marginfiSigner } = await makeInitAccountIxs(connection, wallet);
+        const signers = marginfiSigner ? [marginfiSigner] : [];
+        const signature = await buildAndSendTransaction(instructions, wallet, connection, showTxStatus, [], signers);
+        if (signature) refetchAccountStatus(signature);
+    } catch (error) {
+        showTxStatus({ status: TxStatus.NONE });
+        captureError(showError, "Failed to create account", "/Onboarding.tsx", error, wallet.publicKey);
+    } finally {
+        setAwaitingSign(false);
+    }
   };
 
   return (

@@ -31,13 +31,17 @@ export const WalletButton = dynamic(
 );
 
 export function SolanaProvider({ children }: { children: ReactNode }) {
+  const { cluster } = useCluster();
+  const endpoint = useMemo(() => cluster.endpoint, [cluster]);
   const onError = useCallback((error: WalletError) => {
     console.error(error);
   }, []);
 
   return (
-    <WalletProvider wallets={[]} onError={onError} autoConnect={true}>
+    <ConnectionProvider endpoint={endpoint}>
+      <WalletProvider wallets={[]} onError={onError} autoConnect={true}>
         <WalletModalProvider>{children}</WalletModalProvider>
-    </WalletProvider>
+      </WalletProvider>
+    </ConnectionProvider>
   );
 }

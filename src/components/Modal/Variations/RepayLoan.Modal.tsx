@@ -2,21 +2,28 @@ import type { MarketIndex } from "@/src/config/constants";
 import { useRefetchAccountData } from "@/src/utils/hooks";
 import { useStore } from "@/src/utils/store";
 import { SUPPORTED_DRIFT_MARKETS } from "@quartz-labs/sdk";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useConnection, useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useEffect, useState } from "react";
 import styles from "../Modal.module.css";
 import InputSection from "../Input.ModuleComponent";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
 import Buttons from "../Buttons.ModalComponent";
-import { baseUnitToDecimal, formatTokenDisplay, truncToDecimalPlaces } from "@/src/utils/helpers";
+import { baseUnitToDecimal, buildAndSendTransaction, decimalToBaseUnit, formatTokenDisplay, truncToDecimalPlaces } from "@/src/utils/helpers";
 import TokenSelect from "../TokenSelect/TokenSelect";
 import { TOKENS } from "@/src/config/tokens";
+import { makeCollateralRepayIxs } from "@/src/utils/instructions";
+import { useError } from "@/src/context/error-provider";
+import { captureError } from "@/src/utils/errors";
+import { TxStatus, useTxStatus } from "@/src/context/tx-status-provider";
 
 export default function RepayLoanModal() {
-    const refetchAccountData = useRefetchAccountData();
-    
+    const wallet = useAnchorWallet();
+    const { connection } = useConnection();
+
     const { prices, rates, balances, setModalVariation } = useStore();
-    const wallet = useWallet();
+    const { showError } = useError();
+    const { showTxStatus } = useTxStatus();
+    const refetchAccountData = useRefetchAccountData();
 
     const [awaitingSign, setAwaitingSign] = useState(false);
     const [errorText, setErrorText] = useState("");
@@ -55,8 +62,8 @@ export default function RepayLoanModal() {
         : [];
 
     const handleConfirm = async () => {
+        if (!wallet?.publicKey) return setErrorText("Wallet not connected");
         if (isNaN(amountLoan)) return setErrorText("Invalid input");
-        if (!wallet.publicKey) return setErrorText("Wallet not connected");
         
         const minAmountLoan = baseUnitToDecimal(1, marketIndexLoan);
         if (amountLoan > baseUnitToDecimal(balanceLoan, marketIndexLoan)) return setErrorText(`Maximum loan amount: ${balanceLoan}`);
@@ -69,11 +76,18 @@ export default function RepayLoanModal() {
         setErrorText("");
 
         setAwaitingSign(true);
-        // TODO - Implement
-        const signature = ""; // await depositUsdc(wallet, connection, decimaltoBaseUnits(amount), showError, showTxStatus);
-        setAwaitingSign(false);
-
-        if (signature) setModalVariation(ModalVariation.DISABLED);
+        try {
+            const amountLoanBaseUnits = decimalToBaseUnit(amountLoan, marketIndexLoan);
+            const { instructions, lookupTables } = await makeCollateralRepayIxs(connection, wallet, amountLoanBaseUnits, marketIndexLoan, marketIndexCollateral);
+            const signature = await buildAndSendTransaction(instructions, wallet, connection, showTxStatus, lookupTables);
+            setAwaitingSign(false);
+            if (signature) setModalVariation(ModalVariation.DISABLED);
+        } catch (error) {
+            showTxStatus({ status: TxStatus.NONE });
+            captureError(showError, "Failed to repay loan", "/RepayLoanModal.tsx", error, wallet.publicKey);
+        } finally {
+            setAwaitingSign(false);
+        }
     }
     
     return (

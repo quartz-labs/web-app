@@ -7,7 +7,7 @@ export function captureError(
     errorString: string, 
     location: string, 
     error: any,
-    wallet?: PublicKey, 
+    wallet: PublicKey | null, 
     silentError: boolean = false,
 ) {
     console.error(error);

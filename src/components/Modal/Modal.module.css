@@ -173,6 +173,10 @@
     margin-top: 55px;
 }
 
+.singleButton {
+    width: 50%;
+}
+
 .mainButton {
     width: 100%;
 }

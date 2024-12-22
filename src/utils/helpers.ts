@@ -1,23 +1,14 @@
-import { MICRO_LAMPORTS_PER_LAMPORT, type MarketIndex } from "@/src/config/constants";
+import { type MarketIndex } from "@/src/config/constants";
 import type { Rate } from "@/src/types/interfaces/Rate.interface";
 import type { AssetInfo } from "@/src/types/interfaces/AssetInfo.interface";
-import { DRIFT_MARKET_INDEX_SOL, DRIFT_MARKET_INDEX_USDC, QuartzClient, SUPPORTED_DRIFT_MARKETS, USDC_MINT, WSOL_MINT } from "@quartz-labs/sdk";
-import { Connection, Keypair, LAMPORTS_PER_SOL, PublicKey, Transaction, TransactionInstruction } from "@solana/web3.js";
-import { TOKENS } from "../config/tokens";
-import { captureError } from "./errors";
+import { TOKENS } from "@/src/config/tokens";
+import { AddressLookupTableAccount, Connection, Keypair, PublicKey, TransactionInstruction } from "@solana/web3.js";
+import { createPriorityFeeInstructions, SUPPORTED_DRIFT_MARKETS } from "@quartz-labs/sdk";
 import type { AnchorWallet } from "@solana/wallet-adapter-react";
-import { AccountLayout, getAssociatedTokenAddress } from "@solana/spl-token";
-import type { ShowErrorProps } from "../context/error-provider";
-
-export async function waitForSignature(signature: string): Promise<void> {
-    try {
-        // TODO: Wait for transaction confirmation
-    } catch (error) {
-        // TODO: Handle timeout
-    }
-    
-    throw new Error("Not implemented");
-}
+import type { QuoteResponse } from "@jup-ag/api";
+import { VersionedTransaction } from "@solana/web3.js";
+import { TransactionMessage } from "@solana/web3.js";
+import { TxStatus, type TxStatusProps } from "../context/tx-status-provider";
 
 export function baseUnitToDecimal(baseUnits: number, marketIndex: MarketIndex): number {
     const token = TOKENS[marketIndex];
@@ -148,4 +139,94 @@ export function formatTokenDisplay(balance: number, marketIndex?: MarketIndex) {
     }
 
     return truncToDecimalPlaces(balance, precision);
+}
+
+export async function getTokenAccountBalance(connection: Connection, tokenAccount: PublicKey) {
+    try {
+        const balance = await connection.getTokenAccountBalance(tokenAccount);
+        return Number(balance.value.amount);
+    } catch (TokenAccountNotFoundError) {
+        return 0;
+    }
+}
+
+export async function getJupiterSwapQuote(
+    inputMint: PublicKey, 
+    outputMint: PublicKey, 
+    amount: number,
+    slippageBps: number
+) {
+    const quoteEndpoint = 
+        `https://quote-api.jup.ag/v6/quote?inputMint=${inputMint.toBase58()}&outputMint=${outputMint.toBase58()}&amount=${amount}&slippageBps=${slippageBps}&swapMode=ExactOut&onlyDirectRoutes=true`;
+    const quoteResponse = await (await fetch(quoteEndpoint)).json() as QuoteResponse;
+    return quoteResponse;
+}
+
+export async function buildAndSendFlashLoanTransaction(
+    instructions: TransactionInstruction[], 
+    wallet: AnchorWallet, 
+    connection: Connection,
+    showTxStatus: (props: TxStatusProps) => void,
+    lookupTables: AddressLookupTableAccount[] = [],
+    otherSigners: Keypair[] = []
+) {
+
+}
+
+export async function buildAndSendTransaction(
+    instructions: TransactionInstruction[], 
+    wallet: AnchorWallet, 
+    connection: Connection,
+    showTxStatus: (props: TxStatusProps) => void,
+    lookupTables: AddressLookupTableAccount[] = [],
+    otherSigners: Keypair[] = []
+): Promise<string> {
+    const computeBudget = 200_000;
+    const ix_priority = await createPriorityFeeInstructions(computeBudget);
+    instructions.unshift(...ix_priority);
+
+    const blockhash = await fetch("/api/blockhash")
+        .then(res => res.json())
+        .then(data => data.blockhash);
+
+    const messageV0 = new TransactionMessage({
+        payerKey: wallet.publicKey,
+        recentBlockhash: blockhash,
+        instructions: instructions
+    }).compileToV0Message(lookupTables);
+    const transaction = new VersionedTransaction(messageV0);
+
+    const signature = await sendTransaction(transaction, wallet, showTxStatus, otherSigners);
+    return signature;
+}
+
+async function sendTransaction(
+    transaction: VersionedTransaction, 
+    wallet: AnchorWallet, 
+    showTxStatus: (props: TxStatusProps) => void,
+    otherSigners: Keypair[] = []
+): Promise<string> {
+    showTxStatus({ status: TxStatus.SIGNING });
+
+    const signedTx = await wallet.signTransaction(transaction);
+    if (otherSigners.length > 0) signedTx.sign(otherSigners);
+
+    const serializedTransaction = Buffer.from(signedTx.serialize()).toString("base64");
+    const response = await fetch("api/tx", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            transaction: serializedTransaction
+        }),
+    });
+    const body = await response.json();
+    if (!response.ok) throw new Error(body.error ?? "Could not send transaction");
+
+    showTxStatus({ 
+        signature: body.signature,
+        status: TxStatus.SENT 
+    });
+    return body.signature;
 }

@@ -58,7 +58,7 @@ function createQuery<T>({
                 errorMessage, 
                 endpoint, 
                 response.error, 
-                undefined, 
+                null, 
                 true // TODO - This is silent to prevent infinite refresh, add some way of showing feedback
             );
         }

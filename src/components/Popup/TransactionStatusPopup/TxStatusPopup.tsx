@@ -8,12 +8,15 @@ import { TailSpin } from "react-loader-spinner";
 import Image from "next/image";
 import { captureError } from "@/src/utils/errors";
 import { useError } from "@/src/context/error-provider";
+import { useRefetchAccountData } from "@/src/utils/hooks";
 
 
 export default function TxStatusPopup() {
     const { props, enabled, hideTxStatus } = useTxStatus();
     const { showError } = useError();
     const wallet = useAnchorWallet();
+    const refetchAccountData = useRefetchAccountData();
+
     const [status, setStatus] = useState(TxStatus.NONE);
 
     const TIMEOUT_TIME = 4_000;
@@ -22,11 +25,12 @@ export default function TxStatusPopup() {
     useEffect(() => {
         const trackSignature = async(signature: string) => {
             if (!props) return;
-            if (!wallet) return captureError(showError, "No wallet connected", "/TxStatusPopup.tsx", "Could not find wallet");
+            if (!wallet) return captureError(showError, "No wallet connected", "/TxStatusPopup.tsx", "Could not find wallet", null);
 
             try {
                 await fetch(`/api/confirm-tx?signature=${signature}`);
                 setStatus(TxStatus.CONFIRMED);
+                refetchAccountData(signature);
 
                 setTimeout(() => {
                     hideTxStatus();
@@ -34,6 +38,7 @@ export default function TxStatusPopup() {
                 }, TIMEOUT_TIME);
             } catch (error) {
                 setStatus(TxStatus.TIMEOUT);
+                refetchAccountData(signature);
                 captureError(showError, "Transaction timed out.", "utils: /instructions.ts", error, wallet.publicKey, true);
 
                 setTimeout(() => {

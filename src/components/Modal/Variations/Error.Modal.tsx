@@ -39,15 +39,15 @@ export default function ErrorModal() {
                             Contact support through <a href="https://discord.gg/K3byNmnKNm" target="_blank">Discord</a> or <a href={email} target="_blank">email</a> with the following <span className="no-wrap">Error ID: {errorId}</span>
                         </p>
                     </div>
-                </div>
 
-                <div className={styles.buttons}>
-                    <button 
-                        className={`glass-button ghost ${styles.mainButton}`}
-                        onClick={hideDetails}
-                    >
-                        Close
-                    </button>
+                    <div className={`${styles.buttons} ${styles.singleButton}`}>
+                        <button 
+                            className={`glass-button ghost ${styles.mainButton}`}
+                            onClick={hideDetails}
+                        >
+                            Close
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

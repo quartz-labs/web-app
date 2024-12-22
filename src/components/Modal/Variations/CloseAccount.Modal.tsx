@@ -4,28 +4,40 @@ import styles from "../Modal.module.css";
 import { PuffLoader } from "react-spinners";
 import { captureError } from "@/src/utils/errors";
 import { useError } from "@/src/context/error-provider";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import { useState } from "react";
 import { useRefetchAccountStatus } from "@/src/utils/hooks";
+import { makeCloseAccountIxs } from "@/src/utils/instructions";
+import { buildAndSendTransaction } from "@/src/utils/helpers";
+import { TxStatus, useTxStatus } from "@/src/context/tx-status-provider";
 
 export default function CloseAccountModal() {
+    const wallet = useAnchorWallet();
+    const { connection } = useConnection();
+
     const { setModalVariation } = useStore();
-    const { wallet } = useWallet();
     const { showError } = useError();
+    const { showTxStatus } = useTxStatus();
     const refetchAccountStatus = useRefetchAccountStatus();
     
     const [ awaitingSign, setAwaitingSign ] = useState(false);
 
     const handleCloseAccount = async () => {
-        if (!wallet) return captureError(showError, "No wallet connected", "/CloseAccountModal.tsx", undefined);
+        if (!wallet) return captureError(showError, "No wallet connected", "/CloseAccountModal.tsx", undefined, null);
 
         setAwaitingSign(true);
-        // TODO - Implement
-        const signature = ""; //await closeAccount(wallet, connection, showError, showTxStatus);
-        setAwaitingSign(false);
-        if (signature) {
-            setModalVariation(ModalVariation.DISABLED);
-            refetchAccountStatus(signature);
+        try {
+            const instructions = await makeCloseAccountIxs(connection, wallet);
+            const signature = await buildAndSendTransaction(instructions, wallet, connection, showTxStatus);
+            if (signature) {
+                refetchAccountStatus(signature);
+                setModalVariation(ModalVariation.DISABLED);
+            }
+        } catch (error) {
+            showTxStatus({ status: TxStatus.NONE });
+            captureError(showError, "Failed to close account", "/CloseAccountModal.tsx", error, wallet.publicKey);
+        } finally {
+            setAwaitingSign(false);
         }
     }
 

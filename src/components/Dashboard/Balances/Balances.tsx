@@ -66,7 +66,7 @@ export default function Balances() {
                             ${loanBalance[0]}<span className={styles.detailBalanceDecimal}>.{loanBalance[1]}</span>
                         </p>
                         {rates !== undefined && (
-                            <p className={`${styles.detailBalanceRate} ${styles.rateHeight}`}>{plusOrMinus(loanRate)} /day</p>
+                            <p className={`${styles.detailBalanceRate} ${styles.rateHeight}`}>{plusOrMinus(loanRate, "$")} /day</p>
                         )}
                     </>
                 )}
@@ -87,7 +87,7 @@ export default function Balances() {
                             ${collateralBalance[0]}<span className={styles.detailBalanceDecimal}>.{collateralBalance[1]}</span>
                         </p>
                         {rates !== undefined && (
-                            <p className={`${styles.detailBalanceRate} ${styles.rateHeight}`}>{plusOrMinus(collateralRate)} /day</p>
+                            <p className={`${styles.detailBalanceRate} ${styles.rateHeight}`}>{plusOrMinus(collateralRate, "$")} /day</p>
                         )}
                     </>
                 )}
