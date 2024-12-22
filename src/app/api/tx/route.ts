@@ -46,6 +46,8 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Blockhash is invalid or has expired" }, { status: 400 });
     }
 
+    console.log(body.skipPreflight);
+
     try {
         const signature = await connection.sendRawTransaction(body.transaction, {
             skipPreflight: body.skipPreflight,

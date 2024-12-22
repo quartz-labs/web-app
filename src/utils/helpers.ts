@@ -9,6 +9,8 @@ import type { QuoteResponse } from "@jup-ag/api";
 import { VersionedTransaction } from "@solana/web3.js";
 import { TransactionMessage } from "@solana/web3.js";
 import { TxStatus, type TxStatusProps } from "../context/tx-status-provider";
+import { getConfig as getMarginfiConfig, MarginfiClient } from "@mrgnlabs/marginfi-client-v2";
+import { PreflightCheck } from "../types/enums/PreflightCheck.enum";
 
 export function baseUnitToDecimal(baseUnits: number, marketIndex: MarketIndex): number {
     const token = TOKENS[marketIndex];
@@ -115,6 +117,9 @@ export function generateAssetInfos(prices: Record<MarketIndex, number>, balances
         else if (balance < 0) borrowedAssets.push({ marketIndex, balance, price, rate: rate.borrowRate });
     }
 
+    suppliedAssets.sort((a, b) => (b.balance * b.price) - (a.balance * a.price));
+    borrowedAssets.sort((a, b) => (b.balance * b.price) - (a.balance * a.price));
+
     return { suppliedAssets, borrowedAssets };
 }
 
@@ -150,6 +155,16 @@ export async function getTokenAccountBalance(connection: Connection, tokenAccoun
     }
 }
 
+export function validateAmount(marketIndex: MarketIndex, amountDecimal: number, maxAmountBaseUnits: number, minAmountBaseUnits: number = 1) {
+    const minAmountDecimal = baseUnitToDecimal(minAmountBaseUnits, marketIndex);
+    const maxAmountDecimal = baseUnitToDecimal(maxAmountBaseUnits, marketIndex);
+
+    if (isNaN(amountDecimal)) return "Invalid input";
+    if (amountDecimal > maxAmountDecimal) return `Maximum amount: ${maxAmountDecimal}`;
+    if (amountDecimal < minAmountDecimal) return `Minimum amount: ${minAmountDecimal}`;
+    return "";
+}
+
 export async function getJupiterSwapQuote(
     inputMint: PublicKey, 
     outputMint: PublicKey, 
@@ -163,14 +178,46 @@ export async function getJupiterSwapQuote(
 }
 
 export async function buildAndSendFlashLoanTransaction(
+    flashLoanAmountBaseUnits: number,
+    flashLoanMarketIndex: MarketIndex,
     instructions: TransactionInstruction[], 
     wallet: AnchorWallet, 
     connection: Connection,
     showTxStatus: (props: TxStatusProps) => void,
     lookupTables: AddressLookupTableAccount[] = [],
     otherSigners: Keypair[] = []
-) {
+): Promise<string> {
+    const PRIORITY_FEE_DECIMAL = 0.002;
+    const amountLoanDecimal = baseUnitToDecimal(flashLoanAmountBaseUnits, flashLoanMarketIndex);
 
+    const marginfiClient = await MarginfiClient.fetch(getMarginfiConfig(), wallet, connection);
+    const [ marginfiAccount ] = await marginfiClient.getMarginfiAccountsForAuthority(wallet.publicKey);
+    if (marginfiAccount === undefined) throw new Error("Could not find Flash Loan MarginFi account");
+    if (marginfiAccount.isDisabled) throw new Error("Flash Loan MarginFi account is disabled"); // TODO: Handle disabled MarginFi accounts
+
+    const loanBank = marginfiClient.getBankByMint(TOKENS[flashLoanMarketIndex].mintAddress);
+    if (loanBank === null) throw new Error("Could not find Flash Loan MarginFi bank");
+
+    const { flashloanTx } = await marginfiAccount.makeLoopTx(
+        amountLoanDecimal,
+        amountLoanDecimal,
+        loanBank.address,
+        loanBank.address,
+        instructions,
+        lookupTables,
+        PRIORITY_FEE_DECIMAL,
+        true
+    )
+
+    const signature = await sendTransaction(
+        flashloanTx, 
+        wallet, 
+        showTxStatus, 
+        otherSigners, 
+        PreflightCheck.SIMULATE, 
+        connection
+    );
+    return signature;
 }
 
 export async function buildAndSendTransaction(
@@ -204,12 +251,23 @@ async function sendTransaction(
     transaction: VersionedTransaction, 
     wallet: AnchorWallet, 
     showTxStatus: (props: TxStatusProps) => void,
-    otherSigners: Keypair[] = []
+    otherSigners: Keypair[] = [],
+    skipPreflight: PreflightCheck = PreflightCheck.CHECK,
+    connection?: Connection
 ): Promise<string> {
     showTxStatus({ status: TxStatus.SIGNING });
 
     const signedTx = await wallet.signTransaction(transaction);
     if (otherSigners.length > 0) signedTx.sign(otherSigners);
+
+    if (skipPreflight === PreflightCheck.SIMULATE) {
+        if (connection === undefined) throw new Error("Connection is required for simulation");
+        const simulation = await connection.simulateTransaction(transaction);
+        console.log(simulation);
+        if (simulation.value.err) {
+            throw new Error(`Transaction simulation failed: ${JSON.stringify(simulation)}`);
+        }
+    }
 
     const serializedTransaction = Buffer.from(signedTx.serialize()).toString("base64");
     const response = await fetch("api/tx", {
@@ -218,11 +276,12 @@ async function sendTransaction(
             "Content-Type": "application/json",
         },
         body: JSON.stringify({
-            transaction: serializedTransaction
+            transaction: serializedTransaction,
+            skipPreflight: (skipPreflight !== PreflightCheck.CHECK)
         }),
     });
     const body = await response.json();
-    if (!response.ok) throw new Error(body.error ?? "Could not send transaction");
+    if (!response.ok) throw new Error(JSON.stringify(body.error) ?? "Could not send transaction");
 
     showTxStatus({ 
         signature: body.signature,

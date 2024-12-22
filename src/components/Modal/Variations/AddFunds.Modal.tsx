@@ -12,10 +12,11 @@ import { SUPPORTED_DRIFT_MARKETS } from "@quartz-labs/sdk";
 import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import { useError } from "@/src/context/error-provider";
 import { useDepositLimitsQuery } from "@/src/utils/queries";
-import { baseUnitToDecimal, buildAndSendTransaction, decimalToBaseUnit } from "@/src/utils/helpers";
+import { baseUnitToDecimal, buildAndSendTransaction, decimalToBaseUnit, validateAmount } from "@/src/utils/helpers";
 import { makeDepositIxs } from "@/src/utils/instructions";
 import { captureError } from "@/src/utils/errors";
 import { TxStatus, useTxStatus } from "@/src/context/tx-status-provider";
+import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
 
 export default function AddFundsModal() {
     const { connection } = useConnection();
@@ -29,7 +30,7 @@ export default function AddFundsModal() {
     const [awaitingSign, setAwaitingSign] = useState(false);
     const [errorText, setErrorText] = useState("");
     const [amountStr, setAmountStr] = useState("");
-    const amount = Number(amountStr);
+    const amountDecimals = Number(amountStr);
 
     const [ marketIndex, setMarketIndex ] = useState<MarketIndex>(SUPPORTED_DRIFT_MARKETS[0]);
     const [ available, setAvailable ] = useState(0);
@@ -38,29 +39,31 @@ export default function AddFundsModal() {
         refetchAccountData();
     }, [refetchAccountData]);
 
-    const { data: depositLimit } = useDepositLimitsQuery(wallet?.publicKey ?? null, marketIndex);
+    const { data: depositLimitBaseUnits } = useDepositLimitsQuery(wallet?.publicKey ?? null, marketIndex);
     useEffect(() => {
-        if (depositLimit) setAvailable(baseUnitToDecimal(depositLimit, marketIndex));
-    }, [depositLimit]);
+        if (depositLimitBaseUnits) setAvailable(baseUnitToDecimal(depositLimitBaseUnits, marketIndex));
+    }, [depositLimitBaseUnits]);
 
     const handleConfirm = async () => {
-        const minAmount = baseUnitToDecimal(1, marketIndex);
-
         if (!wallet?.publicKey) return setErrorText("Wallet not connected");
-        if (isNaN(amount)) return setErrorText("Invalid input");
-        if (amount > available) return setErrorText(`Maximum amount: ${available}`);
-        if (amount < minAmount) return setErrorText(`Minimum amount: ${minAmount}`);
-        setErrorText("");
+        
+        const errorText = validateAmount(marketIndex, amountDecimals, depositLimitBaseUnits ?? 0);
+        setErrorText(errorText);
+        if (errorText) return;
 
         setAwaitingSign(true);
         try {
-            const amountBaseUnits = decimalToBaseUnit(amount, marketIndex);
+            const amountBaseUnits = decimalToBaseUnit(amountDecimals, marketIndex);
             const instructions = await makeDepositIxs(connection, wallet, amountBaseUnits, marketIndex);
             const signature = await buildAndSendTransaction(instructions, wallet, connection, showTxStatus);
+            setAwaitingSign(false);
             if (signature) setModalVariation(ModalVariation.DISABLED);
         } catch (error) {
-            showTxStatus({ status: TxStatus.NONE });
-            captureError(showError, "Failed to add funds", "/AddFundsModal.tsx", error, wallet.publicKey);
+            if (error instanceof WalletSignTransactionError) showTxStatus({ status: TxStatus.SIGN_REJECTED });
+            else {
+                showTxStatus({ status: TxStatus.NONE });
+                captureError(showError, "Failed to add funds", "/AddFundsModal.tsx", error, wallet.publicKey);
+            }
         } finally {
             setAwaitingSign(false);
         }
@@ -77,8 +80,8 @@ export default function AddFundsModal() {
                 available={available}
                 amountStr={amountStr}
                 setAmountStr={setAmountStr}
-                setMaxAmount={() => setAmountStr(depositLimit ? baseUnitToDecimal(depositLimit, marketIndex).toString() : "0")}
-                setHalfAmount={() => setAmountStr(depositLimit ? baseUnitToDecimal(Math.trunc(depositLimit / 2), marketIndex).toString() : "0")}
+                setMaxAmount={() => setAmountStr(depositLimitBaseUnits ? baseUnitToDecimal(depositLimitBaseUnits, marketIndex).toString() : "0")}
+                setHalfAmount={() => setAmountStr(depositLimitBaseUnits ? baseUnitToDecimal(Math.trunc(depositLimitBaseUnits / 2), marketIndex).toString() : "0")}
                 marketIndex={marketIndex}
                 setMarketIndex={setMarketIndex}
             />

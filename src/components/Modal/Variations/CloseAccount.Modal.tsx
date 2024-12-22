@@ -10,6 +10,7 @@ import { useRefetchAccountStatus } from "@/src/utils/hooks";
 import { makeCloseAccountIxs } from "@/src/utils/instructions";
 import { buildAndSendTransaction } from "@/src/utils/helpers";
 import { TxStatus, useTxStatus } from "@/src/context/tx-status-provider";
+import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
 
 export default function CloseAccountModal() {
     const wallet = useAnchorWallet();
@@ -29,37 +30,39 @@ export default function CloseAccountModal() {
         try {
             const instructions = await makeCloseAccountIxs(connection, wallet);
             const signature = await buildAndSendTransaction(instructions, wallet, connection, showTxStatus);
+            setAwaitingSign(false);
             if (signature) {
                 refetchAccountStatus(signature);
                 setModalVariation(ModalVariation.DISABLED);
             }
         } catch (error) {
-            showTxStatus({ status: TxStatus.NONE });
-            captureError(showError, "Failed to close account", "/CloseAccountModal.tsx", error, wallet.publicKey);
+            if (error instanceof WalletSignTransactionError) showTxStatus({ status: TxStatus.SIGN_REJECTED });
+            else {
+                showTxStatus({ status: TxStatus.NONE });
+                captureError(showError, "Failed to close account", "/CloseAccountModal.tsx", error, wallet.publicKey);
+            }
         } finally {
             setAwaitingSign(false);
         }
     }
 
     return (
-        <>
-            <div className={styles.contentWrapper}>
-                <h2 className={`${styles.heading} ${styles.closeHeading}`}>
-                    Permanently Close Account
-                </h2>
-            
-                <p className={"error-text large-text"} style={{marginBottom: "42px"}}>
-                    Warning: This action cannot be undone
-                </p>
+        <div className={styles.contentWrapper}>
+            <h2 className={`${styles.heading} ${styles.closeHeading}`}>
+                Permanently Close Account
+            </h2>
+        
+            <p className={"error-text large-text"} style={{marginBottom: "42px"}}>
+                Warning: This action cannot be undone
+            </p>
 
-                <div className={styles.closeRequirements}>
-                    <p>To continue, your account must: </p>
-                    <ul>
-                        <li>be at least 13 days old</li>
-                        <li>have no outstanding loans</li>
-                        <li>have no remaining funds</li>
-                    </ul>
-                </div>
+            <div className={styles.closeRequirements}>
+                <p>To continue, your account must: </p>
+                <ul>
+                    <li>be at least 13 days old</li>
+                    <li>have no outstanding loans</li>
+                    <li>have no remaining funds</li>
+                </ul>
             </div>
 
             <div className={styles.buttons}>
@@ -88,6 +91,6 @@ export default function CloseAccountModal() {
                     Cancel
                 </button>
             </div>
-        </>
+        </div>
     )
 }

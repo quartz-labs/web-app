@@ -58,7 +58,7 @@ button.popup:active {
 .message p,
 .message a {
     color: var(--color-text-light);
-    font-size: var(--text-size-tiny);
+    font-size: var(--font-size-tiny);
     text-align: left;
 }
 
@@ -80,6 +80,6 @@ button.popup:active {
 
 .headingDetails {
     color: var(--color-text-light);
-    font-size: var(--text-size-small);
+    font-size: var(--font-size-small);
     text-decoration: underline;
 }

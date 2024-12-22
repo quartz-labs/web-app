@@ -1,4 +1,4 @@
-import { baseUnitToDecimal, buildAndSendTransaction, decimalToBaseUnit } from "@/src/utils/helpers";
+import { baseUnitToDecimal, buildAndSendTransaction, decimalToBaseUnit, validateAmount } from "@/src/utils/helpers";
 import type { MarketIndex } from "@/src/config/constants";
 import { useRefetchAccountData, useRefetchWithdrawLimits } from "@/src/utils/hooks";
 import { useStore } from "@/src/utils/store";
@@ -13,6 +13,7 @@ import { makeWithdrawIxs } from "@/src/utils/instructions";
 import { useError } from "@/src/context/error-provider";
 import { captureError } from "@/src/utils/errors";
 import { TxStatus, useTxStatus } from "@/src/context/tx-status-provider";
+import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
 
 export default function WithdrawModal() {
     const { connection } = useConnection();
@@ -23,12 +24,11 @@ export default function WithdrawModal() {
     const { showTxStatus } = useTxStatus();
     const refetchAccountData = useRefetchAccountData();
     const refetchWithdrawLimits = useRefetchWithdrawLimits();
-    
 
     const [awaitingSign, setAwaitingSign] = useState(false);
     const [errorText, setErrorText] = useState("");
     const [amountStr, setAmountStr] = useState("");
-    const amount = Number(amountStr);
+    const amountDecimals = Number(amountStr);
 
     const [ marketIndex, setMarketIndex ] = useState<MarketIndex>(SUPPORTED_DRIFT_MARKETS[0]);
 
@@ -42,24 +42,25 @@ export default function WithdrawModal() {
     const maxAmountBaseUnits = withdrawLimits?.[marketIndex] ?? 0;
 
     const handleConfirm = async () => {
-        const minAmount = baseUnitToDecimal(1, marketIndex);
-
         if (!wallet?.publicKey) return setErrorText("Wallet not connected");
-        if (isNaN(amount)) return setErrorText("Invalid input");
-        if (amount > baseUnitToDecimal(maxAmountBaseUnits, marketIndex)) return setErrorText(`Maximum amount: ${maxAmountBaseUnits}`);
-        if (amount < minAmount) return setErrorText(`Minimum amount: ${minAmount}`);
-        setErrorText("");
+
+        const errorText = validateAmount(marketIndex, amountDecimals, maxAmountBaseUnits);
+        setErrorText(errorText);
+        if (errorText) return;
 
         setAwaitingSign(true);
         try {
-            const amountBaseUnits = decimalToBaseUnit(amount, marketIndex);
+            const amountBaseUnits = decimalToBaseUnit(amountDecimals, marketIndex);
             const instructions = await makeWithdrawIxs(connection, wallet, amountBaseUnits, marketIndex);
             const signature = await buildAndSendTransaction(instructions, wallet, connection, showTxStatus);
             setAwaitingSign(false);
             if (signature) setModalVariation(ModalVariation.DISABLED);
         } catch (error) {
-            showTxStatus({ status: TxStatus.NONE });
-            captureError(showError, "Failed to withdraw", "/WithdrawModal.tsx", error, wallet.publicKey);
+            if (error instanceof WalletSignTransactionError) showTxStatus({ status: TxStatus.SIGN_REJECTED });
+            else {
+                showTxStatus({ status: TxStatus.NONE });
+                captureError(showError, "Failed to withdraw", "/WithdrawModal.tsx", error, wallet.publicKey);
+            }
         } finally {
             setAwaitingSign(false);
         }

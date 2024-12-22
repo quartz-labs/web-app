@@ -90,11 +90,11 @@ export const useAccountStatusQuery = (address: PublicKey | null) => {
 export const usePricesQuery = createQuery<Record<MarketIndex, number>>({
     queryKey: ["prices"],
     url: "https://api.quartzpay.io/data/price",
-    params: { ids: Object.values(TOKENS).map((token) => token.priceId).join(',') },
+    params: { ids: Object.values(TOKENS).map((token) => token.coingeckoPriceId).join(',') },
     transformResponse: (body) => {
         // Iterate through all tokens and map the marketIndex to the priceId
         return Object.entries(TOKENS).reduce((acc, [marketIndex, token]) => {
-            acc[Number(marketIndex) as MarketIndex] = body[token.priceId];
+            acc[Number(marketIndex) as MarketIndex] = body[token.coingeckoPriceId];
             return acc;
         }, {} as Record<MarketIndex, number>);
     },

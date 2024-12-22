@@ -114,21 +114,19 @@ export async function makeCollateralRepayIxs(
     marketIndexCollateral: MarketIndex
 ): Promise<{
     instructions: TransactionInstruction[],
-    lookupTables: AddressLookupTableAccount[]
+    lookupTables: AddressLookupTableAccount[],
+    flashLoanAmountBaseUnits: number
 }> {
     const quartzClient = await QuartzClient.fetchClientLight(connection);
     const userPromise = quartzClient.getQuartzAccountLight(wallet.publicKey);
 
     const mintCollateral = TOKENS[marketIndexCollateral].mintAddress;
     const walletAtaCollateral = await getAssociatedTokenAddress(mintCollateral, wallet.publicKey);
-    const oix_createAtaCollateral = await makeCreateAtaIxsIfNeeded(connection, walletAtaCollateral, wallet.publicKey, mintCollateral);
     const startingBalanceCollateral = await getTokenAccountBalance(connection, walletAtaCollateral);
 
     const mintLoan = TOKENS[marketIndexLoan].mintAddress;
     const walletAtaLoan = await getAssociatedTokenAddress(mintLoan, wallet.publicKey);
     const oix_createAtaLoan = await makeCreateAtaIxsIfNeeded(connection, walletAtaLoan, wallet.publicKey, mintLoan);
-
-    const oix_createAtas = [...oix_createAtaCollateral, ...oix_createAtaLoan];
 
     const jupiterQuote = await getJupiterSwapQuote(mintCollateral, mintLoan, amountLoanBaseUnits, JUPITER_SLIPPAGE_BPS);
     const collateralRequiredForSwap = Number(jupiterQuote.inAmount) * (1 + (JUPITER_SLIPPAGE_BPS / 10_000));
@@ -146,8 +144,9 @@ export async function makeCollateralRepayIxs(
         jupiterQuote
     );
     return {
-        instructions: [...oix_createAtas, ...ixs_collateralRepay],
-        lookupTables
+        instructions: [...oix_createAtaLoan, ...ixs_collateralRepay],
+        lookupTables,
+        flashLoanAmountBaseUnits: collateralRequiredForSwap
     };
 }
 
@@ -165,7 +164,7 @@ async function makeCreateAtaIxsIfNeeded(
                 authority,
                 ata,
                 authority,
-                mint
+                mint,
             )
         );
     }

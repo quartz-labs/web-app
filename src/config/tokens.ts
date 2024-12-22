@@ -6,14 +6,14 @@ export const TOKENS: Record<MarketIndex, Token> = {
     [DRIFT_MARKET_INDEX_USDC]: {
         name: "USDC",
         icon: "usdc.webp",
-        priceId: "usd-coin",
+        coingeckoPriceId: "usd-coin",
         decimalPrecision: 6,
         mintAddress: USDC_MINT,
     },
     [DRIFT_MARKET_INDEX_SOL]: {
         name: "SOL",
         icon: "sol.webp",
-        priceId: "solana",
+        coingeckoPriceId: "solana",
         decimalPrecision: 9,
         mintAddress: WSOL_MINT,
     },

@@ -8,13 +8,14 @@ import styles from "../Modal.module.css";
 import InputSection from "../Input.ModuleComponent";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
 import Buttons from "../Buttons.ModalComponent";
-import { baseUnitToDecimal, buildAndSendTransaction, decimalToBaseUnit, formatTokenDisplay, truncToDecimalPlaces } from "@/src/utils/helpers";
+import { baseUnitToDecimal, buildAndSendFlashLoanTransaction, buildAndSendTransaction, decimalToBaseUnit, formatTokenDisplay, truncToDecimalPlaces } from "@/src/utils/helpers";
 import TokenSelect from "../TokenSelect/TokenSelect";
 import { TOKENS } from "@/src/config/tokens";
 import { makeCollateralRepayIxs } from "@/src/utils/instructions";
 import { useError } from "@/src/context/error-provider";
 import { captureError } from "@/src/utils/errors";
 import { TxStatus, useTxStatus } from "@/src/context/tx-status-provider";
+import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
 
 export default function RepayLoanModal() {
     const wallet = useAnchorWallet();
@@ -28,7 +29,7 @@ export default function RepayLoanModal() {
     const [awaitingSign, setAwaitingSign] = useState(false);
     const [errorText, setErrorText] = useState("");
     const [amountLoanStr, setAmountLoanStr] = useState("");
-    const amountLoan = Number(amountLoanStr);
+    const amountLoanDecimal = Number(amountLoanStr);
 
     const [ marketIndexCollateral, setMarketIndexCollateral ] = useState<MarketIndex>(SUPPORTED_DRIFT_MARKETS[1]);
     const [ marketIndexLoan, setMarketIndexLoan ] = useState<MarketIndex>(SUPPORTED_DRIFT_MARKETS[0]);
@@ -39,14 +40,14 @@ export default function RepayLoanModal() {
 
     const priceCollateral = prices?.[marketIndexCollateral] ?? 0;
     const rateCollateral = rates?.[marketIndexCollateral]?.depositRate ?? 0;
-    const balanceCollateral = balances?.[marketIndexCollateral] ?? 0;
+    const balanceCollateralBaseUnits = balances?.[marketIndexCollateral] ?? 0;
     
     const priceLoan = prices?.[marketIndexLoan] ?? 0;
-    const balanceLoan = balances?.[marketIndexLoan] ?? 0;
+    const balanceLoanBaseUnits = balances?.[marketIndexLoan] ?? 0;
 
-    const amountCollateral = (amountLoan * priceLoan) / priceCollateral;
+    const amountCollateralDecimal = (amountLoanDecimal * priceLoan) / priceCollateral;
     const valueCollateral = prices?.[marketIndexCollateral] 
-        ? prices?.[marketIndexCollateral] * amountCollateral 
+        ? prices?.[marketIndexCollateral] * amountCollateralDecimal 
         : undefined;
 
     const loanMarketIndices = balances
@@ -63,28 +64,51 @@ export default function RepayLoanModal() {
 
     const handleConfirm = async () => {
         if (!wallet?.publicKey) return setErrorText("Wallet not connected");
-        if (isNaN(amountLoan)) return setErrorText("Invalid input");
-        
-        const minAmountLoan = baseUnitToDecimal(1, marketIndexLoan);
-        if (amountLoan > baseUnitToDecimal(balanceLoan, marketIndexLoan)) return setErrorText(`Maximum loan amount: ${balanceLoan}`);
-        if (amountLoan < minAmountLoan) return setErrorText(`Minimum loan amount: ${minAmountLoan}`);
+        if (isNaN(amountLoanDecimal)) return setErrorText("Invalid input");
 
-        const minAmountCollateral = baseUnitToDecimal(1, marketIndexCollateral);
-        if (amountCollateral > baseUnitToDecimal(balanceCollateral, marketIndexCollateral)) return setErrorText(`Maximum collateral amount: ${balanceCollateral}`);
-        if (amountCollateral < minAmountCollateral) return setErrorText(`Minimum collateral amount: ${minAmountCollateral}`);
+        const balanceLoanDecimal = baseUnitToDecimal(Math.abs(balanceLoanBaseUnits), marketIndexLoan);
+        const minAmountLoanDecimal = baseUnitToDecimal(1, marketIndexLoan);
+
+        if (amountLoanDecimal > balanceLoanDecimal) {
+            return setErrorText(`Maximum loan amount: ${balanceLoanDecimal}`);
+        }
+        if (amountLoanDecimal < minAmountLoanDecimal) {
+            return setErrorText(`Minimum loan amount: ${minAmountLoanDecimal}`);
+        }
+
+        const balanceCollateralDecimal = baseUnitToDecimal(balanceCollateralBaseUnits, marketIndexCollateral);
+        const minAmountCollateralDecimal = baseUnitToDecimal(1, marketIndexCollateral);
+
+        if (amountCollateralDecimal > balanceCollateralDecimal) {
+            return setErrorText(`Maximum collateral amount: ${balanceCollateralDecimal}`);
+        }
+        if (amountCollateralDecimal < minAmountCollateralDecimal) {
+            return setErrorText(`Minimum collateral amount: ${minAmountCollateralDecimal}`);
+        }
 
         setErrorText("");
 
         setAwaitingSign(true);
         try {
-            const amountLoanBaseUnits = decimalToBaseUnit(amountLoan, marketIndexLoan);
-            const { instructions, lookupTables } = await makeCollateralRepayIxs(connection, wallet, amountLoanBaseUnits, marketIndexLoan, marketIndexCollateral);
-            const signature = await buildAndSendTransaction(instructions, wallet, connection, showTxStatus, lookupTables);
+            const amountLoanBaseUnits = decimalToBaseUnit(amountLoanDecimal, marketIndexLoan);
+            const { instructions, lookupTables, flashLoanAmountBaseUnits } = await makeCollateralRepayIxs(connection, wallet, amountLoanBaseUnits, marketIndexLoan, marketIndexCollateral);
+            const signature = await buildAndSendFlashLoanTransaction(
+                flashLoanAmountBaseUnits, 
+                marketIndexCollateral, 
+                instructions, 
+                wallet, 
+                connection, 
+                showTxStatus, 
+                lookupTables
+            );
             setAwaitingSign(false);
             if (signature) setModalVariation(ModalVariation.DISABLED);
         } catch (error) {
-            showTxStatus({ status: TxStatus.NONE });
-            captureError(showError, "Failed to repay loan", "/RepayLoanModal.tsx", error, wallet.publicKey);
+            if (error instanceof WalletSignTransactionError) showTxStatus({ status: TxStatus.SIGN_REJECTED });
+            else {
+                showTxStatus({ status: TxStatus.NONE });
+                captureError(showError, "Failed to repay loan", "/RepayLoanModal.tsx", error, wallet.publicKey);
+            }
         } finally {
             setAwaitingSign(false);
         }
@@ -100,11 +124,23 @@ export default function RepayLoanModal() {
                 borrowing={true}
                 price={prices?.[marketIndexLoan]}
                 rate={rates?.[marketIndexLoan]?.borrowRate}
-                available={Math.abs(baseUnitToDecimal(balanceLoan, marketIndexLoan))}
+                available={Math.abs(baseUnitToDecimal(balanceLoanBaseUnits, marketIndexLoan))}
                 amountStr={amountLoanStr}
                 setAmountStr={setAmountLoanStr}
-                setMaxAmount={() => setAmountLoanStr(balanceLoan ? baseUnitToDecimal(balanceLoan, marketIndexLoan).toString() : "0")}
-                setHalfAmount={() => setAmountLoanStr(balanceLoan ? baseUnitToDecimal(Math.trunc(balanceLoan / 2), marketIndexLoan).toString() : "0")}
+                setMaxAmount={() => {
+                    setAmountLoanStr(
+                        balanceLoanBaseUnits 
+                        ? baseUnitToDecimal(Math.abs(balanceLoanBaseUnits), marketIndexLoan).toString() 
+                        : "0"
+                    )
+                }}
+                setHalfAmount={() => {
+                    setAmountLoanStr(
+                        balanceLoanBaseUnits 
+                        ? baseUnitToDecimal(Math.trunc(Math.abs(balanceLoanBaseUnits) / 2), marketIndexLoan).toString() 
+                        : "0"
+                    )
+                }}
                 marketIndex={marketIndexLoan}
                 setMarketIndex={setMarketIndexLoan}
                 selectableMarketIndices={loanMarketIndices}
@@ -115,7 +151,7 @@ export default function RepayLoanModal() {
 
                 <div className={styles.inputFieldWrapper}>
                     <div className={`${styles.inputField} ${styles.inputFieldAmount} ${styles.inputFieldCollateral}`}>
-                        {truncToDecimalPlaces(amountCollateral, TOKENS[marketIndexCollateral].decimalPrecision)}
+                        {truncToDecimalPlaces(amountCollateralDecimal, TOKENS[marketIndexCollateral].decimalPrecision)}
                     </div>
 
                     <TokenSelect 

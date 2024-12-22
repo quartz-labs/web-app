@@ -8,6 +8,7 @@ import { useError } from "@/src/context/error-provider";
 import { useRefetchAccountStatus } from "@/src/utils/hooks";
 import { captureError } from "@/src/utils/errors";
 import { TxStatus, useTxStatus } from "@/src/context/tx-status-provider";
+import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
 
 export default function Onboarding() {
   const wallet = useAnchorWallet();
@@ -38,14 +39,19 @@ export default function Onboarding() {
 
     setAttemptFailed(false);
     setAwaitingSign(true);
+    refetchAccountStatus();
     try {
         const { instructions, marginfiSigner } = await makeInitAccountIxs(connection, wallet);
         const signers = marginfiSigner ? [marginfiSigner] : [];
         const signature = await buildAndSendTransaction(instructions, wallet, connection, showTxStatus, [], signers);
+        setAwaitingSign(false);
         if (signature) refetchAccountStatus(signature);
     } catch (error) {
-        showTxStatus({ status: TxStatus.NONE });
-        captureError(showError, "Failed to create account", "/Onboarding.tsx", error, wallet.publicKey);
+        if (error instanceof WalletSignTransactionError) showTxStatus({ status: TxStatus.SIGN_REJECTED });
+        else {
+            showTxStatus({ status: TxStatus.NONE });
+            captureError(showError, "Failed to create account", "/Onboarding.tsx", error, wallet.publicKey);
+        }
     } finally {
         setAwaitingSign(false);
     }
