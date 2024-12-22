@@ -3,7 +3,8 @@ const nextConfig = {
   webpack: (config) => {
     config.resolve.fallback = {
       ...config.resolve.fallback,
-      fs: false
+      fs: false,
+      'rpc-websockets/dist/lib/client/websocket.cjs': false
     };
     return config;
   },
