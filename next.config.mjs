@@ -4,7 +4,8 @@ const nextConfig = {
     config.resolve.fallback = {
       ...config.resolve.fallback,
       fs: false,
-      'rpc-websockets/dist/lib/client/websocket.cjs': false
+      "rpc-websockets/dist/lib/client.cjs": false,
+      "rpc-websockets/dist/lib/client/websocket.cjs": false
     };
     return config;
   },
