@@ -12,7 +12,7 @@ export interface AssetCardProps {
 export default function AssetCard({ assetInfo }: AssetCardProps) {
     const value = Math.abs(assetInfo.balance * assetInfo.price);
     const valueDisplay = formatDollarValue(value, 2);
-    const balance = Math.abs(assetInfo.balance) * 100;
+    const balance = Math.abs(assetInfo.balance);
     const rateDisplay = (assetInfo.rate * 100).toFixed(2);
     
     const [ windowWidth, setWindowWidth ] = useState(window.innerWidth);

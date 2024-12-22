@@ -129,11 +129,13 @@ export function getDisplayWalletAddress(address: string) {
 
 export function formatTokenDisplay(balance: number, marketIndex?: MarketIndex) {
     if (marketIndex === undefined) {
-        return balance < 999 
+        const truncedValue = balance < 999 
             ? truncToDecimalPlaces(balance, 5) 
             : balance < 99999
                 ? truncToDecimalPlaces(balance, 2)
                 : truncToDecimalPlaces(balance, 0);
+        if (truncedValue === 0) return balance;
+        return truncedValue;
     }
 
     const magnitude = Math.floor(Math.log10(Math.abs(balance))) + 1;
