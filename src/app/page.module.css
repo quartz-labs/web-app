@@ -12,3 +12,9 @@
     padding: var(--panel-padding);
     gap: var(--panel-padding);
 }
+
+@media only screen and (max-width: 800px) {
+    .content {
+        flex-direction: column;
+    }
+}

@@ -45,3 +45,19 @@
 .valueDecimal {
     font-size: calc(var(--font-size-large) * 0.55);
 }
+
+@media only screen and (max-width: 1024px) and (min-width: 800px) {
+    .details {
+        flex-direction: row;
+        align-items: baseline;
+        justify-content: end;
+        gap: 10px;
+        width: 100%;
+    }
+
+    .mobileContent {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+    }
+}

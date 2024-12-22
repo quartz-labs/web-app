@@ -14,24 +14,28 @@ export default function Dashboard() {
       <Modal />
 
       <div className={`glass panel ${styles.mainPanel}`}>
-        <h1 className={styles.title}>Balance</h1>
-        <Balances />
+        <div className={styles.mainPanelContent}>
+          <h1 className={styles.title}>Balance</h1>
+          <Balances />
+        
+          {isInitialized && (
+            <>
+              <Health />
+              <ButtonRow />
+            </>
+          )}
 
-        {isInitialized && (
-          <>
-            <Health />
-            <ButtonRow />
-          </>
-        )}
-
-        {!isInitialized && (
-          <p className={styles.notInitialized}>No wallet connected</p>
-        )}
+          {!isInitialized && (
+            <p className={styles.notInitialized}>No wallet connected</p>
+          )}
+        </div>
       </div>
 
       <div className={`glass panel ${styles.assetsPanel}`}>
-        <h2 className={styles.title}>Assets</h2>
-        <Assets />
+        <div className={styles.assetsPanelContent}>
+          <h2 className={styles.title}>Assets</h2>
+          <Assets />
+        </div>
       </div>
     </>
   );

@@ -17,15 +17,15 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 15px;
+    gap: var(--nav-items-gap);
     padding: 5px 0px;
 }
 
 .notificationsButton {
     height: 100%;
     width: auto;
-    padding: 9px;
-    margin-right: -9px;
+    padding: var(--notifications-button-padding);
+    margin-right: -var(--notifications-button-padding);
     border-radius: 100%;
 }
 

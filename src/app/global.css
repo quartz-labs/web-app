@@ -211,6 +211,20 @@ a:hover {
   --address-copy-button-height: 57px;
   --popup-position-bottom: 50px;
   --popup-position-left: 100px;
+  --asset-panel-width: 30%;
+  --asset-panel-content-width: 82%;
+  --balance-wrapper-width: 80%;
+  --buttons-row-gap: 20px;
+  --notifications-button-padding: 9px;
+  --nav-items-gap: 15px;
+}
+
+@media only screen and (max-width: 1300px) {
+  :root {
+    --asset-panel-width: 35%;
+    --asset-panel-content-width: 90%;
+    --balance-wrapper-width: 85%;
+  }
 }
 
 @media only screen and (max-width: 800px) {
@@ -230,10 +244,12 @@ a:hover {
     --nav-height: 45px;
     --modal-width: 90%;
     --modal-content-width: 80%;
+    --asset-panel-width: 100%;
+    --notifications-button-padding: 7px;
   }
 }
 
-@media only screen and (max-width: 568px) {
+@media only screen and (max-width: 580px) {
   :root {
     --font-size-h0: calc(0.8 * var(--font-size-h0-base));
     --font-size-h1: calc(0.8 * var(--font-size-h1-base));
@@ -251,6 +267,10 @@ a:hover {
     --modal-content-width: 90%;
     --input-field-height: 75px;
     --address-copy-button-height: 53.4px;
+    --balance-wrapper-width: 100%;
+    --buttons-row-gap: 10px;
+    --notifications-button-padding: 5px;
+    --nav-items-gap: 10px;
   }
 }
 
@@ -259,5 +279,6 @@ a:hover {
     --nav-height: 35px;
     --input-field-height: 65px;
     --address-copy-button-height: 46.3px;
+    --notifications-button-padding: 3px;
   }
 }

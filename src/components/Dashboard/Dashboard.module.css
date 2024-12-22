@@ -3,13 +3,23 @@
 }
 
 .mainPanel {
-    padding: 45px 50px;
+    padding: 45px 0px;
+}
+
+.mainPanelContent {
+    width: 90%;
+    margin: 0 auto;
 }
 
 .assetsPanel {
-    padding: 45px 40px;
+    padding: 45px 0px;
     flex-grow: 0;
-    width: 30%;
+    width: var(--asset-panel-width);
+}
+
+.assetsPanelContent {
+    width: var(--asset-panel-content-width);
+    margin: 0 auto;
 }
 
 .notInitialized {

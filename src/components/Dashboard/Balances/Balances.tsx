@@ -58,46 +58,48 @@ export default function Balances() {
                 )}
             </div>
 
-            <div>
-                <h2 className={styles.detailBalanceTitle}>Loans</h2>
-                {displayBalances && (
-                    <>
-                        <p className={styles.detailBalance}>    
-                            ${loanBalance[0]}<span className={styles.detailBalanceDecimal}>.{loanBalance[1]}</span>
-                        </p>
-                        {rates !== undefined && (
-                            <p className={`${styles.detailBalanceRate} ${styles.rateHeight}`}>{plusOrMinus(loanRate, "$")} /day</p>
-                        )}
-                    </>
-                )}
-                {!displayBalances && (
-                    <>
-                        <p className={`${styles.detailBalance} ${styles.notInitialized}`}>
-                            $--<span className={styles.detailBalanceDecimal}>.--</span>
-                        </p>
-                    </>
-                )}
-            </div>
+            <div className={styles.detailBalances}>
+                <div>
+                    <h2 className={styles.detailBalanceTitle}>Loans</h2>
+                    {displayBalances && (
+                        <>
+                            <p className={styles.detailBalance}>    
+                                ${loanBalance[0]}<span className={styles.detailBalanceDecimal}>.{loanBalance[1]}</span>
+                            </p>
+                            {rates !== undefined && (
+                                <p className={`${styles.detailBalanceRate} ${styles.rateHeight}`}>{plusOrMinus(loanRate, "$")} /day</p>
+                            )}
+                        </>
+                    )}
+                    {!displayBalances && (
+                        <>
+                            <p className={`${styles.detailBalance} ${styles.notInitialized}`}>
+                                $--<span className={styles.detailBalanceDecimal}>.--</span>
+                            </p>
+                        </>
+                    )}
+                </div>
 
-            <div>
-                <h2 className={styles.detailBalanceTitle}>Total Collateral</h2>
-                {displayBalances && (
-                    <>
-                        <p className={styles.detailBalance}>
-                            ${collateralBalance[0]}<span className={styles.detailBalanceDecimal}>.{collateralBalance[1]}</span>
-                        </p>
-                        {rates !== undefined && (
-                            <p className={`${styles.detailBalanceRate} ${styles.rateHeight}`}>{plusOrMinus(collateralRate, "$")} /day</p>
-                        )}
-                    </>
-                )}
-                {!displayBalances && (
-                    <>
-                        <p className={`${styles.detailBalance} ${styles.notInitialized}`}>
-                            $--<span className={styles.detailBalanceDecimal}>.--</span>
-                        </p>
-                    </>
-                )}
+                <div>
+                    <h2 className={styles.detailBalanceTitle}>Total Collateral</h2>
+                    {displayBalances && (
+                        <>
+                            <p className={styles.detailBalance}>
+                                ${collateralBalance[0]}<span className={styles.detailBalanceDecimal}>.{collateralBalance[1]}</span>
+                            </p>
+                            {rates !== undefined && (
+                                <p className={`${styles.detailBalanceRate} ${styles.rateHeight}`}>{plusOrMinus(collateralRate, "$")} /day</p>
+                            )}
+                        </>
+                    )}
+                    {!displayBalances && (
+                        <>
+                            <p className={`${styles.detailBalance} ${styles.notInitialized}`}>
+                                $--<span className={styles.detailBalanceDecimal}>.--</span>
+                            </p>
+                        </>
+                    )}
+                </div>
             </div>
         </div>
     );

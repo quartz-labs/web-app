@@ -1,9 +1,30 @@
 .balanceOverview {
-    width: 80%;
+    width: var(--balance-wrapper-width);
     display: grid;
-    grid-template-columns: 2.2fr 1fr 1fr;
+    grid-template-columns: 2.2fr 2fr;
     align-items: flex-end;
     margin-bottom: 30px;
+}
+
+.detailBalances {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+@media only screen and (max-width: 580px) {
+    .balanceOverview {
+        display: flex;
+        justify-content: space-between;
+    }
+}
+
+@media only screen and (max-width: 375px) {
+    .balanceOverview {
+        display: flex;
+        flex-direction: column;
+        align-items: start;
+        gap: 20px;
+    }
 }
 
 .netBalanceWrapper {
