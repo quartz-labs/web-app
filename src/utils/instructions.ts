@@ -1,5 +1,5 @@
 import { getConfig as getMarginfiConfig, MarginfiClient } from "@mrgnlabs/marginfi-client-v2";
-import { QuartzClient, WSOL_MINT } from "@quartz-labs/sdk";
+import { QuartzClientLight, WSOL_MINT } from "@quartz-labs/sdk";
 import type { AnchorWallet } from "@solana/wallet-adapter-react";
 import type { TransactionInstruction } from "@solana/web3.js";
 import type { Connection } from "@solana/web3.js";
@@ -19,7 +19,7 @@ export async function makeInitAccountIxs(
     marginfiSigner: Keypair | null
 }> {
     const [quartzClient, marginfiClient] = await Promise.all([
-        QuartzClient.fetchClientLight(connection),
+        QuartzClientLight.fetchClientLight(connection),
         MarginfiClient.fetch(getMarginfiConfig(), wallet, connection)
     ]);
 
@@ -47,7 +47,7 @@ export async function makeCloseAccountIxs(
     connection: Connection,
     wallet: AnchorWallet
 ): Promise<TransactionInstruction[]> {
-    const quartzClient = await QuartzClient.fetchClientLight(connection);
+    const quartzClient = await QuartzClientLight.fetchClientLight(connection);
     const user = await quartzClient.getQuartzAccountLight(wallet.publicKey);
     return await user.makeCloseAccountIxs();
 }
@@ -58,7 +58,7 @@ export async function makeDepositIxs(
     amountBaseUnits: number,
     marketIndex: MarketIndex
 ): Promise<TransactionInstruction[]> {
-    const quartzClient = await QuartzClient.fetchClientLight(connection);
+    const quartzClient = await QuartzClientLight.fetchClientLight(connection);
     const userPromise = quartzClient.getQuartzAccountLight(wallet.publicKey);
 
     const mint = TOKENS[marketIndex].mintAddress;
@@ -89,7 +89,7 @@ export async function makeWithdrawIxs(
     amountBaseUnits: number,
     marketIndex: MarketIndex
 ): Promise<TransactionInstruction[]> {
-    const quartzClient = await QuartzClient.fetchClientLight(connection);
+    const quartzClient = await QuartzClientLight.fetchClientLight(connection);
     const userPromise = quartzClient.getQuartzAccountLight(wallet.publicKey);
 
     const mint = TOKENS[marketIndex].mintAddress;
@@ -117,7 +117,7 @@ export async function makeCollateralRepayIxs(
     lookupTables: AddressLookupTableAccount[],
     flashLoanAmountBaseUnits: number
 }> {
-    const quartzClient = await QuartzClient.fetchClientLight(connection);
+    const quartzClient = await QuartzClientLight.fetchClientLight(connection);
     const userPromise = quartzClient.getQuartzAccountLight(wallet.publicKey);
 
     const mintCollateral = TOKENS[marketIndexCollateral].mintAddress;

@@ -4,9 +4,7 @@ const nextConfig = {
     // Fallbacks for Node.js modules
     config.resolve.fallback = {
       ...config.resolve.fallback,
-      fs: false,
-      "rpc-websockets/dist/lib/client.cjs": false,
-      "rpc-websockets/dist/lib/client/websocket.cjs": false,
+      fs: false
     };
 
     config.resolve.alias = {
