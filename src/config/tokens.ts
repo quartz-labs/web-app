@@ -4,6 +4,7 @@ import type { MarketIndex } from "./constants";
 
 export const TOKENS: Record<MarketIndex, Token> = {
     [DRIFT_MARKET_INDEX_USDC]: {
+        marketIndex: DRIFT_MARKET_INDEX_USDC,
         name: "USDC",
         icon: "usdc.webp",
         coingeckoPriceId: "usd-coin",
@@ -11,6 +12,7 @@ export const TOKENS: Record<MarketIndex, Token> = {
         mintAddress: USDC_MINT,
     },
     [DRIFT_MARKET_INDEX_SOL]: {
+        marketIndex: DRIFT_MARKET_INDEX_SOL,
         name: "SOL",
         icon: "sol.webp",
         coingeckoPriceId: "solana",

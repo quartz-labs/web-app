@@ -31,8 +31,20 @@ export default function RepayLoanModal() {
     const [amountLoanStr, setAmountLoanStr] = useState("");
     const amountLoanDecimal = Number(amountLoanStr);
 
-    const [ marketIndexCollateral, setMarketIndexCollateral ] = useState<MarketIndex>(SUPPORTED_DRIFT_MARKETS[1]);
-    const [ marketIndexLoan, setMarketIndexLoan ] = useState<MarketIndex>(SUPPORTED_DRIFT_MARKETS[0]);
+    const loanMarketIndices = balances
+        ? Object.entries(balances)
+            .filter(([, balance]) => balance < 0)
+            .map(([marketIndex]) => Number(marketIndex) as MarketIndex)
+        : [];
+
+    const collateralMarketIndices = balances
+        ? Object.entries(balances)
+            .filter(([, balance]) => balance > 0)
+            .map(([marketIndex]) => Number(marketIndex) as MarketIndex)
+        : [];
+
+    const [ marketIndexCollateral, setMarketIndexCollateral ] = useState<MarketIndex>(collateralMarketIndices[0] ?? SUPPORTED_DRIFT_MARKETS[1]);
+    const [ marketIndexLoan, setMarketIndexLoan ] = useState<MarketIndex>(loanMarketIndices[0] ?? SUPPORTED_DRIFT_MARKETS[0]);
 
     useEffect(() => {
         refetchAccountData();
@@ -49,18 +61,6 @@ export default function RepayLoanModal() {
     const valueCollateral = prices?.[marketIndexCollateral] 
         ? prices?.[marketIndexCollateral] * amountCollateralDecimal 
         : undefined;
-
-    const loanMarketIndices = balances
-        ? Object.entries(balances)
-            .filter(([, balance]) => balance < 0)
-            .map(([marketIndex]) => Number(marketIndex) as MarketIndex)
-        : [];
-
-    const collateralMarketIndices = balances
-        ? Object.entries(balances)
-            .filter(([, balance]) => balance > 0)
-            .map(([marketIndex]) => Number(marketIndex) as MarketIndex)
-        : [];
 
     const handleConfirm = async () => {
         if (!wallet?.publicKey) return setErrorText("Wallet not connected");

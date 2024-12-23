@@ -56,7 +56,7 @@ export default function TokenSelect({
                             key={index}
                             className={styles.dropdownItem}
                             onClick={() => {
-                                setMarketIndex(index as MarketIndex);
+                                setMarketIndex(token.marketIndex);
                                 setIsOpen(false);
                             }}
                             role="menuitem"
