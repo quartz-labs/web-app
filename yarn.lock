@@ -7,7 +7,7 @@
   resolved "https://registry.yarnpkg.com/@alloc/quick-lru/-/quick-lru-5.2.0.tgz#7bf68b20c0a350f936915fcae06f58e32007ce30"
   integrity sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==
 
-"@babel/runtime@^7.10.5", "@babel/runtime@^7.25.0":
+"@babel/runtime@^7.10.5", "@babel/runtime@^7.17.2", "@babel/runtime@^7.25.0":
   version "7.26.0"
   resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.26.0.tgz#8600c2f595f277c60815256418b85356a65173c1"
   integrity sha512-FDSOghenHTiToteC/QRlv2q3DhPZ/oOXTBoirfWNx1Cx3TMVcGWQtMMmQcSvb/JjpNeGzx8Pq/b4fKEJuWm1sw==
@@ -686,10 +686,10 @@
     bs58 "^5.0.0"
     jito-ts "^3.0.1"
 
-"@quartz-labs/sdk@0.1.6":
-  version "0.1.6"
-  resolved "https://registry.yarnpkg.com/@quartz-labs/sdk/-/sdk-0.1.6.tgz#90d884f18bc28b0dbbf982944fa68ada14e3911d"
-  integrity sha512-d/pl9niW9nTMeIGMVs3AKYEbvPFFzSrPWOylOYYgMX4Hdl0FhGRBRvgRYjxm41m/GX/hA2oMdUlZx9vQRFVwsA==
+"@quartz-labs/sdk@^0.1.7":
+  version "0.1.7"
+  resolved "https://registry.yarnpkg.com/@quartz-labs/sdk/-/sdk-0.1.7.tgz#9fb3dcaeefc4ad341dec88d4300426804ac67487"
+  integrity sha512-au65oB7I1iiHnBDyynlCZtWwep5WguB+09yDiFnWWDhPQhsgbNORjx2W6fzn9Fuyyx7j3XRnP6rqC7Io/Z2pSQ==
   dependencies:
     "@coral-xyz/anchor" "^0.29.0"
     "@drift-labs/sdk" "^2.103.0-beta.9"
@@ -697,6 +697,8 @@
     "@pythnetwork/pyth-solana-receiver" "^0.8.2"
     "@solana/spl-token" "^0.4.9"
     bn.js "^5.2.1"
+  optionalDependencies:
+    rpc-websockets "^9.0.2"
 
 "@react-native-async-storage/async-storage@^1.17.7":
   version "1.24.0"
@@ -4051,7 +4053,20 @@ rimraf@^3.0.2:
   dependencies:
     glob "^7.1.3"
 
-rpc-websockets@7.5.1, rpc-websockets@^9.0.2:
+rpc-websockets@7.5.1:
+  version "7.5.1"
+  resolved "https://registry.yarnpkg.com/rpc-websockets/-/rpc-websockets-7.5.1.tgz#e0a05d525a97e7efc31a0617f093a13a2e10c401"
+  integrity sha512-kGFkeTsmd37pHPMaHIgN1LVKXMi0JD782v4Ds9ZKtLlwdTKjn+CxM9A9/gLT2LaOuEcEFGL98h1QWQtlOIdW0w==
+  dependencies:
+    "@babel/runtime" "^7.17.2"
+    eventemitter3 "^4.0.7"
+    uuid "^8.3.2"
+    ws "^8.5.0"
+  optionalDependencies:
+    bufferutil "^4.0.1"
+    utf-8-validate "^5.0.2"
+
+rpc-websockets@^9.0.2:
   version "9.0.4"
   resolved "https://registry.yarnpkg.com/rpc-websockets/-/rpc-websockets-9.0.4.tgz#9d8ee82533b5d1e13d9ded729e3e38d0d8fa083f"
   integrity sha512-yWZWN0M+bivtoNLnaDbtny4XchdAIF5Q4g/ZsC5UC61Ckbp0QczwO8fg44rV3uYmY4WHd+EZQbn90W1d8ojzqQ==
