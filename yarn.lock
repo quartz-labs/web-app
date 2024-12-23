@@ -686,10 +686,10 @@
     bs58 "^5.0.0"
     jito-ts "^3.0.1"
 
-"@quartz-labs/sdk@^0.1.7":
-  version "0.1.7"
-  resolved "https://registry.yarnpkg.com/@quartz-labs/sdk/-/sdk-0.1.7.tgz#9fb3dcaeefc4ad341dec88d4300426804ac67487"
-  integrity sha512-au65oB7I1iiHnBDyynlCZtWwep5WguB+09yDiFnWWDhPQhsgbNORjx2W6fzn9Fuyyx7j3XRnP6rqC7Io/Z2pSQ==
+"@quartz-labs/sdk@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@quartz-labs/sdk/-/sdk-0.2.0.tgz#11b404a555c0e8438259d81a0e743aed4bd94329"
+  integrity sha512-nC4M/iBpoLHZUjcO1whJn6yTWHc1D3m4zB6tRrsD8e3BG0N+LczCTNxR1QNLU6cLshQnlwb73q+PxGiwLzA+QA==
   dependencies:
     "@coral-xyz/anchor" "^0.29.0"
     "@drift-labs/sdk" "^2.103.0-beta.9"
