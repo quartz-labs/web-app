@@ -11,7 +11,7 @@ const nextConfig = {
 
     config.resolve.alias = {
       ...config.resolve.alias,
-      "@quartz-labs/sdk": "@quartz-labs/sdk/lib/node/index.browser.js"
+      "@quartz-labs/sdk": "@quartz-labs/sdk/dist/index.browser.js"
     };
 
     return config;
