@@ -21,7 +21,20 @@ const PostHogPageView = dynamic(() => import('@/src/context/posthog-provider').t
 
 export const metadata = {
   title: 'Quartz',
-  description: 'Quartz beta web app',
+  description: 'Spend without selling',
+  openGraph: {
+    title: 'Quartz',
+    description: 'Spend without selling',
+    url: 'https://quartzpay.io',
+    siteName: 'Quartz',
+    images: [
+      {
+        url: 'https://cdn.prod.website-files.com/67504dd7fde047775f88c355/67504dd7fde047775f88c404_open-graph.jpg',
+        width: 1200,
+        height: 630,
+      },
+    ],
+  },
 };
 
 export default function RootLayout({
