@@ -11,7 +11,6 @@ import { TransactionMessage } from "@solana/web3.js";
 import { TxStatus, type TxStatusProps } from "../context/tx-status-provider";
 import { getConfig as getMarginfiConfig, MarginfiClient } from "@mrgnlabs/marginfi-client-v2";
 import { PreflightCheck } from "../types/enums/PreflightCheck.enum";
-import { TokenAccountNotFoundError } from "@solana/spl-token";
 
 export function baseUnitToDecimal(baseUnits: number, marketIndex: MarketIndex): number {
     const token = TOKENS[marketIndex];
@@ -153,9 +152,8 @@ export async function getTokenAccountBalance(connection: Connection, tokenAccoun
     try {
         const balance = await connection.getTokenAccountBalance(tokenAccount);
         return Number(balance.value.amount);
-    } catch (error) {
-        if (error instanceof TokenAccountNotFoundError) return 0;
-        throw error;
+    } catch {
+        return 0;
     }
 }
 
