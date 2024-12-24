@@ -249,7 +249,14 @@ export async function buildAndSendTransaction(
     }).compileToV0Message(lookupTables);
     const transaction = new VersionedTransaction(messageV0);
 
-    const signature = await sendTransaction(transaction, wallet, showTxStatus, otherSigners);
+    const signature = await sendTransaction(
+        transaction, 
+        wallet, 
+        showTxStatus, 
+        otherSigners, 
+        PreflightCheck.SIMULATE, 
+        connection
+    );
     return signature;
 }
 
