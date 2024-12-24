@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { Connection } from '@solana/web3.js';
 import { PublicKey } from '@solana/web3.js';
 import { NextResponse } from 'next/server';

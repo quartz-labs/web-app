@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import config from '@/src/config/config';
 import { AccountStatus } from '@/src/types/enums/AccountStatus.enum';
 import { getVaultPublicKey } from '@quartz-labs/sdk';
