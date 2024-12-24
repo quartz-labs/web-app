@@ -175,7 +175,10 @@ export async function getJupiterSwapQuote(
 ) {
     const quoteEndpoint = 
         `https://quote-api.jup.ag/v6/quote?inputMint=${inputMint.toBase58()}&outputMint=${outputMint.toBase58()}&amount=${amount}&slippageBps=${slippageBps}&swapMode=ExactOut&onlyDirectRoutes=true`;
-    const quoteResponse = await (await fetch(quoteEndpoint)).json() as QuoteResponse;
+    const response = await fetch(quoteEndpoint);
+    const body = await response.json();
+    if (!response.ok) throw new Error(body);
+    const quoteResponse = body.result as QuoteResponse;
     return quoteResponse;
 }
 
@@ -234,9 +237,10 @@ export async function buildAndSendTransaction(
     const ix_priority = await createPriorityFeeInstructions(computeBudget);
     instructions.unshift(...ix_priority);
 
-    const blockhash = await fetch("/api/blockhash")
-        .then(res => res.json())
-        .then(data => data.blockhash);
+    const response = await fetch("/api/blockhash");
+    const body = await response.json();
+    if (!response.ok) throw new Error(body);
+    const blockhash = body.blockhash;
 
     const messageV0 = new TransactionMessage({
         payerKey: wallet.publicKey,

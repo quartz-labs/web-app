@@ -28,7 +28,9 @@ export default function TxStatusPopup() {
             if (!wallet) return captureError(showError, "No wallet connected", "/TxStatusPopup.tsx", "Could not find wallet", null);
 
             try {
-                await fetch(`/api/confirm-tx?signature=${signature}`);
+                const response = await fetch(`/api/confirm-tx?signature=${signature}`);
+                const body = await response.json();
+                if (!response.ok) throw new Error(body.error);
                 setStatus(TxStatus.CONFIRMED);
                 refetchAccountData(signature);
 

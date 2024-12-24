@@ -76,9 +76,10 @@ async function checkIsMissingBetaKey(connection: Connection, address: PublicKey)
             },
         }),
     });
-    const { result } = await response.json();
+    const body = await response.json();
+    if (!response.ok) throw new Error(body);
 
-    for (const asset of result.items) {
+    for (const asset of body.result.items) {
         if (asset.content.metadata.name && asset.content.metadata.name.includes("Quartz Pin")) {
             return false;
         }
