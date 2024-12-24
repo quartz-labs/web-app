@@ -2,8 +2,8 @@ import { type MarketIndex } from "@/src/config/constants";
 import type { Rate } from "@/src/types/interfaces/Rate.interface";
 import type { AssetInfo } from "@/src/types/interfaces/AssetInfo.interface";
 import { TOKENS } from "@/src/config/tokens";
-import { AddressLookupTableAccount, Connection, Keypair, PublicKey, TransactionInstruction } from "@solana/web3.js";
-import { createPriorityFeeInstructions, SUPPORTED_DRIFT_MARKETS } from "@quartz-labs/sdk";
+import { AddressLookupTableAccount, ComputeBudgetProgram, Connection, Keypair, PublicKey, TransactionInstruction } from "@solana/web3.js";
+import { SUPPORTED_DRIFT_MARKETS } from "@quartz-labs/sdk";
 import type { AnchorWallet } from "@solana/wallet-adapter-react";
 import type { QuoteResponse } from "@jup-ag/api";
 import { VersionedTransaction } from "@solana/web3.js";
@@ -192,7 +192,7 @@ export async function buildAndSendFlashLoanTransaction(
     lookupTables: AddressLookupTableAccount[] = [],
     otherSigners: Keypair[] = []
 ): Promise<string> {
-    const PRIORITY_FEE_DECIMAL = 0.002;
+    const PRIORITY_FEE_DECIMAL = 0.0025;
     const amountLoanDecimal = baseUnitToDecimal(flashLoanAmountBaseUnits, flashLoanMarketIndex);
 
     const marginfiClient = await MarginfiClient.fetch(getMarginfiConfig(), wallet, connection);
@@ -233,9 +233,14 @@ export async function buildAndSendTransaction(
     lookupTables: AddressLookupTableAccount[] = [],
     otherSigners: Keypair[] = []
 ): Promise<string> {
-    const computeBudget = 200_000;
-    const ix_priority = await createPriorityFeeInstructions(computeBudget);
-    instructions.unshift(...ix_priority);
+    // TODO: Calculate actual compute unit and fee
+    const ix_computeLimit = ComputeBudgetProgram.setComputeUnitLimit({
+        units: 200_000,
+    });
+    const ix_computePrice = ComputeBudgetProgram.setComputeUnitPrice({
+        microLamports: 1_250_000,
+    });
+    instructions.unshift(ix_computeLimit, ix_computePrice);
 
     const response = await fetch("/api/blockhash");
     const body = await response.json();

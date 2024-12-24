@@ -655,7 +655,7 @@
     "@pythnetwork/solana-utils" "*"
     "@solana/web3.js" "^1.90.0"
 
-"@pythnetwork/pyth-solana-receiver@^0.8.0", "@pythnetwork/pyth-solana-receiver@^0.8.2":
+"@pythnetwork/pyth-solana-receiver@^0.8.0":
   version "0.8.2"
   resolved "https://registry.yarnpkg.com/@pythnetwork/pyth-solana-receiver/-/pyth-solana-receiver-0.8.2.tgz#e1c54de017bad6c321c22245fe240e020e9c853d"
   integrity sha512-WrrdwwhSYvvB5vJEL+SfPnfuxgkRKMeKdZvGFFwe6ENrMhrQCM05oDkvNNYfXATLcpQGRAyBu9l1xIxUxixpqw==
@@ -686,15 +686,14 @@
     bs58 "^5.0.0"
     jito-ts "^3.0.1"
 
-"@quartz-labs/sdk@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@quartz-labs/sdk/-/sdk-0.2.0.tgz#11b404a555c0e8438259d81a0e743aed4bd94329"
-  integrity sha512-nC4M/iBpoLHZUjcO1whJn6yTWHc1D3m4zB6tRrsD8e3BG0N+LczCTNxR1QNLU6cLshQnlwb73q+PxGiwLzA+QA==
+"@quartz-labs/sdk@^0.2.1":
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/@quartz-labs/sdk/-/sdk-0.2.1.tgz#c0df44d63d42b3389d741b4b268606e5efb58975"
+  integrity sha512-tZdM19QQ1+tLmV9jo83mpJKRiMhVEzccScsty6ZS9CUyMo6aPhiLrX+BqNjAS0Jn5W9v7qhVjwTQpuPw54/1Nw==
   dependencies:
     "@coral-xyz/anchor" "^0.29.0"
     "@drift-labs/sdk" "^2.103.0-beta.9"
     "@jup-ag/api" "^6.0.30"
-    "@pythnetwork/pyth-solana-receiver" "^0.8.2"
     "@solana/spl-token" "^0.4.9"
     bn.js "^5.2.1"
   optionalDependencies:
