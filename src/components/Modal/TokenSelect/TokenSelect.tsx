@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import styles from './TokenSelect.module.css';
-import { TOKENS } from "@/src/config/tokens";
-import type { MarketIndex } from "@/src/config/constants";
+import { TOKENS_METADATA } from "@/src/config/tokensMetadata";
+import type { MarketIndex } from '@quartz-labs/sdk';
+import type { TokenMetadata } from '@/src/types/interfaces/TokenMetadata.interface';
 
 export interface TokenSelectProps {
     marketIndex: MarketIndex;
@@ -29,7 +30,11 @@ export default function TokenSelect({
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const tokens = selectableMarketIndices ? selectableMarketIndices.map(index => TOKENS[index]) : Object.values(TOKENS);
+    const filteredTokens: Record<MarketIndex, TokenMetadata> = selectableMarketIndices 
+        ? Object.fromEntries(
+            selectableMarketIndices.map(index => [index, TOKENS_METADATA[index]])
+        ) as Record<MarketIndex, TokenMetadata>
+        : TOKENS_METADATA;
 
     return (
         <div className={styles.tokenSelectWrapper} ref={dropdownRef}>
@@ -40,37 +45,40 @@ export default function TokenSelect({
                 aria-expanded={isOpen}
             >
                 <Image 
-                    src={`/tokens/${TOKENS[marketIndex].icon}`} 
-                    alt={TOKENS[marketIndex].name} 
+                    src={`/tokens/${TOKENS_METADATA[marketIndex].icon}`} 
+                    alt={TOKENS_METADATA[marketIndex].name} 
                     className={styles.assetIcon}
                     width={26} 
                     height={26} 
                 /> 
-                <p>{TOKENS[marketIndex].name}</p>
+                <p>{TOKENS_METADATA[marketIndex].name}</p>
             </button>
             
             {isOpen && (
                 <div className={styles.dropdownMenu} role="menu">
-                    {tokens.map((token, index) => (
-                        <button
-                            key={index}
-                            className={styles.dropdownItem}
-                            onClick={() => {
-                                setMarketIndex(token.marketIndex);
-                                setIsOpen(false);
-                            }}
-                            role="menuitem"
-                        >
-                            <Image 
-                                src={`/tokens/${token.icon}`} 
-                                alt={token.name} 
-                                className={styles.assetIcon}
-                                width={22} 
-                                height={22} 
-                            />
-                            {token.name}
-                        </button>
-                    ))}
+                    {Object.entries(filteredTokens).map(([index, token]) => {
+                        const marketIndex = Number(index) as MarketIndex;
+                        return (
+                            <button
+                                key={marketIndex}
+                                className={styles.dropdownItem}
+                                onClick={() => {
+                                    setMarketIndex(marketIndex);
+                                    setIsOpen(false);
+                                }}
+                                role="menuitem"
+                            >
+                                <Image 
+                                    src={`/tokens/${token.icon}`} 
+                                    alt={token.name} 
+                                    className={styles.assetIcon}
+                                    width={22} 
+                                    height={22} 
+                                />
+                                {token.name}
+                            </button>
+                        );
+                    })}
                 </div>
             )}
         </div>

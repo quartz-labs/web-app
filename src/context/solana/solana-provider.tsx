@@ -3,13 +3,9 @@
 import dynamic from 'next/dynamic';
 
 import { WalletError } from '@solana/wallet-adapter-base';
-import {
-  ConnectionProvider,
-  WalletProvider,
-} from '@solana/wallet-adapter-react';
+import { WalletProvider } from '@solana/wallet-adapter-react';
 import { WalletModalProvider, WalletMultiButton } from './wallet-adapter-react-ui';
-import { type ReactNode, useCallback, useMemo } from 'react';
-import { useCluster } from './cluster-data-access';
+import { type ReactNode, useCallback } from 'react';
 
 import './wallet-adapter-react-ui/styles.css';
 
@@ -31,17 +27,13 @@ export const WalletButton = dynamic(
 );
 
 export function SolanaProvider({ children }: { children: ReactNode }) {
-  const { cluster } = useCluster();
-  const endpoint = useMemo(() => cluster.endpoint, [cluster]);
   const onError = useCallback((error: WalletError) => {
     console.error(error);
   }, []);
 
   return (
-    <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={[]} onError={onError} autoConnect={true}>
+    <WalletProvider wallets={[]} onError={onError} autoConnect={true}>
         <WalletModalProvider>{children}</WalletModalProvider>
       </WalletProvider>
-    </ConnectionProvider>
   );
 }

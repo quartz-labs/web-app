@@ -1,25 +1,23 @@
-import type { MarketIndex } from "@/src/config/constants";
 import { useRefetchAccountData } from "@/src/utils/hooks";
 import { useStore } from "@/src/utils/store";
-import { SUPPORTED_DRIFT_MARKETS } from "@quartz-labs/sdk";
-import { useConnection, useAnchorWallet } from "@solana/wallet-adapter-react";
+import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useEffect, useState } from "react";
 import styles from "../Modal.module.css";
 import InputSection from "../Input.ModalComponent";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
 import Buttons from "../Buttons.ModalComponent";
-import { baseUnitToDecimal, buildAndSendFlashLoanTransaction, decimalToBaseUnit, formatTokenDisplay, truncToDecimalPlaces } from "@/src/utils/helpers";
+import { baseUnitToDecimal, decimalToBaseUnit, formatTokenDisplay, truncToDecimalPlaces, sendTransaction } from "@/src/utils/helpers";
 import TokenSelect from "../TokenSelect/TokenSelect";
-import { TOKENS } from "@/src/config/tokens";
-import { makeCollateralRepayIxs } from "@/src/utils/instructions";
+import { TOKENS_METADATA } from "@/src/config/tokensMetadata";
+import { getCollateralRepayTx } from "@/src/utils/instructions";
 import { useError } from "@/src/context/error-provider";
 import { captureError } from "@/src/utils/errors";
 import { TxStatus, useTxStatus } from "@/src/context/tx-status-provider";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
+import { MarketIndex } from "@quartz-labs/sdk";
 
 export default function RepayLoanModal() {
     const wallet = useAnchorWallet();
-    const { connection } = useConnection();
 
     const { prices, rates, balances, setModalVariation } = useStore();
     const { showError } = useError();
@@ -43,8 +41,8 @@ export default function RepayLoanModal() {
             .map(([marketIndex]) => Number(marketIndex) as MarketIndex)
         : [];
 
-    const [ marketIndexCollateral, setMarketIndexCollateral ] = useState<MarketIndex>(collateralMarketIndices[0] ?? SUPPORTED_DRIFT_MARKETS[1]);
-    const [ marketIndexLoan, setMarketIndexLoan ] = useState<MarketIndex>(loanMarketIndices[0] ?? SUPPORTED_DRIFT_MARKETS[0]);
+    const [ marketIndexCollateral, setMarketIndexCollateral ] = useState<MarketIndex>(collateralMarketIndices[0] ?? MarketIndex[1]);
+    const [ marketIndexLoan, setMarketIndexLoan ] = useState<MarketIndex>(loanMarketIndices[0] ?? MarketIndex[0]);
 
     useEffect(() => {
         refetchAccountData();
@@ -91,16 +89,10 @@ export default function RepayLoanModal() {
         setAwaitingSign(true);
         try {
             const amountLoanBaseUnits = decimalToBaseUnit(amountLoanDecimal, marketIndexLoan);
-            const { instructions, lookupTables, flashLoanAmountBaseUnits } = await makeCollateralRepayIxs(connection, wallet, amountLoanBaseUnits, marketIndexLoan, marketIndexCollateral);
-            const signature = await buildAndSendFlashLoanTransaction(
-                flashLoanAmountBaseUnits, 
-                marketIndexCollateral, 
-                instructions, 
-                wallet, 
-                connection, 
-                showTxStatus, 
-                lookupTables
-            );
+
+            const transaction = await getCollateralRepayTx(wallet, amountLoanBaseUnits, marketIndexLoan, marketIndexCollateral);
+            const signature = await sendTransaction(transaction, wallet, showTxStatus);
+            
             setAwaitingSign(false);
             if (signature) setModalVariation(ModalVariation.DISABLED);
         } catch (error) {
@@ -151,7 +143,7 @@ export default function RepayLoanModal() {
 
                 <div className={styles.inputFieldWrapper}>
                     <div className={`${styles.inputField} ${styles.inputFieldAmount} ${styles.inputFieldCollateral}`}>
-                        {truncToDecimalPlaces(amountCollateralDecimal, TOKENS[marketIndexCollateral].decimalPrecision)}
+                        {truncToDecimalPlaces(amountCollateralDecimal, TOKENS_METADATA[marketIndexCollateral].decimalPrecision)}
                     </div>
 
                     <TokenSelect 

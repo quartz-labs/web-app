@@ -1,4 +1,4 @@
-import type { MarketIndex } from "@/src/config/constants";
+import type { MarketIndex } from "@quartz-labs/sdk";
 
 export interface AssetInfo {
     marketIndex: MarketIndex;

@@ -7,19 +7,17 @@ import Buttons from "../Buttons.ModalComponent";
 import styles from "../Modal.module.css";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
 import { useStore } from "@/src/utils/store";
-import type { MarketIndex } from "@/src/config/constants";
-import { SUPPORTED_DRIFT_MARKETS } from "@quartz-labs/sdk";
-import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
+import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useError } from "@/src/context/error-provider";
 import { useDepositLimitsQuery } from "@/src/utils/queries";
 import { baseUnitToDecimal, buildAndSendTransaction, decimalToBaseUnit, validateAmount } from "@/src/utils/helpers";
-import { makeDepositIxs } from "@/src/utils/instructions";
+import { getDepositIxs } from "@/src/utils/instructions";
 import { captureError } from "@/src/utils/errors";
 import { TxStatus, useTxStatus } from "@/src/context/tx-status-provider";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
+import { MarketIndex } from "@quartz-labs/sdk";
 
 export default function AddFundsModal() {
-    const { connection } = useConnection();
     const wallet = useAnchorWallet();
 
     const { prices, rates, setModalVariation } = useStore();
@@ -32,7 +30,7 @@ export default function AddFundsModal() {
     const [amountStr, setAmountStr] = useState("");
     const amountDecimals = Number(amountStr);
 
-    const [ marketIndex, setMarketIndex ] = useState<MarketIndex>(SUPPORTED_DRIFT_MARKETS[0]);
+    const [ marketIndex, setMarketIndex ] = useState<MarketIndex>(MarketIndex[0]);
     const [ available, setAvailable ] = useState(0);
 
     useEffect(() => {
@@ -54,8 +52,8 @@ export default function AddFundsModal() {
         setAwaitingSign(true);
         try {
             const amountBaseUnits = decimalToBaseUnit(amountDecimals, marketIndex);
-            const instructions = await makeDepositIxs(connection, wallet, amountBaseUnits, marketIndex);
-            const signature = await buildAndSendTransaction(instructions, wallet, connection, showTxStatus);
+            const instructions = await getDepositIxs(wallet, amountBaseUnits, marketIndex);
+            const signature = await buildAndSendTransaction(instructions, wallet, showTxStatus);
             setAwaitingSign(false);
             if (signature) setModalVariation(ModalVariation.DISABLED);
         } catch (error) {

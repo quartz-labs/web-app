@@ -7,11 +7,6 @@ const nextConfig = {
       fs: false
     };
 
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      "@quartz-labs/sdk": "@quartz-labs/sdk/dist/index.browser.js"
-    };
-
     return config;
   },
   async rewrites() {

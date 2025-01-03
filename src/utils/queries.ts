@@ -3,10 +3,10 @@ import { captureError } from "./errors";
 import { useQuery } from "@tanstack/react-query";
 import { AccountStatus } from "@/src/types/enums/AccountStatus.enum";
 import type { PublicKey } from "@solana/web3.js";
-import { SUPPORTED_DRIFT_MARKETS } from "@quartz-labs/sdk";
-import { DEFAULT_REFETCH_INTERVAL, type MarketIndex } from "@/src/config/constants";
+import { DEFAULT_REFETCH_INTERVAL } from "@/src/config/constants";
 import type { Rate } from "@/src/types/interfaces/Rate.interface";
-import { TOKENS } from "../config/tokens";
+import { TOKENS_METADATA } from "../config/tokensMetadata";
+import { MarketIndex } from "@quartz-labs/sdk";
 
 interface QueryConfig {
     queryKey: string[];
@@ -90,10 +90,10 @@ export const useAccountStatusQuery = (address: PublicKey | null) => {
 export const usePricesQuery = createQuery<Record<MarketIndex, number>>({
     queryKey: ["prices"],
     url: "https://api.quartzpay.io/data/price",
-    params: { ids: Object.values(TOKENS).map((token) => token.coingeckoPriceId).join(',') },
+    params: { ids: Object.values(TOKENS_METADATA).map((token) => token.coingeckoPriceId).join(',') },
     transformResponse: (body) => {
         // Iterate through all tokens and map the marketIndex to the priceId
-        return Object.entries(TOKENS).reduce((acc, [marketIndex, token]) => {
+        return Object.entries(TOKENS_METADATA).reduce((acc, [marketIndex, token]) => {
             acc[Number(marketIndex) as MarketIndex] = body[token.coingeckoPriceId];
             return acc;
         }, {} as Record<MarketIndex, number>);
@@ -106,7 +106,7 @@ export const useRatesQuery = createQuery<Record<MarketIndex, Rate>>({
     queryKey: ["rates"],
     url: "https://api.quartzpay.io/drift/rate", 
     params: { 
-        marketIndices: SUPPORTED_DRIFT_MARKETS.join(',') 
+        marketIndices: MarketIndex.join(',') 
     },
     refetchInterval: DEFAULT_REFETCH_INTERVAL,
     errorMessage: "Could not fetch rates"
@@ -118,7 +118,7 @@ export const useBalancesQuery = (address: PublicKey | null) => {
         url: "https://api.quartzpay.io/drift/balance",
         params: address ? { 
             address: address.toBase58(),
-            marketIndices: SUPPORTED_DRIFT_MARKETS.join(',')
+            marketIndices: MarketIndex.join(',')
         } : undefined,
         errorMessage: "Could not fetch balances",
         refetchInterval: DEFAULT_REFETCH_INTERVAL,
@@ -133,7 +133,7 @@ export const useWithdrawLimitsQuery = (address: PublicKey | null) => {
         url: "https://api.quartzpay.io/drift/withdraw-limit",
         params: address ? { 
             address: address.toBase58(),
-            marketIndices: SUPPORTED_DRIFT_MARKETS.join(',')
+            marketIndices: MarketIndex.join(',')
         } : undefined,
         errorMessage: "Could not fetch withdraw limits",
         refetchInterval: DEFAULT_REFETCH_INTERVAL,

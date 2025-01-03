@@ -1,24 +1,21 @@
-import { type MarketIndex } from "@/src/config/constants";
 import type { Rate } from "@/src/types/interfaces/Rate.interface";
 import type { AssetInfo } from "@/src/types/interfaces/AssetInfo.interface";
-import { TOKENS } from "@/src/config/tokens";
+import { TOKENS_METADATA } from "@/src/config/tokensMetadata";
 import { AddressLookupTableAccount, ComputeBudgetProgram, Connection, Keypair, PublicKey, TransactionInstruction } from "@solana/web3.js";
-import { SUPPORTED_DRIFT_MARKETS } from "@quartz-labs/sdk";
 import type { AnchorWallet } from "@solana/wallet-adapter-react";
 import type { QuoteResponse } from "@jup-ag/api";
 import { VersionedTransaction } from "@solana/web3.js";
 import { TransactionMessage } from "@solana/web3.js";
 import { TxStatus, type TxStatusProps } from "../context/tx-status-provider";
-import { getConfig as getMarginfiConfig, MarginfiClient } from "@mrgnlabs/marginfi-client-v2";
-import { PreflightCheck } from "../types/enums/PreflightCheck.enum";
+import { MarketIndex } from "@quartz-labs/sdk";
 
 export function baseUnitToDecimal(baseUnits: number, marketIndex: MarketIndex): number {
-    const token = TOKENS[marketIndex];
+    const token = TOKENS_METADATA[marketIndex];
     return baseUnits / (10 ** token.decimalPrecision);
 }
 
 export function decimalToBaseUnit(decimal: number, marketIndex: MarketIndex): number {
-    const token = TOKENS[marketIndex];
+    const token = TOKENS_METADATA[marketIndex];
     return Math.trunc(decimal * (10 ** token.decimalPrecision));
 }
 
@@ -52,7 +49,7 @@ export function formatDollarValue(num: number, decimalPlaces: number = 1): [stri
 }
 
 export function calculateBalanceDollarValues(prices: Record<MarketIndex, number>, balances: Record<MarketIndex, number>) {
-    return SUPPORTED_DRIFT_MARKETS.reduce((acc, marketIndex) => {
+    return MarketIndex.reduce((acc, marketIndex) => {
         const price = prices[marketIndex];
         const balance = baseUnitToDecimal(balances[marketIndex], marketIndex);
         acc[marketIndex] = price * balance;
@@ -68,7 +65,7 @@ export function calculateBalances(values: Record<MarketIndex, number>): {
     let collateralBalance = 0;
     let loanBalance = 0;
 
-    for (const marketIndex of SUPPORTED_DRIFT_MARKETS) {
+    for (const marketIndex of MarketIndex) {
         const value = values[marketIndex];
         if (value > 0) collateralBalance += value;
         if (value < 0) loanBalance += Math.abs(value);
@@ -89,7 +86,7 @@ export function calculateRateChanges(values: Record<MarketIndex, number>, rates:
     let collateralRate = 0;
     let loanRate = 0;
 
-    for (const marketIndex of SUPPORTED_DRIFT_MARKETS) {
+    for (const marketIndex of MarketIndex) {
         const value = values[marketIndex];
         const rate = rates[marketIndex];
 
@@ -108,7 +105,7 @@ export function generateAssetInfos(prices: Record<MarketIndex, number>, balances
     const suppliedAssets: AssetInfo[] = [];
     const borrowedAssets: AssetInfo[] = [];
     
-    for (const marketIndex of SUPPORTED_DRIFT_MARKETS) {
+    for (const marketIndex of MarketIndex) {
         const balance = baseUnitToDecimal(balances[marketIndex], marketIndex);
         const price = prices[marketIndex];
         const rate = rates[marketIndex];
@@ -140,7 +137,7 @@ export function formatTokenDisplay(balance: number, marketIndex?: MarketIndex) {
 
     const magnitude = Math.floor(Math.log10(Math.abs(balance))) + 1;
     
-    let precision = TOKENS[marketIndex].decimalPrecision;
+    let precision = TOKENS_METADATA[marketIndex].decimalPrecision;
     if (magnitude >= 3) {
         precision = Math.max(0, precision - (magnitude - 2));
     }
@@ -182,53 +179,9 @@ export async function getJupiterSwapQuote(
     return quoteResponse;
 }
 
-export async function buildAndSendFlashLoanTransaction(
-    flashLoanAmountBaseUnits: number,
-    flashLoanMarketIndex: MarketIndex,
-    instructions: TransactionInstruction[], 
-    wallet: AnchorWallet, 
-    connection: Connection,
-    showTxStatus: (props: TxStatusProps) => void,
-    lookupTables: AddressLookupTableAccount[] = [],
-    otherSigners: Keypair[] = []
-): Promise<string> {
-    const PRIORITY_FEE_DECIMAL = 0.0025;
-    const amountLoanDecimal = baseUnitToDecimal(flashLoanAmountBaseUnits, flashLoanMarketIndex);
-
-    const marginfiClient = await MarginfiClient.fetch(getMarginfiConfig(), wallet, connection);
-    const [ marginfiAccount ] = await marginfiClient.getMarginfiAccountsForAuthority(wallet.publicKey);
-    if (marginfiAccount === undefined) throw new Error("Could not find Flash Loan MarginFi account");
-    if (marginfiAccount.isDisabled) throw new Error("Flash Loan MarginFi account is disabled"); // TODO: Handle disabled MarginFi accounts
-
-    const loanBank = marginfiClient.getBankByMint(TOKENS[flashLoanMarketIndex].mintAddress);
-    if (loanBank === null) throw new Error("Could not find Flash Loan MarginFi bank");
-
-    const { flashloanTx } = await marginfiAccount.makeLoopTx(
-        amountLoanDecimal,
-        amountLoanDecimal,
-        loanBank.address,
-        loanBank.address,
-        instructions,
-        lookupTables,
-        PRIORITY_FEE_DECIMAL,
-        true
-    )
-
-    const signature = await sendTransaction(
-        flashloanTx, 
-        wallet, 
-        showTxStatus, 
-        otherSigners, 
-        PreflightCheck.SIMULATE, 
-        connection
-    );
-    return signature;
-}
-
 export async function buildAndSendTransaction(
     instructions: TransactionInstruction[], 
-    wallet: AnchorWallet, 
-    connection: Connection,
+    wallet: AnchorWallet,
     showTxStatus: (props: TxStatusProps) => void,
     lookupTables: AddressLookupTableAccount[] = [],
     otherSigners: Keypair[] = []
@@ -258,44 +211,32 @@ export async function buildAndSendTransaction(
         transaction, 
         wallet, 
         showTxStatus, 
-        otherSigners, 
-        PreflightCheck.SIMULATE, 
-        connection
+        otherSigners
     );
     return signature;
 }
 
-async function sendTransaction(
+export async function sendTransaction(
     transaction: VersionedTransaction, 
     wallet: AnchorWallet, 
     showTxStatus: (props: TxStatusProps) => void,
     otherSigners: Keypair[] = [],
-    skipPreflight: PreflightCheck = PreflightCheck.CHECK,
-    connection?: Connection
+    skipPreflight: boolean = false
 ): Promise<string> {
     showTxStatus({ status: TxStatus.SIGNING });
 
     const signedTx = await wallet.signTransaction(transaction);
     if (otherSigners.length > 0) signedTx.sign(otherSigners);
 
-    if (skipPreflight === PreflightCheck.SIMULATE) {
-        if (connection === undefined) throw new Error("Connection is required for simulation");
-        const simulation = await connection.simulateTransaction(transaction);
-        console.log(simulation);
-        if (simulation.value.err) {
-            throw new Error(`Transaction simulation failed: ${JSON.stringify(simulation)}`);
-        }
-    }
-
     const serializedTransaction = Buffer.from(signedTx.serialize()).toString("base64");
-    const response = await fetch("api/tx", {
+    const response = await fetch("api/send-tx", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
         body: JSON.stringify({
             transaction: serializedTransaction,
-            skipPreflight: (skipPreflight !== PreflightCheck.CHECK)
+            skipPreflight: skipPreflight
         }),
     });
     const body = await response.json();

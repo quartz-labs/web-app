@@ -1,9 +1,9 @@
 import { useState } from "react";
 import styles from "./OtherViews.module.css";
-import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
+import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { PuffLoader } from "react-spinners";
 import { buildAndSendTransaction } from "@/src/utils/helpers";
-import { makeInitAccountIxs } from "@/src/utils/instructions";
+import { getInitAccountIxs } from "@/src/utils/instructions";
 import { useError } from "@/src/context/error-provider";
 import { useRefetchAccountStatus } from "@/src/utils/hooks";
 import { captureError } from "@/src/utils/errors";
@@ -12,7 +12,6 @@ import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
 
 export default function Onboarding() {
   const wallet = useAnchorWallet();
-  const { connection } = useConnection();
   const { showError } = useError();
   const { showTxStatus } = useTxStatus();
   const refetchAccountStatus = useRefetchAccountStatus();
@@ -41,9 +40,9 @@ export default function Onboarding() {
     setAwaitingSign(true);
     refetchAccountStatus();
     try {
-        const { instructions, marginfiSigner } = await makeInitAccountIxs(connection, wallet);
+        const { instructions, marginfiSigner } = await getInitAccountIxs(wallet);
         const signers = marginfiSigner ? [marginfiSigner] : [];
-        const signature = await buildAndSendTransaction(instructions, wallet, connection, showTxStatus, [], signers);
+        const signature = await buildAndSendTransaction(instructions, wallet, showTxStatus, [], signers);
         setAwaitingSign(false);
         if (signature) refetchAccountStatus(signature);
     } catch (error) {

@@ -1,22 +1,20 @@
 import { baseUnitToDecimal, buildAndSendTransaction, decimalToBaseUnit, validateAmount } from "@/src/utils/helpers";
-import type { MarketIndex } from "@/src/config/constants";
 import { useRefetchAccountData, useRefetchWithdrawLimits } from "@/src/utils/hooks";
 import { useStore } from "@/src/utils/store";
-import { SUPPORTED_DRIFT_MARKETS } from "@quartz-labs/sdk";
-import { useConnection, useAnchorWallet } from "@solana/wallet-adapter-react";
+import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useEffect, useState } from "react";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
 import styles from "../Modal.module.css";
 import InputSection from "../Input.ModalComponent";
 import Buttons from "../Buttons.ModalComponent";
-import { makeWithdrawIxs } from "@/src/utils/instructions";
+import { getWithdrawIxs } from "@/src/utils/instructions";
 import { useError } from "@/src/context/error-provider";
 import { captureError } from "@/src/utils/errors";
 import { TxStatus, useTxStatus } from "@/src/context/tx-status-provider";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
+import { MarketIndex } from "@quartz-labs/sdk";
 
 export default function WithdrawModal() {
-    const { connection } = useConnection();
     const wallet = useAnchorWallet();
 
     const { prices, rates, withdrawLimits, setModalVariation } = useStore();
@@ -30,7 +28,7 @@ export default function WithdrawModal() {
     const [amountStr, setAmountStr] = useState("");
     const amountDecimals = Number(amountStr);
 
-    const [ marketIndex, setMarketIndex ] = useState<MarketIndex>(SUPPORTED_DRIFT_MARKETS[0]);
+    const [ marketIndex, setMarketIndex ] = useState<MarketIndex>(MarketIndex[0]);
 
     useEffect(() => {
         refetchAccountData();
@@ -51,8 +49,8 @@ export default function WithdrawModal() {
         setAwaitingSign(true);
         try {
             const amountBaseUnits = decimalToBaseUnit(amountDecimals, marketIndex);
-            const instructions = await makeWithdrawIxs(connection, wallet, amountBaseUnits, marketIndex);
-            const signature = await buildAndSendTransaction(instructions, wallet, connection, showTxStatus);
+            const instructions = await getWithdrawIxs(wallet, amountBaseUnits, marketIndex);
+            const signature = await buildAndSendTransaction(instructions, wallet, showTxStatus);
             setAwaitingSign(false);
             if (signature) setModalVariation(ModalVariation.DISABLED);
         } catch (error) {

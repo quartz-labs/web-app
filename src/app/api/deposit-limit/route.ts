@@ -4,11 +4,10 @@ import { Connection } from '@solana/web3.js';
 import { PublicKey } from '@solana/web3.js';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { DRIFT_MARKET_INDEX_SOL, SUPPORTED_DRIFT_MARKETS } from "@quartz-labs/sdk";
-import { MICRO_LAMPORTS_PER_LAMPORT, type MarketIndex } from '@/src/config/constants';
+import { MICRO_LAMPORTS_PER_LAMPORT } from '@/src/config/constants';
 import { AccountLayout } from '@solana/spl-token';
 import { getAssociatedTokenAddress } from '@solana/spl-token';
-import { TOKENS } from '@/src/config/tokens';
+import { MarketIndex, TOKENS } from '@quartz-labs/sdk';
 
 const envSchema = z.object({
     RPC_URL: z.string().url(),
@@ -41,7 +40,7 @@ export async function GET(request: Request) {
     if (!marketIndexParam) return NextResponse.json({ error: "Market index is required" }, { status: 400 });
 
     const marketIndex = parseInt(marketIndexParam);
-    if (isNaN(marketIndex) || !SUPPORTED_DRIFT_MARKETS.includes(marketIndex as any)) {
+    if (isNaN(marketIndex) || ![...MarketIndex].includes(marketIndex as any)) {
         return NextResponse.json({ error: "Invalid market index" }, { status: 400 });
     }
 
@@ -58,11 +57,17 @@ export async function GET(request: Request) {
 }
 
 async function fetchDepositLimit(connection: Connection, pubkey: PublicKey, marketIndex: MarketIndex): Promise<number> {
-    if (marketIndex === DRIFT_MARKET_INDEX_SOL) {
+    const [marketIndexSolString] = Object.entries(TOKENS).find(([, token]) => token.name === "SOL") ?? [];
+    const marketIndexSol = Number(marketIndexSolString);
+    if (isNaN(marketIndexSol)) {
+        throw new Error("SOL market index not found");
+    }
+
+    if (marketIndex === marketIndexSol) {
         return await fetchMaxDepositLamports(pubkey, connection);
     }
     
-    return await fetchMaxDepositSpl(pubkey, connection, TOKENS[marketIndex].mintAddress);
+    return await fetchMaxDepositSpl(pubkey, connection, TOKENS[marketIndex].mint);
 }
 
 async function fetchMaxDepositLamports(pubkey: PublicKey, connection: Connection) {

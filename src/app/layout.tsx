@@ -4,7 +4,6 @@ import { ReactQueryProvider } from '@/src/context/react-query-provider';
 import dynamic from 'next/dynamic';
 import { PostHogClient } from '@/src/context/posthog-provider';
 import { SolanaProvider } from '@/src/context/solana/solana-provider';
-import { ClusterProvider } from '@/src/context/solana/cluster-data-access';
 import { ErrorProvider } from '@/src/context/error-provider';
 import { TxStatusProvider } from '../context/tx-status-provider';
 import ErrorPopup from '../components/Popup/ErrorPopup/ErrorPopup';
@@ -48,17 +47,15 @@ export default function RootLayout({
         <ErrorProvider>
           <ReactQueryProvider>
             <PostHogClient>
-              <ClusterProvider>
-                <SolanaProvider>
-                  <TxStatusProvider>
-                    <PostHogPageView />
-                    <ErrorPopup />
-                    <ErrorModal />
-                    <TxStatusPopup />
-                    {children}
-                  </TxStatusProvider>
-                </SolanaProvider>
-              </ClusterProvider>
+              <SolanaProvider>
+                <TxStatusProvider>
+                  <PostHogPageView />
+                  <ErrorPopup />
+                  <ErrorModal />
+                  <TxStatusPopup />
+                  {children}
+                </TxStatusProvider>
+              </SolanaProvider>
             </PostHogClient>
           </ReactQueryProvider>
         </ErrorProvider>

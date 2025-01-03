@@ -4,17 +4,16 @@ import styles from "../Modal.module.css";
 import { PuffLoader } from "react-spinners";
 import { captureError } from "@/src/utils/errors";
 import { useError } from "@/src/context/error-provider";
-import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
+import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useState } from "react";
 import { useRefetchAccountStatus } from "@/src/utils/hooks";
-import { makeCloseAccountIxs } from "@/src/utils/instructions";
+import { getCloseAccountIxs } from "@/src/utils/instructions";
 import { buildAndSendTransaction } from "@/src/utils/helpers";
 import { TxStatus, useTxStatus } from "@/src/context/tx-status-provider";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
 
 export default function CloseAccountModal() {
     const wallet = useAnchorWallet();
-    const { connection } = useConnection();
 
     const { setModalVariation } = useStore();
     const { showError } = useError();
@@ -28,8 +27,8 @@ export default function CloseAccountModal() {
 
         setAwaitingSign(true);
         try {
-            const instructions = await makeCloseAccountIxs(connection, wallet);
-            const signature = await buildAndSendTransaction(instructions, wallet, connection, showTxStatus);
+            const instructions = await getCloseAccountIxs(wallet);
+            const signature = await buildAndSendTransaction(instructions, wallet, showTxStatus);
             setAwaitingSign(false);
             if (signature) {
                 refetchAccountStatus(signature);

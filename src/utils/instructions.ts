@@ -1,15 +1,16 @@
 import { getConfig as getMarginfiConfig, MarginfiClient } from "@mrgnlabs/marginfi-client-v2";
-import { QuartzClientLight, WSOL_MINT } from "@quartz-labs/sdk";
 import type { AnchorWallet } from "@solana/wallet-adapter-react";
 import type { TransactionInstruction } from "@solana/web3.js";
 import type { Connection } from "@solana/web3.js";
 import type { PublicKey } from "@solana/web3.js";
-import { JUPITER_SLIPPAGE_BPS, type MarketIndex } from "../config/constants";
-import { TOKENS } from "../config/tokens";
+import { JUPITER_SLIPPAGE_BPS } from "../config/constants";
+import { TOKENS_METADATA } from "../config/tokensMetadata";
 import { createAssociatedTokenAccountInstruction, createCloseAccountInstruction, createSyncNativeInstruction, getAssociatedTokenAddress } from "@solana/spl-token";
 import { Keypair, SystemProgram } from "@solana/web3.js";
 import type { AddressLookupTableAccount } from "@solana/web3.js";
-import { getJupiterSwapQuote, getTokenAccountBalance } from "./helpers";
+import { baseUnitToDecimal, getJupiterSwapQuote, getTokenAccountBalance } from "./helpers";
+import { MarketIndex, QuartzClient } from "@quartz-labs/sdk";
+import type { VersionedTransaction } from "@solana/web3.js";
 
 export async function makeInitAccountIxs(
     connection: Connection,
@@ -19,7 +20,7 @@ export async function makeInitAccountIxs(
     marginfiSigner: Keypair | null
 }> {
     const [quartzClient, marginfiClient] = await Promise.all([
-        QuartzClientLight.fetchClientLight(connection),
+        QuartzClient.fetchClient(connection),
         MarginfiClient.fetch(getMarginfiConfig(), wallet, connection)
     ]);
 
@@ -47,8 +48,8 @@ export async function makeCloseAccountIxs(
     connection: Connection,
     wallet: AnchorWallet
 ): Promise<TransactionInstruction[]> {
-    const quartzClient = await QuartzClientLight.fetchClientLight(connection);
-    const user = await quartzClient.getQuartzAccountLight(wallet.publicKey);
+    const quartzClient = await QuartzClient.fetchClient(connection);
+    const user = await quartzClient.getQuartzAccount(wallet.publicKey);
     return await user.makeCloseAccountIxs();
 }
 
@@ -58,16 +59,19 @@ export async function makeDepositIxs(
     amountBaseUnits: number,
     marketIndex: MarketIndex
 ): Promise<TransactionInstruction[]> {
-    const quartzClient = await QuartzClientLight.fetchClientLight(connection);
-    const userPromise = quartzClient.getQuartzAccountLight(wallet.publicKey);
+    const quartzClient = await QuartzClient.fetchClient(connection);
+    const userPromise = quartzClient.getQuartzAccount(wallet.publicKey);
 
-    const mint = TOKENS[marketIndex].mintAddress;
+    const mint = TOKENS_METADATA[marketIndex].mint;
     const walletAta = await getAssociatedTokenAddress(mint, wallet.publicKey);
     const oix_createAta = await makeCreateAtaIxsIfNeeded(connection, walletAta, wallet.publicKey, mint);
 
+    const wSolMint = Object.values(TOKENS_METADATA).find(token => token.name === "SOL")?.mint;
+    if (!wSolMint) throw new Error("wSolMint not found");
+
     const oix_wrapSol: TransactionInstruction[] = [];
     const oix_closeWsol: TransactionInstruction[] = [];
-    if (mint === WSOL_MINT) {
+    if (mint === wSolMint) {
         const ix_wrapSol = SystemProgram.transfer({
             fromPubkey: wallet.publicKey,
             toPubkey: walletAta,
@@ -89,15 +93,18 @@ export async function makeWithdrawIxs(
     amountBaseUnits: number,
     marketIndex: MarketIndex
 ): Promise<TransactionInstruction[]> {
-    const quartzClient = await QuartzClientLight.fetchClientLight(connection);
-    const userPromise = quartzClient.getQuartzAccountLight(wallet.publicKey);
+    const quartzClient = await QuartzClient.fetchClient(connection);
+    const userPromise = quartzClient.getQuartzAccount(wallet.publicKey);
 
-    const mint = TOKENS[marketIndex].mintAddress;
+    const mint = TOKENS_METADATA[marketIndex].mint;
     const walletAta = await getAssociatedTokenAddress(mint, wallet.publicKey);
     const oix_createAta = await makeCreateAtaIxsIfNeeded(connection, walletAta, wallet.publicKey, mint);
 
+    const wSolMint = Object.values(TOKENS_METADATA).find(token => token.name === "SOL")?.mint;
+    if (!wSolMint) throw new Error("wSolMint not found");
+
     const oix_closeWsol: TransactionInstruction[] = [];
-    if (mint === WSOL_MINT) {
+    if (mint === wSolMint) {
         oix_closeWsol.push(createCloseAccountInstruction(walletAta, wallet.publicKey, wallet.publicKey));
     }
 
@@ -117,14 +124,14 @@ export async function makeCollateralRepayIxs(
     lookupTables: AddressLookupTableAccount[],
     flashLoanAmountBaseUnits: number
 }> {
-    const quartzClient = await QuartzClientLight.fetchClientLight(connection);
-    const userPromise = quartzClient.getQuartzAccountLight(wallet.publicKey);
+    const quartzClient = await QuartzClient.fetchClient(connection);
+    const userPromise = quartzClient.getQuartzAccount(wallet.publicKey);
 
-    const mintCollateral = TOKENS[marketIndexCollateral].mintAddress;
+    const mintCollateral = TOKENS_METADATA[marketIndexCollateral].mint;
     const walletAtaCollateral = await getAssociatedTokenAddress(mintCollateral, wallet.publicKey);
     const startingBalanceCollateral = await getTokenAccountBalance(connection, walletAtaCollateral);
 
-    const mintLoan = TOKENS[marketIndexLoan].mintAddress;
+    const mintLoan = TOKENS_METADATA[marketIndexLoan].mint;
     const walletAtaLoan = await getAssociatedTokenAddress(mintLoan, wallet.publicKey);
     const oix_createAtaLoan = await makeCreateAtaIxsIfNeeded(connection, walletAtaLoan, wallet.publicKey, mintLoan);
 
@@ -150,6 +157,39 @@ export async function makeCollateralRepayIxs(
     };
 }
 
+export async function buildFlashLoanTransaction(
+    flashLoanAmountBaseUnits: number,
+    flashLoanMarketIndex: MarketIndex,
+    instructions: TransactionInstruction[], 
+    wallet: AnchorWallet,
+    connection: Connection,
+    lookupTables: AddressLookupTableAccount[] = []
+): Promise<VersionedTransaction> {
+    const PRIORITY_FEE_DECIMAL = 0.0025;
+    const amountLoanDecimal = baseUnitToDecimal(flashLoanAmountBaseUnits, flashLoanMarketIndex);
+
+    const marginfiClient = await MarginfiClient.fetch(getMarginfiConfig(), wallet, connection);
+    const [ marginfiAccount ] = await marginfiClient.getMarginfiAccountsForAuthority(wallet.publicKey);
+    if (marginfiAccount === undefined) throw new Error("Could not find Flash Loan MarginFi account");
+    if (marginfiAccount.isDisabled) throw new Error("Flash Loan MarginFi account is disabled"); // TODO: Handle disabled MarginFi accounts
+
+    const loanBank = marginfiClient.getBankByMint(TOKENS_METADATA[flashLoanMarketIndex].mint);
+    if (loanBank === null) throw new Error("Could not find Flash Loan MarginFi bank");
+
+    const { flashloanTx } = await marginfiAccount.makeLoopTx(
+        amountLoanDecimal,
+        amountLoanDecimal,
+        loanBank.address,
+        loanBank.address,
+        instructions,
+        lookupTables,
+        PRIORITY_FEE_DECIMAL,
+        true
+    )
+
+    return flashloanTx;
+}
+
 async function makeCreateAtaIxsIfNeeded(
     connection: Connection,
     ata: PublicKey,
@@ -169,4 +209,45 @@ async function makeCreateAtaIxsIfNeeded(
         );
     }
     return oix_createAta;
+}
+
+export async function getInitAccountIxs(
+    connection: Connection,
+    wallet: AnchorWallet
+): Promise<VersionedTransaction> {
+    throw new Error("Not implemented");
+}
+
+export async function getCloseAccountIxs(
+    connection: Connection,
+    wallet: AnchorWallet
+): Promise<VersionedTransaction> {
+    throw new Error("Not implemented");
+}
+
+export async function getDepositIxs(
+    connection: Connection,
+    wallet: AnchorWallet,
+    amountBaseUnits: number,
+    marketIndex: MarketIndex
+): Promise<VersionedTransaction> {
+    throw new Error("Not implemented");
+}
+
+export async function getWithdrawIxs(
+    connection: Connection,
+    wallet: AnchorWallet,
+    amountBaseUnits: number,
+    marketIndex: MarketIndex
+): Promise<VersionedTransaction> {
+    throw new Error("Not implemented");
+}
+
+export async function getCollateralRepayTx(
+    wallet: AnchorWallet,
+    amountLoanBaseUnits: number,
+    marketIndexLoan: MarketIndex,
+    marketIndexCollateral: MarketIndex
+): Promise<VersionedTransaction> {
+    throw new Error("Not implemented");
 }
