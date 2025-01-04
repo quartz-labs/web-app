@@ -1,4 +1,4 @@
-import type { MarketIndex } from "@quartz-labs/sdk";
+import type { MarketIndex } from "@quartz-labs/sdk/browser";
 import styles from "./Modal.module.css";
 import TokenSelect from "./TokenSelect/TokenSelect";
 import { formatTokenDisplay } from "@/src/utils/helpers";

@@ -10,12 +10,11 @@ import { useStore } from "@/src/utils/store";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useError } from "@/src/context/error-provider";
 import { useDepositLimitsQuery } from "@/src/utils/queries";
-import { baseUnitToDecimal, buildAndSendTransaction, decimalToBaseUnit, validateAmount } from "@/src/utils/helpers";
-import { getDepositIxs } from "@/src/utils/instructions";
+import { baseUnitToDecimal, decimalToBaseUnit, validateAmount, fetchAndParse, deserializeTransaction, signAndSendTransaction } from "@/src/utils/helpers";
 import { captureError } from "@/src/utils/errors";
 import { TxStatus, useTxStatus } from "@/src/context/tx-status-provider";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
-import { MarketIndex } from "@quartz-labs/sdk";
+import { MarketIndex } from "@quartz-labs/sdk/browser";
 
 export default function AddFundsModal() {
     const wallet = useAnchorWallet();
@@ -52,8 +51,20 @@ export default function AddFundsModal() {
         setAwaitingSign(true);
         try {
             const amountBaseUnits = decimalToBaseUnit(amountDecimals, marketIndex);
-            const instructions = await getDepositIxs(wallet, amountBaseUnits, marketIndex);
-            const signature = await buildAndSendTransaction(instructions, wallet, showTxStatus);
+            const serializedTx = await fetchAndParse("/api/build-tx/deposit", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    address: wallet.publicKey.toBase58(),
+                    amountBaseUnits,
+                    marketIndex
+                }),
+            });
+            const transaction = deserializeTransaction(serializedTx);
+            const signature = await signAndSendTransaction(transaction, wallet, showTxStatus);
+            
             setAwaitingSign(false);
             if (signature) setModalVariation(ModalVariation.DISABLED);
         } catch (error) {

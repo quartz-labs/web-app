@@ -2,13 +2,12 @@ import { useState } from "react";
 import styles from "./OtherViews.module.css";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { PuffLoader } from "react-spinners";
-import { buildAndSendTransaction } from "@/src/utils/helpers";
-import { getInitAccountIxs } from "@/src/utils/instructions";
 import { useError } from "@/src/context/error-provider";
 import { useRefetchAccountStatus } from "@/src/utils/hooks";
 import { captureError } from "@/src/utils/errors";
 import { TxStatus, useTxStatus } from "@/src/context/tx-status-provider";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
+import { signAndSendTransaction, fetchAndParse, deserializeTransaction } from "@/src/utils/helpers";
 
 export default function Onboarding() {
   const wallet = useAnchorWallet();
@@ -40,9 +39,18 @@ export default function Onboarding() {
     setAwaitingSign(true);
     refetchAccountStatus();
     try {
-        const { instructions, marginfiSigner } = await getInitAccountIxs(wallet);
-        const signers = marginfiSigner ? [marginfiSigner] : [];
-        const signature = await buildAndSendTransaction(instructions, wallet, showTxStatus, [], signers);
+        const serializedTx = await fetchAndParse("/api/build-tx/init-account", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                address: wallet.publicKey.toBase58()
+            }),
+        });
+        const transaction = deserializeTransaction(serializedTx);
+        const signature = await signAndSendTransaction(transaction, wallet, showTxStatus);
+
         setAwaitingSign(false);
         if (signature) refetchAccountStatus(signature);
     } catch (error) {

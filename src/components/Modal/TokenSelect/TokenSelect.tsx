@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import styles from './TokenSelect.module.css';
 import { TOKENS_METADATA } from "@/src/config/tokensMetadata";
-import type { MarketIndex } from '@quartz-labs/sdk';
+import type { MarketIndex } from '@quartz-labs/sdk/browser';
 import type { TokenMetadata } from '@/src/types/interfaces/TokenMetadata.interface';
 
 export interface TokenSelectProps {

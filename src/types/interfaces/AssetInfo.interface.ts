@@ -1,4 +1,4 @@
-import type { MarketIndex } from "@quartz-labs/sdk";
+import type { MarketIndex } from "@quartz-labs/sdk/browser";
 
 export interface AssetInfo {
     marketIndex: MarketIndex;

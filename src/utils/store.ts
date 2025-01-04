@@ -1,7 +1,7 @@
 import type { Rate } from "@/src/types/interfaces/Rate.interface";
 import { create } from "zustand";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
-import type { MarketIndex } from "@quartz-labs/sdk";
+import type { MarketIndex } from "@quartz-labs/sdk/browser";
 
 type State = {
   isInitialized: boolean;

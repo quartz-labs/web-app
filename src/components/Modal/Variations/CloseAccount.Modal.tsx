@@ -7,10 +7,9 @@ import { useError } from "@/src/context/error-provider";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useState } from "react";
 import { useRefetchAccountStatus } from "@/src/utils/hooks";
-import { getCloseAccountIxs } from "@/src/utils/instructions";
-import { buildAndSendTransaction } from "@/src/utils/helpers";
 import { TxStatus, useTxStatus } from "@/src/context/tx-status-provider";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
+import { signAndSendTransaction, fetchAndParse, deserializeTransaction } from "@/src/utils/helpers";
 
 export default function CloseAccountModal() {
     const wallet = useAnchorWallet();
@@ -27,8 +26,18 @@ export default function CloseAccountModal() {
 
         setAwaitingSign(true);
         try {
-            const instructions = await getCloseAccountIxs(wallet);
-            const signature = await buildAndSendTransaction(instructions, wallet, showTxStatus);
+            const serializedTx = await fetchAndParse("/api/build-tx/close-account", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    address: wallet.publicKey.toBase58()
+                }),
+            });
+            const transaction = deserializeTransaction(serializedTx);
+            const signature = await signAndSendTransaction(transaction, wallet, showTxStatus);
+            
             setAwaitingSign(false);
             if (signature) {
                 refetchAccountStatus(signature);

@@ -6,15 +6,14 @@ import styles from "../Modal.module.css";
 import InputSection from "../Input.ModalComponent";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
 import Buttons from "../Buttons.ModalComponent";
-import { baseUnitToDecimal, decimalToBaseUnit, formatTokenDisplay, truncToDecimalPlaces, sendTransaction } from "@/src/utils/helpers";
+import { baseUnitToDecimal, decimalToBaseUnit, formatTokenDisplay, truncToDecimalPlaces, signAndSendTransaction, fetchAndParse, deserializeTransaction } from "@/src/utils/helpers";
 import TokenSelect from "../TokenSelect/TokenSelect";
 import { TOKENS_METADATA } from "@/src/config/tokensMetadata";
-import { getCollateralRepayTx } from "@/src/utils/instructions";
 import { useError } from "@/src/context/error-provider";
 import { captureError } from "@/src/utils/errors";
 import { TxStatus, useTxStatus } from "@/src/context/tx-status-provider";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
-import { MarketIndex } from "@quartz-labs/sdk";
+import { MarketIndex } from "@quartz-labs/sdk/browser";
 
 export default function RepayLoanModal() {
     const wallet = useAnchorWallet();
@@ -90,8 +89,20 @@ export default function RepayLoanModal() {
         try {
             const amountLoanBaseUnits = decimalToBaseUnit(amountLoanDecimal, marketIndexLoan);
 
-            const transaction = await getCollateralRepayTx(wallet, amountLoanBaseUnits, marketIndexLoan, marketIndexCollateral);
-            const signature = await sendTransaction(transaction, wallet, showTxStatus);
+            const serializedTx = await fetchAndParse("/api/build-tx/collateral-repay", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    address: wallet.publicKey.toBase58(),
+                    amountLoanBaseUnits,
+                    marketIndexLoan,
+                    marketIndexCollateral
+                }),
+            });
+            const transaction = deserializeTransaction(serializedTx);
+            const signature = await signAndSendTransaction(transaction, wallet, showTxStatus);
             
             setAwaitingSign(false);
             if (signature) setModalVariation(ModalVariation.DISABLED);

@@ -6,7 +6,7 @@ import type { PublicKey } from "@solana/web3.js";
 import { DEFAULT_REFETCH_INTERVAL } from "@/src/config/constants";
 import type { Rate } from "@/src/types/interfaces/Rate.interface";
 import { TOKENS_METADATA } from "../config/tokensMetadata";
-import { MarketIndex } from "@quartz-labs/sdk";
+import { MarketIndex } from "@quartz-labs/sdk/browser";
 
 interface QueryConfig {
     queryKey: string[];

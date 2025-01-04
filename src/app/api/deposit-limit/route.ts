@@ -7,7 +7,7 @@ import { z } from 'zod';
 import { MICRO_LAMPORTS_PER_LAMPORT } from '@/src/config/constants';
 import { AccountLayout } from '@solana/spl-token';
 import { getAssociatedTokenAddress } from '@solana/spl-token';
-import { MarketIndex, TOKENS } from '@quartz-labs/sdk';
+import { MarketIndex, TOKENS } from '@quartz-labs/sdk/browser';
 
 const envSchema = z.object({
     RPC_URL: z.string().url(),

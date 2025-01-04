@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import config from '@/src/config/config';
 import { AccountStatus } from '@/src/types/enums/AccountStatus.enum';
-import { getVaultPublicKey } from '@quartz-labs/sdk';
+import { getVaultPublicKey } from '@quartz-labs/sdk/browser';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';

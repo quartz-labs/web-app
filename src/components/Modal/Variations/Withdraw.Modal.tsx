@@ -1,4 +1,4 @@
-import { baseUnitToDecimal, buildAndSendTransaction, decimalToBaseUnit, validateAmount } from "@/src/utils/helpers";
+import { baseUnitToDecimal, decimalToBaseUnit, validateAmount, fetchAndParse, deserializeTransaction, signAndSendTransaction } from "@/src/utils/helpers";
 import { useRefetchAccountData, useRefetchWithdrawLimits } from "@/src/utils/hooks";
 import { useStore } from "@/src/utils/store";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
@@ -7,12 +7,11 @@ import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
 import styles from "../Modal.module.css";
 import InputSection from "../Input.ModalComponent";
 import Buttons from "../Buttons.ModalComponent";
-import { getWithdrawIxs } from "@/src/utils/instructions";
 import { useError } from "@/src/context/error-provider";
 import { captureError } from "@/src/utils/errors";
 import { TxStatus, useTxStatus } from "@/src/context/tx-status-provider";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
-import { MarketIndex } from "@quartz-labs/sdk";
+import { MarketIndex } from "@quartz-labs/sdk/browser";
 
 export default function WithdrawModal() {
     const wallet = useAnchorWallet();
@@ -49,8 +48,19 @@ export default function WithdrawModal() {
         setAwaitingSign(true);
         try {
             const amountBaseUnits = decimalToBaseUnit(amountDecimals, marketIndex);
-            const instructions = await getWithdrawIxs(wallet, amountBaseUnits, marketIndex);
-            const signature = await buildAndSendTransaction(instructions, wallet, showTxStatus);
+            const serializedTx = await fetchAndParse("/api/build-tx/withdraw", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    address: wallet.publicKey.toBase58(),
+                    amountBaseUnits,
+                    marketIndex
+                }),
+            });
+            const transaction = deserializeTransaction(serializedTx);
+            const signature = await signAndSendTransaction(transaction, wallet, showTxStatus);
             setAwaitingSign(false);
             if (signature) setModalVariation(ModalVariation.DISABLED);
         } catch (error) {

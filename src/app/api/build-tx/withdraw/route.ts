@@ -2,10 +2,10 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { Connection, PublicKey, SystemProgram, TransactionInstruction } from '@solana/web3.js';
+import { Connection, PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { MarketIndex, QuartzClient, TOKENS } from '@quartz-labs/sdk';
 import { createCloseAccountInstruction } from '@solana/spl-token';
-import { createSyncNativeInstruction, getAssociatedTokenAddress } from '@solana/spl-token';
+import { getAssociatedTokenAddress } from '@solana/spl-token';
 import { buildTransaction, getWsolMint, makeCreateAtaIxsIfNeeded } from '@/src/utils/helpers';
 
 const envSchema = z.object({
@@ -59,7 +59,7 @@ export async function GET(request: Request) {
     const marketIndex = body.marketIndex as MarketIndex;
 
     try {
-        const instructions = await makeDepositIxs(connection, address, amountBaseUnits, marketIndex);
+        const instructions = await makeWithdrawIxs(connection, address, amountBaseUnits, marketIndex);
         const transaction = await buildTransaction(connection, instructions, address);
         const serializedTx = Buffer.from(transaction.serialize()).toString("base64");
         return NextResponse.json({ transaction: serializedTx });
@@ -72,7 +72,7 @@ export async function GET(request: Request) {
     }
 }
 
-async function makeDepositIxs(
+async function makeWithdrawIxs(
     connection: Connection,
     address: PublicKey,
     amountBaseUnits: number,
@@ -85,20 +85,12 @@ async function makeDepositIxs(
     const walletAta = await getAssociatedTokenAddress(mint, address);
     const oix_createAta = await makeCreateAtaIxsIfNeeded(connection, walletAta, address, mint);
 
-    const oix_wrapSol: TransactionInstruction[] = [];
     const oix_closeWsol: TransactionInstruction[] = [];
     if (mint === getWsolMint()) {
-        const ix_wrapSol = SystemProgram.transfer({
-            fromPubkey: address,
-            toPubkey: walletAta,
-            lamports: amountBaseUnits,
-        });
-        const ix_syncNative = createSyncNativeInstruction(walletAta);
-        oix_wrapSol.push(ix_wrapSol, ix_syncNative);
         oix_closeWsol.push(createCloseAccountInstruction(walletAta, address, address));
     }
 
     const user = await userPromise;
-    const ix_deposit = await user.makeDepositIx(amountBaseUnits, mint, marketIndex, false);
-    return [...oix_createAta, ...oix_wrapSol, ix_deposit, ...oix_closeWsol];
+    const ix_withdraw = await user.makeWithdrawIx(amountBaseUnits, mint, marketIndex, false);
+    return [...oix_createAta, ix_withdraw, ...oix_closeWsol];
 }

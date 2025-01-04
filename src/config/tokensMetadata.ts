@@ -1,4 +1,4 @@
-import { MarketIndex, TOKENS } from "@quartz-labs/sdk";
+import { MarketIndex, TOKENS } from "@quartz-labs/sdk/browser";
 import type { TokenMetadata } from "../types/interfaces/TokenMetadata.interface";
 
 export const TOKENS_METADATA = Object.fromEntries(
