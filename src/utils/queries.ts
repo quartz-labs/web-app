@@ -7,6 +7,7 @@ import { DEFAULT_REFETCH_INTERVAL } from "@/src/config/constants";
 import type { Rate } from "@/src/types/interfaces/Rate.interface";
 import { TOKENS_METADATA } from "../config/tokensMetadata";
 import { MarketIndex } from "@quartz-labs/sdk/browser";
+import config from "../config/config";
 
 interface QueryConfig {
     queryKey: string[];
@@ -89,7 +90,7 @@ export const useAccountStatusQuery = (address: PublicKey | null) => {
 
 export const usePricesQuery = createQuery<Record<MarketIndex, number>>({
     queryKey: ["prices"],
-    url: "https://api.quartzpay.io/data/price",
+    url: `${config.NEXT_PUBLIC_API_URL}/data/price`,
     params: { ids: Object.values(TOKENS_METADATA).map((token) => token.coingeckoPriceId).join(',') },
     transformResponse: (body) => {
         // Iterate through all tokens and map the marketIndex to the priceId
@@ -104,7 +105,7 @@ export const usePricesQuery = createQuery<Record<MarketIndex, number>>({
 
 export const useRatesQuery = createQuery<Record<MarketIndex, Rate>>({
     queryKey: ["rates"],
-    url: "https://api.quartzpay.io/drift/rate", 
+    url: `${config.NEXT_PUBLIC_API_URL}/user/rate`,
     params: { 
         marketIndices: MarketIndex.join(',') 
     },
@@ -115,7 +116,7 @@ export const useRatesQuery = createQuery<Record<MarketIndex, Rate>>({
 export const useBalancesQuery = (address: PublicKey | null) => {
     const query = createQuery<Record<MarketIndex, number>>({
         queryKey: ["user", "balances", address?.toBase58() ?? ""],
-        url: "https://api.quartzpay.io/drift/balance",
+        url: `${config.NEXT_PUBLIC_API_URL}/user/balance`,
         params: address ? { 
             address: address.toBase58(),
             marketIndices: MarketIndex.join(',')
@@ -130,7 +131,7 @@ export const useBalancesQuery = (address: PublicKey | null) => {
 export const useWithdrawLimitsQuery = (address: PublicKey | null) => {
     const query = createQuery<Record<MarketIndex, number>>({
         queryKey: ["user", "withdraw-limits", address?.toBase58() ?? ""],
-        url: "https://api.quartzpay.io/drift/withdraw-limit",
+        url: `${config.NEXT_PUBLIC_API_URL}/user/withdraw-limit`,
         params: address ? { 
             address: address.toBase58(),
             marketIndices: MarketIndex.join(',')
@@ -159,7 +160,7 @@ export const useDepositLimitsQuery = (address: PublicKey | null, marketIndex: Ma
 export const useHealthQuery = (address: PublicKey | null) => {
     const query = createQuery<number>({
         queryKey: ["user", "health", address?.toBase58() ?? ""],
-        url: "https://api.quartzpay.io/drift/health",
+        url: "https://api.quartzpay.io/user/health",
         params: address ? { 
             address: address.toBase58()
         } : undefined,

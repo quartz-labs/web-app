@@ -42,7 +42,8 @@
     "typescript": "^5"
   },
   "resolutions": {
-    "@solana/web3.js": "1.98.0"
+    "@solana/web3.js": "1.98.0",
+    "rpc-websockets": "9.0.4"
   },
   "packageManager": "yarn@1.22.22"
 }

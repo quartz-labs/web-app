@@ -7,17 +7,21 @@ import EmptyAssetCard from "./AssetCard/EmptyAssetCard";
 import { useEffect, useState } from "react";
 
 export default function Assets() {
-    const { prices, balances, rates } = useStore();
+    const { prices, balances, rates, isInitialized } = useStore();
 
     const [suppliedAssets, setSuppliedAssets] = useState<AssetInfo[]>([]);
     const [borrowedAssets, setBorrowedAssets] = useState<AssetInfo[]>([]);
 
     useEffect(() => {
-        if (!prices || !balances || !rates) return;
+        if (!prices || !balances || !rates || !isInitialized) {
+            setSuppliedAssets([]);
+            setBorrowedAssets([]);
+            return;
+        };
         const assetInfos = generateAssetInfos(prices, balances, rates);
         setSuppliedAssets(assetInfos.suppliedAssets);
         setBorrowedAssets(assetInfos.borrowedAssets);
-    }, [prices, balances, rates]);
+    }, [prices, balances, rates, isInitialized]);
 
     return (
         <>

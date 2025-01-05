@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { Connection, Keypair, PublicKey, TransactionInstruction } from '@solana/web3.js';
-import { QuartzClient, Wallet } from '@quartz-labs/sdk';
+import { QuartzClient, DummyWallet } from '@quartz-labs/sdk';
 import { getConfig as getMarginfiConfig, MarginfiClient } from '@mrgnlabs/marginfi-client-v2';
 import { buildTransaction } from '@/src/utils/helpers';
 
@@ -70,7 +70,7 @@ async function makeInitAccountIxs(
     instructions: TransactionInstruction[], 
     marginfiSigner: Keypair | null
 }> {
-    const wallet = new Wallet(Keypair.generate());
+    const wallet = new DummyWallet(Keypair.generate());
     const [quartzClient, marginfiClient] = await Promise.all([
         QuartzClient.fetchClient(connection),
         MarginfiClient.fetch(getMarginfiConfig(), wallet, connection)

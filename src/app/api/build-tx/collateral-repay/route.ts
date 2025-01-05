@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { AddressLookupTableAccount, Connection, Keypair, PublicKey, TransactionInstruction, VersionedTransaction } from '@solana/web3.js';
-import { MarketIndex, QuartzClient, TOKENS, Wallet } from '@quartz-labs/sdk';
+import { MarketIndex, QuartzClient, TOKENS, DummyWallet } from '@quartz-labs/sdk';
 import { getAssociatedTokenAddress } from '@solana/spl-token';
 import { baseUnitToDecimal, getJupiterSwapQuote, getTokenAccountBalance, makeCreateAtaIxsIfNeeded } from '@/src/utils/helpers';
 import { JUPITER_SLIPPAGE_BPS } from '@/src/config/constants';
@@ -146,7 +146,7 @@ async function buildFlashLoanTransaction(
     const PRIORITY_FEE_DECIMAL = 0.0025;
     const amountLoanDecimal = baseUnitToDecimal(flashLoanAmountBaseUnits, flashLoanMarketIndex);
 
-    const wallet = new Wallet(Keypair.generate());
+    const wallet = new DummyWallet(Keypair.generate());
     const marginfiClient = await MarginfiClient.fetch(getMarginfiConfig(), wallet, connection);
     const [ marginfiAccount ] = await marginfiClient.getMarginfiAccountsForAuthority(address);
     if (marginfiAccount === undefined) throw new Error("Could not find Flash Loan MarginFi account");
