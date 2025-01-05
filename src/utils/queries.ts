@@ -8,6 +8,7 @@ import type { Rate } from "@/src/types/interfaces/Rate.interface";
 import { TOKENS_METADATA } from "../config/tokensMetadata";
 import { MarketIndex } from "@quartz-labs/sdk/browser";
 import config from "../config/config";
+import { buildEndpointURL } from "./helpers";
 
 interface QueryConfig {
     queryKey: string[];
@@ -33,9 +34,8 @@ function createQuery<T>({
     return () => {
         const { showError } = useError();
 
-        const searchParams = new URLSearchParams(params);
-        const endpoint = `${url}${params ? `?${searchParams.toString()}` : ''}`;
-
+        const endpoint = buildEndpointURL(url, params);
+        
         const queryFn = async (): Promise<T> => {
             const response = await fetch(endpoint);
             const body = await response.json();

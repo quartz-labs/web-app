@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { Connection, PublicKey, TransactionInstruction } from '@solana/web3.js';
-import { MarketIndex, QuartzClient, TOKENS } from '@quartz-labs/sdk';
+import { MarketIndex, QuartzClient, QuartzUser, TOKENS } from '@quartz-labs/sdk';
 import { createCloseAccountInstruction } from '@solana/spl-token';
 import { getAssociatedTokenAddress } from '@solana/spl-token';
 import { buildTransaction, getWsolMint, makeCreateAtaIxsIfNeeded } from '@/src/utils/helpers';
@@ -45,10 +45,16 @@ export async function GET(request: Request) {
         return new Response("Internal server configuration error", { status: 500 });
     }
 
-    const bodyJson = await request.json();
+    const { searchParams } = new URL(request.url);
+    const params = {
+        address: searchParams.get('address'),
+        amountBaseUnits: Number(searchParams.get('amountBaseUnits')),
+        marketIndex: Number(searchParams.get('marketIndex'))
+    };
+
     let body: z.infer<typeof paramsSchema>;
     try {
-        body = paramsSchema.parse(bodyJson);
+        body = paramsSchema.parse(params);
     } catch (error) {
         return NextResponse.json({ error }, { status: 400 });
     }
@@ -58,8 +64,16 @@ export async function GET(request: Request) {
     const amountBaseUnits = body.amountBaseUnits;
     const marketIndex = body.marketIndex as MarketIndex;
 
+    const quartzClient = await QuartzClient.fetchClient(connection);
+    let user: QuartzUser;
     try {
-        const instructions = await makeWithdrawIxs(connection, address, amountBaseUnits, marketIndex);
+        user = await quartzClient.getQuartzAccount(address);
+    } catch {
+        return NextResponse.json({ error: "User not found" }, { status: 400 });
+    }
+
+    try {
+        const instructions = await makeWithdrawIxs(connection, address, amountBaseUnits, marketIndex, user);
         const transaction = await buildTransaction(connection, instructions, address);
         const serializedTx = Buffer.from(transaction.serialize()).toString("base64");
         return NextResponse.json({ transaction: serializedTx });
@@ -76,11 +90,9 @@ async function makeWithdrawIxs(
     connection: Connection,
     address: PublicKey,
     amountBaseUnits: number,
-    marketIndex: MarketIndex
+    marketIndex: MarketIndex,
+    user: QuartzUser
 ): Promise<TransactionInstruction[]> {
-    const quartzClient = await QuartzClient.fetchClient(connection);
-    const userPromise = quartzClient.getQuartzAccount(address);
-
     const mint = TOKENS[marketIndex].mint;
     const walletAta = await getAssociatedTokenAddress(mint, address);
     const oix_createAta = await makeCreateAtaIxsIfNeeded(connection, walletAta, address, mint);
@@ -90,7 +102,6 @@ async function makeWithdrawIxs(
         oix_closeWsol.push(createCloseAccountInstruction(walletAta, address, address));
     }
 
-    const user = await userPromise;
     const ix_withdraw = await user.makeWithdrawIx(amountBaseUnits, mint, marketIndex, false);
     return [...oix_createAta, ix_withdraw, ...oix_closeWsol];
 }

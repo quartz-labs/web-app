@@ -36,10 +36,12 @@ export async function GET(request: Request) {
         return new Response("Internal server configuration error", { status: 500 });
     }
 
-    const bodyJson = await request.json();
+    const { searchParams } = new URL(request.url);
+    const params = { address: searchParams.get('address') };
+
     let body: z.infer<typeof paramsSchema>;
     try {
-        body = paramsSchema.parse(bodyJson);
+        body = paramsSchema.parse(params);
     } catch (error) {
         return NextResponse.json({ error }, { status: 400 });
     }
@@ -70,7 +72,7 @@ async function makeInitAccountIxs(
     instructions: TransactionInstruction[], 
     marginfiSigner: Keypair | null
 }> {
-    const wallet = new DummyWallet(Keypair.generate());
+    const wallet = new DummyWallet();
     const [quartzClient, marginfiClient] = await Promise.all([
         QuartzClient.fetchClient(connection),
         MarginfiClient.fetch(getMarginfiConfig(), wallet, connection)

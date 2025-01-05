@@ -6,7 +6,7 @@ import styles from "../Modal.module.css";
 import InputSection from "../Input.ModalComponent";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
 import Buttons from "../Buttons.ModalComponent";
-import { baseUnitToDecimal, decimalToBaseUnit, formatTokenDisplay, truncToDecimalPlaces, signAndSendTransaction, fetchAndParse, deserializeTransaction } from "@/src/utils/helpers";
+import { baseUnitToDecimal, decimalToBaseUnit, formatTokenDisplay, truncToDecimalPlaces, signAndSendTransaction, fetchAndParse, deserializeTransaction, buildEndpointURL } from "@/src/utils/helpers";
 import TokenSelect from "../TokenSelect/TokenSelect";
 import { TOKENS_METADATA } from "@/src/config/tokensMetadata";
 import { useError } from "@/src/context/error-provider";
@@ -87,21 +87,14 @@ export default function RepayLoanModal() {
 
         setAwaitingSign(true);
         try {
-            const amountLoanBaseUnits = decimalToBaseUnit(amountLoanDecimal, marketIndexLoan);
-
-            const serializedTx = await fetchAndParse("/api/build-tx/collateral-repay", {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    address: wallet.publicKey.toBase58(),
-                    amountLoanBaseUnits,
-                    marketIndexLoan,
-                    marketIndexCollateral
-                }),
+            const endpoint = buildEndpointURL("/api/build-tx/collateral-repay", {
+                address: wallet.publicKey.toBase58(),
+                amountLoanBaseUnits: decimalToBaseUnit(amountLoanDecimal, marketIndexLoan),
+                marketIndexLoan,
+                marketIndexCollateral
             });
-            const transaction = deserializeTransaction(serializedTx);
+            const response = await fetchAndParse(endpoint);
+            const transaction = deserializeTransaction(response.transaction);
             const signature = await signAndSendTransaction(transaction, wallet, showTxStatus);
             
             setAwaitingSign(false);

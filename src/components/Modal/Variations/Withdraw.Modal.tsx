@@ -1,4 +1,4 @@
-import { baseUnitToDecimal, decimalToBaseUnit, validateAmount, fetchAndParse, deserializeTransaction, signAndSendTransaction } from "@/src/utils/helpers";
+import { baseUnitToDecimal, decimalToBaseUnit, validateAmount, fetchAndParse, deserializeTransaction, signAndSendTransaction, buildEndpointURL } from "@/src/utils/helpers";
 import { useRefetchAccountData, useRefetchWithdrawLimits } from "@/src/utils/hooks";
 import { useStore } from "@/src/utils/store";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
@@ -47,19 +47,13 @@ export default function WithdrawModal() {
 
         setAwaitingSign(true);
         try {
-            const amountBaseUnits = decimalToBaseUnit(amountDecimals, marketIndex);
-            const serializedTx = await fetchAndParse("/api/build-tx/withdraw", {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    address: wallet.publicKey.toBase58(),
-                    amountBaseUnits,
-                    marketIndex
-                }),
+            const endpoint = buildEndpointURL("/api/build-tx/withdraw", {
+                address: wallet.publicKey.toBase58(),
+                amountBaseUnits: decimalToBaseUnit(amountDecimals, marketIndex),
+                marketIndex
             });
-            const transaction = deserializeTransaction(serializedTx);
+            const response = await fetchAndParse(endpoint);
+            const transaction = deserializeTransaction(response.transaction);
             const signature = await signAndSendTransaction(transaction, wallet, showTxStatus);
             setAwaitingSign(false);
             if (signature) setModalVariation(ModalVariation.DISABLED);

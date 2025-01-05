@@ -10,7 +10,7 @@ import { useStore } from "@/src/utils/store";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useError } from "@/src/context/error-provider";
 import { useDepositLimitsQuery } from "@/src/utils/queries";
-import { baseUnitToDecimal, decimalToBaseUnit, validateAmount, fetchAndParse, deserializeTransaction, signAndSendTransaction } from "@/src/utils/helpers";
+import { baseUnitToDecimal, decimalToBaseUnit, validateAmount, fetchAndParse, deserializeTransaction, signAndSendTransaction, buildEndpointURL } from "@/src/utils/helpers";
 import { captureError } from "@/src/utils/errors";
 import { TxStatus, useTxStatus } from "@/src/context/tx-status-provider";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
@@ -50,19 +50,13 @@ export default function AddFundsModal() {
 
         setAwaitingSign(true);
         try {
-            const amountBaseUnits = decimalToBaseUnit(amountDecimals, marketIndex);
-            const serializedTx = await fetchAndParse("/api/build-tx/deposit", {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    address: wallet.publicKey.toBase58(),
-                    amountBaseUnits,
-                    marketIndex
-                }),
+            const endpoint = buildEndpointURL("/api/build-tx/deposit", {
+                address: wallet.publicKey.toBase58(),
+                amountBaseUnits: decimalToBaseUnit(amountDecimals, marketIndex),
+                marketIndex
             });
-            const transaction = deserializeTransaction(serializedTx);
+            const response = await fetchAndParse(endpoint);
+            const transaction = deserializeTransaction(response.transaction);
             const signature = await signAndSendTransaction(transaction, wallet, showTxStatus);
             
             setAwaitingSign(false);

@@ -2,12 +2,13 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { AddressLookupTableAccount, Connection, Keypair, PublicKey, TransactionInstruction, VersionedTransaction } from '@solana/web3.js';
-import { MarketIndex, QuartzClient, TOKENS, DummyWallet } from '@quartz-labs/sdk';
+import { AddressLookupTableAccount, Connection, PublicKey, TransactionInstruction, VersionedTransaction } from '@solana/web3.js';
+import { MarketIndex, QuartzClient, TOKENS, DummyWallet, QuartzUser } from '@quartz-labs/sdk';
 import { getAssociatedTokenAddress } from '@solana/spl-token';
-import { baseUnitToDecimal, getJupiterSwapQuote, getTokenAccountBalance, makeCreateAtaIxsIfNeeded } from '@/src/utils/helpers';
+import { baseUnitToDecimal, fetchAndParse, getTokenAccountBalance, makeCreateAtaIxsIfNeeded } from '@/src/utils/helpers';
 import { JUPITER_SLIPPAGE_BPS } from '@/src/config/constants';
 import { getConfig as getMarginfiConfig, MarginfiClient } from '@mrgnlabs/marginfi-client-v2';
+import type { QuoteResponse } from '@jup-ag/api';
 
 const envSchema = z.object({
     RPC_URL: z.string().url(),
@@ -50,10 +51,17 @@ export async function GET(request: Request) {
         return new Response("Internal server configuration error", { status: 500 });
     }
 
-    const bodyJson = await request.json();
+    const { searchParams } = new URL(request.url);
+    const params = {
+        address: searchParams.get('address'),
+        amountLoanBaseUnits: Number(searchParams.get('amountLoanBaseUnits')),
+        marketIndexLoan: Number(searchParams.get('marketIndexLoan')),
+        marketIndexCollateral: Number(searchParams.get('marketIndexCollateral'))
+    };
+
     let body: z.infer<typeof paramsSchema>;
     try {
-        body = paramsSchema.parse(bodyJson);
+        body = paramsSchema.parse(params);
     } catch (error) {
         return NextResponse.json({ error }, { status: 400 });
     }
@@ -64,18 +72,33 @@ export async function GET(request: Request) {
     const marketIndexLoan = body.marketIndexLoan as MarketIndex;
     const marketIndexCollateral = body.marketIndexCollateral as MarketIndex;
 
+    const quartzClient = await QuartzClient.fetchClient(connection);
+    let user: QuartzUser;
+    try {
+        user = await quartzClient.getQuartzAccount(address);
+    } catch {
+        return NextResponse.json({ error: "User not found" }, { status: 400 });
+    }
+
     try {
         const {
             instructions,
             lookupTables,
             flashLoanAmountBaseUnits
-        } = await makeCollateralRepayIxs(connection, address, amountLoanBaseUnits, marketIndexLoan, marketIndexCollateral);
+        } = await makeCollateralRepayIxs(
+            connection,
+            address,
+            amountLoanBaseUnits,
+            marketIndexLoan,
+            marketIndexCollateral,
+            user
+        );
 
         const transaction = await buildFlashLoanTransaction(
             connection,
             address,
             flashLoanAmountBaseUnits,
-            marketIndexLoan,
+            marketIndexCollateral,
             instructions,
             lookupTables
         );
@@ -96,27 +119,26 @@ async function makeCollateralRepayIxs(
     address: PublicKey,
     amountLoanBaseUnits: number,
     marketIndexLoan: MarketIndex,
-    marketIndexCollateral: MarketIndex
+    marketIndexCollateral: MarketIndex,
+    user: QuartzUser
 ): Promise<{
     instructions: TransactionInstruction[],
     lookupTables: AddressLookupTableAccount[],
     flashLoanAmountBaseUnits: number
 }> {
-    const quartzClient = await QuartzClient.fetchClient(connection);
-    const userPromise = quartzClient.getQuartzAccount(address);
-
     const mintCollateral = TOKENS[marketIndexCollateral].mint;
     const walletAtaCollateral = await getAssociatedTokenAddress(mintCollateral, address);
     const startingBalanceCollateral = await getTokenAccountBalance(connection, walletAtaCollateral);
-
+    
     const mintLoan = TOKENS[marketIndexLoan].mint;
     const walletAtaLoan = await getAssociatedTokenAddress(mintLoan, address);
     const oix_createAtaLoan = await makeCreateAtaIxsIfNeeded(connection, walletAtaLoan, address, mintLoan);
 
-    const jupiterQuote = await getJupiterSwapQuote(mintCollateral, mintLoan, amountLoanBaseUnits, JUPITER_SLIPPAGE_BPS);
-    const collateralRequiredForSwap = Number(jupiterQuote.inAmount) * (1 + (JUPITER_SLIPPAGE_BPS / 10_000));
+    const jupiterQuoteEndpoint
+        = `https://quote-api.jup.ag/v6/quote?inputMint=${mintCollateral.toBase58()}&outputMint=${mintLoan.toBase58()}&amount=${amountLoanBaseUnits}&slippageBps=${JUPITER_SLIPPAGE_BPS}&swapMode=ExactOut&onlyDirectRoutes=true`;
+    const jupiterQuote: QuoteResponse = await fetchAndParse(jupiterQuoteEndpoint);
+    const collateralRequiredForSwap = Math.ceil(Number(jupiterQuote.inAmount) * (1 + (JUPITER_SLIPPAGE_BPS / 10_000)));
 
-    const user = await userPromise;
     const { ixs: ixs_collateralRepay, lookupTables } = await user.makeCollateralRepayIxs(
         address,
         walletAtaLoan,
@@ -128,6 +150,7 @@ async function makeCollateralRepayIxs(
         startingBalanceCollateral + collateralRequiredForSwap,
         jupiterQuote
     );
+
     return {
         instructions: [...oix_createAtaLoan, ...ixs_collateralRepay],
         lookupTables,
@@ -146,7 +169,7 @@ async function buildFlashLoanTransaction(
     const PRIORITY_FEE_DECIMAL = 0.0025;
     const amountLoanDecimal = baseUnitToDecimal(flashLoanAmountBaseUnits, flashLoanMarketIndex);
 
-    const wallet = new DummyWallet(Keypair.generate());
+    const wallet = new DummyWallet(address);
     const marginfiClient = await MarginfiClient.fetch(getMarginfiConfig(), wallet, connection);
     const [ marginfiAccount ] = await marginfiClient.getMarginfiAccountsForAuthority(address);
     if (marginfiAccount === undefined) throw new Error("Could not find Flash Loan MarginFi account");

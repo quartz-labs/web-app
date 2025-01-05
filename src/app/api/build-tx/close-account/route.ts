@@ -2,8 +2,8 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { Connection, PublicKey, TransactionInstruction } from '@solana/web3.js';
-import { QuartzClient } from '@quartz-labs/sdk';
+import { Connection, PublicKey } from '@solana/web3.js';
+import { QuartzClient, QuartzUser } from '@quartz-labs/sdk';
 import { buildTransaction } from '@/src/utils/helpers';
 
 const envSchema = z.object({
@@ -35,10 +35,12 @@ export async function GET(request: Request) {
         return new Response("Internal server configuration error", { status: 500 });
     }
 
-    const bodyJson = await request.json();
+    const { searchParams } = new URL(request.url);
+    const params = { address: searchParams.get('address') };
+
     let body: z.infer<typeof paramsSchema>;
     try {
-        body = paramsSchema.parse(bodyJson);
+        body = paramsSchema.parse(params);
     } catch (error) {
         return NextResponse.json({ error }, { status: 400 });
     }
@@ -46,8 +48,16 @@ export async function GET(request: Request) {
     const connection = new Connection(env.RPC_URL);
     const address = new PublicKey(body.address);
 
+    const quartzClient = await QuartzClient.fetchClient(connection);
+    let user: QuartzUser;
     try {
-        const instructions = await makeCloseAccountIxs(connection, address);
+        user = await quartzClient.getQuartzAccount(address);
+    } catch {
+        return NextResponse.json({ error: "User not found" }, { status: 400 });
+    }
+
+    try {
+        const instructions = await user.makeCloseAccountIxs();
         const transaction = await buildTransaction(connection, instructions, address);
         const serializedTx = Buffer.from(transaction.serialize()).toString("base64");
         return NextResponse.json({ transaction: serializedTx });
@@ -58,13 +68,4 @@ export async function GET(request: Request) {
             { status: 500 }
         );
     }
-}
-
-async function makeCloseAccountIxs(
-    connection: Connection,
-    address: PublicKey
-): Promise<TransactionInstruction[]> {
-    const quartzClient = await QuartzClient.fetchClient(connection);
-    const user = await quartzClient.getQuartzAccount(address);
-    return await user.makeCloseAccountIxs();
 }

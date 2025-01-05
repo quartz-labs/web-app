@@ -3,7 +3,6 @@ import type { AssetInfo } from "@/src/types/interfaces/AssetInfo.interface";
 import { TOKENS_METADATA } from "@/src/config/tokensMetadata";
 import { AddressLookupTableAccount, ComputeBudgetProgram, Connection, PublicKey, TransactionInstruction } from "@solana/web3.js";
 import type { AnchorWallet } from "@solana/wallet-adapter-react";
-import type { QuoteResponse } from "@jup-ag/api";
 import { VersionedTransaction } from "@solana/web3.js";
 import { TransactionMessage } from "@solana/web3.js";
 import { TxStatus, type TxStatusProps } from "../context/tx-status-provider";
@@ -171,23 +170,22 @@ export function validateAmount(marketIndex: MarketIndex, amountDecimal: number, 
     return "";
 }
 
-export async function getJupiterSwapQuote(
-    inputMint: PublicKey, 
-    outputMint: PublicKey, 
-    amount: number,
-    slippageBps: number
-) {
-    const quoteEndpoint = 
-        `https://quote-api.jup.ag/v6/quote?inputMint=${inputMint.toBase58()}&outputMint=${outputMint.toBase58()}&amount=${amount}&slippageBps=${slippageBps}&swapMode=ExactOut&onlyDirectRoutes=true`;
-    const response = await fetchAndParse(quoteEndpoint);
-    return response.result as QuoteResponse;
-}
-
 export async function fetchAndParse(url: string, req?: RequestInit): Promise<any> {
     const response = await fetch(url, req);
     const body = await response.json();
     if (!response.ok) throw new Error(JSON.stringify(body.error) ?? `Could not fetch ${url}`);
     return body;
+}
+
+export function buildEndpointURL(baseEndpoint: string, params?: Record<string, any>) {
+    if (!params) return baseEndpoint;
+
+    const stringParams: Record<string, string> = {};
+    for (const [key, value] of Object.entries(params)) {
+        stringParams[key] = String(value);
+    }
+    const searchParams = new URLSearchParams(stringParams);
+    return `${baseEndpoint}${params ? `?${searchParams.toString()}` : ''}`;
 }
 
 export async function makeCreateAtaIxsIfNeeded(
@@ -248,7 +246,6 @@ export async function signAndSendTransaction(
     skipPreflight: boolean = false
 ): Promise<string> {
     showTxStatus({ status: TxStatus.SIGNING });
-
     const signedTx = await wallet.signTransaction(transaction);
 
     const serializedTransaction = Buffer.from(signedTx.serialize()).toString("base64");
