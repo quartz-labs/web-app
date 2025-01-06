@@ -686,7 +686,7 @@
     bs58 "^5.0.0"
     jito-ts "^3.0.1"
 
-"@quartz-labs/sdk@^0.2.1":
+"@quartz-labs/sdk@0.2.1":
   version "0.2.1"
   resolved "https://registry.yarnpkg.com/@quartz-labs/sdk/-/sdk-0.2.1.tgz#c0df44d63d42b3389d741b4b268606e5efb58975"
   integrity sha512-tZdM19QQ1+tLmV9jo83mpJKRiMhVEzccScsty6ZS9CUyMo6aPhiLrX+BqNjAS0Jn5W9v7qhVjwTQpuPw54/1Nw==

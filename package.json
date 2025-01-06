@@ -12,7 +12,7 @@
     "@jup-ag/api": "^6.0.32",
     "@mrgnlabs/marginfi-client-v2": "^4.0.0",
     "@mrgnlabs/mrgn-common": "^1.8.0",
-    "@quartz-labs/sdk": "^0.2.1",
+    "@quartz-labs/sdk": "0.2.1",
     "@solana/spl-token": "^0.4.9",
     "@solana/wallet-adapter-base": "^0.9.23",
     "@solana/wallet-adapter-base-ui": "^0.1.2",

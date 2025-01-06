@@ -11,6 +11,8 @@ import styles from "./page.module.css";
 import { useAccountStatusQuery, useBalancesQuery, useHealthQuery, usePricesQuery, useRatesQuery, useWithdrawLimitsQuery } from "@/src/utils/queries";
 import { useStore } from "@/src/utils/store";
 import { useEffect } from 'react';
+import config from "../config/config";
+import Unavailable from "../components/OtherViews/Unavailable";
 
 export default function Page() {
   const wallet = useWallet();
@@ -52,9 +54,14 @@ export default function Page() {
       />
 
       <div className={styles.content}>
-        {(() => {
-          switch (accountStatus) {
-            case AccountStatus.CLOSED:
+        {config.NEXT_PUBLIC_UNAVAILABLE_TIME && (
+          <Unavailable />
+        )}
+        
+        {!config.NEXT_PUBLIC_UNAVAILABLE_TIME && (
+          () => {
+            switch (accountStatus) {
+              case AccountStatus.CLOSED:
               return <ClosedAccount />;
 
             case AccountStatus.NO_BETA_KEY:
@@ -65,8 +72,9 @@ export default function Page() {
               
             default:
               return <Dashboard />;
-          }
-        })()}
+            }
+          })()
+        }
       </div>
     </main>
   );
