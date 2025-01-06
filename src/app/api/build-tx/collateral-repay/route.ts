@@ -3,9 +3,9 @@ export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { AddressLookupTableAccount, Connection, PublicKey, TransactionInstruction, VersionedTransaction } from '@solana/web3.js';
-import { MarketIndex, QuartzClient, TOKENS, DummyWallet, QuartzUser } from '@quartz-labs/sdk';
+import { baseUnitToDecimal, MarketIndex, QuartzClient, TOKENS, DummyWallet, QuartzUser, getTokenProgram, makeCreateAtaIxIfNeeded } from '@quartz-labs/sdk';
 import { getAssociatedTokenAddress } from '@solana/spl-token';
-import { baseUnitToDecimal, fetchAndParse, getTokenAccountBalance, makeCreateAtaIxsIfNeeded } from '@/src/utils/helpers';
+import { fetchAndParse, getTokenAccountBalance } from '@/src/utils/helpers';
 import { JUPITER_SLIPPAGE_BPS } from '@/src/config/constants';
 import { getConfig as getMarginfiConfig, MarginfiClient } from '@mrgnlabs/marginfi-client-v2';
 import type { QuoteResponse } from '@jup-ag/api';
@@ -127,12 +127,14 @@ async function makeCollateralRepayIxs(
     flashLoanAmountBaseUnits: number
 }> {
     const mintCollateral = TOKENS[marketIndexCollateral].mint;
-    const walletAtaCollateral = await getAssociatedTokenAddress(mintCollateral, address);
+    const mintCollateralTokenProgram = await getTokenProgram(connection, mintCollateral);
+    const walletAtaCollateral = await getAssociatedTokenAddress(mintCollateral, address, false, mintCollateralTokenProgram);
     const startingBalanceCollateral = await getTokenAccountBalance(connection, walletAtaCollateral);
     
     const mintLoan = TOKENS[marketIndexLoan].mint;
-    const walletAtaLoan = await getAssociatedTokenAddress(mintLoan, address);
-    const oix_createAtaLoan = await makeCreateAtaIxsIfNeeded(connection, walletAtaLoan, address, mintLoan);
+    const mintLoanTokenProgram = await getTokenProgram(connection, mintLoan);
+    const walletAtaLoan = await getAssociatedTokenAddress(mintLoan, address, false, mintLoanTokenProgram);
+    const oix_createAtaLoan = await makeCreateAtaIxIfNeeded(connection, walletAtaLoan, address, mintLoan, mintLoanTokenProgram);
 
     const jupiterQuoteEndpoint
         = `https://quote-api.jup.ag/v6/quote?inputMint=${mintCollateral.toBase58()}&outputMint=${mintLoan.toBase58()}&amount=${amountLoanBaseUnits}&slippageBps=${JUPITER_SLIPPAGE_BPS}&swapMode=ExactOut&onlyDirectRoutes=true`;
@@ -141,11 +143,7 @@ async function makeCollateralRepayIxs(
 
     const { ixs: ixs_collateralRepay, lookupTables } = await user.makeCollateralRepayIxs(
         address,
-        walletAtaLoan,
-        mintLoan,
         marketIndexLoan,
-        walletAtaCollateral,
-        mintCollateral,
         marketIndexCollateral,
         startingBalanceCollateral + collateralRequiredForSwap,
         jupiterQuote

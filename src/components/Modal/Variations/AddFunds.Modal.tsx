@@ -10,11 +10,11 @@ import { useStore } from "@/src/utils/store";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useError } from "@/src/context/error-provider";
 import { useDepositLimitsQuery } from "@/src/utils/queries";
-import { baseUnitToDecimal, decimalToBaseUnit, validateAmount, fetchAndParse, deserializeTransaction, signAndSendTransaction, buildEndpointURL } from "@/src/utils/helpers";
+import { validateAmount, fetchAndParse, deserializeTransaction, signAndSendTransaction, buildEndpointURL } from "@/src/utils/helpers";
 import { captureError } from "@/src/utils/errors";
 import { TxStatus, useTxStatus } from "@/src/context/tx-status-provider";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
-import { MarketIndex } from "@quartz-labs/sdk/browser";
+import { MarketIndex, baseUnitToDecimal, decimalToBaseUnit } from "@quartz-labs/sdk/browser";
 
 export default function AddFundsModal() {
     const wallet = useAnchorWallet();

@@ -6,18 +6,7 @@ import type { AnchorWallet } from "@solana/wallet-adapter-react";
 import { VersionedTransaction } from "@solana/web3.js";
 import { TransactionMessage } from "@solana/web3.js";
 import { TxStatus, type TxStatusProps } from "../context/tx-status-provider";
-import { MarketIndex, TOKENS } from "@quartz-labs/sdk/browser";
-import { createAssociatedTokenAccountInstruction } from "@solana/spl-token";
-
-export function baseUnitToDecimal(baseUnits: number, marketIndex: MarketIndex): number {
-    const token = TOKENS_METADATA[marketIndex];
-    return baseUnits / (10 ** token.decimalPrecision);
-}
-
-export function decimalToBaseUnit(decimal: number, marketIndex: MarketIndex): number {
-    const token = TOKENS_METADATA[marketIndex];
-    return Math.trunc(decimal * (10 ** token.decimalPrecision));
-}
+import { MarketIndex, TOKENS, baseUnitToDecimal } from "@quartz-labs/sdk/browser";
 
 export function truncToDecimalPlaces(value: number, decimalPlaces: number): number {
     return Math.trunc(value * 10 ** decimalPlaces) / 10 ** decimalPlaces;
@@ -186,27 +175,6 @@ export function buildEndpointURL(baseEndpoint: string, params?: Record<string, a
     }
     const searchParams = new URLSearchParams(stringParams);
     return `${baseEndpoint}${params ? `?${searchParams.toString()}` : ''}`;
-}
-
-export async function makeCreateAtaIxsIfNeeded(
-    connection: Connection,
-    ata: PublicKey,
-    authority: PublicKey,
-    mint: PublicKey
-) {
-    const oix_createAta: TransactionInstruction[] = [];
-    const ataInfo = await connection.getAccountInfo(ata);
-    if (ataInfo === null) {
-        oix_createAta.push(
-            createAssociatedTokenAccountInstruction(
-                authority,
-                ata,
-                authority,
-                mint,
-            )
-        );
-    }
-    return oix_createAta;
 }
 
 export function deserializeTransaction(serializedTx: string): VersionedTransaction {

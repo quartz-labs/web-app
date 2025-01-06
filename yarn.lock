@@ -867,10 +867,10 @@
     bs58 "^5.0.0"
     jito-ts "^3.0.1"
 
-"@quartz-labs/sdk@0.3.1":
-  version "0.3.1"
-  resolved "https://registry.yarnpkg.com/@quartz-labs/sdk/-/sdk-0.3.1.tgz#983fba5140b708ea0374a42a5e2644273a8f6cce"
-  integrity sha512-gAlrRm+jHfkFZmzUiNej4zfVAOi8NPlfmJTGH/PtwQLhPBXjgUbQBO8iFvBSiaJ7aW32RiJWYqWMXReoAQNQWQ==
+"@quartz-labs/sdk@0.3.2":
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/@quartz-labs/sdk/-/sdk-0.3.2.tgz#a7749861084d39499551fd3a9b2255e6357b85a2"
+  integrity sha512-mPNm9pC2lTHoJiBPTD/5zArYAYg5+QSkQ5ghsdtQprmJiqjHz60WriGkNzcfniYxUrOODvRkEqAdGybF3ryttw==
   dependencies:
     "@coral-xyz/anchor" "^0.29.0"
     "@drift-labs/sdk" "^2.103.0-beta.9"

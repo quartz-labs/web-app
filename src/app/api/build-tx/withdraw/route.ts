@@ -3,10 +3,10 @@ export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { Connection, PublicKey, TransactionInstruction } from '@solana/web3.js';
-import { MarketIndex, QuartzClient, QuartzUser, TOKENS } from '@quartz-labs/sdk';
-import { createCloseAccountInstruction } from '@solana/spl-token';
+import { getTokenProgram, MarketIndex, QuartzClient, QuartzUser, TOKENS, makeCreateAtaIxIfNeeded } from '@quartz-labs/sdk';
+import { createCloseAccountInstruction, getAssociatedTokenAddressSync } from '@solana/spl-token';
 import { getAssociatedTokenAddress } from '@solana/spl-token';
-import { buildTransaction, getWsolMint, makeCreateAtaIxsIfNeeded } from '@/src/utils/helpers';
+import { buildTransaction, getWsolMint } from '@/src/utils/helpers';
 
 const envSchema = z.object({
     RPC_URL: z.string().url(),
@@ -94,14 +94,18 @@ async function makeWithdrawIxs(
     user: QuartzUser
 ): Promise<TransactionInstruction[]> {
     const mint = TOKENS[marketIndex].mint;
-    const walletAta = await getAssociatedTokenAddress(mint, address);
-    const oix_createAta = await makeCreateAtaIxsIfNeeded(connection, walletAta, address, mint);
+    const mintTokenProgram = await getTokenProgram(connection, mint);
+    const walletAta = await getAssociatedTokenAddress(mint, address, false, mintTokenProgram);
+    const oix_createAta = await makeCreateAtaIxIfNeeded(connection, walletAta, address, mint, mintTokenProgram);
+
+    console.log(walletAta.toBase58());
+    console.log((await getAssociatedTokenAddressSync(mint, address)).toBase58());
 
     const oix_closeWsol: TransactionInstruction[] = [];
     if (mint === getWsolMint()) {
         oix_closeWsol.push(createCloseAccountInstruction(walletAta, address, address));
     }
 
-    const ix_withdraw = await user.makeWithdrawIx(amountBaseUnits, mint, marketIndex, false);
+    const ix_withdraw = await user.makeWithdrawIx(amountBaseUnits, marketIndex, false);
     return [...oix_createAta, ix_withdraw, ...oix_closeWsol];
 }
