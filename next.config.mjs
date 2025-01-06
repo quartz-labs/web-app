@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  serverExternalPackages: ["rpc-websockets"],
+  serverExternalPackages: ["@drift-labs/sdk"],
   webpack: (config) => {
     // Fallbacks for Node.js modules
     config.resolve.fallback = {
