@@ -70,3 +70,13 @@
 .missingLabel {
     color: var(--color-error);
 }
+
+.unavailableContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 20px;
+  
+    max-width: 700px;
+  }
