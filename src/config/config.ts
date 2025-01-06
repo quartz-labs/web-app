@@ -5,10 +5,11 @@ const envSchema = z.object({
     NEXT_PUBLIC_POSTHOG_KEY: z.string(),
     NEXT_PUBLIC_POSTHOG_HOST: z.string().url(),
     NEXT_PUBLIC_RPC_URL: z.string().url(),
-    NEXT_PUBLIC_UNAVAILABLE_TIME: z.string().optional()
+    NEXT_PUBLIC_UNAVAILABLE_TIME: z.string()
 });
 
-const config = envSchema.parse({
+type Config = z.infer<typeof envSchema>;
+const config: Config = envSchema.parse({
     NEXT_PUBLIC_REQUIRE_BETA_KEY: process.env.NEXT_PUBLIC_REQUIRE_BETA_KEY,
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,

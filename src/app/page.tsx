@@ -11,8 +11,8 @@ import styles from "./page.module.css";
 import { useAccountStatusQuery, useBalancesQuery, useHealthQuery, usePricesQuery, useRatesQuery, useWithdrawLimitsQuery } from "@/src/utils/queries";
 import { useStore } from "@/src/utils/store";
 import { useEffect } from 'react';
-import config from "../config/config";
-import Unavailable from "../components/OtherViews/Unavailable";
+import config from "@/src/config/config";
+import Unavailable from "@/src/components/OtherViews/Unavailable";
 
 export default function Page() {
   const wallet = useWallet();
@@ -26,7 +26,7 @@ export default function Page() {
   } = useStore();
 
   const { data: accountStatus, isLoading: isAccountStatusLoading } = useAccountStatusQuery(wallet.publicKey);
-  const isInitialized = (accountStatus === AccountStatus.INITIALIZED && !isAccountStatusLoading);
+  const isInitialized = (accountStatus === AccountStatus.INITIALIZED && !isAccountStatusLoading && !config.NEXT_PUBLIC_UNAVAILABLE_TIME);
 
   const { data: prices } = usePricesQuery();
   const { data: rates } = useRatesQuery();
@@ -35,6 +35,7 @@ export default function Page() {
   const { data: health } = useHealthQuery(isInitialized ? wallet.publicKey : null);
 
   useEffect(() => {
+    console.log(config.NEXT_PUBLIC_UNAVAILABLE_TIME);
     setPrices(prices);
     setRates(rates);
     setBalances(balances);
