@@ -5,6 +5,7 @@ export interface TokenMetadata {
     mint: PublicKey;
     pythPriceFeedId: string;
     decimalPrecision: number;
+    driftCollateralWeight: number;
     icon: string;
     coingeckoPriceId: string;
 }

@@ -21,7 +21,8 @@ export const TOKENS_METADATA = Object.fromEntries(
                 name: token.name,
                 mint: token.mint,
                 pythPriceFeedId: token.pythPriceFeedId,
-                decimalPrecision: token.decimalPrecision,
+                decimalPrecision: token.decimalPrecision.toNumber(),
+                driftCollateralWeight: token.driftCollateralWeight.toNumber(),
                 icon: `${token.name.toLowerCase()}.webp`,
                 coingeckoPriceId,
             }
