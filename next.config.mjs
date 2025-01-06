@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  serverExternalPackages: ["rpc-websockets"],
   webpack: (config) => {
     // Fallbacks for Node.js modules
     config.resolve.fallback = {
