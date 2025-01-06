@@ -1,6 +1,8 @@
 import { PublicKey } from '@solana/web3.js';
 import { z } from 'zod';
 
+console.log("Env variables during parsing: ", process.env);
+
 const envSchema = z.object({
     NEXT_PUBLIC_POSTHOG_KEY: z.string(),
     NEXT_PUBLIC_POSTHOG_HOST: z.string().url(),
