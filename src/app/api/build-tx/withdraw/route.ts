@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { Connection, PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { getTokenProgram, MarketIndex, QuartzClient, QuartzUser, TOKENS, makeCreateAtaIxIfNeeded } from '@quartz-labs/sdk';
-import { createCloseAccountInstruction, getAssociatedTokenAddressSync } from '@solana/spl-token';
+import { createCloseAccountInstruction } from '@solana/spl-token';
 import { getAssociatedTokenAddress } from '@solana/spl-token';
 import { buildTransaction, getWsolMint } from '@/src/utils/helpers';
 
@@ -97,9 +97,6 @@ async function makeWithdrawIxs(
     const mintTokenProgram = await getTokenProgram(connection, mint);
     const walletAta = await getAssociatedTokenAddress(mint, address, false, mintTokenProgram);
     const oix_createAta = await makeCreateAtaIxIfNeeded(connection, walletAta, address, mint, mintTokenProgram);
-
-    console.log(walletAta.toBase58());
-    console.log((await getAssociatedTokenAddressSync(mint, address)).toBase58());
 
     const oix_closeWsol: TransactionInstruction[] = [];
     if (mint === getWsolMint()) {
