@@ -14,7 +14,7 @@ export interface TokenSelectProps {
 export default function TokenSelect({ 
     marketIndex, 
     setMarketIndex, 
-    selectableMarketIndices = [1, 0, 5, 28]
+    selectableMarketIndices
 }: TokenSelectProps) {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
