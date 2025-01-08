@@ -1,6 +1,5 @@
 import type { Rate } from "@/src/types/interfaces/Rate.interface";
 import type { AssetInfo } from "@/src/types/interfaces/AssetInfo.interface";
-import { TOKENS_METADATA } from "@/src/config/tokensMetadata";
 import { AddressLookupTableAccount, ComputeBudgetProgram, Connection, PublicKey, TransactionInstruction } from "@solana/web3.js";
 import type { AnchorWallet } from "@solana/wallet-adapter-react";
 import { VersionedTransaction } from "@solana/web3.js";
@@ -126,7 +125,7 @@ export function formatTokenDisplay(balance: number, marketIndex?: MarketIndex) {
 
     const magnitude = Math.floor(Math.log10(Math.abs(balance))) + 1;
     
-    let precision = TOKENS_METADATA[marketIndex].decimalPrecision;
+    let precision = TOKENS[marketIndex].decimalPrecision.toNumber();
     if (magnitude >= 3) {
         precision = Math.max(0, precision - (magnitude - 2));
     }
@@ -164,6 +163,10 @@ export async function fetchAndParse(url: string, req?: RequestInit): Promise<any
     const body = await response.json();
     if (!response.ok) throw new Error(JSON.stringify(body.error) ?? `Could not fetch ${url}`);
     return body;
+}
+
+export function getTokenIcon(marketIndex: MarketIndex) {
+    return `/tokens/${TOKENS[marketIndex].name.toLowerCase()}.webp`;
 }
 
 export function buildEndpointURL(baseEndpoint: string, params?: Record<string, any>) {

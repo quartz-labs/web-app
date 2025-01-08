@@ -1,9 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import styles from './TokenSelect.module.css';
-import { TOKENS_METADATA } from "@/src/config/tokensMetadata";
-import type { MarketIndex } from '@quartz-labs/sdk/browser';
-import type { TokenMetadata } from '@/src/types/interfaces/TokenMetadata.interface';
+import { type MarketIndex, TOKENS, type Token } from '@quartz-labs/sdk/browser';
+import { getTokenIcon } from '@/src/utils/helpers';
 
 export interface TokenSelectProps {
     marketIndex: MarketIndex;
@@ -30,11 +29,11 @@ export default function TokenSelect({
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const filteredTokens: Record<MarketIndex, TokenMetadata> = selectableMarketIndices 
+    const filteredTokens: Record<MarketIndex, Token> = selectableMarketIndices 
         ? Object.fromEntries(
-            selectableMarketIndices.map(index => [index, TOKENS_METADATA[index]])
-        ) as Record<MarketIndex, TokenMetadata>
-        : TOKENS_METADATA;
+            selectableMarketIndices.map(index => [index, TOKENS[index]])
+        ) as Record<MarketIndex, Token>
+        : TOKENS;
 
     return (
         <div className={styles.tokenSelectWrapper} ref={dropdownRef}>
@@ -45,13 +44,13 @@ export default function TokenSelect({
                 aria-expanded={isOpen}
             >
                 <Image 
-                    src={`/tokens/${TOKENS_METADATA[marketIndex].icon}`} 
-                    alt={TOKENS_METADATA[marketIndex].name} 
+                    src={getTokenIcon(marketIndex)} 
+                    alt={TOKENS[marketIndex].name} 
                     className={styles.assetIcon}
                     width={26} 
                     height={26} 
                 /> 
-                <p>{TOKENS_METADATA[marketIndex].name}</p>
+                <p>{TOKENS[marketIndex].name}</p>
             </button>
             
             {isOpen && (
@@ -69,7 +68,7 @@ export default function TokenSelect({
                                 role="menuitem"
                             >
                                 <Image 
-                                    src={`/tokens/${token.icon}`} 
+                                    src={getTokenIcon(marketIndex)} 
                                     alt={token.name} 
                                     className={styles.assetIcon}
                                     width={22} 

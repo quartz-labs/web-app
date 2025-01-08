@@ -8,12 +8,11 @@ import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
 import Buttons from "../Buttons.ModalComponent";
 import { formatTokenDisplay, truncToDecimalPlaces, signAndSendTransaction, fetchAndParse, deserializeTransaction, buildEndpointURL } from "@/src/utils/helpers";
 import TokenSelect from "../TokenSelect/TokenSelect";
-import { TOKENS_METADATA } from "@/src/config/tokensMetadata";
 import { useError } from "@/src/context/error-provider";
 import { captureError } from "@/src/utils/errors";
 import { TxStatus, useTxStatus } from "@/src/context/tx-status-provider";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
-import { MarketIndex, baseUnitToDecimal, decimalToBaseUnit } from "@quartz-labs/sdk/browser";
+import { MarketIndex, TOKENS, baseUnitToDecimal, decimalToBaseUnit } from "@quartz-labs/sdk/browser";
 
 export default function RepayLoanModal() {
     const wallet = useAnchorWallet();
@@ -147,7 +146,7 @@ export default function RepayLoanModal() {
 
                 <div className={styles.inputFieldWrapper}>
                     <div className={`${styles.inputField} ${styles.inputFieldAmount} ${styles.inputFieldCollateral}`}>
-                        {truncToDecimalPlaces(amountCollateralDecimal, TOKENS_METADATA[marketIndexCollateral].decimalPrecision)}
+                        {truncToDecimalPlaces(amountCollateralDecimal, TOKENS[marketIndexCollateral].decimalPrecision.toNumber())}
                     </div>
 
                     <TokenSelect 

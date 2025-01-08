@@ -1,9 +1,9 @@
 import Image from "next/image";
 import styles from "./AssetCard.module.css";
 import type { AssetInfo } from "@/src/types/interfaces/AssetInfo.interface";
-import { formatDollarValue, formatTokenDisplay } from "@/src/utils/helpers";
-import { TOKENS_METADATA } from "@/src/config/tokensMetadata";
+import { formatDollarValue, formatTokenDisplay, getTokenIcon } from "@/src/utils/helpers";
 import { useState, useEffect } from "react";
+import { TOKENS } from "@quartz-labs/sdk/browser";
 
 export interface AssetCardProps {
     assetInfo: AssetInfo;
@@ -27,8 +27,8 @@ export default function AssetCard({ assetInfo }: AssetCardProps) {
         return (
             <li className={`${styles.assetCard} glass`}>
                 <Image 
-                        src={`/tokens/${TOKENS_METADATA[assetInfo.marketIndex].icon}`} 
-                        alt={TOKENS_METADATA[assetInfo.marketIndex].name} 
+                        src={getTokenIcon(assetInfo.marketIndex)} 
+                        alt={TOKENS[assetInfo.marketIndex].name} 
                         width={36} 
                         height={36} 
                         className={styles.assetIcon}
@@ -38,7 +38,7 @@ export default function AssetCard({ assetInfo }: AssetCardProps) {
                     <div className={styles.tokenInfo}>
                         
                         <p>{formatTokenDisplay(balance)}</p>
-                        <p className={"light-text"}>{TOKENS_METADATA[assetInfo.marketIndex].name}</p>
+                        <p className={"light-text"}>{TOKENS[assetInfo.marketIndex].name}</p>
                     </div>
 
                     <div className={styles.details}>
@@ -56,14 +56,14 @@ export default function AssetCard({ assetInfo }: AssetCardProps) {
         <li className={`${styles.assetCard} glass`}>
             <div className={styles.tokenInfo}>
                 <Image 
-                    src={`/tokens/${TOKENS_METADATA[assetInfo.marketIndex].icon}`} 
-                    alt={TOKENS_METADATA[assetInfo.marketIndex].name} 
+                    src={getTokenIcon(assetInfo.marketIndex)} 
+                    alt={TOKENS[assetInfo.marketIndex].name} 
                     width={36} 
                     height={36} 
                     className={styles.assetIcon}
                 />
                 <p>{formatTokenDisplay(balance)}</p>
-                <p className={"light-text"}>{TOKENS_METADATA[assetInfo.marketIndex].name}</p>
+                <p className={"light-text"}>{TOKENS[assetInfo.marketIndex].name}</p>
             </div>
 
             <div className={styles.details}>
