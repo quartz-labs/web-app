@@ -13,10 +13,10 @@ import { TxStatus, useTxStatus } from "@/src/context/tx-status-provider";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
 import { MarketIndex, baseUnitToDecimal, decimalToBaseUnit } from "@quartz-labs/sdk/browser";
 
-export default function WithdrawModal() {
+export default function BorrowModal() {
     const wallet = useAnchorWallet();
 
-    const { prices, rates, balances, withdrawLimits, setModalVariation } = useStore();
+    const { prices, rates, withdrawLimits, setModalVariation } = useStore();
     const { showError } = useError();
     const { showTxStatus } = useTxStatus();
     const refetchAccountData = useRefetchAccountData();
@@ -35,16 +35,13 @@ export default function WithdrawModal() {
         const interval = setInterval(refetchWithdrawLimits, 3_000);
         return () => clearInterval(interval);
     }, [refetchAccountData, refetchWithdrawLimits]);
-    
-    const collateralBalance = balances?.[marketIndex] ?? 0;
-    const maxWithdrawBaseUnits = collateralBalance > 0
-        ? Math.min(collateralBalance, withdrawLimits?.[marketIndex] ?? 0)
-        : 0;
+
+    const maxAmountBaseUnits = withdrawLimits?.[marketIndex] ?? 0;
 
     const handleConfirm = async () => {
         if (!wallet?.publicKey) return setErrorText("Wallet not connected");
 
-        const errorText = validateAmount(marketIndex, amountDecimals, maxWithdrawBaseUnits);
+        const errorText = validateAmount(marketIndex, amountDecimals, maxAmountBaseUnits);
         setErrorText(errorText);
         if (errorText) return;
 
@@ -52,7 +49,7 @@ export default function WithdrawModal() {
         try {
             const endpoint = buildEndpointURL("/api/build-tx/withdraw", {
                 address: wallet.publicKey.toBase58(),
-                allowLoan: false,
+                allowLoan: true,
                 amountBaseUnits: decimalToBaseUnit(amountDecimals, marketIndex),
                 marketIndex
             });
@@ -74,17 +71,17 @@ export default function WithdrawModal() {
     
     return (
         <div className={styles.contentWrapper}>
-            <h2 className={styles.heading}>Withdraw Funds</h2>
+            <h2 className={styles.heading}>Borrow Funds</h2>
 
             <InputSection
                 borrowing={true}
                 price={prices?.[marketIndex]}
                 rate={rates?.[marketIndex]?.borrowRate}
-                available={baseUnitToDecimal(maxWithdrawBaseUnits, marketIndex)}
+                available={baseUnitToDecimal(maxAmountBaseUnits, marketIndex)}
                 amountStr={amountStr}
                 setAmountStr={setAmountStr}
-                setMaxAmount={() => setAmountStr(maxWithdrawBaseUnits ? baseUnitToDecimal(maxWithdrawBaseUnits, marketIndex).toString() : "0")}
-                setHalfAmount={() => setAmountStr(maxWithdrawBaseUnits ? baseUnitToDecimal(Math.trunc(maxWithdrawBaseUnits / 2), marketIndex).toString() : "0")}
+                setMaxAmount={() => setAmountStr(maxAmountBaseUnits ? baseUnitToDecimal(maxAmountBaseUnits, marketIndex).toString() : "0")}
+                setHalfAmount={() => setAmountStr(maxAmountBaseUnits ? baseUnitToDecimal(Math.trunc(maxAmountBaseUnits / 2), marketIndex).toString() : "0")}
                 marketIndex={marketIndex}
                 setMarketIndex={setMarketIndex}
             />
@@ -96,7 +93,7 @@ export default function WithdrawModal() {
             } 
 
             <Buttons 
-                label="Withdraw" 
+                label="Borrow" 
                 awaitingSign={awaitingSign} 
                 onConfirm={handleConfirm} 
                 onCancel={() => setModalVariation(ModalVariation.DISABLED)}

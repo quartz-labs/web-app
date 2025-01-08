@@ -225,6 +225,13 @@ a:hover {
     --asset-panel-width: 35%;
     --asset-panel-content-width: 90%;
     --balance-wrapper-width: 85%;
+    --buttons-row-gap: 16px;
+  }
+}
+
+@media only screen and (max-width: 1040px) {
+  :root {
+    --buttons-row-gap: 12px;
   }
 }
 

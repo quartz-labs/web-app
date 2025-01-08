@@ -5,8 +5,7 @@ import { AccountStatus } from "@/src/types/enums/AccountStatus.enum";
 import type { PublicKey } from "@solana/web3.js";
 import { DEFAULT_REFETCH_INTERVAL } from "@/src/config/constants";
 import type { Rate } from "@/src/types/interfaces/Rate.interface";
-import { TOKENS_METADATA } from "../config/tokensMetadata";
-import { MarketIndex } from "@quartz-labs/sdk/browser";
+import { MarketIndex, TOKENS } from "@quartz-labs/sdk/browser";
 import config from "../config/config";
 import { buildEndpointURL } from "./helpers";
 
@@ -91,10 +90,10 @@ export const useAccountStatusQuery = (address: PublicKey | null) => {
 export const usePricesQuery = createQuery<Record<MarketIndex, number>>({
     queryKey: ["prices"],
     url: `${config.NEXT_PUBLIC_API_URL}/data/price`,
-    params: { ids: Object.values(TOKENS_METADATA).map((token) => token.coingeckoPriceId).join(',') },
+    params: { ids: Object.values(TOKENS).map((token) => token.coingeckoPriceId).join(',') },
     transformResponse: (body) => {
         // Iterate through all tokens and map the marketIndex to the priceId
-        return Object.entries(TOKENS_METADATA).reduce((acc, [marketIndex, token]) => {
+        return Object.entries(TOKENS).reduce((acc, [marketIndex, token]) => {
             acc[Number(marketIndex) as MarketIndex] = body[token.coingeckoPriceId];
             return acc;
         }, {} as Record<MarketIndex, number>);

@@ -22,6 +22,13 @@ export default function ButtonRow() {
                 Withdraw
             </button>
 
+            <button 
+                className={`glass-button ${styles.mainButton}`} 
+                onClick={() => setModalVariation(ModalVariation.BORROW)}
+            >
+                Borrow
+            </button>
+
             {hasLoan && (
                 <button 
                     className={`glass-button ghost ${styles.mainButton}`} 

@@ -28,6 +28,7 @@ const paramsSchema = z.object({
         Number.isInteger,
         { message: "amountBaseUnits must be an integer" }
     ),
+    allowLoan: z.boolean(),
     marketIndex: z.number().refine(
         (value) => MarketIndex.includes(value as any),
         { message: "marketIndex must be a valid market index" }
@@ -49,7 +50,8 @@ export async function GET(request: Request) {
     const params = {
         address: searchParams.get('address'),
         amountBaseUnits: Number(searchParams.get('amountBaseUnits')),
-        marketIndex: Number(searchParams.get('marketIndex'))
+        marketIndex: Number(searchParams.get('marketIndex')),
+        allowLoan: searchParams.get('allowLoan') === 'true'
     };
 
     let body: z.infer<typeof paramsSchema>;
@@ -62,6 +64,7 @@ export async function GET(request: Request) {
     const connection = new Connection(env.RPC_URL);
     const address = new PublicKey(body.address);
     const amountBaseUnits = body.amountBaseUnits;
+    const allowLoan = body.allowLoan;
     const marketIndex = body.marketIndex as MarketIndex;
 
     const quartzClient = await QuartzClient.fetchClient(connection);
@@ -73,7 +76,14 @@ export async function GET(request: Request) {
     }
 
     try {
-        const instructions = await makeWithdrawIxs(connection, address, amountBaseUnits, marketIndex, user);
+        const instructions = await makeWithdrawIxs(
+            connection, 
+            address, 
+            amountBaseUnits, 
+            marketIndex, 
+            user, 
+            allowLoan
+        );
         const transaction = await buildTransaction(connection, instructions, address);
         const serializedTx = Buffer.from(transaction.serialize()).toString("base64");
         return NextResponse.json({ transaction: serializedTx });
@@ -91,7 +101,8 @@ async function makeWithdrawIxs(
     address: PublicKey,
     amountBaseUnits: number,
     marketIndex: MarketIndex,
-    user: QuartzUser
+    user: QuartzUser,
+    allowLoan: boolean
 ): Promise<TransactionInstruction[]> {
     const mint = TOKENS[marketIndex].mint;
     const mintTokenProgram = await getTokenProgram(connection, mint);
@@ -103,6 +114,6 @@ async function makeWithdrawIxs(
         oix_closeWsol.push(createCloseAccountInstruction(walletAta, address, address));
     }
 
-    const ix_withdraw = await user.makeWithdrawIx(amountBaseUnits, marketIndex, false);
+    const ix_withdraw = await user.makeWithdrawIx(amountBaseUnits, marketIndex, allowLoan);
     return [...oix_createAta, ix_withdraw, ...oix_closeWsol];
 }
