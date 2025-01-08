@@ -818,7 +818,7 @@
     assert "^2.0.0"
     buffer "^6.0.1"
 
-"@pythnetwork/price-service-sdk@>=1.6.0", "@pythnetwork/price-service-sdk@^1.7.1":
+"@pythnetwork/price-service-sdk@1.8.0", "@pythnetwork/price-service-sdk@>=1.6.0", "@pythnetwork/price-service-sdk@^1.7.1":
   version "1.8.0"
   resolved "https://registry.yarnpkg.com/@pythnetwork/price-service-sdk/-/price-service-sdk-1.8.0.tgz#f5f01f654963eb9a0cf12127b4f1a89b60ef008a"
   integrity sha512-tFZ1thj3Zja06DzPIX2dEWSi7kIfIyqreoywvw5NQ3Z1pl5OJHQGMEhxt6Li3UCGSp2ooYZS9wl8/8XfrfrNSA==
@@ -847,7 +847,18 @@
     "@pythnetwork/solana-utils" "0.4.2"
     "@solana/web3.js" "^1.90.0"
 
-"@pythnetwork/solana-utils@*":
+"@pythnetwork/pyth-solana-receiver@^0.9.1":
+  version "0.9.1"
+  resolved "https://registry.yarnpkg.com/@pythnetwork/pyth-solana-receiver/-/pyth-solana-receiver-0.9.1.tgz#d32167637f294bc610d88c569d04fe4d02708b8f"
+  integrity sha512-1Pfdq1JG9HYPDzzv6ZmXQJcYoRawEo+drK+YoZzPFXplWyRJwlSQAOW7KYNz2AQqH7jEUkxLbvUaifexViStXQ==
+  dependencies:
+    "@coral-xyz/anchor" "^0.29.0"
+    "@noble/hashes" "^1.4.0"
+    "@pythnetwork/price-service-sdk" "1.8.0"
+    "@pythnetwork/solana-utils" "0.4.3"
+    "@solana/web3.js" "^1.90.0"
+
+"@pythnetwork/solana-utils@*", "@pythnetwork/solana-utils@0.4.3":
   version "0.4.3"
   resolved "https://registry.yarnpkg.com/@pythnetwork/solana-utils/-/solana-utils-0.4.3.tgz#c925af00a13733ce81848d19c7c004e9dfedd92d"
   integrity sha512-aMiVPtye3H2XFWXV8Hlgyp+oHXsAdt6d2FG0xhdTGDWssTnL4e9r7I8XBcucKHQkMDUhLN1bNeNOZcSBVyp9mg==
@@ -867,14 +878,15 @@
     bs58 "^5.0.0"
     jito-ts "^3.0.1"
 
-"@quartz-labs/sdk@0.3.3":
-  version "0.3.3"
-  resolved "https://registry.yarnpkg.com/@quartz-labs/sdk/-/sdk-0.3.3.tgz#6f5cd471be0f5d50d9dddc2ef93faad213a1bbfa"
-  integrity sha512-bxpbx0kDcXkceA4hVekPPv5NxTFzTF3qPT87j1AxDGe+ZMHcUjiF06L8Co0JGAu3Y81+HhB1JEq2tgVo1yagPQ==
+"@quartz-labs/sdk@0.3.4":
+  version "0.3.4"
+  resolved "https://registry.yarnpkg.com/@quartz-labs/sdk/-/sdk-0.3.4.tgz#cd527f17161f235bdf7c224f907fed75277a2dfa"
+  integrity sha512-J5bnodhsxYyzNiu7z78+m3joyKjvSjzBEnrhsQLq/eOxzQQfzyJAyrWQYm1e8h/6izGeFVT6jDoMMAneiiOB9w==
   dependencies:
     "@coral-xyz/anchor" "^0.29.0"
     "@drift-labs/sdk" "^2.103.0-beta.9"
     "@jup-ag/api" "^6.0.30"
+    "@pythnetwork/pyth-solana-receiver" "^0.9.1"
     "@solana/spl-token" "^0.4.9"
     bn.js "^5.2.1"
 
