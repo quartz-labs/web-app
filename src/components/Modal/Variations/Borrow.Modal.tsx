@@ -16,7 +16,7 @@ import { MarketIndex, baseUnitToDecimal, decimalToBaseUnit } from "@quartz-labs/
 export default function BorrowModal() {
     const wallet = useAnchorWallet();
 
-    const { prices, rates, withdrawLimits, setModalVariation } = useStore();
+    const { prices, balances, rates, withdrawLimits, setModalVariation } = useStore();
     const { showError } = useError();
     const { showTxStatus } = useTxStatus();
     const refetchAccountData = useRefetchAccountData();
@@ -36,12 +36,13 @@ export default function BorrowModal() {
         return () => clearInterval(interval);
     }, [refetchAccountData, refetchWithdrawLimits]);
 
-    const maxAmountBaseUnits = withdrawLimits?.[marketIndex] ?? 0;
+    const balance = balances?.[marketIndex] ?? 0;
+    const maxBorrowBaseUnits = withdrawLimits?.[marketIndex] ?? 0;
 
     const handleConfirm = async () => {
         if (!wallet?.publicKey) return setErrorText("Wallet not connected");
 
-        const errorText = validateAmount(marketIndex, amountDecimals, maxAmountBaseUnits);
+        const errorText = validateAmount(marketIndex, amountDecimals, maxBorrowBaseUnits);
         setErrorText(errorText);
         if (errorText) return;
 
@@ -77,18 +78,24 @@ export default function BorrowModal() {
                 borrowing={true}
                 price={prices?.[marketIndex]}
                 rate={rates?.[marketIndex]?.borrowRate}
-                available={baseUnitToDecimal(maxAmountBaseUnits, marketIndex)}
+                available={baseUnitToDecimal(maxBorrowBaseUnits, marketIndex)}
                 amountStr={amountStr}
                 setAmountStr={setAmountStr}
-                setMaxAmount={() => setAmountStr(maxAmountBaseUnits ? baseUnitToDecimal(maxAmountBaseUnits, marketIndex).toString() : "0")}
-                setHalfAmount={() => setAmountStr(maxAmountBaseUnits ? baseUnitToDecimal(Math.trunc(maxAmountBaseUnits / 2), marketIndex).toString() : "0")}
+                setMaxAmount={() => setAmountStr(maxBorrowBaseUnits ? baseUnitToDecimal(maxBorrowBaseUnits, marketIndex).toString() : "0")}
+                setHalfAmount={() => setAmountStr(maxBorrowBaseUnits ? baseUnitToDecimal(Math.trunc(maxBorrowBaseUnits / 2), marketIndex).toString() : "0")}
                 marketIndex={marketIndex}
                 setMarketIndex={setMarketIndex}
             />
 
+            {(amountDecimals !== 0 && decimalToBaseUnit(amountDecimals, marketIndex) <= balance) && 
+                <div className={styles.messageTextWrapper}>
+                    <p className={"light-text small-text"}>The selected amount is less than your balance and will result in a withdrawal, <span className="no-wrap">not a borrow.</span></p>
+                </div>
+            }
+
             {errorText &&
-                <div className={styles.errorTextWrapper}>
-                    <p>{errorText}</p>
+                <div className={styles.messageTextWrapper}>
+                    <p className={"error-text"}>{errorText}</p>
                 </div>
             } 
 

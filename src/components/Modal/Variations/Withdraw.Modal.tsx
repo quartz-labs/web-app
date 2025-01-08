@@ -90,8 +90,8 @@ export default function WithdrawModal() {
             />
 
             {errorText &&
-                <div className={styles.errorTextWrapper}>
-                    <p>{errorText}</p>
+                <div className={styles.messageTextWrapper}>
+                    <p className={"error-text"}>{errorText}</p>
                 </div>
             } 
 
