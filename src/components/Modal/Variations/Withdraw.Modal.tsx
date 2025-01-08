@@ -27,7 +27,13 @@ export default function WithdrawModal() {
     const [amountStr, setAmountStr] = useState("");
     const amountDecimals = Number(amountStr);
 
-    const [ marketIndex, setMarketIndex ] = useState<MarketIndex>(MarketIndex[0]);
+    const collateralMarketIndices = balances
+        ? Object.entries(balances)
+            .filter(([, balance]) => balance > 0)
+            .map(([marketIndex]) => Number(marketIndex) as MarketIndex)
+        : [];
+
+    const [ marketIndex, setMarketIndex ] = useState<MarketIndex>(collateralMarketIndices[0] ?? MarketIndex[0]);
 
     useEffect(() => {
         refetchAccountData();
@@ -87,6 +93,7 @@ export default function WithdrawModal() {
                 setHalfAmount={() => setAmountStr(maxWithdrawBaseUnits ? baseUnitToDecimal(Math.trunc(maxWithdrawBaseUnits / 2), marketIndex).toString() : "0")}
                 marketIndex={marketIndex}
                 setMarketIndex={setMarketIndex}
+                selectableMarketIndices={collateralMarketIndices}
             />
 
             {errorText &&
