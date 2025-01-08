@@ -27,6 +27,7 @@ const paramsSchema = z.object({
         Number.isInteger,
         { message: "amountBaseUnits must be an integer" }
     ),
+    repayingLoan: z.boolean(),
     marketIndex: z.number().refine(
         (value) => MarketIndex.includes(value as any),
         { message: "marketIndex must be a valid market index" }
@@ -48,6 +49,7 @@ export async function GET(request: Request) {
     const params = {
         address: searchParams.get('address'),
         amountBaseUnits: Number(searchParams.get('amountBaseUnits')),
+        repayingLoan: searchParams.get('repayingLoan') === 'true',
         marketIndex: Number(searchParams.get('marketIndex'))
     };
 
@@ -62,6 +64,7 @@ export async function GET(request: Request) {
     const address = new PublicKey(body.address);
     const amountBaseUnits = body.amountBaseUnits;
     const marketIndex = body.marketIndex as MarketIndex;
+    const repayingLoan = body.repayingLoan;
 
     const quartzClient = await QuartzClient.fetchClient(connection);
     let user: QuartzUser;
@@ -72,7 +75,7 @@ export async function GET(request: Request) {
     }
 
     try {
-        const instructions = await makeDepositIxs(connection, address, amountBaseUnits, marketIndex, user);
+        const instructions = await makeDepositIxs(connection, address, amountBaseUnits, marketIndex, user, repayingLoan);
         const transaction = await buildTransaction(connection, instructions, address);
         const serializedTx = Buffer.from(transaction.serialize()).toString("base64");
         return NextResponse.json({ transaction: serializedTx });
@@ -90,7 +93,8 @@ async function makeDepositIxs(
     address: PublicKey,
     amountBaseUnits: number,
     marketIndex: MarketIndex,
-    user: QuartzUser
+    user: QuartzUser,
+    repayingLoan: boolean
 ): Promise<TransactionInstruction[]> {
     const mint = TOKENS[marketIndex].mint;
     const mintTokenProgram = await getTokenProgram(connection, mint);
@@ -110,6 +114,6 @@ async function makeDepositIxs(
         oix_closeWsol.push(createCloseAccountInstruction(walletAta, address, address));
     }
 
-    const ix_deposit = await user.makeDepositIx(amountBaseUnits, marketIndex, false);
+    const ix_deposit = await user.makeDepositIx(amountBaseUnits, marketIndex, repayingLoan);
     return [...oix_createAta, ...oix_wrapSol, ix_deposit, ...oix_closeWsol];
 }

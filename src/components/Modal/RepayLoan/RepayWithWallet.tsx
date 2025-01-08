@@ -58,6 +58,7 @@ export default function RepayWithWallet() {
             const endpoint = buildEndpointURL("/api/build-tx/deposit", {
                 address: wallet.publicKey.toBase58(),
                 amountBaseUnits: decimalToBaseUnit(amountDecimals, marketIndex),
+                repayingLoan: true,
                 marketIndex
             });
             const response = await fetchAndParse(endpoint);

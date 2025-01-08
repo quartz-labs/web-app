@@ -53,6 +53,7 @@ export default function AddFundsModal() {
             const endpoint = buildEndpointURL("/api/build-tx/deposit", {
                 address: wallet.publicKey.toBase58(),
                 amountBaseUnits: decimalToBaseUnit(amountDecimals, marketIndex),
+                repayingLoan: false,
                 marketIndex
             });
             const response = await fetchAndParse(endpoint);
