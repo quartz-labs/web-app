@@ -6,7 +6,7 @@ import { useRefetchAccountData } from "@/src/utils/hooks";
 import { useDepositLimitsQuery } from "@/src/utils/queries";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useStore } from "@/src/utils/store";
-import { MarketIndex, QUARTZ_ADDRESS_TABLE } from "@quartz-labs/sdk";
+import { MarketIndex } from "@quartz-labs/sdk/browser";
 
 export interface RepayLoanInnerModalProps {
     depositLimitBaseUnits: number;
