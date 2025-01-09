@@ -1,7 +1,6 @@
-import { useRefetchAccountData } from "@/src/utils/hooks";
 import { useStore } from "@/src/utils/store";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import styles from "../Modal.module.css";
 import InputSection from "../Input.ModalComponent";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
@@ -13,41 +12,33 @@ import { captureError } from "@/src/utils/errors";
 import { TxStatus, useTxStatus } from "@/src/context/tx-status-provider";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
 import { MarketIndex, TOKENS, baseUnitToDecimal, decimalToBaseUnit } from "@quartz-labs/sdk/browser";
-import { useDepositLimitsQuery } from "@/src/utils/queries";
+import type { RepayLoanInnerModalProps } from "../Variations/RepayLoan.Modal";
 
-export default function RepayWithCollateral() {
+interface RepayWithCollateralProps extends RepayLoanInnerModalProps {
+    marketIndexCollateral: MarketIndex;
+    setMarketIndexCollateral: (marketIndex: MarketIndex) => void;
+    collateralPositionsMarketIndices: MarketIndex[];
+}
+
+export default function RepayWithCollateral({
+    depositLimitBaseUnits,
+    marketIndexLoan,
+    setMarketIndexLoan,
+    loanPositionsMarketIndices,
+    marketIndexCollateral,
+    setMarketIndexCollateral,
+    collateralPositionsMarketIndices
+}: RepayWithCollateralProps) {
     const wallet = useAnchorWallet();
 
     const { prices, rates, balances, setModalVariation } = useStore();
     const { showError } = useError();
     const { showTxStatus } = useTxStatus();
-    const refetchAccountData = useRefetchAccountData();
 
     const [awaitingSign, setAwaitingSign] = useState(false);
     const [errorText, setErrorText] = useState("");
     const [amountLoanStr, setAmountLoanStr] = useState("");
     const amountLoanDecimal = Number(amountLoanStr);
-
-    const loanMarketIndices = balances
-        ? Object.entries(balances)
-            .filter(([, balance]) => balance < 0)
-            .map(([marketIndex]) => Number(marketIndex) as MarketIndex)
-        : [];
-
-    const collateralMarketIndices = balances
-        ? Object.entries(balances)
-            .filter(([, balance]) => balance > 0)
-            .map(([marketIndex]) => Number(marketIndex) as MarketIndex)
-        : [];
-
-    const [ marketIndexCollateral, setMarketIndexCollateral ] = useState<MarketIndex>(collateralMarketIndices[0] ?? MarketIndex[1]);
-    const [ marketIndexLoan, setMarketIndexLoan ] = useState<MarketIndex>(loanMarketIndices[0] ?? MarketIndex[0]);
-
-    useEffect(() => {
-        refetchAccountData();
-    }, [refetchAccountData]);
-
-    const { data: depositLimitBaseUnits } = useDepositLimitsQuery(wallet?.publicKey ?? null, marketIndexLoan);
 
     const priceCollateral = prices?.[marketIndexCollateral] ?? 0;
     const rateCollateral = rates?.[marketIndexCollateral]?.depositRate ?? 0;
@@ -61,7 +52,7 @@ export default function RepayWithCollateral() {
         ? prices?.[marketIndexCollateral] * amountCollateralDecimal 
         : undefined;
 
-    const canRepayWithWallet = (amountLoanDecimal > 0 && amountLoanDecimal <= baseUnitToDecimal(depositLimitBaseUnits ?? 0, marketIndexLoan));
+    const canRepayWithWallet = (amountLoanDecimal > 0 && amountLoanDecimal <= baseUnitToDecimal(depositLimitBaseUnits, marketIndexLoan));
 
     const handleConfirm = async () => {
         if (!wallet?.publicKey) return setErrorText("Wallet not connected");
@@ -143,7 +134,7 @@ export default function RepayWithCollateral() {
                 }}
                 marketIndex={marketIndexLoan}
                 setMarketIndex={setMarketIndexLoan}
-                selectableMarketIndices={loanMarketIndices}
+                selectableMarketIndices={loanPositionsMarketIndices}
             />
 
             <div className={`${styles.inputSection} ${styles.inputSectionCollateral}`}>
@@ -157,7 +148,7 @@ export default function RepayWithCollateral() {
                     <TokenSelect 
                         marketIndex={marketIndexCollateral} 
                         setMarketIndex={setMarketIndexCollateral} 
-                        selectableMarketIndices={collateralMarketIndices}
+                        selectableMarketIndices={collateralPositionsMarketIndices}
                     />
                 </div>
 

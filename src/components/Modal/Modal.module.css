@@ -60,14 +60,14 @@
 .repaySelectButtonLeft {
     border-radius: 24px 0px 0px 0px;
     flex-grow: 1;
-    padding-bottom: 38px;
+    padding: 18px 28px 38px 28px;
     height: 100%;
 }
 
 .repaySelectButtonRight {
     border-radius: 0px 24px 0px 0px;
     flex-grow: 1;
-    padding-bottom: 38px;
+    padding: 18px 28px 38px 28px;
     height: 100%;
 }
 

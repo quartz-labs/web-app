@@ -114,6 +114,7 @@ async function makeWithdrawIxs(
         oix_closeWsol.push(createCloseAccountInstruction(walletAta, address, address));
     }
 
-    const ix_withdraw = await user.makeWithdrawIx(amountBaseUnits, marketIndex, allowLoan);
+    const reduceOnly = !allowLoan;
+    const ix_withdraw = await user.makeWithdrawIx(amountBaseUnits, marketIndex, reduceOnly);
     return [...oix_createAta, ix_withdraw, ...oix_closeWsol];
 }

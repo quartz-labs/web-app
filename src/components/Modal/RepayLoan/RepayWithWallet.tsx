@@ -1,55 +1,44 @@
-import { useEffect } from "react";
 import { useState } from "react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import styles from "../Modal.module.css";
 import { useError } from "@/src/context/error-provider";
 import { TxStatus, useTxStatus } from "@/src/context/tx-status-provider";
-import { useRefetchAccountData } from "@/src/utils/hooks";
 import { useStore } from "@/src/utils/store";
-import { useDepositLimitsQuery } from "@/src/utils/queries";
-import { MarketIndex, baseUnitToDecimal, decimalToBaseUnit } from "@quartz-labs/sdk/browser";
+import { baseUnitToDecimal, decimalToBaseUnit } from "@quartz-labs/sdk/browser";
 import { buildEndpointURL, validateAmount, fetchAndParse, deserializeTransaction, signAndSendTransaction } from "@/src/utils/helpers";
 import { captureError } from "@/src/utils/errors";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
 import Buttons from "../Buttons.ModalComponent";
 import InputSection from "../Input.ModalComponent";
+import type { RepayLoanInnerModalProps } from "../Variations/RepayLoan.Modal";
 
-export default function RepayWithWallet() {
+export default function RepayWithWallet({
+    depositLimitBaseUnits,
+    marketIndexLoan,
+    setMarketIndexLoan,
+    loanPositionsMarketIndices
+}: RepayLoanInnerModalProps) {
     const wallet = useAnchorWallet();
 
     const { prices, balances, rates, setModalVariation } = useStore();
     const { showError } = useError();
     const { showTxStatus } = useTxStatus();
-    const refetchAccountData = useRefetchAccountData();
 
     const [awaitingSign, setAwaitingSign] = useState(false);
     const [errorText, setErrorText] = useState("");
     const [amountStr, setAmountStr] = useState("");
     const amountDecimals = Number(amountStr);
 
-    const loanMarketIndices = balances
-        ? Object.entries(balances)
-            .filter(([, balance]) => balance < 0)
-            .map(([marketIndex]) => Number(marketIndex) as MarketIndex)
-        : [];
-
-    const [ marketIndex, setMarketIndex ] = useState<MarketIndex>(loanMarketIndices[0] ?? MarketIndex[0]);
-
-    useEffect(() => {
-        refetchAccountData();
-    }, [refetchAccountData]);
-
-    const { data: depositLimitBaseUnits } = useDepositLimitsQuery(wallet?.publicKey ?? null, marketIndex);
     const maxRepayBaseUnits = Math.min(
-        depositLimitBaseUnits ?? 0, 
-        Math.abs(balances?.[marketIndex] ?? 0)
+        depositLimitBaseUnits, 
+        Math.abs(balances?.[marketIndexLoan] ?? 0)
     );
 
     const handleConfirm = async () => {
         if (!wallet?.publicKey) return setErrorText("Wallet not connected");
         
-        const errorText = validateAmount(marketIndex, amountDecimals, depositLimitBaseUnits ?? 0);
+        const errorText = validateAmount(marketIndexLoan, amountDecimals, depositLimitBaseUnits);
         setErrorText(errorText);
         if (errorText) return;
 
@@ -57,9 +46,9 @@ export default function RepayWithWallet() {
         try {
             const endpoint = buildEndpointURL("/api/build-tx/deposit", {
                 address: wallet.publicKey.toBase58(),
-                amountBaseUnits: decimalToBaseUnit(amountDecimals, marketIndex),
+                amountBaseUnits: decimalToBaseUnit(amountDecimals, marketIndexLoan),
                 repayingLoan: true,
-                marketIndex
+                marketIndex: marketIndexLoan
             });
             const response = await fetchAndParse(endpoint);
             const transaction = deserializeTransaction(response.transaction);
@@ -84,16 +73,16 @@ export default function RepayWithWallet() {
 
             <InputSection
                 borrowing={false}
-                price={prices?.[marketIndex]}
-                rate={rates?.[marketIndex]?.depositRate}
-                available={baseUnitToDecimal(maxRepayBaseUnits, marketIndex)}
+                price={prices?.[marketIndexLoan]}
+                rate={rates?.[marketIndexLoan]?.depositRate}
+                available={baseUnitToDecimal(maxRepayBaseUnits, marketIndexLoan)}
                 amountStr={amountStr}
                 setAmountStr={setAmountStr}
-                setMaxAmount={() => setAmountStr(maxRepayBaseUnits ? baseUnitToDecimal(maxRepayBaseUnits, marketIndex).toString() : "0")}
-                setHalfAmount={() => setAmountStr(maxRepayBaseUnits ? baseUnitToDecimal(Math.trunc(maxRepayBaseUnits / 2), marketIndex).toString() : "0")}
-                marketIndex={marketIndex}
-                setMarketIndex={setMarketIndex}
-                selectableMarketIndices={loanMarketIndices}
+                setMaxAmount={() => setAmountStr(maxRepayBaseUnits ? baseUnitToDecimal(maxRepayBaseUnits, marketIndexLoan).toString() : "0")}
+                setHalfAmount={() => setAmountStr(maxRepayBaseUnits ? baseUnitToDecimal(Math.trunc(maxRepayBaseUnits / 2), marketIndexLoan).toString() : "0")}
+                marketIndex={marketIndexLoan}
+                setMarketIndex={setMarketIndexLoan}
+                selectableMarketIndices={loanPositionsMarketIndices}
             />
 
             {errorText &&

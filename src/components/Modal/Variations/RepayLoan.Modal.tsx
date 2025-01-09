@@ -1,10 +1,46 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import RepayWithCollateral from "../RepayLoan/RepayWithCollateral";
 import RepayWithWallet from "../RepayLoan/RepayWithWallet";
 import styles from "../Modal.module.css";
+import { useRefetchAccountData } from "@/src/utils/hooks";
+import { useDepositLimitsQuery } from "@/src/utils/queries";
+import { useAnchorWallet } from "@solana/wallet-adapter-react";
+import { useStore } from "@/src/utils/store";
+import { MarketIndex, QUARTZ_ADDRESS_TABLE } from "@quartz-labs/sdk";
+
+export interface RepayLoanInnerModalProps {
+    depositLimitBaseUnits: number;
+    marketIndexLoan: MarketIndex;
+    setMarketIndexLoan: (marketIndex: MarketIndex) => void;
+    loanPositionsMarketIndices: MarketIndex[];
+}
 
 export default function RepayLoanModal() {
+    const { balances } = useStore();
+    const wallet = useAnchorWallet();
+    const refetchAccountData = useRefetchAccountData();
+
     const [collateralRepaySelected, setCollateralRepaySelected] = useState(false);
+
+    const loanPositionsMarketIndices = balances
+        ? Object.entries(balances)
+            .filter(([, balance]) => balance < 0)
+            .map(([marketIndex]) => Number(marketIndex) as MarketIndex)
+        : [];
+    const [ marketIndexLoan, setMarketIndexLoan ] = useState<MarketIndex>(loanPositionsMarketIndices[0] ?? MarketIndex[0]);
+
+    const collateralPositionsMarketIndices = balances
+        ? Object.entries(balances)
+            .filter(([, balance]) => balance > 0)
+            .map(([marketIndex]) => Number(marketIndex) as MarketIndex)
+        : [];
+    const [ marketIndexCollateral, setMarketIndexCollateral ] = useState<MarketIndex>(collateralPositionsMarketIndices[0] ?? MarketIndex[1]);
+
+    useEffect(() => {
+        refetchAccountData();
+    }, [refetchAccountData]);
+
+    const { data: depositLimitBaseUnits } = useDepositLimitsQuery(wallet?.publicKey ?? null, marketIndexLoan);
     
     return (
         <>
@@ -23,9 +59,28 @@ export default function RepayLoanModal() {
                 </button>
             </div>
 
+            {QUARTZ_ADDRESS_TABLE.toBase58()}
+
             <div className={`glass ${styles.repayInnerModal}`}>
-                {collateralRepaySelected && <RepayWithCollateral />}
-                {!collateralRepaySelected && <RepayWithWallet />}
+                {collateralRepaySelected && 
+                    <RepayWithCollateral 
+                        depositLimitBaseUnits={depositLimitBaseUnits ?? 0}
+                        marketIndexLoan={marketIndexLoan}
+                        setMarketIndexLoan={setMarketIndexLoan}
+                        loanPositionsMarketIndices={loanPositionsMarketIndices}
+                        marketIndexCollateral={marketIndexCollateral}
+                        setMarketIndexCollateral={setMarketIndexCollateral}
+                        collateralPositionsMarketIndices={collateralPositionsMarketIndices}
+                    />
+                }
+                {!collateralRepaySelected && 
+                    <RepayWithWallet 
+                        depositLimitBaseUnits={depositLimitBaseUnits ?? 0}
+                        marketIndexLoan={marketIndexLoan}
+                        setMarketIndexLoan={setMarketIndexLoan}
+                        loanPositionsMarketIndices={loanPositionsMarketIndices}
+                    />
+                }
             </div>
         </>
     )
