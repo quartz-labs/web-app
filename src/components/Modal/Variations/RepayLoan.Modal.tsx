@@ -59,8 +59,6 @@ export default function RepayLoanModal() {
                 </button>
             </div>
 
-            {QUARTZ_ADDRESS_TABLE.toBase58()}
-
             <div className={`glass ${styles.repayInnerModal}`}>
                 {collateralRepaySelected && 
                     <RepayWithCollateral 
