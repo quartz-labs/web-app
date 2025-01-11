@@ -35,7 +35,6 @@ export default function Page() {
   const { data: health } = useHealthQuery(isInitialized ? wallet.publicKey : null);
 
   useEffect(() => {
-    console.log(config.NEXT_PUBLIC_UNAVAILABLE_TIME);
     setPrices(prices);
     setRates(rates);
     setBalances(balances);

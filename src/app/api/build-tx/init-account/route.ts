@@ -53,7 +53,8 @@ export async function GET(request: Request) {
         const { instructions, marginfiSigner } = await makeInitAccountIxs(connection, address);
         const transaction = await buildTransaction(connection, instructions, address);
         if (marginfiSigner) transaction.sign([marginfiSigner]);
-
+        if (marginfiSigner) console.log(marginfiSigner.publicKey.toBase58());
+        
         const serializedTx = Buffer.from(transaction.serialize()).toString("base64");
         return NextResponse.json({ transaction: serializedTx });
     } catch (error) {
@@ -72,7 +73,7 @@ async function makeInitAccountIxs(
     instructions: TransactionInstruction[], 
     marginfiSigner: Keypair | null
 }> {
-    const wallet = new DummyWallet();
+    const wallet = new DummyWallet(address);
     const [quartzClient, marginfiClient] = await Promise.all([
         QuartzClient.fetchClient(connection),
         MarginfiClient.fetch(getMarginfiConfig(), wallet, connection)

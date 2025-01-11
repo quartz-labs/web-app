@@ -41,13 +41,6 @@ export async function POST(request: Request) {
         return NextResponse.json({ error }, { status: 400 });
     }
 
-    const transaction = VersionedTransaction.deserialize(body.transaction);
-    const isBlockhashValid = await connection.isBlockhashValid(transaction.message.recentBlockhash);
-    transaction.message.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
-    if (!isBlockhashValid) {
-        return NextResponse.json({ error: "Blockhash is invalid or has expired" }, { status: 400 });
-    }
-
     try {
         const signature = await connection.sendRawTransaction(body.transaction, {
             skipPreflight: body.skipPreflight,

@@ -26,7 +26,7 @@ export function captureError(
     }
 
     posthog.capture(`Error: ${errorString}`, {
-        error: error,
+        error: error.toString(),
         errorId: id,
         location: location,
         line: errorStack.toString(),

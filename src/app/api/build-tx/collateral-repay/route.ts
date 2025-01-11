@@ -138,6 +138,8 @@ async function makeCollateralRepayIxs(
 
     const jupiterQuoteEndpoint
         = `https://quote-api.jup.ag/v6/quote?inputMint=${mintCollateral.toBase58()}&outputMint=${mintLoan.toBase58()}&amount=${amountLoanBaseUnits}&slippageBps=${JUPITER_SLIPPAGE_BPS}&swapMode=ExactOut&onlyDirectRoutes=true`;
+    // const jupiterQuoteEndpoint
+    //     = `https://quote-api.jup.ag/v6/quote?inputMint=${mintCollateral.toBase58()}&outputMint=${mintLoan.toBase58()}&amount=${amountLoanBaseUnits}&slippageBps=${JUPITER_SLIPPAGE_BPS}&swapMode=ExactOut`;
     const jupiterQuote: QuoteResponse = await fetchAndParse(jupiterQuoteEndpoint);
     const collateralRequiredForSwap = Math.ceil(Number(jupiterQuote.inAmount) * (1 + (JUPITER_SLIPPAGE_BPS / 10_000)));
 
@@ -175,6 +177,17 @@ async function buildFlashLoanTransaction(
 
     const loanBank = marginfiClient.getBankByMint(TOKENS[flashLoanMarketIndex].mint);
     if (loanBank === null) throw new Error("Could not find Flash Loan MarginFi bank");
+
+    // if (instructions.length < 4) throw new Error("Invalid instructions");
+    // const addresses = [
+    //     ...instructions[0]!.keys.map(key => key.pubkey.toBase58()),
+    //     ...instructions[2]!.keys.map(key => key.pubkey.toBase58()),
+    //     ...instructions[3]!.keys.map(key => key.pubkey.toBase58())
+    // ]
+    // const lookupTableAddresses = lookupTables[0]?.state.addresses.map(address => address.toBase58());
+    // const missingAddresses = addresses.filter(address => !lookupTableAddresses?.includes(address));
+    // const uniqueMissingAddresses = [...new Set(missingAddresses)];
+    // console.log(uniqueMissingAddresses);
 
     const { flashloanTx } = await marginfiAccount.makeLoopTx(
         amountLoanDecimal,

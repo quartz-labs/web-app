@@ -161,6 +161,7 @@ export function validateAmount(marketIndex: MarketIndex, amountDecimal: number, 
 export async function fetchAndParse(url: string, req?: RequestInit): Promise<any> {
     const response = await fetch(url, req);
     const body = await response.json();
+
     if (!response.ok) throw new Error(JSON.stringify(body.error) ?? `Could not fetch ${url}`);
     return body;
 }
