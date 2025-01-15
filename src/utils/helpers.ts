@@ -6,6 +6,7 @@ import { VersionedTransaction } from "@solana/web3.js";
 import { TransactionMessage } from "@solana/web3.js";
 import { TxStatus, type TxStatusProps } from "../context/tx-status-provider";
 import { MarketIndex, TOKENS, baseUnitToDecimal } from "@quartz-labs/sdk/browser";
+import { DEFAULT_COMPUTE_UNIT_LIMIT } from "../config/constants";
 
 export function truncToDecimalPlaces(value: number, decimalPlaces: number): number {
     return Math.trunc(value * 10 ** decimalPlaces) / 10 ** decimalPlaces;
@@ -186,22 +187,49 @@ export function deserializeTransaction(serializedTx: string): VersionedTransacti
     return VersionedTransaction.deserialize(buffer);
 }
 
+export async function getComputerUnitLimitIx(
+    connection: Connection,
+    instructions: TransactionInstruction[],
+    address: PublicKey,
+    lookupTables: AddressLookupTableAccount[] = [],
+    blockhash: string
+) {
+    const messageV0 = new TransactionMessage({
+        payerKey: address,
+        recentBlockhash: blockhash,
+        instructions: instructions
+    }).compileToV0Message(lookupTables);
+    const simulation = await connection.simulateTransaction(
+        new VersionedTransaction(messageV0)
+    );
+
+    const estimatedComputeUnits = simulation.value.unitsConsumed;
+    const computeUnitLimit = estimatedComputeUnits 
+        ? Math.ceil(estimatedComputeUnits * 1.3) 
+        : DEFAULT_COMPUTE_UNIT_LIMIT;
+
+    return ComputeBudgetProgram.setComputeUnitLimit({
+        units: computeUnitLimit,
+    });
+}
+
+export async function getComputeUnitPriceIx() {
+    return ComputeBudgetProgram.setComputeUnitPrice({
+        microLamports: 1_250_000, // TODO: Calculate actual fee
+    });
+}
+
 export async function buildTransaction(
     connection: Connection,
     instructions: TransactionInstruction[], 
     address: PublicKey,
     lookupTables: AddressLookupTableAccount[] = []
 ): Promise<VersionedTransaction> {
-    // TODO: Calculate actual compute unit and fee
-    const ix_computeLimit = ComputeBudgetProgram.setComputeUnitLimit({
-        units: 200_000,
-    });
-    const ix_computePrice = ComputeBudgetProgram.setComputeUnitPrice({
-        microLamports: 1_250_000,
-    });
+    const blockhash = (await connection.getLatestBlockhash()).blockhash;
+    const ix_computeLimit = await getComputerUnitLimitIx(connection, instructions, address, lookupTables, blockhash);
+    const ix_computePrice = await getComputeUnitPriceIx();
     instructions.unshift(ix_computeLimit, ix_computePrice);
 
-    const blockhash = (await connection.getLatestBlockhash()).blockhash;
     const messageV0 = new TransactionMessage({
         payerKey: address,
         recentBlockhash: blockhash,

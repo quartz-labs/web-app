@@ -53,7 +53,6 @@ export async function GET(request: Request) {
         const { instructions, marginfiSigner } = await makeInitAccountIxs(connection, address);
         const transaction = await buildTransaction(connection, instructions, address);
         if (marginfiSigner) transaction.sign([marginfiSigner]);
-        if (marginfiSigner) console.log(marginfiSigner.publicKey.toBase58());
         
         const serializedTx = Buffer.from(transaction.serialize()).toString("base64");
         return NextResponse.json({ transaction: serializedTx });
