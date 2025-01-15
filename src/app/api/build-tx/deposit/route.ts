@@ -2,10 +2,10 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { Connection, PublicKey, SystemProgram, TransactionInstruction } from '@solana/web3.js';
-import { getTokenProgram, MarketIndex, QuartzClient, QuartzUser, TOKENS, makeCreateAtaIxIfNeeded } from '@quartz-labs/sdk';
-import { createCloseAccountInstruction, createSyncNativeInstruction, getAssociatedTokenAddress} from '@solana/spl-token';
-import { buildTransaction, getWsolMint } from '@/src/utils/helpers';
+import { Connection, PublicKey } from '@solana/web3.js';
+import { MarketIndex, QuartzClient, QuartzUser } from '@quartz-labs/sdk';
+import { buildTransaction } from '@/src/utils/helpers';
+import { makeDepositIxs } from '../../_utils/utils.server';
 
 const envSchema = z.object({
     RPC_URL: z.string().url(),
@@ -86,34 +86,4 @@ export async function GET(request: Request) {
             { status: 500 }
         );
     }
-}
-
-async function makeDepositIxs(
-    connection: Connection,
-    address: PublicKey,
-    amountBaseUnits: number,
-    marketIndex: MarketIndex,
-    user: QuartzUser,
-    repayingLoan: boolean
-): Promise<TransactionInstruction[]> {
-    const mint = TOKENS[marketIndex].mint;
-    const mintTokenProgram = await getTokenProgram(connection, mint);
-    const walletAta = await getAssociatedTokenAddress(mint, address, false, mintTokenProgram);
-    const oix_createAta = await makeCreateAtaIxIfNeeded(connection, walletAta, address, mint, mintTokenProgram);
-
-    const oix_wrapSol: TransactionInstruction[] = [];
-    const oix_closeWsol: TransactionInstruction[] = [];
-    if (mint === getWsolMint()) {
-        const ix_wrapSol = SystemProgram.transfer({
-            fromPubkey: address,
-            toPubkey: walletAta,
-            lamports: amountBaseUnits,
-        });
-        const ix_syncNative = createSyncNativeInstruction(walletAta);
-        oix_wrapSol.push(ix_wrapSol, ix_syncNative);
-        oix_closeWsol.push(createCloseAccountInstruction(walletAta, address, address));
-    }
-
-    const ix_deposit = await user.makeDepositIx(amountBaseUnits, marketIndex, repayingLoan);
-    return [...oix_createAta, ...oix_wrapSol, ix_deposit, ...oix_closeWsol];
 }

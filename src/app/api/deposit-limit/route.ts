@@ -8,6 +8,9 @@ import { MICRO_LAMPORTS_PER_LAMPORT } from '@/src/config/constants';
 import { AccountLayout } from '@solana/spl-token';
 import { getAssociatedTokenAddress } from '@solana/spl-token';
 import { getTokenProgram, MarketIndex, TOKENS } from '@quartz-labs/sdk/browser';
+import { makeDepositIxs } from '../_utils/utils.server';
+import { QuartzClient } from '@quartz-labs/sdk';
+import { getComputeUnitLimit, getComputeUnitPrice } from '@/src/utils/helpers';
 
 const envSchema = z.object({
     RPC_URL: z.string().url(),
@@ -64,22 +67,41 @@ async function fetchDepositLimit(connection: Connection, pubkey: PublicKey, mark
     }
 
     if (marketIndex === marketIndexSol) {
-        return await fetchMaxDepositLamports(pubkey, connection);
+        return await fetchMaxDepositLamports(pubkey, connection, marketIndexSol);
     }
     
     return await fetchMaxDepositSpl(pubkey, connection, TOKENS[marketIndex].mint);
 }
 
-async function fetchMaxDepositLamports(pubkey: PublicKey, connection: Connection) {
-    const balanceLamports = await connection.getBalance(pubkey);
+async function fetchMaxDepositLamports(pubkey: PublicKey, connection: Connection, marketIndexSol: MarketIndex) {
+    const quartzClient = await QuartzClient.fetchClient(connection);
+    const user = await quartzClient.getQuartzAccount(pubkey);
+    const balanceLamportsPromise = connection.getBalance(pubkey);
+    const wSolAtaRentPromise = connection.getMinimumBalanceForRentExemption(AccountLayout.span);
+    const depositIxsPromise = makeDepositIxs(connection, pubkey, 1, marketIndexSol, user, false);
 
-    const ataSize = AccountLayout.span;
-    const wSolAtaRent = await connection.getMinimumBalanceForRentExemption(ataSize);
+    const [
+        depositIxs,
+        blockhash
+    ] = await Promise.all([
+        depositIxsPromise,
+        connection.getLatestBlockhash().then(res => res.blockhash)
+    ]);
 
-    // TODO - Fetch proper priority fee
-    const computeUnitPriceMicroLamports = 1_000_000;
+    const [
+        computeUnitLimit, 
+        computeUnitPrice,
+        balanceLamports,
+        wSolAtaRent
+    ] = await Promise.all([
+        getComputeUnitLimit(connection, depositIxs, pubkey, [], blockhash),
+        getComputeUnitPrice(),
+        balanceLamportsPromise,
+        wSolAtaRentPromise
+    ]);
+
     const baseSignerFeeLamports = 5000;
-    const priorityFeeLamports = (computeUnitPriceMicroLamports * 200_000 ) / MICRO_LAMPORTS_PER_LAMPORT;
+    const priorityFeeLamports = (computeUnitPrice * computeUnitLimit ) / MICRO_LAMPORTS_PER_LAMPORT;
     const maxDeposit = balanceLamports - (wSolAtaRent * 2) - (baseSignerFeeLamports + priorityFeeLamports);
 
     return Math.max(maxDeposit, 0);

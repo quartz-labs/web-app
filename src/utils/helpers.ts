@@ -187,7 +187,7 @@ export function deserializeTransaction(serializedTx: string): VersionedTransacti
     return VersionedTransaction.deserialize(buffer);
 }
 
-export async function getComputerUnitLimitIx(
+export async function getComputeUnitLimit(
     connection: Connection,
     instructions: TransactionInstruction[],
     address: PublicKey,
@@ -207,15 +207,31 @@ export async function getComputerUnitLimitIx(
     const computeUnitLimit = estimatedComputeUnits 
         ? Math.ceil(estimatedComputeUnits * 1.3) 
         : DEFAULT_COMPUTE_UNIT_LIMIT;
+    return computeUnitLimit;
+}
 
+export async function getComputerUnitLimitIx(
+    connection: Connection,
+    instructions: TransactionInstruction[],
+    address: PublicKey,
+    lookupTables: AddressLookupTableAccount[] = [],
+    blockhash: string
+) {
+    const computeUnitLimit = await getComputeUnitLimit(connection, instructions, address, lookupTables, blockhash);
     return ComputeBudgetProgram.setComputeUnitLimit({
         units: computeUnitLimit,
     });
 }
 
+export async function getComputeUnitPrice() {
+    // TODO: Calculate actual fee
+    return 1_250_000;
+};
+
 export async function getComputeUnitPriceIx() {
+    const computeUnitPrice = await getComputeUnitPrice();
     return ComputeBudgetProgram.setComputeUnitPrice({
-        microLamports: 1_250_000, // TODO: Calculate actual fee
+        microLamports: computeUnitPrice,
     });
 }
 
