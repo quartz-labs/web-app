@@ -46,7 +46,6 @@ export default function TokenSelect({
                 <Image 
                     src={getTokenIcon(marketIndex)} 
                     alt={TOKENS[marketIndex].name} 
-                    className={styles.assetIcon}
                     width={26} 
                     height={26} 
                 /> 
@@ -70,7 +69,6 @@ export default function TokenSelect({
                                 <Image 
                                     src={getTokenIcon(marketIndex)} 
                                     alt={token.name} 
-                                    className={styles.assetIcon}
                                     width={22} 
                                     height={22} 
                                 />

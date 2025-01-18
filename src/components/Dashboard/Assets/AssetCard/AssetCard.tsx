@@ -35,7 +35,6 @@ export default function AssetCard({ assetInfo }: AssetCardProps) {
                         alt={TOKENS[assetInfo.marketIndex].name} 
                         width={36} 
                         height={36} 
-                        className={styles.assetIcon}
                 />
 
                 <div className={styles.mobileContent}>
@@ -65,7 +64,6 @@ export default function AssetCard({ assetInfo }: AssetCardProps) {
                     alt={TOKENS[assetInfo.marketIndex].name} 
                     width={36} 
                     height={36} 
-                    className={styles.assetIcon}
                 />
                 <p>{formatTokenDisplay(balance)}</p>
                 <p className={"light-text"}>{TOKENS[assetInfo.marketIndex].name}</p>

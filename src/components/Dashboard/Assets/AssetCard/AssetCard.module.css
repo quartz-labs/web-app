@@ -28,10 +28,6 @@
     font-size: var(--font-size-asset-amount);
 }
 
-.assetIcon {
-    border-radius: 100%;
-}
-
 .details {
     display: flex;
     flex-direction: column;

@@ -24,10 +24,6 @@
     width: 100%;
 }
 
-.assetIcon {
-    border-radius: 100%;
-}
-
 .dropdownMenu {
     position: absolute;
     top: calc(100% + 8px);
