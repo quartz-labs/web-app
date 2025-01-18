@@ -11,9 +11,13 @@ export interface AssetCardProps {
 
 export default function AssetCard({ assetInfo }: AssetCardProps) {
     const value = Math.abs(assetInfo.balance * assetInfo.price);
-    const valueDisplay = formatDollarValue(value, 2);
+    const valueDisplay = (value < 0.01)
+        ? ["0", "01"]
+        : formatDollarValue(value, 2);
     const balance = Math.abs(assetInfo.balance);
     const rateDisplay = (assetInfo.rate * 100).toFixed(2);
+
+    console.log(assetInfo.marketIndex, assetInfo.balance, assetInfo.price, (value < 0.01), valueDisplay);
     
     const [ windowWidth, setWindowWidth ] = useState(window.innerWidth);
     useEffect(() => {
@@ -43,6 +47,7 @@ export default function AssetCard({ assetInfo }: AssetCardProps) {
 
                     <div className={styles.details}>
                         <p className={styles.value}>
+                            {value < 0.01 && "<"}
                             ${valueDisplay[0]}<span className={styles.valueDecimal}>.{valueDisplay[1]}</span>
                         </p>
                         <p className={styles.valueDecimal}>({rateDisplay}% {assetInfo.balance > 0 ? "APY" : "APR"})</p>
@@ -68,6 +73,7 @@ export default function AssetCard({ assetInfo }: AssetCardProps) {
 
             <div className={styles.details}>
                 <p className={styles.value}>
+                    {value < 0.01 && "<"}
                     ${valueDisplay[0]}<span className={styles.valueDecimal}>.{valueDisplay[1]}</span>
                 </p>
                 <p className={styles.valueDecimal}>({rateDisplay}% {assetInfo.balance > 0 ? "APY" : "APR"})</p>

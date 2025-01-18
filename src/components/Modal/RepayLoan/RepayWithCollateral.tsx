@@ -172,7 +172,7 @@ export default function RepayWithCollateral({
 
             {canRepayWithWallet && 
                 <div className={styles.messageTextWrapper}>
-                    <p className={"light-text small-text"}>Your wallet has enough {TOKENS[marketIndexLoan].name} to repay the loan without <span className="no-wrap">using your collateral.</span></p>
+                    <p className={"light-text small-text"}>Your wallet has enough {TOKENS[marketIndexLoan].name} to repay the loan without <span className="no-wrap">selling your collateral.</span></p>
                 </div>
             }
 

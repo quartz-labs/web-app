@@ -138,12 +138,10 @@ async function makeCollateralRepayIxs(
 
     const jupiterQuoteEndpoint
         = `https://quote-api.jup.ag/v6/quote?inputMint=${mintCollateral.toBase58()}&outputMint=${mintLoan.toBase58()}&amount=${amountLoanBaseUnits}&slippageBps=${JUPITER_SLIPPAGE_BPS}&swapMode=ExactOut&onlyDirectRoutes=true`;
-    // const jupiterQuoteEndpoint
-    //     = `https://quote-api.jup.ag/v6/quote?inputMint=${mintCollateral.toBase58()}&outputMint=${mintLoan.toBase58()}&amount=${amountLoanBaseUnits}&slippageBps=${JUPITER_SLIPPAGE_BPS}&swapMode=ExactOut`;
     const jupiterQuote: QuoteResponse = await fetchAndParse(jupiterQuoteEndpoint);
     const collateralRequiredForSwap = Math.ceil(Number(jupiterQuote.inAmount) * (1 + (JUPITER_SLIPPAGE_BPS / 10_000)));
 
-    const { ixs: ixs_collateralRepay, lookupTables } = await user.makeCollateralRepayIxs(
+    const { ixs: ixs_collateralRepay, lookupTables } = await user.makeLegacyCollateralRepayIxs(
         address,
         marketIndexLoan,
         marketIndexCollateral,

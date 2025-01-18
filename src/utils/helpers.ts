@@ -103,8 +103,8 @@ export function generateAssetInfos(prices: Record<MarketIndex, number>, balances
         else if (balance < 0) borrowedAssets.push({ marketIndex, balance, price, rate: rate.borrowRate });
     }
 
-    suppliedAssets.sort((a, b) => (b.balance * b.price) - (a.balance * a.price));
-    borrowedAssets.sort((a, b) => (b.balance * b.price) - (a.balance * a.price));
+    suppliedAssets.sort((a, b) => (Math.abs(b.balance * b.price) - Math.abs(a.balance * a.price)));
+    borrowedAssets.sort((a, b) => (Math.abs(b.balance * b.price) - Math.abs(a.balance * a.price)));
 
     return { suppliedAssets, borrowedAssets };
 }
