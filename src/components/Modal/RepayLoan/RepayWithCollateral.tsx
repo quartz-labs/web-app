@@ -29,6 +29,7 @@ export default function RepayWithCollateral({
     setMarketIndexCollateral,
     collateralPositionsMarketIndices
 }: RepayWithCollateralProps) {
+    const MIN_COLLATERAL_REPAY_USD = 0.01;
     const wallet = useAnchorWallet();
 
     const { prices, rates, balances, setModalVariation } = useStore();
@@ -52,12 +53,14 @@ export default function RepayWithCollateral({
     const priceLoan = prices?.[marketIndexLoan] ?? 0;
     const balanceLoanBaseUnits = balances?.[marketIndexLoan] ?? 0;
 
-    let amountCollateralDecimal = (amountLoanDecimal * priceLoan) / priceCollateral;
-    if (amountCollateralDecimal < 10 ** TOKENS[marketIndexCollateral].decimalPrecision.toNumber()) {
-        amountCollateralDecimal = 0;
-    }
+    const amountCollateralDecimal = (amountLoanDecimal * priceLoan) / priceCollateral;
+    const belowOneBaseUnit = amountCollateralDecimal * (10 ** TOKENS[marketIndexCollateral].decimalPrecision.toNumber()) < 1;
+    const amountCollateralDecimalDisplay = belowOneBaseUnit 
+        ? 0 
+        : truncToDecimalPlaces(amountCollateralDecimal, TOKENS[marketIndexCollateral].decimalPrecision.toNumber());
+
     const valueCollateral = prices?.[marketIndexCollateral] 
-        ? prices?.[marketIndexCollateral] * amountCollateralDecimal 
+        ? prices?.[marketIndexCollateral] * amountCollateralDecimalDisplay 
         : undefined;
 
     const canRepayWithWallet = (amountLoanDecimal > 0 && amountLoanDecimal <= baseUnitToDecimal(depositLimitBaseUnits, marketIndexLoan));
@@ -67,23 +70,27 @@ export default function RepayWithCollateral({
         if (isNaN(amountLoanDecimal)) return setErrorText("Invalid input");
 
         const balanceLoanDecimal = baseUnitToDecimal(Math.abs(balanceLoanBaseUnits), marketIndexLoan);
-        const minAmountLoanDecimal = baseUnitToDecimal(1, marketIndexLoan);
+        const isAboveMinValueLoan = !prices
+            ? true
+            : amountLoanDecimal > MIN_COLLATERAL_REPAY_USD / prices[marketIndexLoan];
 
         if (amountLoanDecimal > balanceLoanDecimal) {
             return setErrorText(`Maximum loan amount: ${balanceLoanDecimal}`);
         }
-        if (amountLoanDecimal < minAmountLoanDecimal) {
-            return setErrorText(`Minimum loan amount: ${minAmountLoanDecimal}`);
+        if (!isAboveMinValueLoan || amountLoanDecimal < baseUnitToDecimal(1, marketIndexLoan)) {
+            return setErrorText(`Collateral repay is not available for loans worth less than $${MIN_COLLATERAL_REPAY_USD.toFixed(2)}`);
         }
 
         const balanceCollateralDecimal = baseUnitToDecimal(balanceCollateralBaseUnits, marketIndexCollateral);
-        const minAmountCollateralDecimal = baseUnitToDecimal(1, marketIndexCollateral);
+        const isAboveMinValueCollateral = !prices
+            ? true
+            : amountCollateralDecimalDisplay > MIN_COLLATERAL_REPAY_USD / prices[marketIndexCollateral];
 
-        if (amountCollateralDecimal > balanceCollateralDecimal) {
+        if (amountCollateralDecimalDisplay > balanceCollateralDecimal) {
             return setErrorText(`Maximum collateral amount: ${balanceCollateralDecimal}`);
         }
-        if (amountCollateralDecimal < minAmountCollateralDecimal) {
-            return setErrorText(`Minimum collateral amount: ${formatPreciseDecimal(minAmountCollateralDecimal)}`);
+        if (!isAboveMinValueCollateral || amountCollateralDecimalDisplay < baseUnitToDecimal(1, marketIndexCollateral)) {
+            return setErrorText(`Collateral repay is not available with collateral worth less than $${MIN_COLLATERAL_REPAY_USD.toFixed(2)}`);
         }
 
         setErrorText("");
@@ -150,7 +157,7 @@ export default function RepayWithCollateral({
 
                 <div className={styles.inputFieldWrapper}>
                     <div className={`${styles.inputField} ${styles.inputFieldAmount} ${styles.inputFieldCollateral}`}>
-                        {truncToDecimalPlaces(amountCollateralDecimal, TOKENS[marketIndexCollateral].decimalPrecision.toNumber())}
+                        {formatPreciseDecimal(amountCollateralDecimalDisplay)}
                     </div>
 
                     <TokenSelect 

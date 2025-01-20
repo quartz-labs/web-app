@@ -81,8 +81,6 @@ async function checkIsMissingBetaKey(connection: Connection, address: PublicKey)
     const body = await response.json();
     if (!response.ok) throw new Error(body);
 
-    console.log(body);
-
     for (const asset of body.result.items) {
         if (asset.content.metadata.name && asset.content.metadata.name.includes("Quartz Pin")) {
             return false;

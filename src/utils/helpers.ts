@@ -12,6 +12,17 @@ export function truncToDecimalPlaces(value: number, decimalPlaces: number): numb
     return Math.trunc(value * 10 ** decimalPlaces) / 10 ** decimalPlaces;
 }
 
+export const formatPreciseDecimal = (num: number) => {
+    const str = num.toString();
+    if (str.includes('e')) { // Convert scientific notation to fixed notation
+        const e = parseInt(str.split('e')[1] || "0");
+        if (e < 0) {
+            return num.toFixed(-e).replace(/\.?0+$/, '');
+        }
+    }
+    return str;
+}
+
 export function plusOrMinus(value: number, currency?: string): string {
     return value >= 0 ? `+${currency ?? ""}${value}` : `-${currency ?? ""}${Math.abs(value)}`;
 }
@@ -281,9 +292,4 @@ export async function signAndSendTransaction(
         status: TxStatus.SENT 
     });
     return response.signature;
-}
-
-export const formatPreciseDecimal = (number: number) => {
-    const str = number.toFixed(20);
-    return str.replace(/\.?0+$/, '');
 }
