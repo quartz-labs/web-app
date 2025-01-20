@@ -282,3 +282,8 @@ export async function signAndSendTransaction(
     });
     return response.signature;
 }
+
+export const formatPreciseDecimal = (number: number) => {
+    const str = number.toFixed(20);
+    return str.replace(/\.?0+$/, '');
+}

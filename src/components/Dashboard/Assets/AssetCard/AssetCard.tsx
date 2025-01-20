@@ -16,8 +16,6 @@ export default function AssetCard({ assetInfo }: AssetCardProps) {
         : formatDollarValue(value, 2);
     const balance = Math.abs(assetInfo.balance);
     const rateDisplay = (assetInfo.rate * 100).toFixed(2);
-
-    console.log(assetInfo.marketIndex, assetInfo.balance, assetInfo.price, (value < 0.01), valueDisplay);
     
     const [ windowWidth, setWindowWidth ] = useState(window.innerWidth);
     useEffect(() => {

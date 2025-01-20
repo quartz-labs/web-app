@@ -5,7 +5,7 @@ import styles from "../Modal.module.css";
 import InputSection from "../Input.ModalComponent";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
 import Buttons from "../Buttons.ModalComponent";
-import { formatTokenDisplay, truncToDecimalPlaces, signAndSendTransaction, fetchAndParse, deserializeTransaction, buildEndpointURL } from "@/src/utils/helpers";
+import { formatTokenDisplay, truncToDecimalPlaces, signAndSendTransaction, fetchAndParse, deserializeTransaction, buildEndpointURL, formatPreciseDecimal } from "@/src/utils/helpers";
 import TokenSelect from "../TokenSelect/TokenSelect";
 import { useError } from "@/src/context/error-provider";
 import { captureError } from "@/src/utils/errors";
@@ -40,6 +40,11 @@ export default function RepayWithCollateral({
     const [amountLoanStr, setAmountLoanStr] = useState("");
     const amountLoanDecimal = Number(amountLoanStr);
 
+    const updateAmountLoanStr = (amount: string) => {
+        setErrorText("");
+        setAmountLoanStr(amount);
+    }
+
     const priceCollateral = prices?.[marketIndexCollateral] ?? 0;
     const rateCollateral = rates?.[marketIndexCollateral]?.depositRate ?? 0;
     const balanceCollateralBaseUnits = balances?.[marketIndexCollateral] ?? 0;
@@ -47,7 +52,10 @@ export default function RepayWithCollateral({
     const priceLoan = prices?.[marketIndexLoan] ?? 0;
     const balanceLoanBaseUnits = balances?.[marketIndexLoan] ?? 0;
 
-    const amountCollateralDecimal = (amountLoanDecimal * priceLoan) / priceCollateral;
+    let amountCollateralDecimal = (amountLoanDecimal * priceLoan) / priceCollateral;
+    if (amountCollateralDecimal < 10 ** TOKENS[marketIndexCollateral].decimalPrecision.toNumber()) {
+        amountCollateralDecimal = 0;
+    }
     const valueCollateral = prices?.[marketIndexCollateral] 
         ? prices?.[marketIndexCollateral] * amountCollateralDecimal 
         : undefined;
@@ -75,7 +83,7 @@ export default function RepayWithCollateral({
             return setErrorText(`Maximum collateral amount: ${balanceCollateralDecimal}`);
         }
         if (amountCollateralDecimal < minAmountCollateralDecimal) {
-            return setErrorText(`Minimum collateral amount: ${minAmountCollateralDecimal}`);
+            return setErrorText(`Minimum collateral amount: ${formatPreciseDecimal(minAmountCollateralDecimal)}`);
         }
 
         setErrorText("");
@@ -117,16 +125,16 @@ export default function RepayWithCollateral({
                 rate={rates?.[marketIndexLoan]?.borrowRate}
                 available={Math.abs(baseUnitToDecimal(balanceLoanBaseUnits, marketIndexLoan))}
                 amountStr={amountLoanStr}
-                setAmountStr={setAmountLoanStr}
+                setAmountStr={updateAmountLoanStr}
                 setMaxAmount={() => {
-                    setAmountLoanStr(
+                    updateAmountLoanStr(
                         balanceLoanBaseUnits 
                         ? baseUnitToDecimal(Math.abs(balanceLoanBaseUnits), marketIndexLoan).toString() 
                         : "0"
                     )
                 }}
                 setHalfAmount={() => {
-                    setAmountLoanStr(
+                    updateAmountLoanStr(
                         balanceLoanBaseUnits 
                         ? baseUnitToDecimal(Math.trunc(Math.abs(balanceLoanBaseUnits) / 2), marketIndexLoan).toString() 
                         : "0"
@@ -170,7 +178,7 @@ export default function RepayWithCollateral({
                 </div>
             </div>
 
-            {canRepayWithWallet && 
+            {(!errorText && canRepayWithWallet) && 
                 <div className={styles.messageTextWrapper}>
                     <p className={"light-text small-text"}>Your wallet has enough {TOKENS[marketIndexLoan].name} to repay the loan without <span className="no-wrap">selling your collateral.</span></p>
                 </div>
