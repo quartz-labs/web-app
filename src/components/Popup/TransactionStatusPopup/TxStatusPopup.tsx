@@ -31,9 +31,14 @@ export default function TxStatusPopup() {
                 const response = await fetch(`/api/confirm-tx?signature=${signature}`);
                 const body = await response.json();
                 if (!response.ok) throw new Error(body.error);
-                setStatus(TxStatus.CONFIRMED);
-                refetchAccountData(signature);
 
+                if (body.success) {
+                    setStatus(TxStatus.CONFIRMED);
+                } else {
+                    setStatus(TxStatus.FAILED);
+                }
+                
+                refetchAccountData(signature);
                 setTimeout(() => {
                     hideTxStatus();
                     setStatus(TxStatus.NONE);
@@ -78,6 +83,21 @@ export default function TxStatusPopup() {
 
             <div className={styles.message}>
                 <p>Check the transaction on <a href={explorerUrl} target="_blank">Solscan</a> to see if it&apos;s been confirmed.</p>
+            </div>
+        </div>
+    );
+
+
+    if (status === TxStatus.FAILED) return (
+        <div className={`${styles.popup} ${styles.error}`}>
+            <div className={styles.heading}>
+                <p className={styles.headingError}>
+                    Transaction failed
+                </p>
+            </div>
+
+            <div className={styles.message}>
+                <p>Check the transaction on <a href={explorerUrl} target="_blank">Solscan</a> to see details.</p>
             </div>
         </div>
     );

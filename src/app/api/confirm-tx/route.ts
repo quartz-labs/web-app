@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { Connection } from '@solana/web3.js';
+import { Connection, TransactionExpiredBlockheightExceededError } from '@solana/web3.js';
 
 const envSchema = z.object({
     RPC_URL: z.string().url(),
@@ -26,9 +26,21 @@ export async function GET(request: Request) {
     if (!signature) return NextResponse.json({ error: "Signature is required" }, { status: 400 });
 
     try {
-        await connection.confirmTransaction({ signature, ...(await connection.getLatestBlockhash()) }, "confirmed");
-        return NextResponse.json({ signature: signature });
+        const result = await connection.confirmTransaction({ signature, ...(await connection.getLatestBlockhash()) }, "confirmed");
+        const success = result.value.err === null;
+
+        return NextResponse.json({ 
+            signature: signature,
+            success: success
+        });
     } catch (error) {
+        if (error instanceof TransactionExpiredBlockheightExceededError) {
+            return NextResponse.json({
+                signature: signature,
+                success: false
+            });
+        }
+
         console.error(error);
         return NextResponse.json(
             { error: `Internal server error: ${error}` },

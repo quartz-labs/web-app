@@ -8,7 +8,8 @@ export enum TxStatus {
   SIGN_REJECTED,
   SENT,
   CONFIRMED,
-  TIMEOUT
+  TIMEOUT,
+  FAILED
 }
 
 export interface TxStatusProps {
