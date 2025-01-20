@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { AddressLookupTableAccount, Connection, PublicKey, TransactionInstruction, VersionedTransaction } from '@solana/web3.js';
 import { baseUnitToDecimal, MarketIndex, QuartzClient, TOKENS, DummyWallet, QuartzUser, getTokenProgram, makeCreateAtaIxIfNeeded } from '@quartz-labs/sdk';
 import { getAssociatedTokenAddress } from '@solana/spl-token';
-import { fetchAndParse, getTokenAccountBalance } from '@/src/utils/helpers';
+import { fetchAndParse, getComputeUnitPriceIx } from '@/src/utils/helpers';
 import { JUPITER_SLIPPAGE_BPS } from '@/src/config/constants';
 import { getConfig as getMarginfiConfig, MarginfiClient } from '@mrgnlabs/marginfi-client-v2';
 import type { QuoteResponse } from '@jup-ag/api';
@@ -38,6 +38,7 @@ const paramsSchema = z.object({
         (value) => MarketIndex.includes(value as any),
         { message: "marketIndexCollateral must be a valid market index" }
     ),
+    swapMode: z.enum(["ExactIn", "ExactOut"]),
 });
 
 export async function GET(request: Request) {
@@ -56,7 +57,8 @@ export async function GET(request: Request) {
         address: searchParams.get('address'),
         amountLoanBaseUnits: Number(searchParams.get('amountLoanBaseUnits')),
         marketIndexLoan: Number(searchParams.get('marketIndexLoan')),
-        marketIndexCollateral: Number(searchParams.get('marketIndexCollateral'))
+        marketIndexCollateral: Number(searchParams.get('marketIndexCollateral')),
+        swapMode: searchParams.get('swapMode')
     };
 
     let body: z.infer<typeof paramsSchema>;
@@ -71,6 +73,7 @@ export async function GET(request: Request) {
     const amountLoanBaseUnits = body.amountLoanBaseUnits;
     const marketIndexLoan = body.marketIndexLoan as MarketIndex;
     const marketIndexCollateral = body.marketIndexCollateral as MarketIndex;
+    const swapMode = body.swapMode;
 
     const quartzClient = await QuartzClient.fetchClient(connection);
     let user: QuartzUser;
@@ -91,7 +94,8 @@ export async function GET(request: Request) {
             amountLoanBaseUnits,
             marketIndexLoan,
             marketIndexCollateral,
-            user
+            user,
+            swapMode
         );
 
         const transaction = await buildFlashLoanTransaction(
@@ -120,32 +124,29 @@ async function makeCollateralRepayIxs(
     amountLoanBaseUnits: number,
     marketIndexLoan: MarketIndex,
     marketIndexCollateral: MarketIndex,
-    user: QuartzUser
+    user: QuartzUser,
+    swapMode: "ExactIn" | "ExactOut"
 ): Promise<{
     instructions: TransactionInstruction[],
     lookupTables: AddressLookupTableAccount[],
     flashLoanAmountBaseUnits: number
 }> {
     const mintCollateral = TOKENS[marketIndexCollateral].mint;
-    const mintCollateralTokenProgram = await getTokenProgram(connection, mintCollateral);
-    const walletAtaCollateral = await getAssociatedTokenAddress(mintCollateral, address, false, mintCollateralTokenProgram);
-    const startingBalanceCollateral = await getTokenAccountBalance(connection, walletAtaCollateral);
-    
     const mintLoan = TOKENS[marketIndexLoan].mint;
+
     const mintLoanTokenProgram = await getTokenProgram(connection, mintLoan);
     const walletAtaLoan = await getAssociatedTokenAddress(mintLoan, address, false, mintLoanTokenProgram);
     const oix_createAtaLoan = await makeCreateAtaIxIfNeeded(connection, walletAtaLoan, address, mintLoan, mintLoanTokenProgram);
 
     const jupiterQuoteEndpoint
-        = `https://quote-api.jup.ag/v6/quote?inputMint=${mintCollateral.toBase58()}&outputMint=${mintLoan.toBase58()}&amount=${amountLoanBaseUnits}&slippageBps=${JUPITER_SLIPPAGE_BPS}&swapMode=ExactOut&onlyDirectRoutes=true`;
+        = `https://quote-api.jup.ag/v6/quote?inputMint=${mintCollateral.toBase58()}&outputMint=${mintLoan.toBase58()}&amount=${amountLoanBaseUnits}&slippageBps=${JUPITER_SLIPPAGE_BPS}&swapMode=${swapMode}&onlyDirectRoutes=true`;
     const jupiterQuote: QuoteResponse = await fetchAndParse(jupiterQuoteEndpoint);
     const collateralRequiredForSwap = Math.ceil(Number(jupiterQuote.inAmount) * (1 + (JUPITER_SLIPPAGE_BPS / 10_000)));
 
-    const { ixs: ixs_collateralRepay, lookupTables } = await user.makeLegacyCollateralRepayIxs(
+    const { ixs: ixs_collateralRepay, lookupTables } = await user.makeCollateralRepayIxs(
         address,
         marketIndexLoan,
         marketIndexCollateral,
-        startingBalanceCollateral + collateralRequiredForSwap,
         jupiterQuote
     );
 
@@ -164,7 +165,6 @@ async function buildFlashLoanTransaction(
     instructions: TransactionInstruction[], 
     lookupTables: AddressLookupTableAccount[] = []
 ): Promise<VersionedTransaction> {
-    const PRIORITY_FEE_DECIMAL = 0.0025;
     const amountLoanDecimal = baseUnitToDecimal(flashLoanAmountBaseUnits, flashLoanMarketIndex);
 
     const wallet = new DummyWallet(address);
@@ -175,28 +175,21 @@ async function buildFlashLoanTransaction(
 
     const loanBank = marginfiClient.getBankByMint(TOKENS[flashLoanMarketIndex].mint);
     if (loanBank === null) throw new Error("Could not find Flash Loan MarginFi bank");
+    
+    const ix_computePrice = await getComputeUnitPriceIx();
 
-    // if (instructions.length < 4) throw new Error("Invalid instructions");
-    // const addresses = [
-    //     ...instructions[0]!.keys.map(key => key.pubkey.toBase58()),
-    //     ...instructions[2]!.keys.map(key => key.pubkey.toBase58()),
-    //     ...instructions[3]!.keys.map(key => key.pubkey.toBase58())
-    // ]
-    // const lookupTableAddresses = lookupTables[0]?.state.addresses.map(address => address.toBase58());
-    // const missingAddresses = addresses.filter(address => !lookupTableAddresses?.includes(address));
-    // const uniqueMissingAddresses = [...new Set(missingAddresses)];
-    // console.log(uniqueMissingAddresses);
+    const { instructions: ix_borrow } = await marginfiAccount.makeBorrowIx(amountLoanDecimal, loanBank.address, {
+        createAtas: true,
+        wrapAndUnwrapSol: false
+    });
+    const { instructions: ix_deposit } = await marginfiAccount.makeDepositIx(amountLoanDecimal, loanBank.address, {
+        wrapAndUnwrapSol: true
+    });
 
-    const { flashloanTx } = await marginfiAccount.makeLoopTx(
-        amountLoanDecimal,
-        amountLoanDecimal,
-        loanBank.address,
-        loanBank.address,
-        instructions,
-        lookupTables,
-        PRIORITY_FEE_DECIMAL,
-        true
-    )
+    const flashloanTx = await marginfiAccount.buildFlashLoanTx({
+        ixs: [ix_computePrice, ...ix_borrow, ...instructions, ...ix_deposit],
+        addressLookupTableAccounts: lookupTables
+    });
 
     return flashloanTx;
 }

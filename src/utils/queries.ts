@@ -3,11 +3,12 @@ import { captureError } from "./errors";
 import { useQuery } from "@tanstack/react-query";
 import { AccountStatus } from "@/src/types/enums/AccountStatus.enum";
 import type { PublicKey } from "@solana/web3.js";
-import { DEFAULT_REFETCH_INTERVAL } from "@/src/config/constants";
+import { DEFAULT_REFETCH_INTERVAL, JUPITER_SLIPPAGE_BPS } from "@/src/config/constants";
 import type { Rate } from "@/src/types/interfaces/Rate.interface";
 import { MarketIndex, TOKENS } from "@quartz-labs/sdk/browser";
 import config from "../config/config";
 import { buildEndpointURL } from "./helpers";
+import type { QuoteResponse } from "@jup-ag/api";
 
 interface QueryConfig {
     queryKey: string[];
@@ -18,6 +19,8 @@ interface QueryConfig {
     errorMessage: string;
     enabled?: boolean;
     staleTime?: number;
+    retry?: boolean;
+    ignoreError?: boolean;
 }
 
 function createQuery<T>({
@@ -28,7 +31,9 @@ function createQuery<T>({
     refetchInterval,
     errorMessage,
     enabled,
-    staleTime
+    staleTime,
+    retry = true,
+    ignoreError = false
 }: QueryConfig) {
     return () => {
         const { showError } = useError();
@@ -49,10 +54,11 @@ function createQuery<T>({
             queryFn,
             refetchInterval,
             enabled,
-            staleTime
+            staleTime,
+            retry : retry ? 3 : false
         });
 
-        if (response.error) {
+        if (!ignoreError && response.error) {
             captureError(
                 showError, 
                 errorMessage, 
@@ -166,6 +172,30 @@ export const useHealthQuery = (address: PublicKey | null) => {
         errorMessage: "Could not fetch health",
         refetchInterval: DEFAULT_REFETCH_INTERVAL,
         enabled: address != null,
+    });
+    return query();
+};
+
+export const useJupiterQuoteQuery = (
+    swapMode: "ExactIn" | "ExactOut",
+    inputMint: PublicKey, 
+    outputMint: PublicKey,
+) => {
+    const query = createQuery<QuoteResponse>({
+        queryKey: ["jupiter", swapMode, inputMint.toBase58(), outputMint.toBase58()],
+        url: "https://quote-api.jup.ag/v6/quote",
+        params: {
+            swapMode,
+            inputMint: inputMint.toBase58(),
+            outputMint: outputMint.toBase58(),
+            amount: "1",
+            slippageBps: JUPITER_SLIPPAGE_BPS.toString(),
+            onlyDirectRoutes: "true"
+        },
+        errorMessage: "Could not fetch Jupiter quote",
+        refetchInterval: DEFAULT_REFETCH_INTERVAL,
+        retry: false,
+        ignoreError: true
     });
     return query();
 };

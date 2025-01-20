@@ -1,6 +1,6 @@
 import { useStore } from "@/src/utils/store";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "../Modal.module.css";
 import InputSection from "../Input.ModalComponent";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
@@ -13,6 +13,7 @@ import { TxStatus, useTxStatus } from "@/src/context/tx-status-provider";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
 import { MarketIndex, TOKENS, baseUnitToDecimal, decimalToBaseUnit } from "@quartz-labs/sdk/browser";
 import type { RepayLoanInnerModalProps } from "../Variations/RepayLoan.Modal";
+import { useJupiterQuoteQuery } from "@/src/utils/queries";
 
 interface RepayWithCollateralProps extends RepayLoanInnerModalProps {
     marketIndexCollateral: MarketIndex;
@@ -27,7 +28,9 @@ export default function RepayWithCollateral({
     loanPositionsMarketIndices,
     marketIndexCollateral,
     setMarketIndexCollateral,
-    collateralPositionsMarketIndices
+    collateralPositionsMarketIndices,
+    amountLoanStr,
+    setAmountLoanStr
 }: RepayWithCollateralProps) {
     const MIN_COLLATERAL_REPAY_USD = 0.01;
     const wallet = useAnchorWallet();
@@ -38,7 +41,6 @@ export default function RepayWithCollateral({
 
     const [awaitingSign, setAwaitingSign] = useState(false);
     const [errorText, setErrorText] = useState("");
-    const [amountLoanStr, setAmountLoanStr] = useState("");
     const amountLoanDecimal = Number(amountLoanStr);
 
     const updateAmountLoanStr = (amount: string) => {
@@ -46,13 +48,34 @@ export default function RepayWithCollateral({
         setAmountLoanStr(amount);
     }
 
+    // Find Jupiter swap route
+    const [jupiterSwapMode, setJupiterSwapMode] = useState<"ExactOut" | "ExactIn" | "None">("ExactOut");
+    const { isError: jupiterQuoteExactOutError, isLoading: jupiterQuoteLoading } = useJupiterQuoteQuery(
+        "ExactOut",
+        TOKENS[marketIndexCollateral].mint,
+        TOKENS[marketIndexLoan].mint,
+    );
+    const { isError: jupiterQuoteExactInError } = useJupiterQuoteQuery(
+        "ExactIn",
+        TOKENS[marketIndexCollateral].mint,
+        TOKENS[marketIndexLoan].mint,
+    );
+    useEffect(() => {
+        if (!jupiterQuoteExactOutError) setJupiterSwapMode("ExactOut");
+        else if (!jupiterQuoteExactInError) setJupiterSwapMode("ExactIn");
+        else setJupiterSwapMode("None");
+    }, [jupiterQuoteExactInError, jupiterQuoteExactOutError]);
+
+    // Collateral info
     const priceCollateral = prices?.[marketIndexCollateral] ?? 0;
     const rateCollateral = rates?.[marketIndexCollateral]?.depositRate ?? 0;
     const balanceCollateralBaseUnits = balances?.[marketIndexCollateral] ?? 0;
     
+    // Loan info
     const priceLoan = prices?.[marketIndexLoan] ?? 0;
     const balanceLoanBaseUnits = balances?.[marketIndexLoan] ?? 0;
 
+    // Collateral required to repay loan
     const amountCollateralDecimal = (amountLoanDecimal * priceLoan) / priceCollateral;
     const belowOneBaseUnit = amountCollateralDecimal * (10 ** TOKENS[marketIndexCollateral].decimalPrecision.toNumber()) < 1;
     const amountCollateralDecimalDisplay = belowOneBaseUnit 
@@ -62,38 +85,12 @@ export default function RepayWithCollateral({
     const valueCollateral = prices?.[marketIndexCollateral] 
         ? prices?.[marketIndexCollateral] * amountCollateralDecimalDisplay 
         : undefined;
-
     const canRepayWithWallet = (amountLoanDecimal > 0 && amountLoanDecimal <= baseUnitToDecimal(depositLimitBaseUnits, marketIndexLoan));
 
     const handleConfirm = async () => {
         if (!wallet?.publicKey) return setErrorText("Wallet not connected");
-        if (isNaN(amountLoanDecimal)) return setErrorText("Invalid input");
-
-        const balanceLoanDecimal = baseUnitToDecimal(Math.abs(balanceLoanBaseUnits), marketIndexLoan);
-        const isAboveMinValueLoan = !prices
-            ? true
-            : amountLoanDecimal > MIN_COLLATERAL_REPAY_USD / prices[marketIndexLoan];
-
-        if (amountLoanDecimal > balanceLoanDecimal) {
-            return setErrorText(`Maximum loan amount: ${balanceLoanDecimal}`);
-        }
-        if (!isAboveMinValueLoan || amountLoanDecimal < baseUnitToDecimal(1, marketIndexLoan)) {
-            return setErrorText(`Collateral repay is not available for loans worth less than $${MIN_COLLATERAL_REPAY_USD.toFixed(2)}`);
-        }
-
-        const balanceCollateralDecimal = baseUnitToDecimal(balanceCollateralBaseUnits, marketIndexCollateral);
-        const isAboveMinValueCollateral = !prices
-            ? true
-            : amountCollateralDecimalDisplay > MIN_COLLATERAL_REPAY_USD / prices[marketIndexCollateral];
-
-        if (amountCollateralDecimalDisplay > balanceCollateralDecimal) {
-            return setErrorText(`Maximum collateral amount: ${balanceCollateralDecimal}`);
-        }
-        if (!isAboveMinValueCollateral || amountCollateralDecimalDisplay < baseUnitToDecimal(1, marketIndexCollateral)) {
-            return setErrorText(`Collateral repay is not available with collateral worth less than $${MIN_COLLATERAL_REPAY_USD.toFixed(2)}`);
-        }
-
-        setErrorText("");
+        if (!areAmountsValid()) return;
+        if (jupiterQuoteLoading || jupiterSwapMode === "None") return;
 
         setAwaitingSign(true);
         try {
@@ -101,7 +98,8 @@ export default function RepayWithCollateral({
                 address: wallet.publicKey.toBase58(),
                 amountLoanBaseUnits: decimalToBaseUnit(amountLoanDecimal, marketIndexLoan),
                 marketIndexLoan,
-                marketIndexCollateral
+                marketIndexCollateral,
+                swapMode: jupiterSwapMode
             });
             const response = await fetchAndParse(endpoint);
             const transaction = deserializeTransaction(response.transaction);
@@ -118,6 +116,44 @@ export default function RepayWithCollateral({
         } finally {
             setAwaitingSign(false);
         }
+    }
+
+    const areAmountsValid = (): boolean => {
+        if (isNaN(amountLoanDecimal)) {
+            setErrorText("Invalid input");
+            return false;
+        }
+
+        const balanceLoanDecimal = baseUnitToDecimal(Math.abs(balanceLoanBaseUnits), marketIndexLoan);
+        const isAboveMinValueLoan = !prices
+            ? true
+            : amountLoanDecimal > MIN_COLLATERAL_REPAY_USD / prices[marketIndexLoan];
+
+        if (amountLoanDecimal > balanceLoanDecimal) {
+            setErrorText(`Maximum loan amount: ${balanceLoanDecimal}`);
+            return false;
+        }
+        if (!isAboveMinValueLoan || amountLoanDecimal < baseUnitToDecimal(1, marketIndexLoan)) {
+            setErrorText(`Collateral repay is not available for loans worth less than $${MIN_COLLATERAL_REPAY_USD.toFixed(2)}`);
+            return false;
+        }
+
+        const balanceCollateralDecimal = baseUnitToDecimal(balanceCollateralBaseUnits, marketIndexCollateral);
+        const isAboveMinValueCollateral = !prices
+            ? true
+            : amountCollateralDecimalDisplay > MIN_COLLATERAL_REPAY_USD / prices[marketIndexCollateral];
+
+        if (amountCollateralDecimalDisplay > balanceCollateralDecimal) {
+            setErrorText(`Maximum collateral amount: ${balanceCollateralDecimal}`);
+            return false;
+        }
+        if (!isAboveMinValueCollateral || amountCollateralDecimalDisplay < baseUnitToDecimal(1, marketIndexCollateral)) {
+            setErrorText(`Collateral repay is not available with collateral worth less than $${MIN_COLLATERAL_REPAY_USD.toFixed(2)}`);
+            return false;
+        }
+
+        setErrorText("");
+        return true;
     }
     
     return (
@@ -136,14 +172,14 @@ export default function RepayWithCollateral({
                 setMaxAmount={() => {
                     updateAmountLoanStr(
                         balanceLoanBaseUnits 
-                        ? baseUnitToDecimal(Math.abs(balanceLoanBaseUnits), marketIndexLoan).toString() 
+                        ? formatPreciseDecimal(baseUnitToDecimal(Math.abs(balanceLoanBaseUnits), marketIndexLoan)) 
                         : "0"
                     )
                 }}
                 setHalfAmount={() => {
                     updateAmountLoanStr(
                         balanceLoanBaseUnits 
-                        ? baseUnitToDecimal(Math.trunc(Math.abs(balanceLoanBaseUnits) / 2), marketIndexLoan).toString() 
+                        ? formatPreciseDecimal(baseUnitToDecimal(Math.trunc(Math.abs(balanceLoanBaseUnits) / 2), marketIndexLoan)) 
                         : "0"
                     )
                 }}
@@ -191,17 +227,30 @@ export default function RepayWithCollateral({
                 </div>
             }
 
+            {(!errorText && jupiterSwapMode === "ExactIn") &&
+                <div className={styles.messageTextWrapper}>
+                    <p className={"light-text small-text"}>No direct ExactOut Jupiter route found. Slippage will be on the loan amount, not the <span className="no-wrap">collateral amount.</span></p>
+                </div>
+            }
+
             {errorText &&
                 <div className={styles.messageTextWrapper}>
                     <p className={"error-text"}>{errorText}</p>
                 </div>
             } 
 
+            {jupiterSwapMode === "None" &&
+                <div className={styles.messageTextWrapper}>
+                    <p className={"error-text"}>Collateral repay unavailable for selected tokens (no Jupiter <span className="no-wrap">route found).</span></p>
+                </div>
+            }
+
             <Buttons 
                 label="Repay Loan" 
                 awaitingSign={awaitingSign} 
                 onConfirm={handleConfirm} 
                 onCancel={() => setModalVariation(ModalVariation.DISABLED)}
+                disabled={jupiterSwapMode === "None"}
             />
         </div>
     )

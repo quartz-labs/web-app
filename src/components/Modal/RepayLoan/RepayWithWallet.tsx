@@ -5,7 +5,7 @@ import { useError } from "@/src/context/error-provider";
 import { TxStatus, useTxStatus } from "@/src/context/tx-status-provider";
 import { useStore } from "@/src/utils/store";
 import { baseUnitToDecimal, decimalToBaseUnit } from "@quartz-labs/sdk/browser";
-import { buildEndpointURL, validateAmount, fetchAndParse, deserializeTransaction, signAndSendTransaction } from "@/src/utils/helpers";
+import { buildEndpointURL, validateAmount, fetchAndParse, deserializeTransaction, signAndSendTransaction, formatPreciseDecimal } from "@/src/utils/helpers";
 import { captureError } from "@/src/utils/errors";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
@@ -17,7 +17,9 @@ export default function RepayWithWallet({
     depositLimitBaseUnits,
     marketIndexLoan,
     setMarketIndexLoan,
-    loanPositionsMarketIndices
+    loanPositionsMarketIndices,
+    amountLoanStr,
+    setAmountLoanStr
 }: RepayLoanInnerModalProps) {
     const wallet = useAnchorWallet();
 
@@ -27,8 +29,7 @@ export default function RepayWithWallet({
 
     const [awaitingSign, setAwaitingSign] = useState(false);
     const [errorText, setErrorText] = useState("");
-    const [amountStr, setAmountStr] = useState("");
-    const amountDecimals = Number(amountStr);
+    const amountDecimals = Number(amountLoanStr);
 
     const maxRepayBaseUnits = Math.min(
         depositLimitBaseUnits, 
@@ -76,10 +77,14 @@ export default function RepayWithWallet({
                 price={prices?.[marketIndexLoan]}
                 rate={rates?.[marketIndexLoan]?.depositRate}
                 available={baseUnitToDecimal(maxRepayBaseUnits, marketIndexLoan)}
-                amountStr={amountStr}
-                setAmountStr={setAmountStr}
-                setMaxAmount={() => setAmountStr(maxRepayBaseUnits ? baseUnitToDecimal(maxRepayBaseUnits, marketIndexLoan).toString() : "0")}
-                setHalfAmount={() => setAmountStr(maxRepayBaseUnits ? baseUnitToDecimal(Math.trunc(maxRepayBaseUnits / 2), marketIndexLoan).toString() : "0")}
+                amountStr={amountLoanStr}
+                setAmountStr={setAmountLoanStr}
+                setMaxAmount={() => setAmountLoanStr(
+                    maxRepayBaseUnits ? formatPreciseDecimal(baseUnitToDecimal(maxRepayBaseUnits, marketIndexLoan)) : "0"
+                )}
+                setHalfAmount={() => setAmountLoanStr(
+                    maxRepayBaseUnits ? formatPreciseDecimal(baseUnitToDecimal(Math.trunc(maxRepayBaseUnits / 2), marketIndexLoan)) : "0"
+                )}
                 marketIndex={marketIndexLoan}
                 setMarketIndex={setMarketIndexLoan}
                 selectableMarketIndices={loanPositionsMarketIndices}

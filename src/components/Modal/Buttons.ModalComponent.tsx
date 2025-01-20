@@ -6,14 +6,23 @@ interface ButtonsProps {
     awaitingSign: boolean;
     onConfirm: () => void;
     onCancel: () => void;
+    disabled?: boolean;
 }
 
-export default function Buttons({label, awaitingSign, onConfirm, onCancel} : ButtonsProps) {
+export default function Buttons({
+    label, 
+    awaitingSign, 
+    onConfirm, 
+    onCancel, 
+    disabled = false
+} : ButtonsProps) {
     return (
         <div className={styles.buttons}>
             <button 
-                className={`glass-button ${styles.mainButton}`}
-                onClick={onConfirm}
+                className={`glass-button ${styles.mainButton} ${disabled ? "disabled" : ""}`}
+                onClick={() => {
+                    if (!disabled) onConfirm();
+                }}
             >
                 {awaitingSign &&
                     <PuffLoader

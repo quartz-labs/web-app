@@ -90,6 +90,13 @@ a:hover {
   border: 1.5px solid var(--placeholder-glass-stroke-error);
 }
 
+.glass-button.disabled {
+  filter: grayscale(100%);
+  cursor: not-allowed;
+  pointer-events: none;
+  opacity: 0.75;
+}
+
 .glass {
   position: relative;
 

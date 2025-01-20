@@ -124,15 +124,15 @@ export function getDisplayWalletAddress(address: string) {
     return `(${address.slice(0, 4)}...${address.slice(-4)})` 
 }
 
-export function formatTokenDisplay(balance: number, marketIndex?: MarketIndex) {
+export function formatTokenDisplay(balance: number, marketIndex?: MarketIndex): string {
     if (marketIndex === undefined) {
         const truncedValue = balance < 999 
             ? truncToDecimalPlaces(balance, 5) 
             : balance < 99999
                 ? truncToDecimalPlaces(balance, 2)
                 : truncToDecimalPlaces(balance, 0);
-        if (truncedValue === 0) return balance;
-        return truncedValue;
+        if (truncedValue === 0) return formatPreciseDecimal(balance);
+        return formatPreciseDecimal(truncedValue);
     }
 
     const magnitude = Math.floor(Math.log10(Math.abs(balance))) + 1;
@@ -142,7 +142,8 @@ export function formatTokenDisplay(balance: number, marketIndex?: MarketIndex) {
         precision = Math.max(0, precision - (magnitude - 2));
     }
 
-    return truncToDecimalPlaces(balance, precision);
+    const truncedValue = truncToDecimalPlaces(balance, precision);
+    return formatPreciseDecimal(truncedValue);
 }
 
 export function getWsolMint() {

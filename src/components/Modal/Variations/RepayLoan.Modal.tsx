@@ -13,6 +13,8 @@ export interface RepayLoanInnerModalProps {
     marketIndexLoan: MarketIndex;
     setMarketIndexLoan: (marketIndex: MarketIndex) => void;
     loanPositionsMarketIndices: MarketIndex[];
+    amountLoanStr: string;
+    setAmountLoanStr: (amount: string) => void;
 }
 
 export default function RepayLoanModal() {
@@ -35,6 +37,8 @@ export default function RepayLoanModal() {
             .map(([marketIndex]) => Number(marketIndex) as MarketIndex)
         : [];
     const [ marketIndexCollateral, setMarketIndexCollateral ] = useState<MarketIndex>(collateralPositionsMarketIndices[0] ?? MarketIndex[1]);
+
+    const [amountLoanStr, setAmountLoanStr] = useState("");
 
     useEffect(() => {
         refetchAccountData();
@@ -69,6 +73,8 @@ export default function RepayLoanModal() {
                         marketIndexCollateral={marketIndexCollateral}
                         setMarketIndexCollateral={setMarketIndexCollateral}
                         collateralPositionsMarketIndices={collateralPositionsMarketIndices}
+                        amountLoanStr={amountLoanStr}
+                        setAmountLoanStr={setAmountLoanStr}
                     />
                 }
                 {!collateralRepaySelected && 
@@ -77,6 +83,8 @@ export default function RepayLoanModal() {
                         marketIndexLoan={marketIndexLoan}
                         setMarketIndexLoan={setMarketIndexLoan}
                         loanPositionsMarketIndices={loanPositionsMarketIndices}
+                        amountLoanStr={amountLoanStr}
+                        setAmountLoanStr={setAmountLoanStr}
                     />
                 }
             </div>

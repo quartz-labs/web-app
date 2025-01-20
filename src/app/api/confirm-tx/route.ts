@@ -31,13 +31,15 @@ export async function GET(request: Request) {
 
         return NextResponse.json({ 
             signature: signature,
-            success: success
+            success: success,
+            timeout: false,
         });
     } catch (error) {
         if (error instanceof TransactionExpiredBlockheightExceededError) {
             return NextResponse.json({
                 signature: signature,
-                success: false
+                success: false,
+                timeout: true
             });
         }
 

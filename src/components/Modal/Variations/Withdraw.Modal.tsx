@@ -1,4 +1,4 @@
-import { validateAmount, fetchAndParse, deserializeTransaction, signAndSendTransaction, buildEndpointURL } from "@/src/utils/helpers";
+import { validateAmount, fetchAndParse, deserializeTransaction, signAndSendTransaction, buildEndpointURL, formatPreciseDecimal } from "@/src/utils/helpers";
 import { useRefetchAccountData, useRefetchWithdrawLimits } from "@/src/utils/hooks";
 import { useStore } from "@/src/utils/store";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
@@ -89,8 +89,12 @@ export default function WithdrawModal() {
                 available={baseUnitToDecimal(maxWithdrawBaseUnits, marketIndex)}
                 amountStr={amountStr}
                 setAmountStr={setAmountStr}
-                setMaxAmount={() => setAmountStr(maxWithdrawBaseUnits ? baseUnitToDecimal(maxWithdrawBaseUnits, marketIndex).toString() : "0")}
-                setHalfAmount={() => setAmountStr(maxWithdrawBaseUnits ? baseUnitToDecimal(Math.trunc(maxWithdrawBaseUnits / 2), marketIndex).toString() : "0")}
+                setMaxAmount={() => setAmountStr(
+                    maxWithdrawBaseUnits ? formatPreciseDecimal(baseUnitToDecimal(maxWithdrawBaseUnits, marketIndex)) : "0"
+                )}
+                setHalfAmount={() => setAmountStr(
+                    maxWithdrawBaseUnits ? formatPreciseDecimal(baseUnitToDecimal(Math.trunc(maxWithdrawBaseUnits / 2), marketIndex)) : "0"
+                )}
                 marketIndex={marketIndex}
                 setMarketIndex={setMarketIndex}
                 selectableMarketIndices={collateralMarketIndices}

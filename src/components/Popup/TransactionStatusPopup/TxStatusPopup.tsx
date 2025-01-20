@@ -23,6 +23,13 @@ export default function TxStatusPopup() {
     const TIMEOUT_TIME_ERROR = 8_000;
 
     useEffect(() => {
+        const setClosePopup = (timeout: number) => {
+            setTimeout(() => {
+                hideTxStatus();
+                setStatus(TxStatus.NONE);
+            }, timeout);
+        }
+
         const trackSignature = async(signature: string) => {
             if (!props) return;
             if (!wallet) return captureError(showError, "No wallet connected", "/TxStatusPopup.tsx", "Could not find wallet", null);
@@ -32,26 +39,20 @@ export default function TxStatusPopup() {
                 const body = await response.json();
                 if (!response.ok) throw new Error(body.error);
 
+                refetchAccountData(signature);
                 if (body.success) {
                     setStatus(TxStatus.CONFIRMED);
+                    setClosePopup(TIMEOUT_TIME);
                 } else {
-                    setStatus(TxStatus.FAILED);
+                    if (body.timeout) setStatus(TxStatus.TIMEOUT);
+                    else setStatus(TxStatus.FAILED);
+                    setClosePopup(TIMEOUT_TIME_ERROR);
                 }
-                
-                refetchAccountData(signature);
-                setTimeout(() => {
-                    hideTxStatus();
-                    setStatus(TxStatus.NONE);
-                }, TIMEOUT_TIME);
             } catch (error) {
-                setStatus(TxStatus.TIMEOUT);
+                setStatus(TxStatus.FAILED);
                 refetchAccountData(signature);
-                captureError(showError, "Transaction timed out.", "utils: /instructions.ts", error, wallet.publicKey, true);
-
-                setTimeout(() => {
-                    hideTxStatus();
-                    setStatus(TxStatus.NONE);
-                }, TIMEOUT_TIME_ERROR);
+                setClosePopup(TIMEOUT_TIME_ERROR);
+                captureError(showError, "Transaction failed.", "utils: /instructions.ts", error, wallet.publicKey, true);
             }
         }
 
@@ -67,7 +68,6 @@ export default function TxStatusPopup() {
             }, TIMEOUT_TIME);
         }
     }, [props, enabled, hideTxStatus, showError, wallet, refetchAccountData]);
-
 
     if (!props || !enabled || status === TxStatus.NONE) return (<></>);
 

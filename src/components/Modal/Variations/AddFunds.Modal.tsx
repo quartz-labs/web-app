@@ -10,7 +10,7 @@ import { useStore } from "@/src/utils/store";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useError } from "@/src/context/error-provider";
 import { useDepositLimitsQuery } from "@/src/utils/queries";
-import { validateAmount, fetchAndParse, deserializeTransaction, signAndSendTransaction, buildEndpointURL } from "@/src/utils/helpers";
+import { validateAmount, fetchAndParse, deserializeTransaction, signAndSendTransaction, buildEndpointURL, formatPreciseDecimal } from "@/src/utils/helpers";
 import { captureError } from "@/src/utils/errors";
 import { TxStatus, useTxStatus } from "@/src/context/tx-status-provider";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
@@ -84,8 +84,12 @@ export default function AddFundsModal() {
                 available={available}
                 amountStr={amountStr}
                 setAmountStr={setAmountStr}
-                setMaxAmount={() => setAmountStr(depositLimitBaseUnits ? baseUnitToDecimal(depositLimitBaseUnits, marketIndex).toString() : "0")}
-                setHalfAmount={() => setAmountStr(depositLimitBaseUnits ? baseUnitToDecimal(Math.trunc(depositLimitBaseUnits / 2), marketIndex).toString() : "0")}
+                setMaxAmount={() => setAmountStr(
+                    depositLimitBaseUnits ? formatPreciseDecimal(baseUnitToDecimal(depositLimitBaseUnits, marketIndex)) : "0"
+                )}
+                setHalfAmount={() => setAmountStr(
+                    depositLimitBaseUnits ? formatPreciseDecimal(baseUnitToDecimal(Math.trunc(depositLimitBaseUnits / 2), marketIndex)) : "0"
+                )}
                 marketIndex={marketIndex}
                 setMarketIndex={setMarketIndex}
             />

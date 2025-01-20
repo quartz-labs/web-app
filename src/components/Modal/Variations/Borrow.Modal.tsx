@@ -1,4 +1,4 @@
-import { validateAmount, fetchAndParse, deserializeTransaction, signAndSendTransaction, buildEndpointURL } from "@/src/utils/helpers";
+import { validateAmount, fetchAndParse, deserializeTransaction, signAndSendTransaction, buildEndpointURL, formatPreciseDecimal } from "@/src/utils/helpers";
 import { useRefetchAccountData, useRefetchWithdrawLimits } from "@/src/utils/hooks";
 import { useStore } from "@/src/utils/store";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
@@ -83,8 +83,12 @@ export default function BorrowModal() {
                 available={baseUnitToDecimal(maxBorrowBaseUnits, marketIndex)}
                 amountStr={amountStr}
                 setAmountStr={setAmountStr}
-                setMaxAmount={() => setAmountStr(maxBorrowBaseUnits ? baseUnitToDecimal(maxBorrowBaseUnits, marketIndex).toString() : "0")}
-                setHalfAmount={() => setAmountStr(maxBorrowBaseUnits ? baseUnitToDecimal(Math.trunc(maxBorrowBaseUnits / 2), marketIndex).toString() : "0")}
+                setMaxAmount={() => setAmountStr(
+                    maxBorrowBaseUnits ? formatPreciseDecimal(baseUnitToDecimal(maxBorrowBaseUnits, marketIndex)) : "0"
+                )}
+                setHalfAmount={() => setAmountStr(
+                    maxBorrowBaseUnits ? formatPreciseDecimal(baseUnitToDecimal(Math.trunc(maxBorrowBaseUnits / 2), marketIndex)) : "0"
+                )}
                 marketIndex={marketIndex}
                 setMarketIndex={setMarketIndex}
             />
