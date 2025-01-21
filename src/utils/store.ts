@@ -2,6 +2,12 @@ import type { Rate } from "@/src/types/interfaces/Rate.interface";
 import { create } from "zustand";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
 import type { MarketIndex } from "@quartz-labs/sdk/browser";
+import { useWallet } from '@solana/wallet-adapter-react'
+import {
+  PublicKey,
+} from '@solana/web3.js'
+import { useMutation } from '@tanstack/react-query'
+
 
 type State = {
   isInitialized: boolean;
@@ -11,6 +17,7 @@ type State = {
   withdrawLimits?: Record<MarketIndex, number>;
   health?: number;
   modalVariation: ModalVariation;
+  jwtToken?: string;
 };
 
 type Action = {
@@ -21,6 +28,7 @@ type Action = {
   setWithdrawLimits: (withdrawLimits?: Record<MarketIndex, number>) => void;
   setHealth: (health?: number) => void;
   setModalVariation: (modalVariation: ModalVariation) => void;
+  setJwtToken: (jwtToken?: string) => void;
 }
 
 export const useStore = create<State & Action>((set) => ({
@@ -31,6 +39,7 @@ export const useStore = create<State & Action>((set) => ({
   withdrawLimits: undefined,
   health: undefined,
   modalVariation: ModalVariation.DISABLED,
+  jwtToken: undefined,
 
   setIsInitialized: (isInitialized: boolean) => set({ isInitialized }),
   setPrices: (prices?: Record<MarketIndex, number>) => set({ prices }),
@@ -39,4 +48,37 @@ export const useStore = create<State & Action>((set) => ({
   setWithdrawLimits: (withdrawLimits?: Record<MarketIndex, number>) => set({ withdrawLimits }),
   setHealth: (health?: number) => set({ health }),
   setModalVariation: (modalVariation: ModalVariation) => set({ modalVariation }),
+  setJwtToken: (jwtToken?: string) => set({ jwtToken }),
 }));
+
+export function useSignMessage({ address }: { address: PublicKey | null }) {
+  if (!address) {
+    console.log("Failed to sign message: no address provided to sign message");
+  }
+
+  const wallet = useWallet()
+
+  return useMutation({
+    mutationKey: ['sign-message', { address }],
+    mutationFn: async (message: string) => {
+      try {
+        if (!wallet.signMessage) {
+          throw new Error('Wallet does not support message signing')
+        }
+
+        // Convert message to Uint8Array and sign it
+        const messageBytes = new TextEncoder().encode(message)
+        const signature = await wallet.signMessage(messageBytes)
+
+        return Buffer.from(signature).toString('base64')
+      } catch (error: unknown) {
+        console.error('Signing failed!', error)
+        throw error
+      }
+    },
+    onError: (error) => {
+      //TODO: ASK iarla how to handle errors
+      console.log("Failed to sign message: ", error);
+    },
+  })
+}

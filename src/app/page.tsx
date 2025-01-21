@@ -8,11 +8,12 @@ import NoBetaKey from "@/src/components/OtherViews/NoBetaKey";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { AccountStatus } from "@/src/types/enums/AccountStatus.enum";
 import styles from "./page.module.css";
-import { useAccountStatusQuery, useBalancesQuery, useHealthQuery, usePricesQuery, useRatesQuery, useWithdrawLimitsQuery } from "@/src/utils/queries";
-import { useStore } from "@/src/utils/store";
-import { useEffect } from 'react';
+import { useAccountStatusQuery, useBalancesQuery, useHasCardQuery, useHealthQuery, usePricesQuery, useRatesQuery, useWithdrawLimitsQuery } from "@/src/utils/queries";
+import { useSignMessage, useStore } from "@/src/utils/store";
+import { useEffect, useCallback } from 'react';
 import config from "@/src/config/config";
 import Unavailable from "@/src/components/OtherViews/Unavailable";
+import bs58 from 'bs58';
 
 export default function Page() {
   const wallet = useWallet();
@@ -22,12 +23,14 @@ export default function Page() {
     setRates, 
     setBalances, 
     setWithdrawLimits, 
-    setHealth
+    setHealth,
+    setJwtToken
   } = useStore();
 
   const { data: accountStatus, isLoading: isAccountStatusLoading } = useAccountStatusQuery(wallet.publicKey);
   const isInitialized = (accountStatus === AccountStatus.INITIALIZED && !isAccountStatusLoading && !config.NEXT_PUBLIC_UNAVAILABLE_TIME);
 
+  const { data: hasCardAccount } = useHasCardQuery(isInitialized ? wallet.publicKey : null);
   const { data: prices } = usePricesQuery();
   const { data: rates } = useRatesQuery();
   const { data: balances } = useBalancesQuery(isInitialized ? wallet.publicKey : null);
@@ -45,6 +48,49 @@ export default function Page() {
     isInitialized, prices, rates, balances, withdrawLimits, health, 
     setPrices, setRates, setBalances, setWithdrawLimits, setHealth, setIsInitialized
   ]);
+
+  const signMessage = useSignMessage({
+    address: wallet.publicKey! // Note: Make sure to handle the case where publicKey is null
+  })
+
+  const handleSignClick = useCallback(async () => {
+    try {
+      // The message you want to sign
+      const timestamp = Date.now();
+      const message = `Sign this message to authenticate with our service\nWallet address: ${wallet.publicKey}\nDomain: ${config.NEXT_PUBLIC_INTERNAL_API_URL}\nTimestamp: ${timestamp}\nThis signature will not trigger any blockchain transaction or cost any gas fees.`;
+
+      const signature = await signMessage.mutateAsync(message);
+      const bytes = Buffer.from(signature, 'base64');
+      const signatureString = bs58.encode(bytes);
+
+      const options = {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json",
+          accept: 'application/json'
+        },
+        body: JSON.stringify({
+          publicKey: wallet.publicKey,
+          signature: signatureString,
+          message: message
+        })
+      };
+      const response = await fetch(`${config.NEXT_PUBLIC_INTERNAL_API_URL}/verify/user`, options);
+      const body = await response.json();
+      console.log('Body:', body);
+      return body;
+    } catch (error) {
+      console.error('Failed to sign message:', error);
+    }
+  }, [wallet.publicKey, signMessage]);
+
+  useEffect(() => {
+    if (isInitialized && hasCardAccount) {
+      console.log("get users to sign message to get JWT");
+      handleSignClick().then(setJwtToken);
+    }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isInitialized, hasCardAccount]);
 
   return (
     <main className={styles.container}>

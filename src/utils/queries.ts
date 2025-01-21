@@ -93,6 +93,20 @@ export const useAccountStatusQuery = (address: PublicKey | null) => {
     return query();
 };
 
+export const useHasCardQuery = (address: PublicKey | null) => {
+    const query = createQuery<boolean>({
+        queryKey: ["account-status", address?.toBase58() ?? "", "has-card"],
+        url: `${config.NEXT_PUBLIC_INTERNAL_API_URL}/verify/card-account`,
+        params: address ? {
+            publicKey: address.toBase58()
+        } : undefined,
+        errorMessage: "Could not fetch account status",
+        enabled: address != null,
+        staleTime: Infinity
+    });
+    return query();
+};
+
 export const usePricesQuery = createQuery<Record<MarketIndex, number>>({
     queryKey: ["prices"],
     url: `${config.NEXT_PUBLIC_API_URL}/data/price`,
