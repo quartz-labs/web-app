@@ -94,9 +94,12 @@ export default function RepayWithCollateral({
 
         setAwaitingSign(true);
         try {
+            const amountSwap = jupiterSwapMode === "ExactOut" 
+                ? decimalToBaseUnit(amountLoanDecimal, marketIndexLoan) 
+                : decimalToBaseUnit(amountCollateralDecimalDisplay, marketIndexCollateral);
             const endpoint = buildEndpointURL("/api/build-tx/collateral-repay", {
                 address: wallet.publicKey.toBase58(),
-                amountLoanBaseUnits: decimalToBaseUnit(amountLoanDecimal, marketIndexLoan),
+                amountSwapBaseUnits: amountSwap,
                 marketIndexLoan,
                 marketIndexCollateral,
                 swapMode: jupiterSwapMode
@@ -241,7 +244,7 @@ export default function RepayWithCollateral({
 
             {jupiterSwapMode === "None" &&
                 <div className={styles.messageTextWrapper}>
-                    <p className={"error-text"}>Collateral repay unavailable for selected tokens (no Jupiter <span className="no-wrap">route found).</span></p>
+                    <p className={"error-text"}>Collateral repay unavailable for selected token pair (no Jupiter <span className="no-wrap">route found).</span></p>
                 </div>
             }
 

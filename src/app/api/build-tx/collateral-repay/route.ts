@@ -26,7 +26,7 @@ const paramsSchema = z.object({
         },
         { message: "Address is not a valid public key" }
     ),
-    amountLoanBaseUnits: z.number().refine(
+    amountSwapBaseUnits: z.number().refine(
         Number.isInteger,
         { message: "amountLoanBaseUnits must be an integer" }
     ),
@@ -55,7 +55,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const params = {
         address: searchParams.get('address'),
-        amountLoanBaseUnits: Number(searchParams.get('amountLoanBaseUnits')),
+        amountSwapBaseUnits: Number(searchParams.get('amountSwapBaseUnits')),
         marketIndexLoan: Number(searchParams.get('marketIndexLoan')),
         marketIndexCollateral: Number(searchParams.get('marketIndexCollateral')),
         swapMode: searchParams.get('swapMode')
@@ -70,7 +70,7 @@ export async function GET(request: Request) {
 
     const connection = new Connection(env.RPC_URL);
     const address = new PublicKey(body.address);
-    const amountLoanBaseUnits = body.amountLoanBaseUnits;
+    const amountSwapBaseUnits = body.amountSwapBaseUnits;
     const marketIndexLoan = body.marketIndexLoan as MarketIndex;
     const marketIndexCollateral = body.marketIndexCollateral as MarketIndex;
     const swapMode = body.swapMode;
@@ -91,7 +91,7 @@ export async function GET(request: Request) {
         } = await makeCollateralRepayIxs(
             connection,
             address,
-            amountLoanBaseUnits,
+            amountSwapBaseUnits,
             marketIndexLoan,
             marketIndexCollateral,
             user,
@@ -121,7 +121,7 @@ export async function GET(request: Request) {
 async function makeCollateralRepayIxs(
     connection: Connection,
     address: PublicKey,
-    amountLoanBaseUnits: number,
+    amountSwapBaseUnits: number,
     marketIndexLoan: MarketIndex,
     marketIndexCollateral: MarketIndex,
     user: QuartzUser,
@@ -139,7 +139,7 @@ async function makeCollateralRepayIxs(
     const oix_createAtaLoan = await makeCreateAtaIxIfNeeded(connection, walletAtaLoan, address, mintLoan, mintLoanTokenProgram);
 
     const jupiterQuoteEndpoint
-        = `https://quote-api.jup.ag/v6/quote?inputMint=${mintCollateral.toBase58()}&outputMint=${mintLoan.toBase58()}&amount=${amountLoanBaseUnits}&slippageBps=${JUPITER_SLIPPAGE_BPS}&swapMode=${swapMode}&onlyDirectRoutes=true`;
+        = `https://quote-api.jup.ag/v6/quote?inputMint=${mintCollateral.toBase58()}&outputMint=${mintLoan.toBase58()}&amount=${amountSwapBaseUnits}&slippageBps=${JUPITER_SLIPPAGE_BPS}&swapMode=${swapMode}&onlyDirectRoutes=true`;
     const jupiterQuote: QuoteResponse = await fetchAndParse(jupiterQuoteEndpoint);
     const collateralRequiredForSwap = Math.ceil(Number(jupiterQuote.inAmount) * (1 + (JUPITER_SLIPPAGE_BPS / 10_000)));
 
