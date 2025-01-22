@@ -52,7 +52,7 @@ export type Address = {
 
 export default function CardSignupModal() {
     const wallet = useAnchorWallet();
-    const { setModalVariation } = useStore();
+    const { setModalVariation, setKycLink } = useStore();
     const { showError } = useError();
 
     const [formData, setFormData] = useState<CardSignupForm>({
@@ -127,7 +127,7 @@ export default function CardSignupModal() {
                 expectedMonthlyVolume: formData.expectedMonthlyVolume,
                 phoneNumber: formData.phoneNumber
             };
-            
+
             const response = await fetchAndParse(`${config.NEXT_PUBLIC_INTERNAL_API_URL}/card/application/create`, {
                 method: 'POST',
                 headers: {
@@ -136,14 +136,11 @@ export default function CardSignupModal() {
                 body: JSON.stringify(requestData),
             });
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
+            console.log('Card Signup Response:', response);
 
-            const result = await response.json();
-            console.log('Card Signup Response:', result);
+            setKycLink(`${response.applicationCompletionLink.url}?userId=${response.applicationCompletionLink.params.userId}`);
 
-            setModalVariation(ModalVariation.DISABLED);
+            setModalVariation(ModalVariation.CARD_KYC);
         } catch (error) {
             captureError(showError, "Failed to submit form", "/CardSignupModal.tsx", error, wallet.publicKey);
         }

@@ -18,6 +18,7 @@ type State = {
   health?: number;
   modalVariation: ModalVariation;
   jwtToken?: string;
+  kycLink?: string;
 };
 
 type Action = {
@@ -29,6 +30,7 @@ type Action = {
   setHealth: (health?: number) => void;
   setModalVariation: (modalVariation: ModalVariation) => void;
   setJwtToken: (jwtToken?: string) => void;
+  setKycLink: (kycLink?: string) => void;
 }
 
 export const useStore = create<State & Action>((set) => ({
@@ -40,6 +42,7 @@ export const useStore = create<State & Action>((set) => ({
   health: undefined,
   modalVariation: ModalVariation.DISABLED,
   jwtToken: undefined,
+  kycLink: undefined,
 
   setIsInitialized: (isInitialized: boolean) => set({ isInitialized }),
   setPrices: (prices?: Record<MarketIndex, number>) => set({ prices }),
@@ -49,6 +52,7 @@ export const useStore = create<State & Action>((set) => ({
   setHealth: (health?: number) => set({ health }),
   setModalVariation: (modalVariation: ModalVariation) => set({ modalVariation }),
   setJwtToken: (jwtToken?: string) => set({ jwtToken }),
+  setKycLink: (kycLink?: string) => set({ kycLink }),
 }));
 
 export function useSignMessage({ address }: { address: PublicKey | null }) {
