@@ -107,6 +107,24 @@ export const useHasCardQuery = (address: PublicKey | null) => {
     return query();
 };
 
+export const useCreateCardAccountQuery = (address: PublicKey | null) => {
+    const query = createQuery<boolean>({
+        queryKey: ["create-card-account", address?.toBase58() ?? "", Date.now().toString()],
+        url: `${config.NEXT_PUBLIC_INTERNAL_API_URL}/card/application/create`,
+        params: address ? {
+            publicKey: address.toBase58()
+        } : undefined,
+        transformResponse: (body) => {
+            console.log(body);
+            return body
+        },
+        errorMessage: "Could not create card account",
+        enabled: address != null,
+        staleTime: Infinity
+    });
+    return query();
+};
+
 export const usePricesQuery = createQuery<Record<MarketIndex, number>>({
     queryKey: ["prices"],
     url: `${config.NEXT_PUBLIC_API_URL}/data/price`,
