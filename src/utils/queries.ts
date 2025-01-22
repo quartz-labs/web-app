@@ -176,26 +176,53 @@ export const useHealthQuery = (address: PublicKey | null) => {
     return query();
 };
 
-export const useJupiterQuoteQuery = (
-    swapMode: "ExactIn" | "ExactOut",
+export const useJupiterSwapModeQuery = (
     inputMint: PublicKey, 
     outputMint: PublicKey,
 ) => {
-    const query = createQuery<QuoteResponse>({
-        queryKey: ["jupiter", swapMode, inputMint.toBase58(), outputMint.toBase58()],
+    const exactInQuery = createQuery<QuoteResponse>({
+        queryKey: ["jupiter", inputMint.toBase58(), outputMint.toBase58(), "exactIn"],
         url: "https://quote-api.jup.ag/v6/quote",
         params: {
-            swapMode,
+            swapMode: "ExactIn",
             inputMint: inputMint.toBase58(),
             outputMint: outputMint.toBase58(),
             amount: "1",
             slippageBps: JUPITER_SLIPPAGE_BPS.toString(),
             onlyDirectRoutes: "true"
         },
-        errorMessage: "Could not fetch Jupiter quote",
+        errorMessage: "Could not fetch Jupiter ExactIn quote",
         refetchInterval: DEFAULT_REFETCH_INTERVAL,
         retry: false,
         ignoreError: true
     });
-    return query();
+
+    const exactOutQuery = createQuery<QuoteResponse>({
+        queryKey: ["jupiter", inputMint.toBase58(), outputMint.toBase58(), "exactOut"],
+        url: "https://quote-api.jup.ag/v6/quote",
+        params: {
+            swapMode: "ExactOut",
+            inputMint: inputMint.toBase58(),
+            outputMint: outputMint.toBase58(),
+            amount: "1",
+            slippageBps: JUPITER_SLIPPAGE_BPS.toString(),
+            onlyDirectRoutes: "true"
+        },
+        errorMessage: "Could not fetch Jupiter ExactOut quote",
+        refetchInterval: DEFAULT_REFETCH_INTERVAL,
+        retry: false,
+        ignoreError: true
+    });
+
+    const { isError: jupiterQuoteExactOutError, isLoading: jupiterQuoteExactOutLoading } = exactOutQuery();
+    const { isError: jupiterQuoteExactInError, isLoading: jupiterQuoteExactInLoading } = exactInQuery();
+
+    let swapMode = "None";
+    if (!jupiterQuoteExactOutError) swapMode = "ExactOut";
+    else if (!jupiterQuoteExactInError) swapMode = "ExactIn";
+
+    return {
+        data: swapMode,
+        isLoading: jupiterQuoteExactOutLoading || jupiterQuoteExactInLoading
+    }
 };

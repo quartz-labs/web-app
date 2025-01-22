@@ -11,7 +11,7 @@ import { useError } from "@/src/context/error-provider";
 import { captureError } from "@/src/utils/errors";
 import { TxStatus, useTxStatus } from "@/src/context/tx-status-provider";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
-import { MarketIndex, baseUnitToDecimal, decimalToBaseUnit } from "@quartz-labs/sdk/browser";
+import { MarketIndex, TOKENS, baseUnitToDecimal, decimalToBaseUnit } from "@quartz-labs/sdk/browser";
 
 export default function BorrowModal() {
     const wallet = useAnchorWallet();
@@ -28,6 +28,12 @@ export default function BorrowModal() {
     const amountDecimals = Number(amountStr);
 
     const [ marketIndex, setMarketIndex ] = useState<MarketIndex>(MarketIndex[0]);
+
+    // Warning for PYUSD
+    const [ autoRepayWarningDetails, setAutoRepayWarningDetails ] = useState(false);
+    useEffect(() => {
+        setAutoRepayWarningDetails(false);
+    }, [marketIndex]);
 
     useEffect(() => {
         refetchAccountData();
@@ -104,6 +110,27 @@ export default function BorrowModal() {
                     <p className={"error-text"}>{errorText}</p>
                 </div>
             } 
+
+            {TOKENS[marketIndex].name === "PYUSD" &&
+                <div className={styles.messageTextWrapper}>
+                    <p className={"error-text"}>
+                        Warning: Auto-repay is not yet supported for PYUSD.&nbsp;
+                        {!autoRepayWarningDetails &&
+                            <a 
+                                onClick={() => setAutoRepayWarningDetails(true)}
+                                className={"light-text pointer-cursor"}
+                            >
+                                Learn more
+                            </a>
+                        }
+                        {autoRepayWarningDetails &&
+                            <span>
+                                Your loan may be liquidated if your account health falls to 0%, with a fee of up to 5%. Activate Telegram notifications to keep on top of your account health.
+                            </span>
+                        }
+                    </p>
+                </div>
+            }
 
             <Buttons 
                 label="Borrow" 

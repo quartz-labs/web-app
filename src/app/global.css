@@ -146,6 +146,10 @@ a:hover {
   width: auto;
 }
 
+.pointer-cursor {
+  cursor: pointer;
+}
+
 :root {
   --overlay-color: rgba(255, 255, 255, 0.03);
   --overlay: linear-gradient(var(--overlay-color), var(--overlay-color));
