@@ -1,7 +1,7 @@
 "use client";
 
 import { TxStatus, useTxStatus } from "@/src/context/tx-status-provider";
-import styles from "../Popup.module.css";
+import styles from "./Popup.module.css";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useEffect, useState } from "react";
 import { TailSpin } from "react-loader-spinner";
@@ -60,12 +60,8 @@ export default function TxStatusPopup() {
 
         if (props?.signature !== undefined) {
             trackSignature(props.signature);
-        } 
-        else if (props?.status === TxStatus.SIGN_REJECTED) {
-            setTimeout(() => {
-                hideTxStatus();
-                setStatus(TxStatus.NONE);
-            }, TIMEOUT_TIME);
+        } else {
+            setClosePopup(TIMEOUT_TIME);
         }
     }, [props, enabled, hideTxStatus, showError, wallet, refetchAccountData]);
 
@@ -98,6 +94,20 @@ export default function TxStatusPopup() {
 
             <div className={styles.message}>
                 <p>Check the transaction on <a href={explorerUrl} target="_blank">Solscan</a> to see details.</p>
+            </div>
+        </div>
+    );
+
+    if (status === TxStatus.BLOCKHASH_EXPIRED) return (
+        <div className={`${styles.popup} ${styles.error}`}>
+            <div className={styles.heading}>
+                <p className={styles.headingError}>
+                    Blockhash expired
+                </p>
+            </div>
+
+            <div className={styles.message}>
+                <p>Please try again, and refresh browser if the problem persists.</p>
             </div>
         </div>
     );

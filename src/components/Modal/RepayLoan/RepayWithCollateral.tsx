@@ -212,18 +212,6 @@ export default function RepayWithCollateral({
                 </div>
             </div>
 
-            {(!errorText && canRepayWithWallet) && 
-                <div className={styles.messageTextWrapper}>
-                    <p className={"light-text small-text"}>Your wallet has enough {TOKENS[marketIndexLoan].name} to repay the loan without <span className="no-wrap">selling your collateral.</span></p>
-                </div>
-            }
-
-            {(!errorText && swapMode === "ExactIn") &&
-                <div className={styles.messageTextWrapper}>
-                    <p className={"light-text small-text"}>No direct ExactOut Jupiter route found. Slippage will be on the loan amount, not the <span className="no-wrap">collateral amount.</span></p>
-                </div>
-            }
-
             {errorText &&
                 <div className={styles.messageTextWrapper}>
                     <p className={"error-text"}>{errorText}</p>
@@ -235,6 +223,20 @@ export default function RepayWithCollateral({
                     <p className={"error-text"}>Collateral repay unavailable for selected token pair (no Jupiter <span className="no-wrap">route found).</span></p>
                 </div>
             }
+
+            {swapMode !== "None" && <>
+                {(!errorText && canRepayWithWallet) && 
+                    <div className={styles.messageTextWrapper}>
+                        <p className={"light-text small-text"}>Your wallet has enough {TOKENS[marketIndexLoan].name} to repay the loan without <span className="no-wrap">selling your collateral.</span></p>
+                    </div>
+                }
+    
+                {(!errorText && swapMode === "ExactIn") &&
+                    <div className={styles.messageTextWrapper}>
+                        <p className={"light-text small-text"}>No direct ExactOut Jupiter route found. Slippage will be on the loan amount, not the <span className="no-wrap">collateral amount.</span></p>
+                    </div>
+                }
+            </>}
 
             <Buttons 
                 label="Repay Loan" 

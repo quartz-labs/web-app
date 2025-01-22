@@ -277,7 +277,9 @@ export async function signAndSendTransaction(
     const signedTx = await wallet.signTransaction(transaction);
 
     const serializedTransaction = Buffer.from(signedTx.serialize()).toString("base64");
-    const response = await fetchAndParse("/api/send-tx", {
+
+    const url = "/api/send-tx";
+    const response = await fetch(url, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -287,10 +289,20 @@ export async function signAndSendTransaction(
             skipPreflight: skipPreflight
         }),
     });
+    const body = await response.json();
+
+    if (!response.ok) {
+        if (body.error.includes("Blockhash not found")) {
+            showTxStatus({ status: TxStatus.BLOCKHASH_EXPIRED });
+            return "";
+        } else {
+            throw new Error(JSON.stringify(body.error) ?? `Could not fetch ${url}`); 
+        }
+    }
 
     showTxStatus({ 
-        signature: response.signature,
+        signature: body.signature,
         status: TxStatus.SENT 
     });
-    return response.signature;
+    return body.signature;
 }

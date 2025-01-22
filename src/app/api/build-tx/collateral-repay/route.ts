@@ -4,11 +4,11 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { AddressLookupTableAccount, Connection, PublicKey, TransactionInstruction, VersionedTransaction } from '@solana/web3.js';
 import { baseUnitToDecimal, MarketIndex, QuartzClient, TOKENS, DummyWallet, QuartzUser, getTokenProgram, makeCreateAtaIxIfNeeded } from '@quartz-labs/sdk';
-import { getAssociatedTokenAddress } from '@solana/spl-token';
 import { fetchAndParse, getComputeUnitPriceIx } from '@/src/utils/helpers';
 import { JUPITER_SLIPPAGE_BPS } from '@/src/config/constants';
 import { getConfig as getMarginfiConfig, MarginfiClient } from '@mrgnlabs/marginfi-client-v2';
 import type { QuoteResponse } from '@jup-ag/api';
+import { createCloseAccountInstruction, getAssociatedTokenAddress } from '@solana/spl-token';
 
 const envSchema = z.object({
     RPC_URL: z.string().url(),
@@ -134,10 +134,6 @@ async function makeCollateralRepayIxs(
     const mintCollateral = TOKENS[marketIndexCollateral].mint;
     const mintLoan = TOKENS[marketIndexLoan].mint;
 
-    const mintLoanTokenProgram = await getTokenProgram(connection, mintLoan);
-    const walletAtaLoan = await getAssociatedTokenAddress(mintLoan, address, false, mintLoanTokenProgram);
-    const oix_createAtaLoan = await makeCreateAtaIxIfNeeded(connection, walletAtaLoan, address, mintLoan, mintLoanTokenProgram);
-
     const jupiterQuoteEndpoint
         = `https://quote-api.jup.ag/v6/quote?inputMint=${mintCollateral.toBase58()}&outputMint=${mintLoan.toBase58()}&amount=${amountSwapBaseUnits}&slippageBps=${JUPITER_SLIPPAGE_BPS}&swapMode=${swapMode}&onlyDirectRoutes=true`;
     const jupiterQuote: QuoteResponse = await fetchAndParse(jupiterQuoteEndpoint);
@@ -151,7 +147,7 @@ async function makeCollateralRepayIxs(
     );
 
     return {
-        instructions: [...oix_createAtaLoan, ...ixs_collateralRepay],
+        instructions: ixs_collateralRepay,
         lookupTables,
         flashLoanAmountBaseUnits: collateralRequiredForSwap
     };
@@ -167,6 +163,7 @@ async function buildFlashLoanTransaction(
 ): Promise<VersionedTransaction> {
     const amountLoanDecimal = baseUnitToDecimal(flashLoanAmountBaseUnits, flashLoanMarketIndex);
 
+    // Get Marginfi account & bank
     const wallet = new DummyWallet(address);
     const marginfiClient = await MarginfiClient.fetch(getMarginfiConfig(), wallet, connection);
     const [ marginfiAccount ] = await marginfiClient.getMarginfiAccountsForAuthority(address);
@@ -176,18 +173,46 @@ async function buildFlashLoanTransaction(
     const loanBank = marginfiClient.getBankByMint(TOKENS[flashLoanMarketIndex].mint);
     if (loanBank === null) throw new Error("Could not find Flash Loan MarginFi bank");
     
+    // Set compute unit price
     const ix_computePrice = await getComputeUnitPriceIx();
 
+    // Make ATA instructions (closing ATA at the end if wSol is used)
+    const mintLoan = TOKENS[flashLoanMarketIndex].mint;
+    const mintLoanTokenProgram = await getTokenProgram(connection, mintLoan);
+    const walletAtaLoan = await getAssociatedTokenAddress(mintLoan, address, false, mintLoanTokenProgram);
+    const oix_createAtaLoan = await makeCreateAtaIxIfNeeded(connection, walletAtaLoan, address, mintLoan, mintLoanTokenProgram);
+
+    const oix_closeWSolAta: TransactionInstruction[] = [];
+    if (TOKENS[flashLoanMarketIndex].name === "SOL") {
+        oix_closeWSolAta.push(
+            createCloseAccountInstruction(
+                walletAtaLoan,
+                address,
+                address,
+                [],
+                mintLoanTokenProgram
+            )
+        );
+    }
+
+    // Make borrow & deposit instructions
     const { instructions: ix_borrow } = await marginfiAccount.makeBorrowIx(amountLoanDecimal, loanBank.address, {
-        createAtas: true,
+        createAtas: false,
         wrapAndUnwrapSol: false
     });
     const { instructions: ix_deposit } = await marginfiAccount.makeDepositIx(amountLoanDecimal, loanBank.address, {
-        wrapAndUnwrapSol: true
+        wrapAndUnwrapSol: false
     });
 
     const flashloanTx = await marginfiAccount.buildFlashLoanTx({
-        ixs: [ix_computePrice, ...ix_borrow, ...instructions, ...ix_deposit],
+        ixs: [
+            ix_computePrice, 
+            ...oix_createAtaLoan, 
+            ...ix_borrow, 
+            ...instructions, 
+            ...ix_deposit, 
+            ...oix_closeWSolAta
+        ],
         addressLookupTableAccounts: lookupTables
     });
 

@@ -5,8 +5,8 @@ import { PostHogClient } from '@/src/context/posthog/posthog-provider';
 import { SolanaProvider } from '@/src/context/solana/solana-provider';
 import { ErrorProvider } from '@/src/context/error-provider';
 import { TxStatusProvider } from '../context/tx-status-provider';
-import ErrorPopup from '../components/Popup/ErrorPopup/ErrorPopup';
-import TxStatusPopup from '../components/Popup/TransactionStatusPopup/TxStatusPopup';
+import ErrorPopup from '../components/Popup/ErrorPopup';
+import TxStatusPopup from '../components/Popup/TxStatusPopup';
 import ErrorModal from '../components/Modal/Variations/Error.Modal';
 import PostHogPageViewClient from '../context/posthog/PostHogPageView';
 

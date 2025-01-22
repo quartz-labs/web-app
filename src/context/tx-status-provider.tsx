@@ -9,7 +9,8 @@ export enum TxStatus {
   SENT,
   CONFIRMED,
   TIMEOUT,
-  FAILED
+  FAILED,
+  BLOCKHASH_EXPIRED
 }
 
 export interface TxStatusProps {
