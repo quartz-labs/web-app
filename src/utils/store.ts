@@ -7,6 +7,7 @@ import {
   PublicKey,
 } from '@solana/web3.js'
 import { useMutation } from '@tanstack/react-query'
+import type { CardUserBase, UserFromDatabase } from "../types/interfaces/CardUserResponse.interface";
 
 
 type State = {
@@ -19,6 +20,8 @@ type State = {
   modalVariation: ModalVariation;
   jwtToken?: string;
   kycLink?: string;
+  userFromDb?: UserFromDatabase;
+  cardUserInfo?: CardUserBase;
 };
 
 type Action = {
@@ -31,6 +34,8 @@ type Action = {
   setModalVariation: (modalVariation: ModalVariation) => void;
   setJwtToken: (jwtToken?: string) => void;
   setKycLink: (kycLink?: string) => void;
+  setUserFromDb: (userFromDb?: UserFromDatabase) => void;
+  setCardUserInfo: (cardUserInfo?: CardUserBase) => void;
 }
 
 export const useStore = create<State & Action>((set) => ({
@@ -43,7 +48,8 @@ export const useStore = create<State & Action>((set) => ({
   modalVariation: ModalVariation.DISABLED,
   jwtToken: undefined,
   kycLink: undefined,
-
+  userFromDb: undefined,
+  cardUserInfo: undefined,
   setIsInitialized: (isInitialized: boolean) => set({ isInitialized }),
   setPrices: (prices?: Record<MarketIndex, number>) => set({ prices }),
   setRates: (rates?: Record<MarketIndex, Rate>) => set({ rates }),
@@ -53,6 +59,8 @@ export const useStore = create<State & Action>((set) => ({
   setModalVariation: (modalVariation: ModalVariation) => set({ modalVariation }),
   setJwtToken: (jwtToken?: string) => set({ jwtToken }),
   setKycLink: (kycLink?: string) => set({ kycLink }),
+  setUserFromDb: (userFromDb?: UserFromDatabase) => set({ userFromDb }),
+  setCardUserInfo: (cardUserInfo?: CardUserBase) => set({ cardUserInfo }),
 }));
 
 export function useSignMessage({ address }: { address: PublicKey | null }) {
