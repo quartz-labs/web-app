@@ -29,13 +29,6 @@ export default function ButtonRow() {
                 Borrow
             </button>
 
-            <button 
-                className={`glass-button ${styles.mainButton}`} 
-                onClick={() => setModalVariation(ModalVariation.CARD_SIGNUP)}
-            >
-                Sign up for Quartz Card ✨
-            </button>
-
             {hasLoan && (
                 <button 
                     className={`glass-button ghost ${styles.mainButton}`} 

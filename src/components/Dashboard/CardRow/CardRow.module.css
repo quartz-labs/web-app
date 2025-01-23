@@ -1,0 +1,24 @@
+.buttonRow {
+    display: flex;
+    gap: var(--buttons-row-gap);
+}
+
+@media only screen and (max-width: 1040px) {
+    .mainButton {
+        width: 100%;
+        padding-left: 0px;
+        padding-right: 0px;
+    }
+}
+
+@media only screen and (max-width: 420px) {
+    .buttonRow {
+        flex-wrap: wrap;
+    }
+
+    .mainButton {
+        padding-left: 0px;
+        padding-right: 0px;
+        width : calc(50% - (var(--buttons-row-gap) / 2));
+    }
+}

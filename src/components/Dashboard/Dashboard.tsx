@@ -5,6 +5,7 @@ import Health from "./Health/Health";
 import ButtonRow from "./ButtonRow/ButtonRow";
 import Assets from "./Assets/Assets";
 import Modal from "../Modal/Modal";
+import CardRow from "./CardRow/CardRow";
 
 export default function Dashboard() {
   const { isInitialized } = useStore();
@@ -22,6 +23,7 @@ export default function Dashboard() {
             <>
               <Health />
               <ButtonRow />
+              <CardRow />
             </>
           )}
 
