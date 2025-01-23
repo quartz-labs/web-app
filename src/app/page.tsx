@@ -8,7 +8,7 @@ import NoBetaKey from "@/src/components/OtherViews/NoBetaKey";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { AccountStatus } from "@/src/types/enums/AccountStatus.enum";
 import styles from "./page.module.css";
-import { useAccountStatusQuery, useBalancesQuery, useHasCardQuery, useHealthQuery, usePricesQuery, useRatesQuery, useWithdrawLimitsQuery } from "@/src/utils/queries";
+import { useAccountStatusQuery, useBalancesQuery, useHasCardQuery, useHealthQuery, usePricesQuery, useRatesQuery, useUserFromDatabaseQuery, useWithdrawLimitsQuery } from "@/src/utils/queries";
 import { useSignMessage, useStore } from "@/src/utils/store";
 import { useEffect, useCallback } from 'react';
 import config from "@/src/config/config";
@@ -24,7 +24,8 @@ export default function Page() {
     setBalances, 
     setWithdrawLimits, 
     setHealth,
-    setJwtToken
+    setJwtToken,
+    setUserFromDb
   } = useStore();
 
   const { data: accountStatus, isLoading: isAccountStatusLoading } = useAccountStatusQuery(wallet.publicKey);
@@ -36,6 +37,8 @@ export default function Page() {
   const { data: balances } = useBalancesQuery(isInitialized ? wallet.publicKey : null);
   const { data: withdrawLimits } = useWithdrawLimitsQuery(isInitialized ? wallet.publicKey : null);
   const { data: health } = useHealthQuery(isInitialized ? wallet.publicKey : null);
+  const { data: userFromDb } = useUserFromDatabaseQuery(isInitialized ? wallet.publicKey : null);
+  
 
   useEffect(() => {
     setPrices(prices);
@@ -44,9 +47,10 @@ export default function Page() {
     setWithdrawLimits(withdrawLimits);
     setHealth(health);
     setIsInitialized(isInitialized);
+    setUserFromDb(userFromDb);
   }, [
-    isInitialized, prices, rates, balances, withdrawLimits, health, 
-    setPrices, setRates, setBalances, setWithdrawLimits, setHealth, setIsInitialized
+    isInitialized, prices, rates, balances, withdrawLimits, health, userFromDb,
+    setPrices, setRates, setBalances, setWithdrawLimits, setHealth, setIsInitialized, setUserFromDb
   ]);
 
   const signMessage = useSignMessage({
@@ -75,7 +79,7 @@ export default function Page() {
           message: message
         })
       };
-      const response = await fetch(`${config.NEXT_PUBLIC_INTERNAL_API_URL}/verify/user`, options);
+      const response = await fetch(`${config.NEXT_PUBLIC_INTERNAL_API_URL}/auth/user`, options);
       const body = await response.json();
       console.log('Body:', body);
       return body;
