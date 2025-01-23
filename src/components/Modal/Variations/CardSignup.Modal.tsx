@@ -10,6 +10,7 @@ import CardSignupInputSection from "../CardSignUp/CardAccountCreate.ModalCompone
 
 import config from "@/src/config/config";
 import { fetchAndParse } from "@/src/utils/helpers";
+import type { CardUserBase } from "@/src/types/interfaces/CardUserResponse.interface";
 
 interface CardSignupForm {
     id: string;
@@ -128,7 +129,7 @@ export default function CardSignupModal() {
                 phoneNumber: formData.phoneNumber
             };
 
-            const response = await fetchAndParse(`${config.NEXT_PUBLIC_INTERNAL_API_URL}/card/application/create`, {
+            const creatCardApplicationResponse: CardUserBase = await fetchAndParse(`${config.NEXT_PUBLIC_INTERNAL_API_URL}/card/application/create`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -136,9 +137,24 @@ export default function CardSignupModal() {
                 body: JSON.stringify(requestData),
             });
 
-            console.log('Card Signup Response:', response);
+            console.log('Card Signup Response:', creatCardApplicationResponse);
 
-            setKycLink(`${response.applicationCompletionLink.url}?userId=${response.applicationCompletionLink.params.userId}`);
+            //get the card user id from the response
+            const cardUserId = creatCardApplicationResponse.id;
+            const addUserResponse = await fetchAndParse(`${config.NEXT_PUBLIC_INTERNAL_API_URL}/auth/add-user`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    publicKey: wallet.publicKey.toBase58(),
+                    cardUserId: cardUserId
+                }),
+            });
+
+            console.log('Add User Response:', addUserResponse);
+
+            setKycLink(`${creatCardApplicationResponse.applicationCompletionLink.url}?userId=${creatCardApplicationResponse.applicationCompletionLink.params.userId}`);
 
             setModalVariation(ModalVariation.CARD_KYC);
         } catch (error) {
