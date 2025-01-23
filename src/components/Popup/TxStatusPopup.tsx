@@ -60,7 +60,7 @@ export default function TxStatusPopup() {
 
         if (props?.signature !== undefined) {
             trackSignature(props.signature);
-        } else {
+        } else if (props?.status === TxStatus.SIGN_REJECTED || props?.status === TxStatus.BLOCKHASH_EXPIRED) {
             setClosePopup(TIMEOUT_TIME);
         }
     }, [props, enabled, hideTxStatus, showError, wallet, refetchAccountData]);
