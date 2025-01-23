@@ -6,7 +6,7 @@ import RepayLoanModal from "@/src/components/Modal/Variations/RepayLoan.Modal";
 import WithdrawModal from "@/src/components/Modal/Variations/Withdraw.Modal";
 import BorrowModal from "../components/Modal/Variations/Borrow.Modal";
 import CardSignupModal from "../components/Modal/Variations/CardSignup.Modal";
-import CardKycModal from "../components/Modal/Variations/CardSignup.Modal copy";
+import CardKycModal from "../components/Modal/Variations/CardKyc.Modal";
 
 export const ModalComponents = {
     [ModalVariation.NOTIFICATIONS]: NotificationsModal,
