@@ -203,8 +203,8 @@ export async function getComputeUnitLimit(
     connection: Connection,
     instructions: TransactionInstruction[],
     address: PublicKey,
-    lookupTables: AddressLookupTableAccount[] = [],
-    blockhash: string
+    blockhash: string,
+    lookupTables: AddressLookupTableAccount[] = []
 ) {
     const messageV0 = new TransactionMessage({
         payerKey: address,
@@ -226,10 +226,10 @@ export async function getComputerUnitLimitIx(
     connection: Connection,
     instructions: TransactionInstruction[],
     address: PublicKey,
-    lookupTables: AddressLookupTableAccount[] = [],
-    blockhash: string
+    blockhash: string,
+    lookupTables: AddressLookupTableAccount[] = []
 ) {
-    const computeUnitLimit = await getComputeUnitLimit(connection, instructions, address, lookupTables, blockhash);
+    const computeUnitLimit = await getComputeUnitLimit(connection, instructions, address, blockhash, lookupTables);
     return ComputeBudgetProgram.setComputeUnitLimit({
         units: computeUnitLimit,
     });
@@ -254,7 +254,7 @@ export async function buildTransaction(
     lookupTables: AddressLookupTableAccount[] = []
 ): Promise<VersionedTransaction> {
     const blockhash = (await connection.getLatestBlockhash()).blockhash;
-    const ix_computeLimit = await getComputerUnitLimitIx(connection, instructions, address, lookupTables, blockhash);
+    const ix_computeLimit = await getComputerUnitLimitIx(connection, instructions, address, blockhash, lookupTables);
     const ix_computePrice = await getComputeUnitPriceIx();
     instructions.unshift(ix_computeLimit, ix_computePrice);
 

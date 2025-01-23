@@ -7,7 +7,7 @@ import { baseUnitToDecimal, MarketIndex, QuartzClient, TOKENS, DummyWallet, Quar
 import { fetchAndParse, getComputeUnitPriceIx } from '@/src/utils/helpers';
 import { JUPITER_SLIPPAGE_BPS } from '@/src/config/constants';
 import { getConfig as getMarginfiConfig, MarginfiClient } from '@mrgnlabs/marginfi-client-v2';
-import type { QuoteResponse } from '@jup-ag/api';
+import { SwapMode, type QuoteResponse } from '@jup-ag/api';
 import { createCloseAccountInstruction, getAssociatedTokenAddress } from '@solana/spl-token';
 
 const envSchema = z.object({
@@ -38,7 +38,7 @@ const paramsSchema = z.object({
         (value) => MarketIndex.includes(value as any),
         { message: "marketIndexCollateral must be a valid market index" }
     ),
-    swapMode: z.enum(["ExactIn", "ExactOut"]),
+    swapMode: z.nativeEnum(SwapMode),
 });
 
 export async function GET(request: Request) {
@@ -125,7 +125,7 @@ async function makeCollateralRepayIxs(
     marketIndexLoan: MarketIndex,
     marketIndexCollateral: MarketIndex,
     user: QuartzUser,
-    swapMode: "ExactIn" | "ExactOut"
+    swapMode: SwapMode
 ): Promise<{
     instructions: TransactionInstruction[],
     lookupTables: AddressLookupTableAccount[],

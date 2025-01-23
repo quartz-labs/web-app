@@ -14,6 +14,7 @@ import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
 import { MarketIndex, TOKENS, baseUnitToDecimal, decimalToBaseUnit } from "@quartz-labs/sdk/browser";
 import type { RepayLoanInnerModalProps } from "../Variations/RepayLoan.Modal";
 import { useJupiterSwapModeQuery } from "@/src/utils/queries";
+import { SwapMode } from "@jup-ag/api";
 
 interface RepayWithCollateralProps extends RepayLoanInnerModalProps {
     marketIndexCollateral: MarketIndex;
@@ -78,7 +79,7 @@ export default function RepayWithCollateral({
     const handleConfirm = async () => {
         if (!wallet?.publicKey) return setErrorText("Wallet not connected");
         if (!areAmountsValid()) return;
-        if (jupiterQuoteLoading || swapMode === "None") return;
+        if (jupiterQuoteLoading || swapMode === null) return;
 
         setAwaitingSign(true);
         try {
@@ -218,20 +219,20 @@ export default function RepayWithCollateral({
                 </div>
             } 
 
-            {swapMode === "None" &&
+            {swapMode === null &&
                 <div className={styles.messageTextWrapper}>
                     <p className={"error-text"}>Collateral repay unavailable for selected token pair (no Jupiter <span className="no-wrap">route found).</span></p>
                 </div>
             }
 
-            {swapMode !== "None" && <>
+            {swapMode !== null && <>
                 {(!errorText && canRepayWithWallet) && 
                     <div className={styles.messageTextWrapper}>
                         <p className={"light-text small-text"}>Your wallet has enough {TOKENS[marketIndexLoan].name} to repay the loan without <span className="no-wrap">selling your collateral.</span></p>
                     </div>
                 }
     
-                {(!errorText && swapMode === "ExactIn") &&
+                {(!errorText && swapMode === SwapMode.ExactIn) &&
                     <div className={styles.messageTextWrapper}>
                         <p className={"light-text small-text"}>No direct ExactOut Jupiter route found. Slippage will be on the loan amount, not the <span className="no-wrap">collateral amount.</span></p>
                     </div>
@@ -243,7 +244,7 @@ export default function RepayWithCollateral({
                 awaitingSign={awaitingSign} 
                 onConfirm={handleConfirm} 
                 onCancel={() => setModalVariation(ModalVariation.DISABLED)}
-                disabled={swapMode === "None"}
+                disabled={swapMode === null}
             />
         </div>
     )
