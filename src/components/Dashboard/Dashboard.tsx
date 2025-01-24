@@ -5,7 +5,6 @@ import Health from "./Health/Health";
 import ButtonRow from "./ButtonRow/ButtonRow";
 import Assets from "./Assets/Assets";
 import Modal from "../Modal/Modal";
-import CardRow from "./CardRow/CardRow";
 import Card from "./Card/Card";
 
 export default function Dashboard() {
@@ -24,7 +23,6 @@ export default function Dashboard() {
             <>
               <Health />
               <ButtonRow />
-              <CardRow />
             </>
           )}
 
@@ -36,6 +34,7 @@ export default function Dashboard() {
 
       <div className={`glass panel ${styles.assetsPanel}`}>
         <div className={styles.assetsPanelContent}>
+          <h2 className={styles.title}>Card</h2>
           <Card />
           <h2 className={styles.title}>Assets</h2>
           <Assets />

@@ -102,7 +102,7 @@ export default function Page() {
     try {
       // The message you want to sign
       const timestamp = Date.now();
-      const message = `Sign this message to authenticate ownership. This signature will not trigger any blockchain transaction or cost any gas fees. \nWallet address: ${wallet.publicKey}\n\nTimestamp: ${timestamp}\n`;
+      const message = `Sign this message to authenticate ownership. This signature will not trigger any blockchain transaction or cost any gas fees. \n\nWallet address: ${wallet.publicKey}\nTimestamp: ${timestamp}\n`;
 
       const signature = await signMessage.mutateAsync(message);
       const bytes = Buffer.from(signature, 'base64');
