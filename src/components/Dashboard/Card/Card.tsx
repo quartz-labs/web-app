@@ -13,6 +13,7 @@ export default function Card() {
                 <div>
                     <div>Status: {card.status}</div>
                     <div>Limit: {card.limit.amount} per {card.limit.frequency}</div>
+                    <div>Balance: $?</div>
                 </div>
 
                 {!showDetails && (

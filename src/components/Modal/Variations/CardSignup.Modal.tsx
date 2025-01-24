@@ -90,7 +90,6 @@ export default function CardSignupModal() {
             ...prev,
             [field]: value
         }));
-        console.log(formData);
     };
 
     const handleSubmit = async () => {
