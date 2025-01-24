@@ -1,5 +1,5 @@
 import type { MarketIndex } from "@quartz-labs/sdk/browser";
-import styles from "../Modal.module.css";
+import styles from "./CardAccountCreate.ModalComponent.module.css";
 
 interface InputSectionProps {
     label?: string;
@@ -17,20 +17,19 @@ export default function CardSignupInputSection({
     const CHARACTER_LIMIT = 100;
 
     return (
-        <div className={styles.inputSection}>
-            <p>{label ?? "Card Signup Input"}</p>
+        <div className={styles.inputWrapper}>
+            {label &&
+                <p>{label}</p>
+            }
             
-            <div className={styles.inputFieldWrapper}>
-                <input 
-                    className={`${styles.inputField} ${styles.inputFieldAmount}`}
-                    type="text" 
-                    placeholder={"..."} 
-                    value={amountStr} 
-                    onChange={(e) => 
-                        setAmountStr(e.target.value.slice(0, CHARACTER_LIMIT))
-                    }
-                />
-            </div>
+            <input 
+                className={styles.kycInput}
+                type="text"
+                value={amountStr} 
+                onChange={(e) => 
+                    setAmountStr(e.target.value.slice(0, CHARACTER_LIMIT))
+                }
+            />
         </div>
     );
 }

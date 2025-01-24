@@ -18,7 +18,7 @@ export default function Card() {
                 {!showDetails && (
                     <button
                         className={styles.cardDetails}
-                        onClick={() => setShowDetails(!showDetails)}
+                        onClick={() => setShowDetails(true)}
                 >  
                     <div>**** **** **** {card.last4}</div>
                         <div>Expires: {card.expirationMonth}/{card.expirationYear}</div>

@@ -90,6 +90,7 @@ export default function CardSignupModal() {
             ...prev,
             [field]: value
         }));
+        console.log(formData);
     };
 
     const handleSubmit = async () => {
@@ -180,11 +181,16 @@ export default function CardSignupModal() {
                     setAmountStr={(value) => handleInputChange("lastName", value)}
                 />
 
-                <CardSignupInputSection
-                    label="Birth Date"
-                    amountStr={formData.birthDate}
-                    setAmountStr={(value) => handleInputChange("birthDate", value)}
-                />
+                <div style={{display: "flex", flexDirection: "column", marginBottom: "8px"}}>
+                    <label style={{marginRight: "10px"}}>Birth Date:</label>
+                    <input
+                        className={styles.dobInput}
+                        type="date"
+                        value={formData.birthDate}
+                        onChange={(e) => handleInputChange("birthDate", e.target.value)}
+                        max={new Date().toISOString().split('T')[0]} // Prevents future dates
+                    />
+                </div>
 
                 <CardSignupInputSection
                     label="Email"
@@ -271,16 +277,19 @@ export default function CardSignupModal() {
                 />
 
                 <CardSignupInputSection
-                    label="Country of issue (ISO 3166-1 alpha-2)"
+                    label="Country Code for Country of Issue (eg: US, IE)"
                     amountStr={formData.countryOfIssue}
                     setAmountStr={(value) => handleInputChange("countryOfIssue", value)}
                 />
 
-                <CardSignupInputSection
-                    label="Do you accept the Quartz card terms of service?"
-                    amountStr={formData.isTermsOfServiceAccepted.toString()}
-                    setAmountStr={(value) => handleInputChange("isTermsOfServiceAccepted", value)}
-                />
+                <div style={{display: "flex", flexDirection: "column", marginBottom: "8px", alignItems: "flex-start"}}>
+                    <label>Do you accept the Quartz card terms of service?</label>
+                    <input 
+                        type="checkbox" 
+                        checked={formData.isTermsOfServiceAccepted}
+                        onChange={(e) => handleInputChange("isTermsOfServiceAccepted", e.target.checked.toString())}
+                    />
+                </div>
             </div>
 
             <div className={styles.fixedButtons}>

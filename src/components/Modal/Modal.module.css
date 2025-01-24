@@ -133,6 +133,19 @@
     width: 100%;
 }
 
+.dobInput {
+    background-color: var(--color-background);
+    color: white;
+    padding: 8px;
+    border: 1px solid #333;
+    border-radius: 4px;
+    width: 100%;
+}
+
+.dobInput::-webkit-calendar-picker-indicator {
+    filter: invert(1);  /* Makes the calendar icon white */
+}
+
 .inputFieldCollateral {
     background: var(--color-background-light);
     display: flex;
