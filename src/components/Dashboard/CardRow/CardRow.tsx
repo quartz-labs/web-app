@@ -19,7 +19,7 @@ export default function CardRow() {
             body: JSON.stringify({
                 id: userFromDb?.card_api_user_id,
                 type: "virtual",
-                frequency:"allTime",
+                frequency: "allTime",
                 amountLimit: "0"
             }),
         });
@@ -50,12 +50,14 @@ export default function CardRow() {
                 </button>
             )}
 
-            <button
-                className={`glass-button ${styles.mainButton}`}
-                onClick={createCard}
-            >
-                Create Card
-            </button>
+            {userFromDb?.auth_level === "Card" &&
+                <button
+                    className={`glass-button ${styles.mainButton}`}
+                    onClick={createCard}
+                >
+                    Create Card
+                </button>
+            }
 
             {Array.isArray(cardDetails) && cardDetails.length > 0 && cardDetails.map((card: CardsForUserResponse) => (
                 <div key={card.id} className={styles.cardDetails}>
