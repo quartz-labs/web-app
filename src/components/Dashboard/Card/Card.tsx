@@ -70,7 +70,7 @@ export default function Card() {
     }
 
     return (
-        <>
+        <div className={styles.cardsContainer}>
             {!userFromDb?.auth_level && (
                 <button
                     className={`glass-button ${styles.mainButton}`}
@@ -97,6 +97,6 @@ export default function Card() {
                     Create Card
                 </button>
             }
-        </>
+        </div>
     )
 }
