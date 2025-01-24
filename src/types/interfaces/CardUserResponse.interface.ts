@@ -52,3 +52,23 @@ export type UserFromDatabase = {
     card_api_user_id: string;
     auth_level: string;
 };
+
+export interface CardsForUserResponse {
+    id: string;
+    companyId: string;
+    userId: string;
+    type: 'physical' | 'virtual';
+    status: 'notActivated' | 'active' | 'locked' | 'cancelled';
+    limit: CardLimit;
+    last4: string;
+    expirationMonth: string;
+    expirationYear: string;
+    tokenWallets: string[] | undefined;
+}
+
+export type LimitFrequency = 'per24HourPeriod' | 'per7DayPeriod' | 'per30DayPeriod' | 'perYearPeriod' | 'allTime' | 'perAuthorization';
+
+export interface CardLimit {
+    amount: number;
+    frequency: LimitFrequency;
+}

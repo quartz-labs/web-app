@@ -9,7 +9,8 @@ import { MarketIndex, TOKENS } from "@quartz-labs/sdk/browser";
 import config from "../config/config";
 import { buildEndpointURL } from "./helpers";
 import type { QuoteResponse } from "@jup-ag/api";
-import type { CardUserBase, UserFromDatabase } from "../types/interfaces/CardUserResponse.interface";
+import type { CardsForUserResponse, CardUserBase } from "../types/interfaces/CardUserResponse.interface";
+import type { UserFromDatabase } from "../types/interfaces/CardUserResponse.interface";
 
 interface QueryConfig {
     queryKey: string[];
@@ -94,63 +95,43 @@ export const useAccountStatusQuery = (address: PublicKey | null) => {
     return query();
 };
 
-export const useHasCardQuery = (address: PublicKey | null) => {
-    const query = createQuery<boolean>({
-        queryKey: ["account-status", address?.toBase58() ?? "", "has-card"],
-        url: `${config.NEXT_PUBLIC_INTERNAL_API_URL}/auth/card-account`,
-        params: address ? {
-            publicKey: address.toBase58()
-        } : undefined,
-        errorMessage: "Could not fetch account status",
-        enabled: address != null,
-        staleTime: Infinity
-    });
-    return query();
-};
-
-export const useCreateCardAccountQuery = (address: PublicKey | null) => {
-    const query = createQuery<boolean>({
-        queryKey: ["create-card-account", address?.toBase58() ?? "", Date.now().toString()],
-        url: `${config.NEXT_PUBLIC_INTERNAL_API_URL}/card/application/create`,
-        params: address ? {
-            publicKey: address.toBase58()
-        } : undefined,
-        transformResponse: (body) => {
-            console.log(body);
-            return body
-        },
-        errorMessage: "Could not create card account",
-        enabled: address != null,
-        staleTime: Infinity
-    });
-    return query();
-};
-
-export const useCardKycStatusQuery = (cardUserId: string | null, enabled: boolean) => {
-    const query = createQuery<CardUserBase>({
-        queryKey: ["account-status", cardUserId ?? "", "kyc-status"],
-        url: `${config.NEXT_PUBLIC_INTERNAL_API_URL}/card/user`,
-        params: cardUserId ? {
-            userId: cardUserId
-        } : undefined,
-        errorMessage: "Could not fetch account status",
-        enabled: cardUserId != null && enabled,
-        refetchInterval: 5_000
-    });
-    return query();
-};
-
-export const useCardKycDatabaseQuery = (cardUserId: string | null, publicKey: PublicKey | null) => {
-    const query = createQuery<CardUserBase>({
-        queryKey: ["card-user", cardUserId ?? "", publicKey?.toBase58() ?? ""],
-        url: `${config.NEXT_PUBLIC_INTERNAL_API_URL}/card/user`,
-        params: cardUserId ? {
-            cardUserId: cardUserId
-        } : publicKey ? {
+export const useUserFromDatabaseQuery = (publicKey: PublicKey | null) => {
+    const query = createQuery<UserFromDatabase>({
+        queryKey: ["card-user", publicKey?.toBase58() ?? ""],
+        url: `${config.NEXT_PUBLIC_INTERNAL_API_URL}/auth/user-info`,
+        params: publicKey ? {
             publicKey: publicKey.toBase58()
         } : undefined,
         errorMessage: "Could not fetch account information",
-        enabled: cardUserId != null || publicKey != null,
+        enabled: publicKey != null,
+        staleTime: Infinity
+    });
+    return query();
+};
+
+export const useCardUserInfoQuery = (cardUserId: string | null, enabled: boolean) => {
+    const query = createQuery<CardUserBase>({
+        queryKey: ["card-user", cardUserId ?? ""],
+        url: `${config.NEXT_PUBLIC_INTERNAL_API_URL}/card/user`,
+        params: cardUserId ? {
+            id: cardUserId
+        } : undefined,
+        errorMessage: "Could not fetch account information",
+        enabled: cardUserId != null && enabled,
+        staleTime: 5_000
+    });
+    return query();
+};
+
+export const useCardsForUserQuery = (cardUserId: string | null) => {
+    const query = createQuery<CardsForUserResponse[]>({
+        queryKey: ["card-user", cardUserId ?? ""],
+        url: `${config.NEXT_PUBLIC_INTERNAL_API_URL}/card/issuing/user`,
+        params: cardUserId ? {
+            id: cardUserId
+        } : undefined,
+        errorMessage: "Could not fetch account information",
+        enabled: cardUserId != null,
         staleTime: Infinity
     });
     return query();
@@ -170,20 +151,6 @@ export const usePricesQuery = createQuery<Record<MarketIndex, number>>({
     refetchInterval: DEFAULT_REFETCH_INTERVAL,
     errorMessage: "Could not fetch prices"
 });
-
-export const useUserFromDatabaseQuery = (publicKey: PublicKey | null) => {
-    const query = createQuery<UserFromDatabase>({
-        queryKey: ["card-user", publicKey?.toBase58() ?? ""],
-        url: `${config.NEXT_PUBLIC_INTERNAL_API_URL}/auth/user-info`,
-        params: publicKey ? {
-            publicKey: publicKey.toBase58()
-        } : undefined,
-        errorMessage: "Could not fetch account information",
-        enabled: publicKey != null,
-        staleTime: Infinity
-    });
-    return query();
-};
 
 export const useRatesQuery = createQuery<Record<MarketIndex, Rate>>({
     queryKey: ["rates"],

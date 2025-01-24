@@ -7,7 +7,7 @@ import {
   PublicKey,
 } from '@solana/web3.js'
 import { useMutation } from '@tanstack/react-query'
-import type { CardUserBase, UserFromDatabase } from "../types/interfaces/CardUserResponse.interface";
+import type { CardsForUserResponse, CardUserBase, UserFromDatabase } from "../types/interfaces/CardUserResponse.interface";
 
 
 type State = {
@@ -22,6 +22,7 @@ type State = {
   kycLink?: string;
   userFromDb?: UserFromDatabase;
   cardUserInfo?: CardUserBase;
+  cardDetails?: CardsForUserResponse[];
 };
 
 type Action = {
@@ -36,6 +37,7 @@ type Action = {
   setKycLink: (kycLink?: string) => void;
   setUserFromDb: (userFromDb?: UserFromDatabase) => void;
   setCardUserInfo: (cardUserInfo?: CardUserBase) => void;
+  setCardDetails: (cardDetails?: CardsForUserResponse[]) => void;
 }
 
 export const useStore = create<State & Action>((set) => ({
@@ -50,6 +52,8 @@ export const useStore = create<State & Action>((set) => ({
   kycLink: undefined,
   userFromDb: undefined,
   cardUserInfo: undefined,
+  cardDetails: undefined,
+
   setIsInitialized: (isInitialized: boolean) => set({ isInitialized }),
   setPrices: (prices?: Record<MarketIndex, number>) => set({ prices }),
   setRates: (rates?: Record<MarketIndex, Rate>) => set({ rates }),
@@ -61,6 +65,7 @@ export const useStore = create<State & Action>((set) => ({
   setKycLink: (kycLink?: string) => set({ kycLink }),
   setUserFromDb: (userFromDb?: UserFromDatabase) => set({ userFromDb }),
   setCardUserInfo: (cardUserInfo?: CardUserBase) => set({ cardUserInfo }),
+  setCardDetails: (cardDetails?: CardsForUserResponse[]) => set({ cardDetails }),
 }));
 
 export function useSignMessage({ address }: { address: PublicKey | null }) {

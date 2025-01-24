@@ -8,12 +8,13 @@ import NoBetaKey from "@/src/components/OtherViews/NoBetaKey";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { AccountStatus } from "@/src/types/enums/AccountStatus.enum";
 import styles from "./page.module.css";
-import { useAccountStatusQuery, useBalancesQuery, useHasCardQuery, useHealthQuery, usePricesQuery, useRatesQuery, useUserFromDatabaseQuery, useWithdrawLimitsQuery } from "@/src/utils/queries";
+import { useAccountStatusQuery, useBalancesQuery, useCardsForUserQuery, useCardUserInfoQuery, useHealthQuery, usePricesQuery, useRatesQuery, useUserFromDatabaseQuery, useWithdrawLimitsQuery } from "@/src/utils/queries";
 import { useSignMessage, useStore } from "@/src/utils/store";
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import config from "@/src/config/config";
 import Unavailable from "@/src/components/OtherViews/Unavailable";
 import bs58 from 'bs58';
+import { fetchAndParse } from "../utils/helpers";
 
 export default function Page() {
   const wallet = useWallet();
@@ -25,20 +26,58 @@ export default function Page() {
     setWithdrawLimits, 
     setHealth,
     setJwtToken,
-    setUserFromDb
+    setUserFromDb,
+    setCardUserInfo,
+    setCardDetails
   } = useStore();
 
   const { data: accountStatus, isLoading: isAccountStatusLoading } = useAccountStatusQuery(wallet.publicKey);
   const isInitialized = (accountStatus === AccountStatus.INITIALIZED && !isAccountStatusLoading && !config.NEXT_PUBLIC_UNAVAILABLE_TIME);
 
-  const { data: hasCardAccount } = useHasCardQuery(isInitialized ? wallet.publicKey : null);
   const { data: prices } = usePricesQuery();
   const { data: rates } = useRatesQuery();
   const { data: balances } = useBalancesQuery(isInitialized ? wallet.publicKey : null);
   const { data: withdrawLimits } = useWithdrawLimitsQuery(isInitialized ? wallet.publicKey : null);
   const { data: health } = useHealthQuery(isInitialized ? wallet.publicKey : null);
   const { data: userFromDb } = useUserFromDatabaseQuery(isInitialized ? wallet.publicKey : null);
-  
+  const hasCardAccount = userFromDb?.auth_level === "Card" ? true : false;
+
+  const { data: cardDetails } = useCardsForUserQuery(userFromDb?.card_api_user_id ?? null);
+
+  const [kycApplicationStatus, setKycApplicationStatus] = useState<string | null>(null);
+  const { data: cardUserInfo } = useCardUserInfoQuery(
+    userFromDb?.card_api_user_id ?? null, 
+    userFromDb?.auth_level === "Base"
+  );
+
+  useEffect(() => {
+    console.log("userFromDb", userFromDb);
+    console.log("kycApplicationStatus", kycApplicationStatus);
+    console.log("wallet.publicKey", wallet.publicKey);
+    console.log("cardUserInfo", cardUserInfo);
+
+    if (kycApplicationStatus === "approved" && userFromDb?.auth_level !== "Card") {
+      console.log("kycApplicationStatus is approved, updating user in database to have auth level 'Card'");
+      //update user in database to have auth level "Card"
+      fetchAndParse(`${config.NEXT_PUBLIC_INTERNAL_API_URL}/auth/auth-level?publicKey=${wallet.publicKey}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          authLevel: "Card"
+        })
+      });
+
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kycApplicationStatus, wallet.publicKey, userFromDb]);
+
+  useEffect(() => {
+    if (cardUserInfo) {
+      setKycApplicationStatus(cardUserInfo.applicationStatus);
+    }
+  }, [cardUserInfo]);
 
   useEffect(() => {
     setPrices(prices);
@@ -48,9 +87,11 @@ export default function Page() {
     setHealth(health);
     setIsInitialized(isInitialized);
     setUserFromDb(userFromDb);
+    setCardUserInfo(cardUserInfo);
+    setCardDetails(cardDetails);
   }, [
-    isInitialized, prices, rates, balances, withdrawLimits, health, userFromDb,
-    setPrices, setRates, setBalances, setWithdrawLimits, setHealth, setIsInitialized, setUserFromDb
+    isInitialized, prices, rates, balances, withdrawLimits, health, userFromDb, cardUserInfo, cardDetails,
+    setPrices, setRates, setBalances, setWithdrawLimits, setHealth, setIsInitialized, setUserFromDb, setCardUserInfo, setCardDetails
   ]);
 
   const signMessage = useSignMessage({
