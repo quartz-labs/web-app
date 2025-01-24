@@ -118,7 +118,8 @@ export const useCardUserInfoQuery = (cardUserId: string | null, enabled: boolean
         } : undefined,
         errorMessage: "Could not fetch account information",
         enabled: cardUserId != null && enabled,
-        staleTime: 5_000
+        staleTime: 5_000,
+        refetchInterval: 5_000
     });
     return query();
 };
