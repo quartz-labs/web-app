@@ -58,16 +58,6 @@ export default function CardRow() {
                     Create Card
                 </button>
             }
-
-            {Array.isArray(cardDetails) && cardDetails.length > 0 && cardDetails.map((card: CardsForUserResponse) => (
-                <div key={card.id} className={styles.cardDetails}>
-                    <div>Card Type: {card.type}</div>
-                    <div>Status: {card.status}</div>
-                    <div>Last 4: {card.last4}</div>
-                    <div>Expires: {card.expirationMonth}/{card.expirationYear}</div>
-                    <div>Limit: {card.limit.amount} per {card.limit.frequency}</div>
-                </div>
-            ))}
         </div>
     );
 }

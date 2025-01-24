@@ -1,0 +1,17 @@
+.cardWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.cardDetails {
+    background-color: var(--color-text-light);
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.cardDetailsRow {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}

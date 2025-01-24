@@ -4,11 +4,11 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { AddressLookupTableAccount, Connection, PublicKey, TransactionInstruction, VersionedTransaction } from '@solana/web3.js';
 import { baseUnitToDecimal, MarketIndex, QuartzClient, TOKENS, DummyWallet, QuartzUser, getTokenProgram, makeCreateAtaIxIfNeeded } from '@quartz-labs/sdk';
-import { getAssociatedTokenAddress } from '@solana/spl-token';
 import { fetchAndParse, getComputeUnitPriceIx } from '@/src/utils/helpers';
 import { JUPITER_SLIPPAGE_BPS } from '@/src/config/constants';
 import { getConfig as getMarginfiConfig, MarginfiClient } from '@mrgnlabs/marginfi-client-v2';
-import type { QuoteResponse } from '@jup-ag/api';
+import { SwapMode, type QuoteResponse } from '@jup-ag/api';
+import { createCloseAccountInstruction, getAssociatedTokenAddress } from '@solana/spl-token';
 
 const envSchema = z.object({
     RPC_URL: z.string().url(),
@@ -26,7 +26,7 @@ const paramsSchema = z.object({
         },
         { message: "Address is not a valid public key" }
     ),
-    amountLoanBaseUnits: z.number().refine(
+    amountSwapBaseUnits: z.number().refine(
         Number.isInteger,
         { message: "amountLoanBaseUnits must be an integer" }
     ),
@@ -38,7 +38,7 @@ const paramsSchema = z.object({
         (value) => MarketIndex.includes(value as any),
         { message: "marketIndexCollateral must be a valid market index" }
     ),
-    swapMode: z.enum(["ExactIn", "ExactOut"]),
+    swapMode: z.nativeEnum(SwapMode),
 });
 
 export async function GET(request: Request) {
@@ -55,7 +55,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const params = {
         address: searchParams.get('address'),
-        amountLoanBaseUnits: Number(searchParams.get('amountLoanBaseUnits')),
+        amountSwapBaseUnits: Number(searchParams.get('amountSwapBaseUnits')),
         marketIndexLoan: Number(searchParams.get('marketIndexLoan')),
         marketIndexCollateral: Number(searchParams.get('marketIndexCollateral')),
         swapMode: searchParams.get('swapMode')
@@ -70,7 +70,7 @@ export async function GET(request: Request) {
 
     const connection = new Connection(env.RPC_URL);
     const address = new PublicKey(body.address);
-    const amountLoanBaseUnits = body.amountLoanBaseUnits;
+    const amountSwapBaseUnits = body.amountSwapBaseUnits;
     const marketIndexLoan = body.marketIndexLoan as MarketIndex;
     const marketIndexCollateral = body.marketIndexCollateral as MarketIndex;
     const swapMode = body.swapMode;
@@ -91,7 +91,7 @@ export async function GET(request: Request) {
         } = await makeCollateralRepayIxs(
             connection,
             address,
-            amountLoanBaseUnits,
+            amountSwapBaseUnits,
             marketIndexLoan,
             marketIndexCollateral,
             user,
@@ -121,11 +121,11 @@ export async function GET(request: Request) {
 async function makeCollateralRepayIxs(
     connection: Connection,
     address: PublicKey,
-    amountLoanBaseUnits: number,
+    amountSwapBaseUnits: number,
     marketIndexLoan: MarketIndex,
     marketIndexCollateral: MarketIndex,
     user: QuartzUser,
-    swapMode: "ExactIn" | "ExactOut"
+    swapMode: SwapMode
 ): Promise<{
     instructions: TransactionInstruction[],
     lookupTables: AddressLookupTableAccount[],
@@ -134,12 +134,8 @@ async function makeCollateralRepayIxs(
     const mintCollateral = TOKENS[marketIndexCollateral].mint;
     const mintLoan = TOKENS[marketIndexLoan].mint;
 
-    const mintLoanTokenProgram = await getTokenProgram(connection, mintLoan);
-    const walletAtaLoan = await getAssociatedTokenAddress(mintLoan, address, false, mintLoanTokenProgram);
-    const oix_createAtaLoan = await makeCreateAtaIxIfNeeded(connection, walletAtaLoan, address, mintLoan, mintLoanTokenProgram);
-
     const jupiterQuoteEndpoint
-        = `https://quote-api.jup.ag/v6/quote?inputMint=${mintCollateral.toBase58()}&outputMint=${mintLoan.toBase58()}&amount=${amountLoanBaseUnits}&slippageBps=${JUPITER_SLIPPAGE_BPS}&swapMode=${swapMode}&onlyDirectRoutes=true`;
+        = `https://quote-api.jup.ag/v6/quote?inputMint=${mintCollateral.toBase58()}&outputMint=${mintLoan.toBase58()}&amount=${amountSwapBaseUnits}&slippageBps=${JUPITER_SLIPPAGE_BPS}&swapMode=${swapMode}&onlyDirectRoutes=true`;
     const jupiterQuote: QuoteResponse = await fetchAndParse(jupiterQuoteEndpoint);
     const collateralRequiredForSwap = Math.ceil(Number(jupiterQuote.inAmount) * (1 + (JUPITER_SLIPPAGE_BPS / 10_000)));
 
@@ -151,7 +147,7 @@ async function makeCollateralRepayIxs(
     );
 
     return {
-        instructions: [...oix_createAtaLoan, ...ixs_collateralRepay],
+        instructions: ixs_collateralRepay,
         lookupTables,
         flashLoanAmountBaseUnits: collateralRequiredForSwap
     };
@@ -167,6 +163,7 @@ async function buildFlashLoanTransaction(
 ): Promise<VersionedTransaction> {
     const amountLoanDecimal = baseUnitToDecimal(flashLoanAmountBaseUnits, flashLoanMarketIndex);
 
+    // Get Marginfi account & bank
     const wallet = new DummyWallet(address);
     const marginfiClient = await MarginfiClient.fetch(getMarginfiConfig(), wallet, connection);
     const [ marginfiAccount ] = await marginfiClient.getMarginfiAccountsForAuthority(address);
@@ -176,18 +173,46 @@ async function buildFlashLoanTransaction(
     const loanBank = marginfiClient.getBankByMint(TOKENS[flashLoanMarketIndex].mint);
     if (loanBank === null) throw new Error("Could not find Flash Loan MarginFi bank");
     
+    // Set compute unit price
     const ix_computePrice = await getComputeUnitPriceIx();
 
+    // Make ATA instructions (closing ATA at the end if wSol is used)
+    const mintLoan = TOKENS[flashLoanMarketIndex].mint;
+    const mintLoanTokenProgram = await getTokenProgram(connection, mintLoan);
+    const walletAtaLoan = await getAssociatedTokenAddress(mintLoan, address, false, mintLoanTokenProgram);
+    const oix_createAtaLoan = await makeCreateAtaIxIfNeeded(connection, walletAtaLoan, address, mintLoan, mintLoanTokenProgram);
+
+    const oix_closeWSolAta: TransactionInstruction[] = [];
+    if (TOKENS[flashLoanMarketIndex].name === "SOL") {
+        oix_closeWSolAta.push(
+            createCloseAccountInstruction(
+                walletAtaLoan,
+                address,
+                address,
+                [],
+                mintLoanTokenProgram
+            )
+        );
+    }
+
+    // Make borrow & deposit instructions
     const { instructions: ix_borrow } = await marginfiAccount.makeBorrowIx(amountLoanDecimal, loanBank.address, {
-        createAtas: true,
+        createAtas: false,
         wrapAndUnwrapSol: false
     });
     const { instructions: ix_deposit } = await marginfiAccount.makeDepositIx(amountLoanDecimal, loanBank.address, {
-        wrapAndUnwrapSol: true
+        wrapAndUnwrapSol: false
     });
 
     const flashloanTx = await marginfiAccount.buildFlashLoanTx({
-        ixs: [ix_computePrice, ...ix_borrow, ...instructions, ...ix_deposit],
+        ixs: [
+            ix_computePrice, 
+            ...oix_createAtaLoan, 
+            ...ix_borrow, 
+            ...instructions, 
+            ...ix_deposit, 
+            ...oix_closeWSolAta
+        ],
         addressLookupTableAccounts: lookupTables
     });
 

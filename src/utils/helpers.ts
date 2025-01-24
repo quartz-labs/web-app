@@ -203,8 +203,8 @@ export async function getComputeUnitLimit(
     connection: Connection,
     instructions: TransactionInstruction[],
     address: PublicKey,
-    lookupTables: AddressLookupTableAccount[] = [],
-    blockhash: string
+    blockhash: string,
+    lookupTables: AddressLookupTableAccount[] = []
 ) {
     const messageV0 = new TransactionMessage({
         payerKey: address,
@@ -226,10 +226,10 @@ export async function getComputerUnitLimitIx(
     connection: Connection,
     instructions: TransactionInstruction[],
     address: PublicKey,
-    lookupTables: AddressLookupTableAccount[] = [],
-    blockhash: string
+    blockhash: string,
+    lookupTables: AddressLookupTableAccount[] = []
 ) {
-    const computeUnitLimit = await getComputeUnitLimit(connection, instructions, address, lookupTables, blockhash);
+    const computeUnitLimit = await getComputeUnitLimit(connection, instructions, address, blockhash, lookupTables);
     return ComputeBudgetProgram.setComputeUnitLimit({
         units: computeUnitLimit,
     });
@@ -254,7 +254,7 @@ export async function buildTransaction(
     lookupTables: AddressLookupTableAccount[] = []
 ): Promise<VersionedTransaction> {
     const blockhash = (await connection.getLatestBlockhash()).blockhash;
-    const ix_computeLimit = await getComputerUnitLimitIx(connection, instructions, address, lookupTables, blockhash);
+    const ix_computeLimit = await getComputerUnitLimitIx(connection, instructions, address, blockhash, lookupTables);
     const ix_computePrice = await getComputeUnitPriceIx();
     instructions.unshift(ix_computeLimit, ix_computePrice);
 
@@ -277,7 +277,9 @@ export async function signAndSendTransaction(
     const signedTx = await wallet.signTransaction(transaction);
 
     const serializedTransaction = Buffer.from(signedTx.serialize()).toString("base64");
-    const response = await fetchAndParse("/api/send-tx", {
+
+    const url = "/api/send-tx";
+    const response = await fetch(url, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -287,10 +289,20 @@ export async function signAndSendTransaction(
             skipPreflight: skipPreflight
         }),
     });
+    const body = await response.json();
+
+    if (!response.ok) {
+        if (body.error.includes("Blockhash not found")) {
+            showTxStatus({ status: TxStatus.BLOCKHASH_EXPIRED });
+            return "";
+        } else {
+            throw new Error(JSON.stringify(body.error) ?? `Could not fetch ${url}`); 
+        }
+    }
 
     showTxStatus({ 
-        signature: response.signature,
+        signature: body.signature,
         status: TxStatus.SENT 
     });
-    return response.signature;
+    return body.signature;
 }

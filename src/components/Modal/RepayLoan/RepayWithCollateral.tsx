@@ -1,6 +1,6 @@
 import { useStore } from "@/src/utils/store";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import styles from "../Modal.module.css";
 import InputSection from "../Input.ModalComponent";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
@@ -13,7 +13,8 @@ import { TxStatus, useTxStatus } from "@/src/context/tx-status-provider";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
 import { MarketIndex, TOKENS, baseUnitToDecimal, decimalToBaseUnit } from "@quartz-labs/sdk/browser";
 import type { RepayLoanInnerModalProps } from "../Variations/RepayLoan.Modal";
-import { useJupiterQuoteQuery } from "@/src/utils/queries";
+import { useJupiterSwapModeQuery } from "@/src/utils/queries";
+import { SwapMode } from "@jup-ag/api";
 
 interface RepayWithCollateralProps extends RepayLoanInnerModalProps {
     marketIndexCollateral: MarketIndex;
@@ -49,22 +50,10 @@ export default function RepayWithCollateral({
     }
 
     // Find Jupiter swap route
-    const [jupiterSwapMode, setJupiterSwapMode] = useState<"ExactOut" | "ExactIn" | "None">("ExactOut");
-    const { isError: jupiterQuoteExactOutError, isLoading: jupiterQuoteLoading } = useJupiterQuoteQuery(
-        "ExactOut",
+    const { data: swapMode, isLoading: jupiterQuoteLoading } = useJupiterSwapModeQuery(
         TOKENS[marketIndexCollateral].mint,
         TOKENS[marketIndexLoan].mint,
     );
-    const { isError: jupiterQuoteExactInError } = useJupiterQuoteQuery(
-        "ExactIn",
-        TOKENS[marketIndexCollateral].mint,
-        TOKENS[marketIndexLoan].mint,
-    );
-    useEffect(() => {
-        if (!jupiterQuoteExactOutError) setJupiterSwapMode("ExactOut");
-        else if (!jupiterQuoteExactInError) setJupiterSwapMode("ExactIn");
-        else setJupiterSwapMode("None");
-    }, [jupiterQuoteExactInError, jupiterQuoteExactOutError]);
 
     // Collateral info
     const priceCollateral = prices?.[marketIndexCollateral] ?? 0;
@@ -90,16 +79,19 @@ export default function RepayWithCollateral({
     const handleConfirm = async () => {
         if (!wallet?.publicKey) return setErrorText("Wallet not connected");
         if (!areAmountsValid()) return;
-        if (jupiterQuoteLoading || jupiterSwapMode === "None") return;
+        if (jupiterQuoteLoading || swapMode === null) return;
 
         setAwaitingSign(true);
         try {
+            const amountSwap = swapMode === "ExactOut" 
+                ? decimalToBaseUnit(amountLoanDecimal, marketIndexLoan) 
+                : decimalToBaseUnit(amountCollateralDecimalDisplay, marketIndexCollateral);
             const endpoint = buildEndpointURL("/api/build-tx/collateral-repay", {
                 address: wallet.publicKey.toBase58(),
-                amountLoanBaseUnits: decimalToBaseUnit(amountLoanDecimal, marketIndexLoan),
+                amountSwapBaseUnits: amountSwap,
                 marketIndexLoan,
                 marketIndexCollateral,
-                swapMode: jupiterSwapMode
+                swapMode: swapMode
             });
             const response = await fetchAndParse(endpoint);
             const transaction = deserializeTransaction(response.transaction);
@@ -221,36 +213,38 @@ export default function RepayWithCollateral({
                 </div>
             </div>
 
-            {(!errorText && canRepayWithWallet) && 
-                <div className={styles.messageTextWrapper}>
-                    <p className={"light-text small-text"}>Your wallet has enough {TOKENS[marketIndexLoan].name} to repay the loan without <span className="no-wrap">selling your collateral.</span></p>
-                </div>
-            }
-
-            {(!errorText && jupiterSwapMode === "ExactIn") &&
-                <div className={styles.messageTextWrapper}>
-                    <p className={"light-text small-text"}>No direct ExactOut Jupiter route found. Slippage will be on the loan amount, not the <span className="no-wrap">collateral amount.</span></p>
-                </div>
-            }
-
             {errorText &&
                 <div className={styles.messageTextWrapper}>
                     <p className={"error-text"}>{errorText}</p>
                 </div>
             } 
 
-            {jupiterSwapMode === "None" &&
+            {swapMode === null &&
                 <div className={styles.messageTextWrapper}>
-                    <p className={"error-text"}>Collateral repay unavailable for selected tokens (no Jupiter <span className="no-wrap">route found).</span></p>
+                    <p className={"error-text"}>Collateral repay unavailable for selected token pair (no Jupiter <span className="no-wrap">route found).</span></p>
                 </div>
             }
+
+            {swapMode !== null && <>
+                {(!errorText && canRepayWithWallet) && 
+                    <div className={styles.messageTextWrapper}>
+                        <p className={"light-text small-text"}>Your wallet has enough {TOKENS[marketIndexLoan].name} to repay the loan without <span className="no-wrap">selling your collateral.</span></p>
+                    </div>
+                }
+    
+                {(!errorText && swapMode === SwapMode.ExactIn) &&
+                    <div className={styles.messageTextWrapper}>
+                        <p className={"light-text small-text"}>No direct ExactOut Jupiter route found. Slippage will be on the loan amount, not the <span className="no-wrap">collateral amount.</span></p>
+                    </div>
+                }
+            </>}
 
             <Buttons 
                 label="Repay Loan" 
                 awaitingSign={awaitingSign} 
                 onConfirm={handleConfirm} 
                 onCancel={() => setModalVariation(ModalVariation.DISABLED)}
-                disabled={jupiterSwapMode === "None"}
+                disabled={swapMode === null}
             />
         </div>
     )

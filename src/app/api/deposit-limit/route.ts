@@ -94,7 +94,7 @@ async function fetchMaxDepositLamports(pubkey: PublicKey, connection: Connection
         balanceLamports,
         wSolAtaRent
     ] = await Promise.all([
-        getComputeUnitLimit(connection, depositIxs, pubkey, [], blockhash),
+        getComputeUnitLimit(connection, depositIxs, pubkey, blockhash, []),
         getComputeUnitPrice(),
         balanceLamportsPromise,
         wSolAtaRentPromise
