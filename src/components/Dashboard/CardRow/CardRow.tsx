@@ -29,7 +29,7 @@ export default function CardRow() {
     }
 
     return (
-        <div className={styles.buttonRow}>
+        <div className={styles.buttonRow} style={{ paddingTop: '20px' }}>
 
 
             {!userFromDb?.auth_level && (
