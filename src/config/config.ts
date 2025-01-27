@@ -18,7 +18,8 @@ const envSchema = z.object({
     ),
     NEXT_PUBLIC_API_URL: z.string().url().transform((url) => url.endsWith('/') ? url.slice(0, -1) : url),
     NEXT_PUBLIC_INTERNAL_API_URL: z.string().url().transform((url) => url.endsWith('/') ? url.slice(0, -1) : url),
-    NEXT_PUBLIC_UNAVAILABLE_TIME: z.string()
+    NEXT_PUBLIC_UNAVAILABLE_TIME: z.string(),
+    NEXT_PUBLIC_CARD_PEM: z.string()
 });
 
 type Config = z.infer<typeof envSchema>;
@@ -29,7 +30,8 @@ const config: Config = envSchema.parse({
     NEXT_PUBLIC_BETA_KEY_COLLECTION: process.env.NEXT_PUBLIC_BETA_KEY_COLLECTION,
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
     NEXT_PUBLIC_INTERNAL_API_URL: process.env.NEXT_PUBLIC_INTERNAL_API_URL,
-    NEXT_PUBLIC_UNAVAILABLE_TIME: process.env.NEXT_PUBLIC_UNAVAILABLE_TIME
+    NEXT_PUBLIC_UNAVAILABLE_TIME: process.env.NEXT_PUBLIC_UNAVAILABLE_TIME,
+    NEXT_PUBLIC_CARD_PEM: process.env.NEXT_PUBLIC_CARD_PEM
 });
 
 export default config;
