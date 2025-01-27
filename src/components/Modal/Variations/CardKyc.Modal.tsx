@@ -9,11 +9,11 @@ export default function CardKycModal() {
             <h2 className={styles.heading}>Complete KYC Verification here:</h2>
             {kycLink || kycLink === "" ? (
                 <a href={kycLink} target="_blank" rel="noopener noreferrer" className={styles.kycLink}>{kycLink}</a>
-            ) : (
-                <a href={`${cardUserInfo?.applicationCompletionLink.url}?userId=${cardUserInfo?.applicationCompletionLink.params.userId}`} target="_blank" rel="noopener noreferrer" className={styles.kycLink}>
-                    {`${cardUserInfo?.applicationCompletionLink.url}?userId=${cardUserInfo?.applicationCompletionLink.params.userId}`}
+            ) : cardUserInfo?.applicationCompletionLink ? (
+                <a href={`${cardUserInfo.applicationCompletionLink.url}?userId=${cardUserInfo.applicationCompletionLink.params.userId}`} target="_blank" rel="noopener noreferrer" className={styles.kycLink}>
+                    {`${cardUserInfo.applicationCompletionLink.url}?userId=${cardUserInfo.applicationCompletionLink.params.userId}`}
                 </a>
-            )}
+            ) : null}
 
         </div>
     );
