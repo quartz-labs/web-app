@@ -56,9 +56,15 @@ export async function GET(request: Request) {
 
 async function checkHasVaultHistory(connection: Connection, wallet: PublicKey): Promise<boolean> {
     const vaultPda = getVaultPublicKey(wallet);
-    const signatures = await connection.getSignaturesForAddress(vaultPda);
-    const isSignatureHistory = (signatures.length > 0);
-    return isSignatureHistory;
+    try {
+        // TODO: This try catch is temporary due to RPC issues
+        const signatures = await connection.getSignaturesForAddress(vaultPda);
+        const isSignatureHistory = (signatures.length > 0);
+        return isSignatureHistory;
+    } catch (error) {
+        console.error(error);
+        return false;
+    }
 }
 
 async function checkIsMissingBetaKey(connection: Connection, address: PublicKey): Promise<boolean> {
