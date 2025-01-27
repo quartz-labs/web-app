@@ -509,10 +509,10 @@
     snake-case "^3.0.4"
     spok "^1.4.3"
 
-"@mrgnlabs/marginfi-client-v2@^4.0.0":
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/@mrgnlabs/marginfi-client-v2/-/marginfi-client-v2-4.0.0.tgz#50676767dc9a06b5ffaccb25f3dc8f7a24b6f52d"
-  integrity sha512-GnXdGdPgU54w517iDXfKoti1i8jrVyOwhxPKS2Lpqac3QH4NL3b4sSbz+pCBDmjk60gveHzu3IAIGscUpbo1yQ==
+"@mrgnlabs/marginfi-client-v2@4.0.4":
+  version "4.0.4"
+  resolved "https://registry.yarnpkg.com/@mrgnlabs/marginfi-client-v2/-/marginfi-client-v2-4.0.4.tgz#cd9689dd35b50ab7c62693dbd3e87228156994b1"
+  integrity sha512-3DYWfhh292LsgPEEvL3fbqmAj9AOkUVm2zh+3t9JDzqqHISQOKSgoD8+sI10NIhnf+0+yvdrwE3vRV75crcucg==
   dependencies:
     "@coral-xyz/anchor" "^0.30.1"
     "@mrgnlabs/mrgn-common" "*"
@@ -812,7 +812,7 @@
     bs58 "^5.0.0"
     jito-ts "^3.0.1"
 
-"@quartz-labs/sdk@^0.3.7":
+"@quartz-labs/sdk@0.3.7":
   version "0.3.7"
   resolved "https://registry.yarnpkg.com/@quartz-labs/sdk/-/sdk-0.3.7.tgz#0c1cb153b66694f3b13df12c0994d269c1ddfb01"
   integrity sha512-p9e/HK0GgA/tF5H18RpjO+6GA7HibrJwwg9tuSPQr11GqcFe3tjhDr2WRPfZ28S/DTWqTsUz81agVuuVH63xsg==
