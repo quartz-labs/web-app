@@ -8,35 +8,42 @@ export default function ButtonRow() {
 
     return (
         <div className={styles.buttonRow}>
-            <button 
-                className={`glass-button ${styles.mainButton}`} 
+            <button
+                className={`glass-button ${styles.mainButton}`}
                 onClick={() => setModalVariation(ModalVariation.ADD_FUNDS)}
             >
                 Add Funds
             </button>
 
-            <button 
-                className={`glass-button ${styles.mainButton}`} 
+            <button
+                className={`glass-button ${styles.mainButton}`}
                 onClick={() => setModalVariation(ModalVariation.WITHDRAW)}
             >
                 Withdraw
             </button>
 
-            <button 
-                className={`glass-button ${styles.mainButton}`} 
+            <button
+                className={`glass-button ${styles.mainButton}`}
                 onClick={() => setModalVariation(ModalVariation.BORROW)}
             >
                 Borrow
             </button>
 
             {hasLoan && (
-                <button 
-                    className={`glass-button ghost ${styles.mainButton}`} 
+                <button
+                    className={`glass-button ghost ${styles.mainButton}`}
                     onClick={() => setModalVariation(ModalVariation.REPAY_LOAN)}
                 >
                     Repay Loan
                 </button>
             )}
+
+            <button
+                className={`glass-button ${styles.mainButton}`}
+                onClick={() => setModalVariation(ModalVariation.CARD_TOPUP)}
+            >
+                Top up card!
+            </button>
         </div>
     );
 }

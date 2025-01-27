@@ -308,6 +308,51 @@ export async function signAndSendTransaction(
     return body.signature;
 }
 
+export async function signAndSendAllTransactions(
+    transactions: VersionedTransaction[], 
+    wallet: AnchorWallet, 
+    showTxStatus: (props: TxStatusProps) => void,
+    skipPreflight: boolean = false
+): Promise<string[]> {
+    showTxStatus({ status: TxStatus.SIGNING });
+    const signedTxs = await wallet.signAllTransactions(transactions);
+
+    const serializedTransactions = signedTxs.map(tx => Buffer.from(tx.serialize()).toString("base64"));
+
+    const signatures: string[] = [];
+
+    for (const serializedTransaction of serializedTransactions) {
+        const url = "/api/send-tx";
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                transaction: serializedTransaction,
+                skipPreflight: skipPreflight
+            }),
+        });
+        const body = await response.json();
+
+        if (!response.ok) {
+            if (body.error.includes("Blockhash not found")) {
+                showTxStatus({ status: TxStatus.BLOCKHASH_EXPIRED });
+                return [];
+            } else {
+                throw new Error(JSON.stringify(body.error) ?? `Could not fetch ${url}`); 
+            }
+        }
+
+        showTxStatus({ 
+            signature: body.signature,
+            status: TxStatus.SENT 
+        });
+        signatures.push(body.signature);
+    }
+    return signatures;
+}
+
 export async function generateSessionId(pem: string) {
     if (!pem) throw new Error("pem is required");
 
