@@ -65,11 +65,11 @@ export async function POST(request: Request) {
     console.log("response", response);
     try {
         const decryptedPan = (await decryptSecret(response.encryptedPan.data, response.encryptedPan.iv, sessionId.secretKey))
-            .replace(/[^\d]/g, '');
+            .replace(/[^\d]/g, '').slice(0, 16);
         console.log("decryptedPan", decryptedPan);
         
         const decryptedCvc = (await decryptSecret(response.encryptedCvc.data, response.encryptedCvc.iv, sessionId.secretKey))
-            .replace(/[^\d]/g, '');
+            .replace(/[^\d]/g, '').slice(0, 3);
         console.log("decryptedCvc", decryptedCvc);
 
         return NextResponse.json({

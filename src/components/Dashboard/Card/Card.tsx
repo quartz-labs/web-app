@@ -10,6 +10,9 @@ export default function Card() {
     const { setModalVariation, userFromDb, jwtToken, setCardDetails, cardDetails } = useStore();
     const [showDetails, setShowDetails] = useState(false);
 
+    const [cardPan, setCardPan] = useState<string[] | null>(null);
+    const [cardCvc, setCardCvc] = useState<string[] | null>(null);
+
     const createCard = async () => {
         // if user has no cards, kyc is approved.
         const createCardResponse: CardsForUserResponse = await fetchAndParse(
@@ -33,6 +36,25 @@ export default function Card() {
         console.log(createCardResponse);
     }
 
+    const getCardDetails = async (cardId: string) => {
+        const body = {
+            jwtToken: jwtToken,
+        }
+
+        const response = await fetchAndParse(`/api/card-details?id=${cardId}`, {
+            method: 'POST',
+            headers: {
+                "Authorization": `Bearer ${jwtToken}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(body)
+        });
+        setCardPan([response.pan]);
+        setCardCvc([response.cvc]);
+
+        setShowDetails(true);
+    }
+
     if (cardDetails !== undefined && cardDetails.length > 0) {
         return (
             <div className={styles.cardsContainer}>
@@ -47,7 +69,7 @@ export default function Card() {
                         {!showDetails && (
                             <button
                                 className={styles.cardDetails}
-                                onClick={() => setShowDetails(true)}
+                                onClick={() => getCardDetails(card.id)}
                             >  
                                 <div className={styles.cardNumber}>**** **** **** {card.last4}</div>
                                 <div>Expires: {card.expirationMonth}/{card.expirationYear}</div>
@@ -56,10 +78,10 @@ export default function Card() {
 
                         {showDetails && (
                             <div className={styles.cardDetails}>
-                                <div className={styles.cardNumber}>1234 5678 9012 3456</div>
+                                <div className={styles.cardNumber}>{cardPan}</div>
                                 <div className={styles.cardDetailsRow}>
                                     <div>Expires: {card.expirationMonth}/{card.expirationYear}</div>
-                                    <div>CVC: 123</div>
+                                    <div>CVC: {cardCvc}</div>
                                 </div>
                             </div>
                         )}
