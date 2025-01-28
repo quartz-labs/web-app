@@ -3,7 +3,7 @@ import styles from "./ButtonRow.module.css";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
 
 export default function ButtonRow() {
-    const { setModalVariation, balances } = useStore();
+    const { setModalVariation, balances, userFromDb } = useStore();
     const hasLoan = balances ? Object.values(balances).some(balance => balance < 0) : false;
 
     return (
@@ -38,12 +38,14 @@ export default function ButtonRow() {
                 </button>
             )}
 
-            <button
-                className={`glass-button ${styles.mainButton}`}
+            {userFromDb?.auth_level === "Card" && (
+                <button
+                    className={`glass-button ${styles.mainButton}`}
                 onClick={() => setModalVariation(ModalVariation.CARD_TOPUP)}
-            >
-                Top up card!
-            </button>
+                >
+                    Top up card!
+                </button>
+            )}
         </div>
     );
 }
