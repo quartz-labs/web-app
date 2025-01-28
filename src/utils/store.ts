@@ -9,7 +9,6 @@ import {
 import { useMutation } from '@tanstack/react-query'
 import type { CardsForUserResponse, CardUserBase, UserFromDatabase } from "../types/interfaces/CardUserResponse.interface";
 
-
 type State = {
   isInitialized: boolean;
   prices?: Record<MarketIndex, number>;
@@ -23,6 +22,8 @@ type State = {
   userFromDb?: UserFromDatabase;
   cardUserInfo?: CardUserBase;
   cardDetails?: CardsForUserResponse[];
+  pendingCardTopup: boolean;
+  topupSignature?: string;
 };
 
 type Action = {
@@ -38,6 +39,8 @@ type Action = {
   setUserFromDb: (userFromDb?: UserFromDatabase) => void;
   setCardUserInfo: (cardUserInfo?: CardUserBase) => void;
   setCardDetails: (cardDetails?: CardsForUserResponse[]) => void;
+  setPendingCardTopup: (pendingCardTopup: boolean) => void;
+  setTopupSignature: (signature?: string) => void;
 }
 
 export const useStore = create<State & Action>((set) => ({
@@ -53,7 +56,8 @@ export const useStore = create<State & Action>((set) => ({
   userFromDb: undefined,
   cardUserInfo: undefined,
   cardDetails: undefined,
-
+  pendingCardTopup: false,
+  topupSignature: undefined,
   setIsInitialized: (isInitialized: boolean) => set({ isInitialized }),
   setPrices: (prices?: Record<MarketIndex, number>) => set({ prices }),
   setRates: (rates?: Record<MarketIndex, Rate>) => set({ rates }),
@@ -66,6 +70,8 @@ export const useStore = create<State & Action>((set) => ({
   setUserFromDb: (userFromDb?: UserFromDatabase) => set({ userFromDb }),
   setCardUserInfo: (cardUserInfo?: CardUserBase) => set({ cardUserInfo }),
   setCardDetails: (cardDetails?: CardsForUserResponse[]) => set({ cardDetails }),
+  setPendingCardTopup: (pendingCardTopup: boolean) => set({ pendingCardTopup }),
+  setTopupSignature: (signature?: string) => set({ topupSignature: signature }),
 }));
 
 export function useSignMessage({ address }: { address: PublicKey | null }) {

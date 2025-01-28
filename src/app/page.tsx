@@ -15,20 +15,26 @@ import config from "@/src/config/config";
 import Unavailable from "@/src/components/OtherViews/Unavailable";
 import bs58 from 'bs58';
 import { fetchAndParse } from "../utils/helpers";
+import type { CardsForUserResponse } from "../types/interfaces/CardUserResponse.interface";
 
 export default function Page() {
   const wallet = useWallet();
-  const { 
+  const {
     setIsInitialized,
-    setPrices, 
-    setRates, 
-    setBalances, 
-    setWithdrawLimits, 
+    setPrices,
+    setRates,
+    setBalances,
+    setWithdrawLimits,
     setHealth,
     setJwtToken,
     setUserFromDb,
     setCardUserInfo,
-    setCardDetails
+    setCardDetails,
+    setPendingCardTopup,
+    setTopupSignature,
+    pendingCardTopup,
+    topupSignature,
+    jwtToken
   } = useStore();
 
   const { data: accountStatus, isLoading: isAccountStatusLoading } = useAccountStatusQuery(wallet.publicKey);
@@ -46,9 +52,61 @@ export default function Page() {
 
   const [kycApplicationStatus, setKycApplicationStatus] = useState<string | null>(null);
   const { data: cardUserInfo } = useCardUserInfoQuery(
-    userFromDb?.card_api_user_id ?? null, 
+    userFromDb?.card_api_user_id ?? null,
     userFromDb?.auth_level === "Base"
   );
+
+  useEffect(() => {
+    if (!pendingCardTopup || !topupSignature) return;
+
+    //get the first card details in the array that is not null
+    const cardInfo = cardDetails?.find(card => card !== null);
+    if (!cardInfo) return;
+
+    const processCardTopup = async () => {
+      //call the card topup POST endpoint
+      const response = await fetch(`/api/card-topup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          signature: topupSignature,
+          cardId: cardInfo.id,
+          jwtToken: jwtToken
+        })
+      });
+
+      let responseBody;
+      try {
+        responseBody = await response.json();
+        if (!responseBody) {
+          console.log("Didn't update the card limit, response is undefined: ", responseBody);
+          return;
+        }
+
+      } catch (error) {
+        console.error("Error updating the card limit: ", error);
+        return;
+      }
+
+      const updatedCardDetails = cardDetails?.map(card => card.id === cardInfo.id ? responseBody as CardsForUserResponse : card);
+      if (updatedCardDetails) {
+        setCardDetails(updatedCardDetails);
+        console.log("updatedCardDetails", updatedCardDetails);
+        setPendingCardTopup(false);
+        setTopupSignature(undefined);
+      }
+    };
+
+    // Set up interval to run every 3 seconds
+    const interval = setInterval(processCardTopup, 3000);
+
+    // Cleanup function to clear interval when component unmounts
+    // or when pendingCardTopup/topupSignature changes
+    return () => clearInterval(interval);
+
+  }, [cardDetails, jwtToken, pendingCardTopup, setCardDetails, topupSignature, setTopupSignature, setPendingCardTopup]);
 
   useEffect(() => {
     console.log("userFromDb", userFromDb);
@@ -89,9 +147,10 @@ export default function Page() {
     setUserFromDb(userFromDb);
     setCardUserInfo(cardUserInfo);
     setCardDetails(cardDetails);
+    setPendingCardTopup(pendingCardTopup);
   }, [
-    isInitialized, prices, rates, balances, withdrawLimits, health, userFromDb, cardUserInfo, cardDetails,
-    setPrices, setRates, setBalances, setWithdrawLimits, setHealth, setIsInitialized, setUserFromDb, setCardUserInfo, setCardDetails
+    isInitialized, prices, rates, balances, withdrawLimits, health, userFromDb, cardUserInfo, cardDetails, pendingCardTopup,
+    setPrices, setRates, setBalances, setWithdrawLimits, setHealth, setIsInitialized, setUserFromDb, setCardUserInfo, setCardDetails, setPendingCardTopup
   ]);
 
   const signMessage = useSignMessage({
@@ -134,13 +193,13 @@ export default function Page() {
       console.log("get users to sign message to get JWT");
       handleSignClick().then(setJwtToken);
     }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isInitialized, hasCardAccount]);
 
   return (
     <main className={styles.container}>
-      <Nav 
-        isAccountInitialized={isInitialized} 
+      <Nav
+        isAccountInitialized={isInitialized}
         isAccountStatusLoading={isAccountStatusLoading}
       />
 
@@ -148,21 +207,21 @@ export default function Page() {
         {config.NEXT_PUBLIC_UNAVAILABLE_TIME && (
           <Unavailable />
         )}
-        
+
         {!config.NEXT_PUBLIC_UNAVAILABLE_TIME && (
           () => {
             switch (accountStatus) {
               case AccountStatus.CLOSED:
-              return <ClosedAccount />;
+                return <ClosedAccount />;
 
-            case AccountStatus.NO_BETA_KEY:
-              return <NoBetaKey />;
+              case AccountStatus.NO_BETA_KEY:
+                return <NoBetaKey />;
 
-            case AccountStatus.NOT_INITIALIZED:
-              return <Onboarding />;
-              
-            default:
-              return <Dashboard />;
+              case AccountStatus.NOT_INITIALIZED:
+                return <Onboarding />;
+
+              default:
+                return <Dashboard />;
             }
           })()
         }

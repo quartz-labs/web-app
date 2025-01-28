@@ -62,7 +62,7 @@ export default function Card() {
                     <div key={card.id} className={styles.cardWrapper}>
                         <div>
                             <div>Status: {card.status}</div>
-                            <div>Limit: {card.limit.amount} per {card.limit.frequency}</div>
+                            <div>Limit: {card.limit?.amount || '0'} per {card.limit?.frequency || 'allTime'}</div>
                             <div>Balance: $?</div>
                         </div>
 

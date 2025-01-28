@@ -13,11 +13,10 @@ import { TxStatus, useTxStatus } from "@/src/context/tx-status-provider";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
 import { MarketIndex, TOKENS, baseUnitToDecimal, decimalToBaseUnit } from "@quartz-labs/sdk/browser";
 
-
 export default function CardTopupModal() {
     const wallet = useAnchorWallet();
 
-    const { prices, balances, rates, withdrawLimits, setModalVariation } = useStore();
+    const { prices, balances, rates, withdrawLimits, setModalVariation, setPendingCardTopup, setTopupSignature } = useStore();
     const { showError } = useError();
     const { showTxStatus } = useTxStatus();
     const refetchAccountData = useRefetchAccountData();
@@ -67,7 +66,11 @@ export default function CardTopupModal() {
 
             const signature = await signAndSendTransaction(topupTransaction, wallet, showTxStatus);
             setAwaitingSign(false);
-            if (signature) setModalVariation(ModalVariation.DISABLED);
+            if (signature) {
+                setTopupSignature(signature);
+                setPendingCardTopup(true);
+                setModalVariation(ModalVariation.DISABLED);
+            }
         } catch (error) {
             if (error instanceof WalletSignTransactionError) showTxStatus({ status: TxStatus.SIGN_REJECTED });
             else {
