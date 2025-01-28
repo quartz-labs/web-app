@@ -93,9 +93,9 @@ export default function RepayWithCollateral({
                 marketIndexCollateral,
                 swapMode: swapMode
             });
-            const response = await fetchAndParse(endpoint);
+            const response = await fetchAndParse(endpoint, undefined, 3);
             const transaction = deserializeTransaction(response.transaction);
-            const signature = await signAndSendTransaction(transaction, wallet, showTxStatus);
+            const signature = await signAndSendTransaction(transaction, wallet, showTxStatus, true);
             
             setAwaitingSign(false);
             if (signature) setModalVariation(ModalVariation.DISABLED);

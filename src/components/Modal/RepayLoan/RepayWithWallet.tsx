@@ -51,7 +51,7 @@ export default function RepayWithWallet({
                 repayingLoan: true,
                 marketIndex: marketIndexLoan
             });
-            const response = await fetchAndParse(endpoint);
+            const response = await fetchAndParse(endpoint, undefined, 3);
             const transaction = deserializeTransaction(response.transaction);
             const signature = await signAndSendTransaction(transaction, wallet, showTxStatus);
             

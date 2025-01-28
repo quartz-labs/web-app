@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import config from '@/src/config/config';
 import { AccountStatus } from '@/src/types/enums/AccountStatus.enum';
-import { getVaultPublicKey } from '@quartz-labs/sdk/browser';
+import { getVaultPublicKey, retryWithBackoff } from '@quartz-labs/sdk';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -56,15 +56,12 @@ export async function GET(request: Request) {
 
 async function checkHasVaultHistory(connection: Connection, wallet: PublicKey): Promise<boolean> {
     const vaultPda = getVaultPublicKey(wallet);
-    try {
-        // TODO: This try catch is temporary due to RPC issues
-        const signatures = await connection.getSignaturesForAddress(vaultPda);
-        const isSignatureHistory = (signatures.length > 0);
-        return isSignatureHistory;
-    } catch (error) {
-        console.error(error);
-        return false;
-    }
+    const signatures = await retryWithBackoff(
+        async () => connection.getSignaturesForAddress(vaultPda),
+        4
+    );
+    const isSignatureHistory = (signatures.length > 0);
+    return isSignatureHistory;
 }
 
 async function checkIsMissingBetaKey(connection: Connection, address: PublicKey): Promise<boolean> {

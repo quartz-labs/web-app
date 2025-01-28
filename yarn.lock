@@ -812,10 +812,10 @@
     bs58 "^5.0.0"
     jito-ts "^3.0.1"
 
-"@quartz-labs/sdk@0.3.7":
-  version "0.3.7"
-  resolved "https://registry.yarnpkg.com/@quartz-labs/sdk/-/sdk-0.3.7.tgz#0c1cb153b66694f3b13df12c0994d269c1ddfb01"
-  integrity sha512-p9e/HK0GgA/tF5H18RpjO+6GA7HibrJwwg9tuSPQr11GqcFe3tjhDr2WRPfZ28S/DTWqTsUz81agVuuVH63xsg==
+"@quartz-labs/sdk@0.4.1":
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/@quartz-labs/sdk/-/sdk-0.4.1.tgz#6fac96f9fa134906ac8675384037d7ad52d5bc34"
+  integrity sha512-idoim1yJEnBWj9/lLW/fgwESw9321vRuXibXYg1uvrSDR72GT5gYE5rRY8LgZHLo8oAkXTshBFQT/99PHFksfQ==
   dependencies:
     "@coral-xyz/anchor" "^0.29.0"
     "@drift-labs/sdk" "^2.103.0-beta.9"

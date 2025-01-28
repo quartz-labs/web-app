@@ -19,7 +19,7 @@ interface QueryConfig {
     errorMessage: string;
     enabled?: boolean;
     staleTime?: number;
-    retry?: boolean;
+    retry?: boolean | number;
     ignoreError?: boolean;
 }
 
@@ -88,7 +88,8 @@ export const useAccountStatusQuery = (address: PublicKey | null) => {
         },
         errorMessage: "Could not fetch account status",
         enabled: address != null,
-        staleTime: Infinity
+        staleTime: Infinity,
+        retry: 5
     });
     return query();
 };
