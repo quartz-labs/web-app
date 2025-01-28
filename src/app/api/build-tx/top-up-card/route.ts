@@ -66,7 +66,6 @@ export async function GET(request: Request) {
         address: searchParams.get('address'),
         amountBaseUnits: Number(searchParams.get('amountBaseUnits')),
         marketIndex: Number(searchParams.get('marketIndex')),
-        allowLoan: searchParams.get('allowLoan') === 'true'
     };
 
     let body: z.infer<typeof paramsSchema>;
@@ -83,14 +82,16 @@ export async function GET(request: Request) {
     const chains = await sdk.chainDetailsMap();
 
     const sourceChain = chains[ChainSymbol.SOL];
-    const sourceToken = ensure(sourceChain?.tokens.find((tokenInfo) => tokenInfo.symbol === "USDC"));
+    const sourceToken = sourceChain?.tokens.find((tokenInfo) => tokenInfo.symbol === "USDC");
+    if (!sourceToken) {
+        return NextResponse.json({ error: "Unable to get source token from Allbridge SDK" }, { status: 500 });
+    }
 
     const destinationChain = chains[ChainSymbol.BAS];
-    const destinationToken = ensure(destinationChain?.tokens.find((tokenInfo) => tokenInfo.symbol === "USDC"));
-
-
-    console.log("Amount: ", baseUnitToDecimal(amountBaseUnits, marketIndex).toFixed(2));
-    console.log("Amount: ", baseUnitToDecimal(amountBaseUnits, marketIndex));
+    const destinationToken = destinationChain?.tokens.find((tokenInfo) => tokenInfo.symbol === "USDC");
+    if (!destinationToken) {
+        return NextResponse.json({ error: "Unable to get destination token from Allbridge SDK" }, { status: 500 });
+    }
 
     let bridgeTx: VersionedTransaction;
     try {
@@ -149,14 +150,6 @@ export async function GET(request: Request) {
             { status: 500 }
         );
     }
-}
-
-export function ensure<T>(argument: T | undefined | null): T {
-    if (argument === undefined || argument === null) {
-        throw new TypeError("This value was promised to be there.");
-    }
-
-    return argument;
 }
 
 async function makeWithdrawIxs(
