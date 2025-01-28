@@ -70,7 +70,7 @@ export default function Card() {
                             <button
                                 className={styles.cardDetails}
                                 onClick={() => getCardDetails(card.id)}
-                            >  
+                            >
                                 <div className={styles.cardNumber}>**** **** **** {card.last4}</div>
                                 <div>Expires: {card.expirationMonth}/{card.expirationYear}</div>
                             </button>

@@ -57,15 +57,6 @@ export default function CardTopupModal() {
 
         setAwaitingSign(true);
         try {
-            // const withdrawEndpoint = buildEndpointURL("/api/build-tx/withdraw", {
-            //     address: wallet.publicKey.toBase58(),
-            //     allowLoan: true,
-            //     amountBaseUnits: decimalToBaseUnit(amountDecimals, marketIndex),
-            //     marketIndex
-            // });
-            // const withdrawResponse = await fetchAndParse(withdrawEndpoint);
-            // const withdrawTransaction = deserializeTransaction(withdrawResponse.transaction);
-
             const topupEndpoint = buildEndpointURL("/api/build-tx/top-up-card", {
                 address: wallet.publicKey.toBase58(),
                 amountBaseUnits: decimalToBaseUnit(amountDecimals, marketIndex),
