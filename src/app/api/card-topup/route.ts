@@ -56,13 +56,19 @@ export async function POST(request: Request) {
         return NextResponse.json({"status": "Transfer status not found"}, { status: 404 });
     }
 
-    let amount;
+    let amount: number;
     try {
         if (!transferStatus.receive) {
             return NextResponse.json({"status": "Transfer status not found"}, { status: 404 });
         }
 
-        amount = transferStatus.receive.amount;
+        // Convert to dollars by dividing by 1_000_000 (6 decimal places)
+        const amountInDollars = Number(transferStatus.receive.amount) / 1_000_000;
+        // Round to 2 decimal places
+        const roundedAmount = Math.floor(amountInDollars * 100) / 100;
+
+        amount = Math.round(roundedAmount * 100);
+
     } catch (error) {
         return NextResponse.json({"status": "Transfer status not found"}, { status: 404 });
     }
