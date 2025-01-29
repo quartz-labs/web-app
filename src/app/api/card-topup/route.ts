@@ -53,33 +53,23 @@ export async function POST(request: Request) {
         transferStatus = await sdk.getTransferStatus(chainSymbol, signature);
     }
     catch (error) {
-        console.log("Error with the SDK", error);
-        return NextResponse.json(undefined, { status: 404 });
+        return NextResponse.json({"status": "Transfer status not found"}, { status: 404 });
     }
-
-    console.log("transferStatus", transferStatus);
 
     let amount;
     try {
         if (!transferStatus.receive) {
-            console.log("Transfer status not found, returning undefined");
-            return NextResponse.json(undefined, { status: 404 });
+            return NextResponse.json({"status": "Transfer status not found"}, { status: 404 });
         }
 
         amount = transferStatus.receive.amount;
-
-        console.log("amount", amount);
-
     } catch (error) {
-        console.error("Unable to get transfer status from allbridge SDK", error);
-        return NextResponse.json(undefined, { status: 404 });
+        return NextResponse.json({"status": "Transfer status not found"}, { status: 404 });
     }
 
     //TODO: convert number to format that Card api expects 
     try {
         const updatedCard = await updateCardLimit(body.cardId, Number(amount), env, body.jwtToken);
-
-        console.log("updatedCard", updatedCard);
         return NextResponse.json(updatedCard);
     } catch (error) {
         console.error("Error updating the card limit: ", error);

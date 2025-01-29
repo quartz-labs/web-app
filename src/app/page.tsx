@@ -16,6 +16,8 @@ import Unavailable from "@/src/components/OtherViews/Unavailable";
 import bs58 from 'bs58';
 import { fetchAndParse } from "../utils/helpers";
 import { useRefetchCardDetails } from "../utils/hooks";
+import { useError } from "../context/error-provider";
+import { captureError } from "../utils/errors";
 
 export default function Page() {
   const wallet = useWallet();
@@ -36,6 +38,8 @@ export default function Page() {
     topupSignature,
     jwtToken
   } = useStore();
+
+  const { showError } = useError();
 
   const { data: accountStatus, isLoading: isAccountStatusLoading } = useAccountStatusQuery(wallet.publicKey);
   const isInitialized = (accountStatus === AccountStatus.INITIALIZED && !isAccountStatusLoading && !config.NEXT_PUBLIC_UNAVAILABLE_TIME);
@@ -82,19 +86,29 @@ export default function Page() {
       let responseBody;
       try {
         responseBody = await response.json();
+
+        if (response.status === 404) {
+          return;
+        }
+
+        if (response.status === 500) {
+          captureError(showError, "Failed to update the card limit after topup", "/page.tsx", responseBody, wallet.publicKey);
+          return;
+        }
+
         if (!responseBody) {
           console.log("Didn't update the card limit, response is undefined: ", responseBody);
           return;
         }
 
       } catch (error) {
-        console.error("Error updating the card limit: ", error);
+        captureError(showError, "Failed to update the card limit after topup", "/page.tsx", error, wallet.publicKey);
         return;
       }
 
       refetchCardDetails();
-        setPendingCardTopup(false);
-        setTopupSignature(undefined);
+      setPendingCardTopup(false);
+      setTopupSignature(undefined);
     };
 
     // Set up interval to run every 3 seconds
