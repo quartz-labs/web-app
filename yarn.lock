@@ -444,15 +444,10 @@
   resolved "https://registry.yarnpkg.com/@js-sdsl/ordered-map/-/ordered-map-4.4.2.tgz#9299f82874bab9e4c7f9c48d865becbfe8d6907c"
   integrity sha512-iUKgm52T8HOE/makSxjqoWhe95ZJA1/G1sYsGev2JDKUSS14KAgg1LHb+Ba+IPow0xflbnSkOsZcO08C7w1gYw==
 
-"@jup-ag/api@^6.0.30":
-  version "6.0.36"
-  resolved "https://registry.yarnpkg.com/@jup-ag/api/-/api-6.0.36.tgz#3bc5393a25e6d10dece0835b43f80db8a28beb17"
-  integrity sha512-oJsYT1vhb8+uf+wrvRTDyB0/MN5RmxiqtVztEUmDaCxwTcVk3Eo/YsRTqeqKlB7rUMTNyQPqiEW6t3tqitgXzg==
-
-"@jup-ag/api@^6.0.32":
-  version "6.0.32"
-  resolved "https://registry.yarnpkg.com/@jup-ag/api/-/api-6.0.32.tgz#af140c5f85b2898857cfc76bedf9079168ca1246"
-  integrity sha512-MkNmYhTbf8zmT52xpM/f7pfZJTlAz0G+juFqBJo0iWZ52stl6EBDKTUCphUQkn153pkUqsLzvFW/q5EjarUI5A==
+"@jup-ag/api@6.0.30", "@jup-ag/api@^6.0.30":
+  version "6.0.30"
+  resolved "https://registry.yarnpkg.com/@jup-ag/api/-/api-6.0.30.tgz#1beb8876affb803bea8ff18a24259b48272a3cf2"
+  integrity sha512-+LSo5yXR150kXg+iyVhNCSwK+PSL+MsB9Wvl930zgeeW0LWUTGyMhibz6wcqcViol+F0RMAVOYh6ryJYO1kkZw==
 
 "@metaplex-foundation/beet-solana@^0.3.0":
   version "0.3.1"

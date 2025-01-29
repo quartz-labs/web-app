@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@jup-ag/api": "^6.0.32",
+    "@jup-ag/api": "6.0.30",
     "@mrgnlabs/marginfi-client-v2": "4.0.4",
     "@quartz-labs/sdk": "0.4.1",
     "@solana/spl-token": "^0.4.9",
@@ -44,7 +44,8 @@
   },
   "resolutions": {
     "@solana/web3.js": "1.98.0",
-    "rpc-websockets": "9.0.4"
+    "rpc-websockets": "9.0.4",
+    "@jup-ag/api": "6.0.30"
   },
   "packageManager": "yarn@1.22.22"
 }
