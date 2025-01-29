@@ -69,7 +69,7 @@ export default function Page() {
 
     const cardInfo = cardDetails?.find(card => card !== null);
     if (!cardInfo) return;
-    
+
     showTxStatus({ status: TxStatus.TOPUP_IN_PROGRESS, signature: topupSignature, walletAddress: wallet.publicKey?.toBase58() });
 
     const startTime = Date.now();
@@ -107,7 +107,6 @@ export default function Page() {
         }
 
         if (response.status === 500) {
-          captureError(showError, "Failed to update the card limit after topup", "/page.tsx", responseBody, wallet.publicKey);
           return;
         }
 
