@@ -65,11 +65,22 @@ export default function Page() {
   useEffect(() => {
     if (!pendingCardTopup || !topupSignature) return;
 
-    //get the first card details in the array that is not null
     const cardInfo = cardDetails?.find(card => card !== null);
     if (!cardInfo) return;
 
+    const startTime = Date.now();
+    const TIMEOUT_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
+
     const processCardTopup = async () => {
+      // Check if we've exceeded the timeout
+      if (Date.now() - startTime > TIMEOUT_DURATION) {
+        clearInterval(interval);
+        captureError(showError, "Card topup process timed out after 5 minutes, please notify support", "/page.tsx", null, wallet.publicKey);
+        setPendingCardTopup(false);
+        setTopupSignature(undefined);
+        return;
+      }
+
       //call the card topup POST endpoint
       const response = await fetch(`/api/card-topup`, {
         method: 'POST',
