@@ -23,6 +23,7 @@ interface QueryConfig {
     staleTime?: number;
     retry?: boolean;
     ignoreError?: boolean;
+    accept404?: boolean;
 }
 
 function createQuery<T>({
@@ -35,7 +36,8 @@ function createQuery<T>({
     enabled,
     staleTime,
     retry = true,
-    ignoreError = false
+    ignoreError = false,
+    accept404 = false
 }: QueryConfig) {
     return () => {
         const { showError } = useError();
@@ -46,7 +48,12 @@ function createQuery<T>({
             const response = await fetch(endpoint);
             const body = await response.json();
 
-            if (!response.ok) throw new Error(body.message || errorMessage);
+            if (!response.ok) {
+                if (response.status === 404 && accept404) {
+                    return transformResponse ? transformResponse(body) : body;
+                }
+                throw new Error(body.message || errorMessage);
+            }
 
             return transformResponse ? transformResponse(body) : body;
         };
@@ -104,7 +111,8 @@ export const useUserFromDatabaseQuery = (publicKey: PublicKey | null) => {
         } : undefined,
         errorMessage: "Could not fetch account information",
         enabled: publicKey != null,
-        staleTime: Infinity
+        staleTime: Infinity,
+        accept404: true
     });
     return query();
 };
