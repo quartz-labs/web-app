@@ -68,6 +68,7 @@ export default function TxStatusPopup() {
     if (!props || !enabled || status === TxStatus.NONE) return (<></>);
 
     const explorerUrl = `https://solscan.io/tx/${props.signature}`;
+    const allbridgeWalletUrl = `https://core.allbridge.io/explorer/address/SOL/${props.walletAddress}`;
 
     if (status === TxStatus.TIMEOUT) return (
         <div className={`${styles.popup} ${styles.error}`}>
@@ -160,6 +161,64 @@ export default function TxStatusPopup() {
                     src="/checkmark.png"
                 />
                 <a href={explorerUrl} target="_blank">View on Solscan</a>
+            </div>
+        </div>
+    );
+
+
+    if (status === TxStatus.TOPUP_IN_PROGRESS) return (
+        <div className={styles.popup}>
+            <div className={styles.heading}>
+                <p>Card top up in progress</p>
+            </div>
+
+            <div className={styles.message}>
+                <Image
+                    height="25"
+                    width="25"
+                    alt=""
+                    src="/checkmark.png"
+                />
+                <a href={explorerUrl} target="_blank">View on Solscan</a>
+                <a href={allbridgeWalletUrl} target="_blank">View on Allbridge</a>
+            </div>
+        </div>
+    );
+
+    if (status === TxStatus.TOPUP_FAILED) return (
+        <div className={styles.popup}>
+            <div className={styles.headingError}>
+                <p>Card top up failed or timed out</p>
+            </div>
+
+            <div className={styles.message}>
+                <Image
+                    height="25"
+                    width="25"
+                    alt=""
+                    src="/checkmark.png"
+                />
+                <a href={explorerUrl} target="_blank">View on Solscan</a>
+                <a href={allbridgeWalletUrl} target="_blank">View on Allbridge</a>
+            </div>
+        </div>
+    );
+
+    if (status === TxStatus.TOPUP_SUCCESS) return (
+        <div className={styles.popup}>
+            <div className={styles.heading}>
+                <p>Card top up successful!</p>
+            </div>
+
+            <div className={styles.message}>
+                <Image
+                    height="25"
+                    width="25"
+                    alt=""
+                    src="/checkmark.png"
+                />
+                <a href={explorerUrl} target="_blank">View on Solscan</a>
+                <a href={allbridgeWalletUrl} target="_blank">View on Allbridge</a>
             </div>
         </div>
     );

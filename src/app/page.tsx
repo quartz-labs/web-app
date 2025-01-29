@@ -18,6 +18,7 @@ import { fetchAndParse } from "../utils/helpers";
 import { useRefetchCardDetails } from "../utils/hooks";
 import { useError } from "../context/error-provider";
 import { captureError } from "../utils/errors";
+import { TxStatus, useTxStatus } from "../context/tx-status-provider";
 
 export default function Page() {
   const wallet = useWallet();
@@ -40,6 +41,7 @@ export default function Page() {
   } = useStore();
 
   const { showError } = useError();
+  const { showTxStatus } = useTxStatus();
 
   const { data: accountStatus, isLoading: isAccountStatusLoading } = useAccountStatusQuery(wallet.publicKey);
   const isInitialized = (accountStatus === AccountStatus.INITIALIZED && !isAccountStatusLoading && !config.NEXT_PUBLIC_UNAVAILABLE_TIME);
@@ -67,6 +69,8 @@ export default function Page() {
 
     const cardInfo = cardDetails?.find(card => card !== null);
     if (!cardInfo) return;
+    
+    showTxStatus({ status: TxStatus.TOPUP_IN_PROGRESS, signature: topupSignature, walletAddress: wallet.publicKey?.toBase58() });
 
     const startTime = Date.now();
     const TIMEOUT_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
@@ -76,11 +80,11 @@ export default function Page() {
       if (Date.now() - startTime > TIMEOUT_DURATION) {
         clearInterval(interval);
         captureError(showError, "Card topup process timed out after 5 minutes, please notify support", "/page.tsx", null, wallet.publicKey);
+        showTxStatus({ status: TxStatus.TOPUP_FAILED, signature: topupSignature, walletAddress: wallet.publicKey?.toBase58() });
         setPendingCardTopup(false);
         setTopupSignature(undefined);
         return;
       }
-
       //call the card topup POST endpoint
       const response = await fetch(`/api/card-topup`, {
         method: 'POST',
@@ -113,6 +117,7 @@ export default function Page() {
         }
 
       } catch (error) {
+        showTxStatus({ status: TxStatus.TOPUP_FAILED, signature: topupSignature, walletAddress: wallet.publicKey?.toBase58() });
         captureError(showError, "Failed to update the card limit after topup", "/page.tsx", error, wallet.publicKey);
         return;
       }
@@ -120,6 +125,7 @@ export default function Page() {
       refetchCardDetails();
       setPendingCardTopup(false);
       setTopupSignature(undefined);
+      showTxStatus({ status: TxStatus.TOPUP_SUCCESS, signature: topupSignature, walletAddress: wallet.publicKey?.toBase58() });
     };
 
     // Set up interval to run every 3 seconds

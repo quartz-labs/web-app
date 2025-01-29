@@ -10,11 +10,15 @@ export enum TxStatus {
   CONFIRMED,
   TIMEOUT,
   FAILED,
-  BLOCKHASH_EXPIRED
+  BLOCKHASH_EXPIRED,
+  TOPUP_IN_PROGRESS,
+  TOPUP_FAILED,
+  TOPUP_SUCCESS
 }
 
 export interface TxStatusProps {
   signature?: string;
+  walletAddress?: string;
   status: TxStatus;
 }
 
