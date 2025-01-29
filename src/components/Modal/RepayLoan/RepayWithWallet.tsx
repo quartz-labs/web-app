@@ -73,9 +73,9 @@ export default function RepayWithWallet({
             <h2 className={`${styles.heading} ${styles.headingRepayLoan}`}>Repay Loan from Wallet</h2>
 
             <InputSection
-                borrowing={false}
+                borrowing={true}
                 price={prices?.[marketIndexLoan]}
-                rate={rates?.[marketIndexLoan]?.depositRate}
+                rate={rates?.[marketIndexLoan]?.borrowRate}
                 available={baseUnitToDecimal(maxRepayBaseUnits, marketIndexLoan)}
                 amountStr={amountLoanStr}
                 setAmountStr={setAmountLoanStr}
