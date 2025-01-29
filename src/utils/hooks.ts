@@ -50,3 +50,11 @@ export function useRefetchCardDetails() {
         queryClient.invalidateQueries({ queryKey: ["card-user", "cards"], refetchType: "all" });
     }, [queryClient]);
 }
+
+export function useRefetchUserInfo() {
+    const queryClient = useQueryClient();
+
+    return useCallback(async () => {
+        queryClient.invalidateQueries({ queryKey: ["card-user"], refetchType: "all" });
+    }, [queryClient]);
+}

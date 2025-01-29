@@ -11,6 +11,7 @@ import CardSignupInputSection from "../CardSignUp/CardAccountCreate.ModalCompone
 import config from "@/src/config/config";
 import { fetchAndParse } from "@/src/utils/helpers";
 import type { CardUserBase } from "@/src/types/interfaces/CardUserResponse.interface";
+import { useRefetchUserInfo } from "@/src/utils/hooks";
 
 interface CardSignupForm {
     id: string;
@@ -55,6 +56,8 @@ export default function CardSignupModal() {
     const wallet = useAnchorWallet();
     const { setModalVariation, setKycLink } = useStore();
     const { showError } = useError();
+
+    const refetchUserInfo = useRefetchUserInfo();
 
     const [formData, setFormData] = useState<CardSignupForm>({
         id: "",
@@ -155,8 +158,8 @@ export default function CardSignupModal() {
             console.log('Add User Response:', addUserResponse);
 
             setKycLink(`${creatCardApplicationResponse.applicationCompletionLink.url}?userId=${creatCardApplicationResponse.applicationCompletionLink.params.userId}`);
-
             setModalVariation(ModalVariation.CARD_KYC);
+            refetchUserInfo();
         } catch (error) {
             captureError(showError, "Failed to submit form", "/CardSignupModal.tsx", error, wallet.publicKey);
         }
