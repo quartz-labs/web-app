@@ -15,7 +15,7 @@ import config from "@/src/config/config";
 import Unavailable from "@/src/components/OtherViews/Unavailable";
 import bs58 from 'bs58';
 import { fetchAndParse } from "../utils/helpers";
-import type { CardsForUserResponse } from "../types/interfaces/CardUserResponse.interface";
+import { useRefetchCardDetails } from "../utils/hooks";
 
 export default function Page() {
   const wallet = useWallet();
@@ -56,6 +56,8 @@ export default function Page() {
     userFromDb?.auth_level === "Base"
   );
 
+  const refetchCardDetails = useRefetchCardDetails();
+
   useEffect(() => {
     if (!pendingCardTopup || !topupSignature) return;
 
@@ -90,13 +92,9 @@ export default function Page() {
         return;
       }
 
-      const updatedCardDetails = cardDetails?.map(card => card.id === cardInfo.id ? responseBody as CardsForUserResponse : card);
-      if (updatedCardDetails) {
-        setCardDetails(updatedCardDetails);
-        console.log("updatedCardDetails", updatedCardDetails);
+      refetchCardDetails();
         setPendingCardTopup(false);
         setTopupSignature(undefined);
-      }
     };
 
     // Set up interval to run every 3 seconds
@@ -106,7 +104,7 @@ export default function Page() {
     // or when pendingCardTopup/topupSignature changes
     return () => clearInterval(interval);
 
-  }, [cardDetails, jwtToken, pendingCardTopup, setCardDetails, topupSignature, setTopupSignature, setPendingCardTopup]);
+  }, [cardDetails, jwtToken, pendingCardTopup, topupSignature, setTopupSignature, setPendingCardTopup, refetchCardDetails]);
 
   useEffect(() => {
     console.log("userFromDb", userFromDb);

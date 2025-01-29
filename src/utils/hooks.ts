@@ -42,3 +42,11 @@ export function useRefetchAccountStatus() {
         });
     }, [queryClient, wallet.publicKey]);
 }
+
+export function useRefetchCardDetails() {
+    const queryClient = useQueryClient();
+
+    return useCallback(async () => {
+        queryClient.invalidateQueries({ queryKey: ["card-user", "cards"], refetchType: "all" });
+    }, [queryClient]);
+}

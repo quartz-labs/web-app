@@ -126,7 +126,7 @@ export const useCardUserInfoQuery = (cardUserId: string | null, enabled: boolean
 
 export const useCardsForUserQuery = (cardUserId: string | null) => {
     const query = createQuery<CardsForUserResponse[]>({
-        queryKey: ["card-user", cardUserId ?? ""],
+        queryKey: ["card-user", "cards", cardUserId ?? ""],
         url: `${config.NEXT_PUBLIC_INTERNAL_API_URL}/card/issuing/user`,
         params: cardUserId ? {
             id: cardUserId
