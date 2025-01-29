@@ -95,7 +95,7 @@ export default function RepayWithCollateral({
             });
             const response = await fetchAndParse(endpoint, undefined, 3);
             const transaction = deserializeTransaction(response.transaction);
-            const signature = await signAndSendTransaction(transaction, wallet, showTxStatus, true);
+            const signature = await signAndSendTransaction(transaction, wallet, showTxStatus);
             
             setAwaitingSign(false);
             if (signature) setModalVariation(ModalVariation.DISABLED);
