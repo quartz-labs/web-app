@@ -10,7 +10,7 @@ import CardSignupInputSection from "../CardSignUp/CardAccountCreate.ModalCompone
 
 import config from "@/src/config/config";
 import { fetchAndParse } from "@/src/utils/helpers";
-import type { CardUserBase } from "@/src/types/interfaces/CardUserResponse.interface";
+import type { ProviderCardUser } from "@/src/types/interfaces/CardUserResponse.interface";
 import { useRefetchUserInfo } from "@/src/utils/hooks";
 
 interface CardSignupForm {
@@ -132,7 +132,7 @@ export default function CardSignupModal() {
                 phoneNumber: formData.phoneNumber
             };
 
-            const creatCardApplicationResponse: CardUserBase = await fetchAndParse(`${config.NEXT_PUBLIC_INTERNAL_API_URL}/card/application/create`, {
+            const creatCardApplicationResponse: ProviderCardUser = await fetchAndParse(`${config.NEXT_PUBLIC_INTERNAL_API_URL}/card/application/create`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

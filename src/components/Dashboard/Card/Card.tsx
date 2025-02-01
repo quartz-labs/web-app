@@ -7,7 +7,13 @@ import config from "@/src/config/config";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
 
 export default function Card() {
-    const { setModalVariation, userFromDb, jwtToken, setCardDetails, cardDetails } = useStore();
+    const { 
+        setModalVariation, 
+        quartzCardUser, 
+        jwtToken, 
+        setCardDetails, 
+        cardDetails 
+    } = useStore();
     const [showDetails, setShowDetails] = useState(false);
 
     const [cardPan, setCardPan] = useState<string[] | null>(null);
@@ -24,7 +30,7 @@ export default function Card() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    id: userFromDb?.card_api_user_id,
+                    id: quartzCardUser?.card_api_user_id,
                     type: "virtual",
                     frequency: "allTime",
                     amountLimit: "0"
@@ -37,21 +43,18 @@ export default function Card() {
     }
 
     const getCardDetails = async (cardId: string) => {
-        const body = {
-            jwtToken: jwtToken,
-        }
-
         const response = await fetchAndParse(`/api/card-details?id=${cardId}`, {
             method: 'POST',
             headers: {
                 "Authorization": `Bearer ${jwtToken}`,
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(body)
+            body: JSON.stringify({
+                jwtToken
+            })
         });
         setCardPan([response.pan]);
         setCardCvc([response.cvc]);
-
         setShowDetails(true);
     }
 
@@ -93,7 +96,7 @@ export default function Card() {
 
     return (
         <div className={styles.cardsContainer}>
-            {!userFromDb?.auth_level && (
+            {!quartzCardUser?.auth_level && (
                 <button
                     className={`glass-button ${styles.mainButton}`}
                     onClick={() => setModalVariation(ModalVariation.CARD_SIGNUP)}
@@ -102,7 +105,7 @@ export default function Card() {
                 </button>
             )}
 
-            {userFromDb?.auth_level === "Base" && (
+            {quartzCardUser?.auth_level === "Base" && (
                 <button
                     className={`glass-button ${styles.mainButton}`}
                     onClick={() => setModalVariation(ModalVariation.CARD_KYC)}
@@ -111,7 +114,7 @@ export default function Card() {
                 </button>
             )}
 
-            {userFromDb?.auth_level === "Card" &&
+            {quartzCardUser?.auth_level === "Card" &&
                 <button
                     className={`glass-button ${styles.mainButton}`}
                     onClick={createCard}

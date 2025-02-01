@@ -34,8 +34,13 @@ export default function Dashboard() {
 
       <div className={`glass panel ${styles.assetsPanel}`}>
         <div className={styles.assetsPanelContent}>
-          <h2 className={styles.title}>Card</h2>
-          <Card />
+          {isInitialized && (
+            <>
+              <h2 className={styles.title}>Card</h2>  
+              <Card />
+            </>
+          )}
+
           <h2 className={styles.title}>Assets</h2>
           <Assets />
         </div>

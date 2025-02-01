@@ -2,7 +2,7 @@ import { useStore } from "@/src/utils/store";
 import styles from "../Modal.module.css";
 
 export default function CardKycModal() {
-    const { kycLink, cardUserInfo } = useStore();
+    const { kycLink, providerCardUser: cardUserInfo } = useStore();
 
     return (
         <div className={styles.contentWrapper}>

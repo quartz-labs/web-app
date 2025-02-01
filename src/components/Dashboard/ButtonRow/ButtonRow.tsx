@@ -3,7 +3,7 @@ import styles from "./ButtonRow.module.css";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
 
 export default function ButtonRow() {
-    const { setModalVariation, balances, userFromDb } = useStore();
+    const { setModalVariation, balances, quartzCardUser: userFromDb } = useStore();
     const hasLoan = balances ? Object.values(balances).some(balance => balance < 0) : false;
 
     return (

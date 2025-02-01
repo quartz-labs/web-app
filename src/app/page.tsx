@@ -8,14 +8,13 @@ import NoBetaKey from "@/src/components/OtherViews/NoBetaKey";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { AccountStatus } from "@/src/types/enums/AccountStatus.enum";
 import styles from "./page.module.css";
-import { useAccountStatusQuery, useBalancesQuery, useCardsForUserQuery, useCardUserInfoQuery, useHealthQuery, usePricesQuery, useRatesQuery, useUserFromDatabaseQuery, useWithdrawLimitsQuery } from "@/src/utils/queries";
-import { useSignMessage, useStore } from "@/src/utils/store";
-import { useEffect, useCallback, useState } from 'react';
+import { useAccountStatusQuery, useBalancesQuery, useCardDetailsQuery, useProviderCardUserQuery, useHealthQuery, usePricesQuery, useRatesQuery, useQuartzCardUserQuery, useWithdrawLimitsQuery } from "@/src/utils/queries";
+import { useStore } from "@/src/utils/store";
+import { useEffect, useState } from 'react';
 import config from "@/src/config/config";
 import Unavailable from "@/src/components/OtherViews/Unavailable";
-import bs58 from 'bs58';
 import { fetchAndParse } from "../utils/helpers";
-import { useRefetchCardDetails } from "../utils/hooks";
+import { useRefetchCardDetails, useLoginCardUser } from "../utils/hooks";
 import { useError } from "../context/error-provider";
 import { captureError } from "../utils/errors";
 import { TxStatus, useTxStatus } from "../context/tx-status-provider";
@@ -24,15 +23,6 @@ export default function Page() {
   const wallet = useWallet();
   const {
     setIsInitialized,
-    setPrices,
-    setRates,
-    setBalances,
-    setWithdrawLimits,
-    setHealth,
-    setJwtToken,
-    setUserFromDb,
-    setCardUserInfo,
-    setCardDetails,
     setPendingCardTopup,
     setTopupSignature,
     pendingCardTopup,
@@ -42,28 +32,43 @@ export default function Page() {
 
   const { showError } = useError();
   const { showTxStatus } = useTxStatus();
-
+  
+  // Quartz account status
   const { data: accountStatus, isLoading: isAccountStatusLoading } = useAccountStatusQuery(wallet.publicKey);
   const isInitialized = (accountStatus === AccountStatus.INITIALIZED && !isAccountStatusLoading && !config.NEXT_PUBLIC_UNAVAILABLE_TIME);
+  useEffect(() => {
+    setIsInitialized(isInitialized);
+  }, [setIsInitialized, isInitialized]);
 
-  const { data: prices } = usePricesQuery();
-  const { data: rates } = useRatesQuery();
-  const { data: balances } = useBalancesQuery(isInitialized ? wallet.publicKey : null);
-  const { data: withdrawLimits } = useWithdrawLimitsQuery(isInitialized ? wallet.publicKey : null);
-  const { data: health } = useHealthQuery(isInitialized ? wallet.publicKey : null);
-  const { data: userFromDb } = useUserFromDatabaseQuery(isInitialized ? wallet.publicKey : null);
-  const hasCardAccount = userFromDb?.auth_level === "Card" ? true : false;
-
-  const { data: cardDetails } = useCardsForUserQuery(userFromDb?.card_api_user_id ?? null);
-
-  const [kycApplicationStatus, setKycApplicationStatus] = useState<string | null>(null);
-  const { data: cardUserInfo } = useCardUserInfoQuery(
-    userFromDb?.card_api_user_id ?? null,
-    userFromDb?.auth_level === "Base"
+  // Quartz account data
+  usePricesQuery();
+  useRatesQuery();
+  useBalancesQuery(isInitialized ? wallet.publicKey : null);
+  useWithdrawLimitsQuery(isInitialized ? wallet.publicKey : null);
+  useHealthQuery(isInitialized ? wallet.publicKey : null);
+  
+  // Card account data
+  const { data: quartzCardUser } = useQuartzCardUserQuery(isInitialized ? wallet.publicKey : null);
+  const { data: providerCardUser } = useProviderCardUserQuery(
+    quartzCardUser?.card_api_user_id ?? null,
+    quartzCardUser?.auth_level === "Base"
   );
+  const { data: cardDetails } = useCardDetailsQuery(quartzCardUser?.card_api_user_id ?? null);
 
+  // Log in card user
+  const loginCardUser = useLoginCardUser(wallet);
+  useEffect(() => {
+    if (isInitialized && quartzCardUser?.auth_level === "Card") {
+      loginCardUser.mutate();
+    }
+  }, [isInitialized, quartzCardUser, loginCardUser]);
+  
+  const [kycApplicationStatus, setKycApplicationStatus] = useState<string | null>(null);
+  
+
+
+  // Topup Card
   const refetchCardDetails = useRefetchCardDetails();
-
   useEffect(() => {
     if (!pendingCardTopup || !topupSignature) return;
 
@@ -134,15 +139,16 @@ export default function Page() {
     // or when pendingCardTopup/topupSignature changes
     return () => clearInterval(interval);
 
-  }, [cardDetails, jwtToken, pendingCardTopup, topupSignature, setTopupSignature, setPendingCardTopup, refetchCardDetails]);
+  }, [cardDetails, jwtToken, pendingCardTopup, topupSignature, setTopupSignature, setPendingCardTopup, refetchCardDetails, showTxStatus, showError, wallet.publicKey]);
 
+  // Handle approve KYC application
   useEffect(() => {
-    console.log("userFromDb", userFromDb);
+    console.log("userFromDb", quartzCardUser);
     console.log("kycApplicationStatus", kycApplicationStatus);
     console.log("wallet.publicKey", wallet.publicKey);
-    console.log("cardUserInfo", cardUserInfo);
+    console.log("cardUserInfo", providerCardUser);
 
-    if (kycApplicationStatus === "approved" && userFromDb?.auth_level !== "Card") {
+    if (kycApplicationStatus === "approved" && quartzCardUser?.auth_level !== "Card") {
       console.log("kycApplicationStatus is approved, updating user in database to have auth level 'Card'");
       //update user in database to have auth level "Card"
       fetchAndParse(`${config.NEXT_PUBLIC_INTERNAL_API_URL}/auth/auth-level?publicKey=${wallet.publicKey}`, {
@@ -157,72 +163,14 @@ export default function Page() {
 
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kycApplicationStatus, wallet.publicKey, userFromDb]);
+  }, [kycApplicationStatus, wallet.publicKey, quartzCardUser]);
 
+  // Set kyc application status
   useEffect(() => {
-    if (cardUserInfo) {
-      setKycApplicationStatus(cardUserInfo.applicationStatus);
+    if (providerCardUser) {
+      setKycApplicationStatus(providerCardUser.applicationStatus);
     }
-  }, [cardUserInfo]);
-
-  useEffect(() => {
-    setPrices(prices);
-    setRates(rates);
-    setBalances(balances);
-    setWithdrawLimits(withdrawLimits);
-    setHealth(health);
-    setIsInitialized(isInitialized);
-    setUserFromDb(userFromDb);
-    setCardUserInfo(cardUserInfo);
-    setCardDetails(cardDetails);
-    setPendingCardTopup(pendingCardTopup);
-  }, [
-    isInitialized, prices, rates, balances, withdrawLimits, health, userFromDb, cardUserInfo, cardDetails, pendingCardTopup,
-    setPrices, setRates, setBalances, setWithdrawLimits, setHealth, setIsInitialized, setUserFromDb, setCardUserInfo, setCardDetails, setPendingCardTopup
-  ]);
-
-  const signMessage = useSignMessage({
-    address: wallet.publicKey! // Note: Make sure to handle the case where publicKey is null
-  })
-
-  const handleSignClick = useCallback(async () => {
-    try {
-      // The message you want to sign
-      const timestamp = Date.now();
-      const message = `Sign this message to authenticate ownership. This signature will not trigger any blockchain transaction or cost any gas fees. \n\nWallet address: ${wallet.publicKey}\nTimestamp: ${timestamp}\n`;
-
-      const signature = await signMessage.mutateAsync(message);
-      const bytes = Buffer.from(signature, 'base64');
-      const signatureString = bs58.encode(bytes);
-
-      const options = {
-        method: 'POST',
-        headers: {
-          "Content-Type": "application/json",
-          accept: 'application/json'
-        },
-        body: JSON.stringify({
-          publicKey: wallet.publicKey,
-          signature: signatureString,
-          message: message
-        })
-      };
-      const response = await fetch(`${config.NEXT_PUBLIC_INTERNAL_API_URL}/auth/user`, options);
-      const body = await response.json();
-      console.log('Body:', body);
-      return body;
-    } catch (error) {
-      console.error('Failed to sign message:', error);
-    }
-  }, [wallet.publicKey, signMessage]);
-
-  useEffect(() => {
-    if (isInitialized && hasCardAccount) {
-      console.log("get users to sign message to get JWT");
-      handleSignClick().then(setJwtToken);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isInitialized, hasCardAccount]);
+  }, [providerCardUser]);
 
   return (
     <main className={styles.container}>

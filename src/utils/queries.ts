@@ -9,10 +9,11 @@ import { MarketIndex, TOKENS } from "@quartz-labs/sdk/browser";
 import config from "../config/config";
 import { buildEndpointURL } from "./helpers";
 import { SwapMode, type QuoteResponse } from "@jup-ag/api";
-import type { CardsForUserResponse, CardUserBase } from "../types/interfaces/CardUserResponse.interface";
-import type { UserFromDatabase } from "../types/interfaces/CardUserResponse.interface";
+import type { CardsForUserResponse, ProviderCardUser } from "../types/interfaces/CardUserResponse.interface";
+import type { QuartzCardUser } from "../types/interfaces/CardUserResponse.interface";
+import { useStore } from "./store";
 
-interface QueryConfig {
+interface QueryConfig<T> {
     queryKey: string[];
     url: string;
     params?: Record<string, string>;
@@ -24,6 +25,7 @@ interface QueryConfig {
     retry?: boolean;
     ignoreError?: boolean;
     accept404?: boolean;
+    onSuccess?: (data: T) => void;
 }
 
 function createQuery<T>({
@@ -37,34 +39,35 @@ function createQuery<T>({
     staleTime,
     retry = true,
     ignoreError = false,
-    accept404 = false
-}: QueryConfig) {
+    accept404 = false,
+    onSuccess
+}: QueryConfig<T>) {
     return () => {
         const { showError } = useError();
 
         const endpoint = buildEndpointURL(url, params);
-        
         const queryFn = async (): Promise<T> => {
             const response = await fetch(endpoint);
             const body = await response.json();
 
             if (!response.ok) {
-                if (response.status === 404 && accept404) {
-                    return transformResponse ? transformResponse(body) : body;
+                if (response.status !== 404 || !accept404) {
+                    throw new Error(body.message ?? errorMessage);
                 }
-                throw new Error(body.message || errorMessage);
             }
 
-            return transformResponse ? transformResponse(body) : body;
+            const data = transformResponse ? transformResponse(body) : body;
+            if (onSuccess) onSuccess(data);
+            return data;
         };
 
-        const response = useQuery({
+        const response = useQuery<T>({
             queryKey: queryKey,
             queryFn,
             refetchInterval,
             enabled,
             staleTime,
-            retry : retry ? 3 : false
+            retry : retry ? 3 : false,
         });
 
         if (!ignoreError && response.error) {
@@ -89,7 +92,7 @@ export const useAccountStatusQuery = (address: PublicKey | null) => {
         params: address ? {
             wallet: address.toBase58()
         } : undefined,
-        transformResponse: (data) => {
+        transformResponse: (data: any) => {
             if (typeof data.status !== 'string' || !Object.values(AccountStatus).includes(data.status as AccountStatus)) {
                 throw new Error('Invalid account status received from API');
             }
@@ -97,81 +100,51 @@ export const useAccountStatusQuery = (address: PublicKey | null) => {
         },
         errorMessage: "Could not fetch account status",
         enabled: address != null,
-        staleTime: Infinity
-    });
-    return query();
-};
-
-export const useUserFromDatabaseQuery = (publicKey: PublicKey | null) => {
-    const query = createQuery<UserFromDatabase>({
-        queryKey: ["card-user", publicKey?.toBase58() ?? ""],
-        url: `${config.NEXT_PUBLIC_INTERNAL_API_URL}/auth/user-info`,
-        params: publicKey ? {
-            publicKey: publicKey.toBase58()
-        } : undefined,
-        errorMessage: "Could not fetch account information",
-        enabled: publicKey != null,
         staleTime: Infinity,
-        accept404: true
     });
     return query();
 };
 
-export const useCardUserInfoQuery = (cardUserId: string | null, enabled: boolean) => {
-    const query = createQuery<CardUserBase>({
-        queryKey: ["card-user", cardUserId ?? ""],
-        url: `${config.NEXT_PUBLIC_INTERNAL_API_URL}/card/user`,
-        params: cardUserId ? {
-            id: cardUserId
-        } : undefined,
-        errorMessage: "Could not fetch account information",
-        enabled: cardUserId != null && enabled,
-        staleTime: 5_000,
-        refetchInterval: 5_000
-    });
+export const usePricesQuery = () => {
+    const { setPrices } = useStore();
+
+    const query = createQuery<Record<MarketIndex, number>>({
+        queryKey: ["prices"],
+        url: `${config.NEXT_PUBLIC_API_URL}/data/price`,
+        params: { ids: Object.values(TOKENS).map((token) => token.coingeckoPriceId).join(',') },
+        transformResponse: (body: any) => {
+            // Iterate through all tokens and map the marketIndex to the priceId
+            return Object.entries(TOKENS).reduce((acc, [marketIndex, token]) => {
+                acc[Number(marketIndex) as MarketIndex] = body[token.coingeckoPriceId];
+                return acc;
+            }, {} as Record<MarketIndex, number>);
+        },
+        refetchInterval: DEFAULT_REFETCH_INTERVAL,
+        errorMessage: "Could not fetch prices",
+        onSuccess: (data) => setPrices(data)
+    })
     return query();
 };
 
-export const useCardsForUserQuery = (cardUserId: string | null) => {
-    const query = createQuery<CardsForUserResponse[]>({
-        queryKey: ["card-user", "cards", cardUserId ?? ""],
-        url: `${config.NEXT_PUBLIC_INTERNAL_API_URL}/card/issuing/user`,
-        params: cardUserId ? {
-            id: cardUserId
-        } : undefined,
-        errorMessage: "Could not fetch account information",
-        enabled: cardUserId != null,
-        staleTime: Infinity
-    });
-    return query();
-};
+export const useRatesQuery = () => {
+    const { setRates } = useStore();
 
-export const usePricesQuery = createQuery<Record<MarketIndex, number>>({
-    queryKey: ["prices"],
-    url: `${config.NEXT_PUBLIC_API_URL}/data/price`,
-    params: { ids: Object.values(TOKENS).map((token) => token.coingeckoPriceId).join(',') },
-    transformResponse: (body) => {
-        // Iterate through all tokens and map the marketIndex to the priceId
-        return Object.entries(TOKENS).reduce((acc, [marketIndex, token]) => {
-            acc[Number(marketIndex) as MarketIndex] = body[token.coingeckoPriceId];
-            return acc;
-        }, {} as Record<MarketIndex, number>);
-    },
-    refetchInterval: DEFAULT_REFETCH_INTERVAL,
-    errorMessage: "Could not fetch prices"
-});
-
-export const useRatesQuery = createQuery<Record<MarketIndex, Rate>>({
-    queryKey: ["rates"],
-    url: `${config.NEXT_PUBLIC_API_URL}/user/rate`,
-    params: { 
+    const query = createQuery<Record<MarketIndex, Rate>>({
+        queryKey: ["rates"],
+        url: `${config.NEXT_PUBLIC_API_URL}/user/rate`,
+        params: { 
         marketIndices: MarketIndex.join(',') 
     },
-    refetchInterval: DEFAULT_REFETCH_INTERVAL,
-    errorMessage: "Could not fetch rates"
-});
+        refetchInterval: DEFAULT_REFETCH_INTERVAL,
+        errorMessage: "Could not fetch rates",
+        onSuccess: (data) => setRates(data)
+    })
+    return query();
+};
 
 export const useBalancesQuery = (address: PublicKey | null) => {
+    const { setBalances } = useStore();
+
     const query = createQuery<Record<MarketIndex, number>>({
         queryKey: ["user", "balances", address?.toBase58() ?? ""],
         url: `${config.NEXT_PUBLIC_API_URL}/user/balance`,
@@ -182,11 +155,14 @@ export const useBalancesQuery = (address: PublicKey | null) => {
         errorMessage: "Could not fetch balances",
         refetchInterval: DEFAULT_REFETCH_INTERVAL,
         enabled: address != null,
+        onSuccess: (data) => setBalances(data)
     });
     return query();
 };
 
 export const useWithdrawLimitsQuery = (address: PublicKey | null) => {
+    const { setWithdrawLimits } = useStore();
+
     const query = createQuery<Record<MarketIndex, number>>({
         queryKey: ["user", "withdraw-limits", address?.toBase58() ?? ""],
         url: `${config.NEXT_PUBLIC_API_URL}/user/withdraw-limit`,
@@ -197,6 +173,7 @@ export const useWithdrawLimitsQuery = (address: PublicKey | null) => {
         errorMessage: "Could not fetch withdraw limits",
         refetchInterval: DEFAULT_REFETCH_INTERVAL,
         enabled: address != null,
+        onSuccess: (data) => setWithdrawLimits(data)
     });
     return query();
 };
@@ -216,6 +193,8 @@ export const useDepositLimitsQuery = (address: PublicKey | null, marketIndex: Ma
 };
 
 export const useHealthQuery = (address: PublicKey | null) => {
+    const { setHealth } = useStore();
+
     const query = createQuery<number>({
         queryKey: ["user", "health", address?.toBase58() ?? ""],
         url: "https://api.quartzpay.io/user/health",
@@ -225,6 +204,60 @@ export const useHealthQuery = (address: PublicKey | null) => {
         errorMessage: "Could not fetch health",
         refetchInterval: DEFAULT_REFETCH_INTERVAL,
         enabled: address != null,
+        onSuccess: (data) => setHealth(data)
+    });
+    return query();
+};
+
+export const useQuartzCardUserQuery = (publicKey: PublicKey | null) => {
+    const { setQuartzCardUser } = useStore();
+
+    const query = createQuery<QuartzCardUser>({
+        queryKey: ["card-user", publicKey?.toBase58() ?? ""],
+        url: `${config.NEXT_PUBLIC_INTERNAL_API_URL}/auth/user-info`,
+        params: publicKey ? {
+            publicKey: publicKey.toBase58()
+        } : undefined,
+        errorMessage: "Could not fetch account information",
+        enabled: publicKey != null,
+        staleTime: Infinity,
+        accept404: true,
+        onSuccess: (data) => setQuartzCardUser(data)
+    });
+    return query();
+};
+
+export const useProviderCardUserQuery = (cardUserId: string | null, enabled: boolean) => {
+    const { setProviderCardUser } = useStore();
+
+    const query = createQuery<ProviderCardUser>({
+        queryKey: ["card-user", cardUserId ?? ""],
+        url: `${config.NEXT_PUBLIC_INTERNAL_API_URL}/card/user`,
+        params: cardUserId ? {
+            id: cardUserId
+        } : undefined,
+        errorMessage: "Could not fetch account information",
+        enabled: cardUserId != null && enabled,
+        staleTime: 5_000,
+        refetchInterval: 5_000,
+        onSuccess: (data) => setProviderCardUser(data)
+    });
+    return query();
+};
+
+export const useCardDetailsQuery = (cardUserId: string | null) => {
+    const { setCardDetails } = useStore();
+
+    const query = createQuery<CardsForUserResponse[]>({
+        queryKey: ["card-user", "cards", cardUserId ?? ""],
+        url: `${config.NEXT_PUBLIC_INTERNAL_API_URL}/card/issuing/user`,
+        params: cardUserId ? {
+            id: cardUserId
+        } : undefined,
+        errorMessage: "Could not fetch account information",
+        enabled: cardUserId != null,
+        staleTime: Infinity,
+        onSuccess: (data) => setCardDetails(data)
     });
     return query();
 };

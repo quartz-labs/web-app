@@ -1,4 +1,4 @@
-export interface CardUserBase {
+export interface ProviderCardUser {
     id: string;
     companyId: string | undefined;
     firstName: string;
@@ -45,7 +45,7 @@ export type ApplicationCompletionLink = {
     };
 };
 
-export type UserFromDatabase = {
+export type QuartzCardUser = {
     id: number;
     created_at: string;
     solana_address: string;
