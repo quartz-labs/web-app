@@ -24,6 +24,7 @@
 .notificationsButton {
     height: 100%;
     width: auto;
+    aspect-ratio: 1;
     padding: var(--notifications-button-padding);
     margin-right: -var(--notifications-button-padding);
     border-radius: 100%;
