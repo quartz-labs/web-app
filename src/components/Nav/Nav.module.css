@@ -16,6 +16,8 @@
 .navItems {
     display: flex;
     flex-direction: row;
+    flex-grow: 1;
+    justify-content: flex-end;
     align-items: center;
     gap: var(--nav-items-gap);
     padding: 5px 0px;
