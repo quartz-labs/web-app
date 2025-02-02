@@ -64,7 +64,9 @@ export default function Card() {
                 jwtToken
             })
         });
-        setCardPan([response.pan]);
+        
+        const formattedPan = response.pan.match(/.{1,4}/g).join(' ');
+        setCardPan([formattedPan]);
         setCardCvc([response.cvc]);
         setShowDetails(true);
     }
