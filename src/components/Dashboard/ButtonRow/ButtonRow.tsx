@@ -3,7 +3,7 @@ import styles from "./ButtonRow.module.css";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
 
 export default function ButtonRow() {
-    const { setModalVariation, balances, quartzCardUser: userFromDb } = useStore();
+    const { setModalVariation, balances } = useStore();
     const hasLoan = balances ? Object.values(balances).some(balance => balance < 0) : false;
 
     return (
@@ -35,15 +35,6 @@ export default function ButtonRow() {
                     onClick={() => setModalVariation(ModalVariation.REPAY_LOAN)}
                 >
                     Repay Loan
-                </button>
-            )}
-
-            {userFromDb?.auth_level === "Card" && (
-                <button
-                    className={`glass-button ${styles.mainButton}`}
-                onClick={() => setModalVariation(ModalVariation.CARD_TOPUP)}
-                >
-                    Top up card!
                 </button>
             )}
         </div>

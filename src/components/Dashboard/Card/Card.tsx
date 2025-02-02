@@ -22,6 +22,7 @@ export default function Card() {
     const [showDetails, setShowDetails] = useState(false);
     const openKycLink = useOpenKycLink();
 
+    const [creatingCard, setCreatingCard] = useState(false);
     const [cardPan, setCardPan] = useState<string[] | null>(null);
     const [cardCvc, setCardCvc] = useState<string[] | null>(null);
 
@@ -31,6 +32,7 @@ export default function Card() {
 
     const createCard = async () => {
         // if user has no cards, kyc is approved.
+        setCreatingCard(true);
         const createCardResponse: CardsForUserResponse = await fetchAndParse(
             `${config.NEXT_PUBLIC_INTERNAL_API_URL}/card/issuing/create`,
             {
@@ -47,7 +49,7 @@ export default function Card() {
                 }),
             }
         );
-
+        setCreatingCard(false);
         setCardDetails(cardDetails ? [...cardDetails, createCardResponse] : [createCardResponse]);
     }
 
@@ -92,38 +94,44 @@ export default function Card() {
         )
     }
 
-    if (cardDetails !== undefined && cardDetails.length > 0) {
+    if (cardDetails !== undefined && cardDetails[0] !== undefined) {
+        const card = cardDetails[0];
         return (
             <div className={styles.cardsContainer}>
-                {cardDetails.map((card: CardsForUserResponse) => (
-                    <div key={card.id} className={styles.cardWrapper}>
-                        <div>
-                            <div>Status: {card.status}</div>
-                            <div>Limit: ${card.limit?.amount / 100 || '0.00'} per {card.limit?.frequency || 'allTime'}</div>
-                            <div>Balance: $?</div>
-                        </div>
-
-                        {!showDetails && (
-                            <button
-                                className={styles.cardDetails}
-                                onClick={() => getCardDetails(card.id)}
-                            >
-                                <div className={styles.cardNumber}>**** **** **** {card.last4}</div>
-                                <div>Expires: {card.expirationMonth}/{card.expirationYear}</div>
-                            </button>
-                        )}
-
-                        {showDetails && (
-                            <div className={styles.cardDetails}>
-                                <div className={styles.cardNumber}>{cardPan}</div>
-                                <div className={styles.cardDetailsRow}>
-                                    <div>Expires: {card.expirationMonth}/{card.expirationYear}</div>
-                                    <div>CVC: {cardCvc}</div>
-                                </div>
-                            </div>
-                        )}
+                <div className={styles.cardWrapper}>
+                    <div>
+                        <div>Status: {card.status}</div>
+                        <div>Limit: ${card.limit?.amount / 100 || '0.00'} per {card.limit?.frequency || 'allTime'}</div>
+                        <div>Balance: $?</div>
                     </div>
-                ))}
+
+                    {!showDetails && (
+                        <button
+                            className={styles.cardDetails}
+                            onClick={() => getCardDetails(card.id)}
+                        >
+                            <div className={styles.cardNumber}>**** **** **** {card.last4}</div>
+                            <div>Expires: {card.expirationMonth}/{card.expirationYear}</div>
+                        </button>
+                    )}
+
+                    {showDetails && (
+                        <div className={styles.cardDetails}>
+                            <div className={styles.cardNumber}>{cardPan}</div>
+                            <div className={styles.cardDetailsRow}>
+                                <div>Expires: {card.expirationMonth}/{card.expirationYear}</div>
+                                <div>CVC: {cardCvc}</div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                <button
+                    className={`glass-button`}
+                onClick={() => setModalVariation(ModalVariation.CARD_TOPUP)}
+                >
+                    Top up card!
+                </button>
             </div>
         )
     }
@@ -132,7 +140,7 @@ export default function Card() {
         return (
             <div className={styles.cardsContainer}>
                 <button
-                    className={`glass-button ${styles.mainButton}`}
+                    className={`glass-button`}
                     onClick={() => setModalVariation(ModalVariation.CARD_SIGNUP)}
                 >
                     Sign up for Quartz Card ✨
@@ -146,7 +154,7 @@ export default function Card() {
             <div className={styles.cardsContainer}>
                 {link && (
                     <button
-                        className={`glass-button ${styles.mainButton}`}
+                        className={`glass-button`}
                         onClick={() => openKycLink(link)}
                     >
                         KYC for Quartz Card
@@ -190,10 +198,21 @@ export default function Card() {
         return (
             <div className={styles.cardsContainer}>
                 <button
-                    className={`glass-button ${styles.mainButton}`}
+                    className={`glass-button`}
                     onClick={createCard}
                 >
-                    Create Card
+                    {creatingCard && (
+                        <PuffLoader
+                            color={"#ffffff"}
+                            size={30}
+                            aria-label="Loading"
+                            data-testid="loader"
+                        />
+                    )}
+                    
+                    {!creatingCard && (
+                        <p>Create Card</p>
+                    )}
                 </button>
             </div>
         )
