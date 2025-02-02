@@ -4,28 +4,23 @@ import { useEffect } from "react";
 import { captureError } from "@/src/utils/errors";
 import { useError } from "@/src/context/error-provider";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
-import { useRefetchProviderCardUser } from "@/src/utils/hooks";
+import { useRefetchCardUser } from "@/src/utils/hooks";
 
 export default function CardKycModal() {
     const { showError } = useError();
-    const { kycLink, providerCardUser, setModalVariation } = useStore();
-    const refetchCardUser = useRefetchProviderCardUser();
-
-    const url = kycLink ?? (
-        providerCardUser?.applicationCompletionLink ? (
-            `${providerCardUser.applicationCompletionLink.url}?userId=${providerCardUser.applicationCompletionLink.params.userId}`
-        ) : undefined
-    );
+    const { kycLink, setModalVariation } = useStore();
+    const refetchCardUser = useRefetchCardUser();
 
     useEffect(() => {
-        if (url) {
-            window.open(url, "_blank", "noopener noreferrer");
+        if (kycLink) {
+            window.open(kycLink, "_blank", "noopener noreferrer");
         } else {
             captureError(showError, "No KYC link found", "/CardKyc.Modal.tsx", null, null);
         }
-    }, [url, showError]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [kycLink]);
 
-    if (!url) {
+    if (!kycLink) {
         return (
             <div className={styles.contentWrapper}>
                 <h2 className={styles.heading}>Complete KYC Verification</h2>
@@ -40,7 +35,7 @@ export default function CardKycModal() {
 
             <p>
                 You will be redirected to the KYC verification page. If you are not redirected, please&nbsp;
-                <a href={url} target="_blank" rel="noopener noreferrer" className={styles.kycLink}>click here</a>.
+                <a href={kycLink} target="_blank" rel="noopener noreferrer" className={styles.kycLink}>click here</a>.
             </p>
 
             <p>Once you have completed the KYC, please click done below.</p>

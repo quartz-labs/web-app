@@ -13,7 +13,7 @@ import { useStore } from "@/src/utils/store";
 import { useEffect } from 'react';
 import config from "@/src/config/config";
 import Unavailable from "@/src/components/OtherViews/Unavailable";
-import { useRefetchCardDetails, useLoginCardUser } from "../utils/hooks";
+import { useLoginCardUser, useRefetchCardUser } from "../utils/hooks";
 import { useError } from "../context/error-provider";
 import { captureError } from "../utils/errors";
 import { TxStatus, useTxStatus } from "../context/tx-status-provider";
@@ -53,7 +53,7 @@ export default function Page() {
   const { data: cardDetails } = useCardDetailsQuery(quartzCardUser?.card_api_user_id ?? null, isInitialized);
   const { data: providerCardUser } = useProviderCardUserQuery(
     quartzCardUser?.card_api_user_id ?? null,
-    isInitialized && quartzCardUser?.auth_level === AuthLevel.PENDING
+    isInitialized && (quartzCardUser?.auth_level === AuthLevel.BASE || quartzCardUser?.auth_level === AuthLevel.PENDING)
   );
   useEffect(() => {
     if (!providerCardUser || !quartzCardUser || !wallet.publicKey) return;
@@ -94,7 +94,7 @@ export default function Page() {
 
 
   // Topup Card
-  const refetchCardDetails = useRefetchCardDetails();
+  const refetchCardUser = useRefetchCardUser();
   useEffect(() => {
     if (!pendingCardTopup || !topupSignature) return;
 
@@ -152,7 +152,7 @@ export default function Page() {
         return;
       }
 
-      refetchCardDetails();
+      refetchCardUser();
       setPendingCardTopup(false);
       setTopupSignature(undefined);
       showTxStatus({ status: TxStatus.TOPUP_SUCCESS, signature: topupSignature, walletAddress: wallet.publicKey?.toBase58() });
@@ -165,7 +165,7 @@ export default function Page() {
     // or when pendingCardTopup/topupSignature changes
     return () => clearInterval(interval);
 
-  }, [cardDetails, jwtToken, pendingCardTopup, topupSignature, setTopupSignature, setPendingCardTopup, refetchCardDetails, showTxStatus, showError, wallet.publicKey]);
+  }, [cardDetails, jwtToken, pendingCardTopup, topupSignature, setTopupSignature, setPendingCardTopup, refetchCardUser, showTxStatus, showError, wallet.publicKey]);
 
   return (
     <main className={styles.container}>

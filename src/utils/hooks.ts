@@ -5,6 +5,7 @@ import base58 from "bs58";
 import config from "../config/config";
 import { fetchAndParse } from "./helpers";
 import { useStore } from "./store";
+import { ModalVariation } from "../types/enums/ModalVariation.enum";
 
 export function useRefetchAccountData() {
     const queryClient = useQueryClient();
@@ -47,30 +48,24 @@ export function useRefetchAccountStatus() {
     }, [queryClient, wallet.publicKey]);
 }
 
-export function useRefetchCardDetails() {
+export function useRefetchCardUser() {
     const queryClient = useQueryClient();
 
     return useCallback(async () => {
-        queryClient.invalidateQueries({ queryKey: ["card-user", "provider-card-user", "card"], refetchType: "all" });
+        queryClient.invalidateQueries({ queryKey: ["card-user"], refetchType: "all" });
     }, [queryClient]);
 }
 
-export function useRefetchProviderCardUser() {
-    const queryClient = useQueryClient();
-
-    return useCallback(async () => {
-        queryClient.invalidateQueries({ queryKey: ["card-user", "provider-card-user", "user"], refetchType: "all" });
-    }, [queryClient]);
+export function useOpenKycLink() {
+    const { setKycLink, setModalVariation } = useStore();
+    
+    return useCallback((link: string) => {
+        setKycLink(link);
+        setModalVariation(ModalVariation.CARD_KYC);
+        window.open(link, "_blank", "noopener noreferrer");
+    }, [setKycLink, setModalVariation]);
 }
 
-export function useRefetchQuartzCardUser() {
-    const queryClient = useQueryClient();
-
-    return useCallback(async () => {
-        queryClient.invalidateQueries({ queryKey: ["card-user", "quartz-card-user"], refetchType: "all" });
-    }, [queryClient]);
-}
-  
 export function useLoginCardUser() {
     const { setJwtToken } = useStore();
     const wallet = useWallet();

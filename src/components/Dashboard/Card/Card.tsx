@@ -6,6 +6,7 @@ import { fetchAndParse } from "@/src/utils/helpers";
 import config from "@/src/config/config";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
 import { TailSpin } from "react-loader-spinner";
+import { useOpenKycLink } from "@/src/utils/hooks";
 
 export default function Card() {
     const { 
@@ -16,6 +17,7 @@ export default function Card() {
         cardDetails 
     } = useStore();
     const [showDetails, setShowDetails] = useState(false);
+    const openKycLink = useOpenKycLink();
 
     const [cardPan, setCardPan] = useState<string[] | null>(null);
     const [cardCvc, setCardCvc] = useState<string[] | null>(null);
@@ -109,7 +111,10 @@ export default function Card() {
             {quartzCardUser?.auth_level === "Base" && (
                 <button
                     className={`glass-button ${styles.mainButton}`}
-                    onClick={() => setModalVariation(ModalVariation.CARD_KYC)}
+                    onClick={() => {
+                        throw new Error("Not implemented"); // TODO: Fetch the ProviderCardUser once at the start, and only refetch if pending
+                        openKycLink("");
+                    }}
                 >
                     KYC for Quartz Card
                 </button>

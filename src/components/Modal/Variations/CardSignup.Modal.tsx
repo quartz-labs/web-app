@@ -10,16 +10,18 @@ import CardSignupInputSection from "../CardSignUp/CardAccountCreate.ModalCompone
 import config from "@/src/config/config";
 import { fetchAndParse } from "@/src/utils/helpers";
 import type { Address, ApplicationCompletionLink, QuartzCardUser } from "@/src/types/interfaces/CardUserResponse.interface";
-import { useRefetchProviderCardUser } from "@/src/utils/hooks";
+import { useOpenKycLink, useRefetchCardUser } from "@/src/utils/hooks";
 import { DEFAULT_KYC_DATA, type KYCData } from "@/src/types/interfaces/KYCData.interface";
 
 export default function CardSignupModal() {
     const wallet = useAnchorWallet();
-    const { setModalVariation, setKycLink } = useStore();
+    const { setModalVariation } = useStore();
     const { showError } = useError();
-    const refetchProviderCardUser = useRefetchProviderCardUser();
-    
+    const refetchCardUser = useRefetchCardUser();
+    const openKycLink = useOpenKycLink();
+
     const [formData, setFormData] = useState<KYCData>(DEFAULT_KYC_DATA);
+    const [loading, setLoading] = useState(false);
 
     const handleFormDataChange = <K extends keyof KYCData>(field: K, value: KYCData[K]) => {
         setFormData(prev => ({
@@ -44,7 +46,13 @@ export default function CardSignupModal() {
             return;
         }
 
+        setLoading(true);
         try {
+            const submitData = {
+                ...formData,
+                walletAddress: wallet.publicKey.toBase58(),
+            }
+
             const response: {
                 quartzCardUser: QuartzCardUser;
                 applicationCompletionLink: ApplicationCompletionLink;
@@ -55,15 +63,16 @@ export default function CardSignupModal() {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(formData),
+                    body: JSON.stringify(submitData),
                 }
             );
 
-            setKycLink(`${response.applicationCompletionLink.url}?userId=${response.applicationCompletionLink.params.userId}`);
-            setModalVariation(ModalVariation.CARD_KYC);
-            refetchProviderCardUser();
+            openKycLink(`${response.applicationCompletionLink.url}?userId=${response.applicationCompletionLink.params.userId}`);
+            refetchCardUser();
         } catch (error) {
             captureError(showError, "Failed to submit form", "/CardSignupModal.tsx", error, wallet.publicKey);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -202,7 +211,7 @@ export default function CardSignupModal() {
             <div className={styles.fixedButtons}>
                 <Buttons
                     label="Submit Application"
-                    awaitingSign={false}
+                    awaitingSign={loading}
                     onConfirm={handleSubmit}
                     onCancel={() => setModalVariation(ModalVariation.DISABLED)}
                 />
