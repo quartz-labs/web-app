@@ -86,7 +86,7 @@ export default function Page() {
   // Log in card user
   const loginCardUser = useLoginCardUser();
   useEffect(() => {
-    if (isInitialized && quartzCardUser?.auth_level === AuthLevel.CARD && !jwtToken) {
+    if (isInitialized && quartzCardUser?.auth_level === AuthLevel.CARD && jwtToken === undefined) {
       loginCardUser.mutate();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps	

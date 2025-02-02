@@ -116,8 +116,8 @@ export function useLoginCardUser() {
               message
             })
         });
-
-        setJwtToken(cardToken.token);
+        
+        setJwtToken(cardToken);
         setIsSigningLoginMessage(false);
       },
       onError: (error) => {
