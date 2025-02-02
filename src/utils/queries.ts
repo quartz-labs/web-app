@@ -213,7 +213,7 @@ export const useQuartzCardUserQuery = (publicKey: PublicKey | null) => {
     const { setQuartzCardUser } = useStore();
 
     const query = createQuery<QuartzCardUser>({
-        queryKey: ["card-user", publicKey?.toBase58() ?? ""],
+        queryKey: ["card-user", "quartz-card-user", publicKey?.toBase58() ?? ""],
         url: `${config.NEXT_PUBLIC_INTERNAL_API_URL}/auth/user-info`,
         params: publicKey ? {
             publicKey: publicKey.toBase58()
@@ -231,31 +231,31 @@ export const useProviderCardUserQuery = (cardUserId: string | null, enabled: boo
     const { setProviderCardUser } = useStore();
 
     const query = createQuery<ProviderCardUser>({
-        queryKey: ["card-user", cardUserId ?? ""],
+        queryKey: ["card-user", "provider-card-user", "user", cardUserId ?? ""],
         url: `${config.NEXT_PUBLIC_INTERNAL_API_URL}/card/user`,
         params: cardUserId ? {
             id: cardUserId
         } : undefined,
         errorMessage: "Could not fetch account information",
         enabled: cardUserId != null && enabled,
-        staleTime: 5_000,
-        refetchInterval: 5_000,
+        staleTime: 3_000,
+        refetchInterval: 3_000,
         onSuccess: (data) => setProviderCardUser(data)
     });
     return query();
 };
 
-export const useCardDetailsQuery = (cardUserId: string | null) => {
+export const useCardDetailsQuery = (cardUserId: string | null, enabled: boolean) => {
     const { setCardDetails } = useStore();
 
     const query = createQuery<CardsForUserResponse[]>({
-        queryKey: ["card-user", "cards", cardUserId ?? ""],
+        queryKey: ["card-user", "provider-card-user", "card", cardUserId ?? ""],
         url: `${config.NEXT_PUBLIC_INTERNAL_API_URL}/card/issuing/user`,
         params: cardUserId ? {
             id: cardUserId
         } : undefined,
         errorMessage: "Could not fetch account information",
-        enabled: cardUserId != null,
+        enabled: cardUserId != null && enabled,
         staleTime: Infinity,
         onSuccess: (data) => setCardDetails(data)
     });

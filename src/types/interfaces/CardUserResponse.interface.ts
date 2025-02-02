@@ -50,8 +50,15 @@ export type QuartzCardUser = {
     created_at: string;
     solana_address: string;
     card_api_user_id: string;
-    auth_level: string;
+    auth_level: AuthLevel;
 };
+
+export enum AuthLevel {
+    BASE = "Base",
+    PENDING = "Pending",
+    CARD = "Card",
+    ADMIN = "Admin",
+}
 
 export interface CardsForUserResponse {
     id: string;

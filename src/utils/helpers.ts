@@ -176,7 +176,13 @@ export async function fetchAndParse(url: string, req?: RequestInit): Promise<any
     const response = await fetch(url, req);
     const body = await response.json();
 
-    if (!response.ok) throw new Error(JSON.stringify(body.error) ?? `Could not fetch ${url}`);
+    if (!response.ok) {
+        const error = {
+            status: response.status,
+            body
+        }
+        throw new Error(JSON.stringify(error) ?? `Could not fetch ${url}`);
+    }
     return body;
 }
 

@@ -20,6 +20,14 @@
     width: 100%;
 }
 
+.pending {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
 .cardNumber {
     font-size: var(--font-size-large);
 }

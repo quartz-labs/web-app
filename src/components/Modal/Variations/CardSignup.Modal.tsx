@@ -7,159 +7,61 @@ import Buttons from "../Buttons.ModalComponent";
 import { useError } from "@/src/context/error-provider";
 import { captureError } from "@/src/utils/errors";
 import CardSignupInputSection from "../CardSignUp/CardAccountCreate.ModalComponent";
-
 import config from "@/src/config/config";
 import { fetchAndParse } from "@/src/utils/helpers";
-import type { ProviderCardUser } from "@/src/types/interfaces/CardUserResponse.interface";
-import { useRefetchUserInfo } from "@/src/utils/hooks";
-
-interface CardSignupForm {
-    id: string;
-    firstName: string;
-    lastName: string;
-    birthDate: string; // YYYY-MM-DD
-    nationalId: string;
-    countryOfIssue: string; // ISO 3166-1 alpha-2
-    email: string;
-    phoneCountryCode: string;
-    phoneNumber: string;
-    line1: string;
-    line2: string | undefined;
-    city: string;
-    region: string;
-    postalCode: string;
-    countryCode: string;
-    country: string;
-    walletAddress?: string;
-    chainId?: string;
-    contractAddress?: string;
-    ipAddress: string;
-    occupation: string;
-    annualSalary: string;
-    accountPurpose: string;
-    expectedMonthlyVolume: string;
-    isTermsOfServiceAccepted: boolean;
-    hasExistingDocuments?: string;
-}
-
-export type Address = {
-    line1: string;
-    line2: string | undefined;
-    city: string;
-    region: string;
-    postalCode: string;
-    countryCode: string;
-    country: string;
-};
+import type { Address, ApplicationCompletionLink, QuartzCardUser } from "@/src/types/interfaces/CardUserResponse.interface";
+import { useRefetchProviderCardUser } from "@/src/utils/hooks";
+import { DEFAULT_KYC_DATA, type KYCData } from "@/src/types/interfaces/KYCData.interface";
 
 export default function CardSignupModal() {
     const wallet = useAnchorWallet();
     const { setModalVariation, setKycLink } = useStore();
     const { showError } = useError();
+    const refetchProviderCardUser = useRefetchProviderCardUser();
+    
+    const [formData, setFormData] = useState<KYCData>(DEFAULT_KYC_DATA);
 
-    const refetchUserInfo = useRefetchUserInfo();
-
-    const [formData, setFormData] = useState<CardSignupForm>({
-        id: "",
-        firstName: "",
-        lastName: "",
-        birthDate: "",
-        nationalId: "",
-        countryOfIssue: "",
-        email: "",
-        phoneCountryCode: "",
-        phoneNumber: "",
-        line1: "",
-        line2: "",
-        city: "",
-        region: "",
-        postalCode: "",
-        countryCode: "",
-        country: "",
-        walletAddress: "",
-        chainId: "",
-        contractAddress: "",
-        ipAddress: "",
-        occupation: "",
-        annualSalary: "",
-        accountPurpose: "",
-        expectedMonthlyVolume: "",
-        isTermsOfServiceAccepted: true,
-        hasExistingDocuments: "",
-    });
-
-    const handleInputChange = (field: keyof CardSignupForm, value: string) => {
+    const handleFormDataChange = <K extends keyof KYCData>(field: K, value: KYCData[K]) => {
         setFormData(prev => ({
             ...prev,
             [field]: value
         }));
     };
 
+    const handleAddressChange = <K extends keyof Address>(field: K, value: Address[K]) => {
+        setFormData(prev => ({
+            ...prev,
+            address: {
+                ...prev.address,
+                [field]: value
+            }
+        }));
+    };
+
     const handleSubmit = async () => {
         if (!wallet?.publicKey) {
-            showError({
-                message: "Wallet not connected",
-                errorId: "WALLET_NOT_CONNECTED",
-                body: "Please connect your wallet to continue."
-            });
+            captureError(showError, "Wallet not connected", "/CardSignupModal.tsx", "Wallet not connected", null);
             return;
         }
 
         try {
-            const requestData = {
-                isTermsOfServiceAccepted: true,
-                address: {
-                    line1: formData.line1,
-                    line2: formData.line2,
-                    city: formData.city,
-                    region: formData.region,
-                    postalCode: formData.postalCode,
-                    countryCode: formData.countryOfIssue,
-                    country: formData.country,
-                },
-                nationalId: formData.nationalId,
-                email: formData.email,
-                phoneCountryCode: formData.phoneCountryCode,
-                countryOfIssue: formData.countryOfIssue,
-                birthDate: formData.birthDate,
-                firstName: formData.firstName,
-                lastName: formData.lastName,
-                ipAddress: "192.168.1.10", // Hardcoded for now, could be fetched from an IP service
-                occupation: formData.occupation,
-                annualSalary: formData.annualSalary,
-                accountPurpose: formData.accountPurpose,
-                expectedMonthlyVolume: formData.expectedMonthlyVolume,
-                phoneNumber: formData.phoneNumber
-            };
+            const response: {
+                quartzCardUser: QuartzCardUser;
+                applicationCompletionLink: ApplicationCompletionLink;
+            } = await fetchAndParse(
+                `${config.NEXT_PUBLIC_INTERNAL_API_URL}/card/application/create`, 
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData),
+                }
+            );
 
-            const creatCardApplicationResponse: ProviderCardUser = await fetchAndParse(`${config.NEXT_PUBLIC_INTERNAL_API_URL}/card/application/create`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(requestData),
-            });
-
-            console.log('Card Signup Response:', creatCardApplicationResponse);
-
-            //get the card user id from the response
-            const cardUserId = creatCardApplicationResponse.id;
-            const addUserResponse = await fetchAndParse(`${config.NEXT_PUBLIC_INTERNAL_API_URL}/auth/add-user`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    publicKey: wallet.publicKey.toBase58(),
-                    cardUserId: cardUserId
-                }),
-            });
-
-            console.log('Add User Response:', addUserResponse);
-
-            setKycLink(`${creatCardApplicationResponse.applicationCompletionLink.url}?userId=${creatCardApplicationResponse.applicationCompletionLink.params.userId}`);
+            setKycLink(`${response.applicationCompletionLink.url}?userId=${response.applicationCompletionLink.params.userId}`);
             setModalVariation(ModalVariation.CARD_KYC);
-            refetchUserInfo();
+            refetchProviderCardUser();
         } catch (error) {
             captureError(showError, "Failed to submit form", "/CardSignupModal.tsx", error, wallet.publicKey);
         }
@@ -174,13 +76,13 @@ export default function CardSignupModal() {
                 <CardSignupInputSection
                     label="First Name"
                     amountStr={formData.firstName}
-                    setAmountStr={(value) => handleInputChange("firstName", value)}
+                    setAmountStr={(value) => handleFormDataChange("firstName", value)}
                 />
 
                 <CardSignupInputSection
                     label="Last Name"
                     amountStr={formData.lastName}
-                    setAmountStr={(value) => handleInputChange("lastName", value)}
+                    setAmountStr={(value) => handleFormDataChange("lastName", value)}
                 />
 
                 <div style={{display: "flex", flexDirection: "column", marginBottom: "8px"}}>
@@ -189,7 +91,7 @@ export default function CardSignupModal() {
                         className={styles.dobInput}
                         type="date"
                         value={formData.birthDate}
-                        onChange={(e) => handleInputChange("birthDate", e.target.value)}
+                        onChange={(e) => handleFormDataChange("birthDate", e.target.value)}
                         max={new Date().toISOString().split('T')[0]} // Prevents future dates
                     />
                 </div>
@@ -197,91 +99,94 @@ export default function CardSignupModal() {
                 <CardSignupInputSection
                     label="Email"
                     amountStr={formData.email}
-                    setAmountStr={(value) => handleInputChange("email", value)}
+                    setAmountStr={(value) => handleFormDataChange("email", value)}
                 />
 
                 <CardSignupInputSection
                     label="Phone Number"
                     amountStr={formData.phoneNumber}
-                    setAmountStr={(value) => handleInputChange("phoneNumber", value)}
+                    setAmountStr={(value) => handleFormDataChange("phoneNumber", value)}
                 />
 
                 <CardSignupInputSection
                     label="Phone Country Code"
                     amountStr={formData.phoneCountryCode}
-                    setAmountStr={(value) => handleInputChange("phoneCountryCode", value)}
+                    setAmountStr={(value) => handleFormDataChange("phoneCountryCode", value)}
                 />
 
                 <CardSignupInputSection
                     label="Address line 1"
-                    amountStr={formData.line1}
-                    setAmountStr={(value) => handleInputChange("line1", value)}
+                    amountStr={formData.address.line1}
+                    setAmountStr={(value) => handleAddressChange("line1", value)}
                 />
 
                 <CardSignupInputSection
                     label="Address line 2"
-                    amountStr={formData.line2 || ""}
-                    setAmountStr={(value) => handleInputChange("line2", value)}
+                    amountStr={formData.address.line2 || ""}
+                    setAmountStr={(value) => handleAddressChange("line2", value)}
                 />
 
                 <CardSignupInputSection
                     label="City"
-                    amountStr={formData.city}
-                    setAmountStr={(value) => handleInputChange("city", value)}
+                    amountStr={formData.address.city}
+                    setAmountStr={(value) => handleAddressChange("city", value)}
                 />
 
                 <CardSignupInputSection
                     label="Postcode"
-                    amountStr={formData.postalCode}
-                    setAmountStr={(value) => handleInputChange("postalCode", value)}
+                    amountStr={formData.address.postalCode}
+                    setAmountStr={(value) => handleAddressChange("postalCode", value)}
                 />
 
                 <CardSignupInputSection
                     label="State"
-                    amountStr={formData.region}
-                    setAmountStr={(value) => handleInputChange("region", value)}
+                    amountStr={formData.address.region}
+                    setAmountStr={(value) => handleAddressChange("region", value)}
                 />
 
                 <CardSignupInputSection
                     label="Country"
-                    amountStr={formData.country}
-                    setAmountStr={(value) => handleInputChange("country", value)}
+                    amountStr={formData.address.country}
+                    setAmountStr={(value) => handleAddressChange("country", value)}
                 />
 
                 <CardSignupInputSection
                     label="Occupation"
                     amountStr={formData.occupation}
-                    setAmountStr={(value) => handleInputChange("occupation", value)}
+                    setAmountStr={(value) => handleFormDataChange("occupation", value)}
                 />
 
                 <CardSignupInputSection
                     label="Annual Income"
                     amountStr={formData.annualSalary}
-                    setAmountStr={(value) => handleInputChange("annualSalary", value)}
+                    setAmountStr={(value) => handleFormDataChange("annualSalary", value)}
                 />
 
                 <CardSignupInputSection
                     label="Account purpose"
                     amountStr={formData.accountPurpose}
-                    setAmountStr={(value) => handleInputChange("accountPurpose", value)}
+                    setAmountStr={(value) => handleFormDataChange("accountPurpose", value)}
                 />
 
                 <CardSignupInputSection
                     label="Expected monthly spend"
                     amountStr={formData.expectedMonthlyVolume}
-                    setAmountStr={(value) => handleInputChange("expectedMonthlyVolume", value)}
+                    setAmountStr={(value) => handleFormDataChange("expectedMonthlyVolume", value)}
                 />
 
                 <CardSignupInputSection
                     label="National ID number"
                     amountStr={formData.nationalId}
-                    setAmountStr={(value) => handleInputChange("nationalId", value)}
+                    setAmountStr={(value) => handleFormDataChange("nationalId", value)}
                 />
 
                 <CardSignupInputSection
                     label="Country Code for Country of Issue (eg: US, IE)"
                     amountStr={formData.countryOfIssue}
-                    setAmountStr={(value) => handleInputChange("countryOfIssue", value)}
+                    setAmountStr={(value) => {
+                        handleAddressChange("countryCode", value);
+                        handleFormDataChange("countryOfIssue", value);
+                    }}
                 />
 
                 <div style={{display: "flex", flexDirection: "column", marginBottom: "8px", alignItems: "flex-start"}}>
@@ -289,7 +194,7 @@ export default function CardSignupModal() {
                     <input 
                         type="checkbox" 
                         checked={formData.isTermsOfServiceAccepted}
-                        onChange={(e) => handleInputChange("isTermsOfServiceAccepted", e.target.checked.toString())}
+                        onChange={(e) => handleFormDataChange("isTermsOfServiceAccepted", e.target.checked)}
                     />
                 </div>
             </div>

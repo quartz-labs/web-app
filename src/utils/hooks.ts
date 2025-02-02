@@ -51,20 +51,29 @@ export function useRefetchCardDetails() {
     const queryClient = useQueryClient();
 
     return useCallback(async () => {
-        queryClient.invalidateQueries({ queryKey: ["card-user", "cards"], refetchType: "all" });
+        queryClient.invalidateQueries({ queryKey: ["card-user", "provider-card-user", "card"], refetchType: "all" });
     }, [queryClient]);
 }
 
-export function useRefetchUserInfo() {
+export function useRefetchProviderCardUser() {
     const queryClient = useQueryClient();
 
     return useCallback(async () => {
-        queryClient.invalidateQueries({ queryKey: ["card-user"], refetchType: "all" });
+        queryClient.invalidateQueries({ queryKey: ["card-user", "provider-card-user", "user"], refetchType: "all" });
+    }, [queryClient]);
+}
+
+export function useRefetchQuartzCardUser() {
+    const queryClient = useQueryClient();
+
+    return useCallback(async () => {
+        queryClient.invalidateQueries({ queryKey: ["card-user", "quartz-card-user"], refetchType: "all" });
     }, [queryClient]);
 }
   
-export function useLoginCardUser(wallet: WalletContextState | undefined) {
+export function useLoginCardUser() {
     const { setJwtToken } = useStore();
+    const wallet = useWallet();
 
     const signMessage = async (wallet: WalletContextState, message: string) => {
         if (!wallet.signMessage) throw new Error("Wallet does not support message signing");

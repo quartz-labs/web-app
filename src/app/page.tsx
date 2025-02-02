@@ -10,14 +10,15 @@ import { AccountStatus } from "@/src/types/enums/AccountStatus.enum";
 import styles from "./page.module.css";
 import { useAccountStatusQuery, useBalancesQuery, useCardDetailsQuery, useProviderCardUserQuery, useHealthQuery, usePricesQuery, useRatesQuery, useQuartzCardUserQuery, useWithdrawLimitsQuery } from "@/src/utils/queries";
 import { useStore } from "@/src/utils/store";
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import config from "@/src/config/config";
 import Unavailable from "@/src/components/OtherViews/Unavailable";
-import { fetchAndParse } from "../utils/helpers";
 import { useRefetchCardDetails, useLoginCardUser } from "../utils/hooks";
 import { useError } from "../context/error-provider";
 import { captureError } from "../utils/errors";
 import { TxStatus, useTxStatus } from "../context/tx-status-provider";
+import { AuthLevel } from "../types/interfaces/CardUserResponse.interface";
+import { fetchAndParse } from "../utils/helpers";
 
 export default function Page() {
   const wallet = useWallet();
@@ -49,21 +50,46 @@ export default function Page() {
   
   // Card account data
   const { data: quartzCardUser } = useQuartzCardUserQuery(isInitialized ? wallet.publicKey : null);
+  const { data: cardDetails } = useCardDetailsQuery(quartzCardUser?.card_api_user_id ?? null, isInitialized);
   const { data: providerCardUser } = useProviderCardUserQuery(
     quartzCardUser?.card_api_user_id ?? null,
-    quartzCardUser?.auth_level === "Base"
+    isInitialized && quartzCardUser?.auth_level === AuthLevel.PENDING
   );
-  const { data: cardDetails } = useCardDetailsQuery(quartzCardUser?.card_api_user_id ?? null);
+  useEffect(() => {
+    if (!providerCardUser || !quartzCardUser || !wallet.publicKey) return;
+
+    let providerCardUserStatus: AuthLevel;
+    if (providerCardUser?.applicationStatus === "approved") {
+      providerCardUserStatus = AuthLevel.CARD;
+    } else if (providerCardUser?.applicationStatus === "pending") {
+      providerCardUserStatus = AuthLevel.PENDING;
+    } else {
+      providerCardUserStatus = AuthLevel.BASE;
+    }
+
+    // Update QuartzCardUser if ProviderCardUser differs
+    if (quartzCardUser?.auth_level !== providerCardUserStatus) {
+      fetchAndParse(`${config.NEXT_PUBLIC_INTERNAL_API_URL}/auth/auth-level?publicKey=${wallet.publicKey}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          authLevel: providerCardUserStatus
+        })
+      });
+    }
+  }, [quartzCardUser, providerCardUser, wallet.publicKey]);
 
   // Log in card user
-  const loginCardUser = useLoginCardUser(wallet);
+  const loginCardUser = useLoginCardUser();
   useEffect(() => {
-    if (isInitialized && quartzCardUser?.auth_level === "Card") {
+    if (isInitialized && quartzCardUser?.auth_level === AuthLevel.CARD) {
       loginCardUser.mutate();
     }
   }, [isInitialized, quartzCardUser, loginCardUser]);
   
-  const [kycApplicationStatus, setKycApplicationStatus] = useState<string | null>(null);
+  // const [kycApplicationStatus, setKycApplicationStatus] = useState<string | null>(null);
   
 
 
@@ -140,37 +166,6 @@ export default function Page() {
     return () => clearInterval(interval);
 
   }, [cardDetails, jwtToken, pendingCardTopup, topupSignature, setTopupSignature, setPendingCardTopup, refetchCardDetails, showTxStatus, showError, wallet.publicKey]);
-
-  // Handle approve KYC application
-  useEffect(() => {
-    console.log("userFromDb", quartzCardUser);
-    console.log("kycApplicationStatus", kycApplicationStatus);
-    console.log("wallet.publicKey", wallet.publicKey);
-    console.log("cardUserInfo", providerCardUser);
-
-    if (kycApplicationStatus === "approved" && quartzCardUser?.auth_level !== "Card") {
-      console.log("kycApplicationStatus is approved, updating user in database to have auth level 'Card'");
-      //update user in database to have auth level "Card"
-      fetchAndParse(`${config.NEXT_PUBLIC_INTERNAL_API_URL}/auth/auth-level?publicKey=${wallet.publicKey}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          authLevel: "Card"
-        })
-      });
-
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kycApplicationStatus, wallet.publicKey, quartzCardUser]);
-
-  // Set kyc application status
-  useEffect(() => {
-    if (providerCardUser) {
-      setKycApplicationStatus(providerCardUser.applicationStatus);
-    }
-  }, [providerCardUser]);
 
   return (
     <main className={styles.container}>

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { fetchAndParse } from "@/src/utils/helpers";
 import config from "@/src/config/config";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
+import { TailSpin } from "react-loader-spinner";
 
 export default function Card() {
     const { 
@@ -112,6 +113,21 @@ export default function Card() {
                 >
                     KYC for Quartz Card
                 </button>
+            )}
+
+            {quartzCardUser?.auth_level === "Pending" && (
+                <div className={styles.pending}>
+                    <p>KYC pending...</p>
+                    <TailSpin
+                        height="18.5"
+                        width="18.5"
+                        color="#ffffffA5"
+                        ariaLabel="loading-spinner"
+                        wrapperStyle={{
+                            width: "25px"
+                        }}
+                    />
+                </div>
             )}
 
             {quartzCardUser?.auth_level === "Card" &&
