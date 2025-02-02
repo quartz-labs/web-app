@@ -227,7 +227,7 @@ export const useQuartzCardUserQuery = (publicKey: PublicKey | null) => {
     return query();
 };
 
-export const useProviderCardUserQuery = (cardUserId: string | null, enabled: boolean) => {
+export const useProviderCardUserQuery = (cardUserId: string | null, refetch: boolean) => {
     const { setProviderCardUser } = useStore();
 
     const query = createQuery<ProviderCardUser>({
@@ -237,9 +237,9 @@ export const useProviderCardUserQuery = (cardUserId: string | null, enabled: boo
             id: cardUserId
         } : undefined,
         errorMessage: "Could not fetch account information",
-        enabled: cardUserId != null && enabled,
-        staleTime: 3_000,
-        refetchInterval: 3_000,
+        enabled: cardUserId != null,
+        staleTime: refetch ? 5_000 : Infinity,
+        refetchInterval: refetch ? 5_000 : undefined,
         onSuccess: (data) => setProviderCardUser(data)
     });
     return query();

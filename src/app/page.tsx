@@ -30,9 +30,10 @@ export default function Page() {
     topupSignature,
     jwtToken
   } = useStore();
-
+  
   const { showError } = useError();
   const { showTxStatus } = useTxStatus();
+  const refetchCardUser = useRefetchCardUser();
   
   // Quartz account status
   const { data: accountStatus, isLoading: isAccountStatusLoading } = useAccountStatusQuery(wallet.publicKey);
@@ -40,7 +41,7 @@ export default function Page() {
   useEffect(() => {
     setIsInitialized(isInitialized);
   }, [setIsInitialized, isInitialized]);
-
+  
   // Quartz account data
   usePricesQuery();
   useRatesQuery();
@@ -78,23 +79,24 @@ export default function Page() {
           authLevel: providerCardUserStatus
         })
       });
+      refetchCardUser();
     }
-  }, [quartzCardUser, providerCardUser, wallet.publicKey]);
+  }, [quartzCardUser, providerCardUser, wallet.publicKey, refetchCardUser]);
 
   // Log in card user
   const loginCardUser = useLoginCardUser();
   useEffect(() => {
-    if (isInitialized && quartzCardUser?.auth_level === AuthLevel.CARD) {
+    if (isInitialized && quartzCardUser?.auth_level === AuthLevel.CARD && !jwtToken) {
       loginCardUser.mutate();
     }
-  }, [isInitialized, quartzCardUser, loginCardUser]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps	
+  }, [isInitialized, quartzCardUser?.auth_level, jwtToken]);
   
   // const [kycApplicationStatus, setKycApplicationStatus] = useState<string | null>(null);
   
 
 
   // Topup Card
-  const refetchCardUser = useRefetchCardUser();
   useEffect(() => {
     if (!pendingCardTopup || !topupSignature) return;
 

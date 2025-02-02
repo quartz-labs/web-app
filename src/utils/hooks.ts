@@ -6,6 +6,7 @@ import config from "../config/config";
 import { fetchAndParse } from "./helpers";
 import { useStore } from "./store";
 import { ModalVariation } from "../types/enums/ModalVariation.enum";
+import { WalletSignMessageError } from "@solana/wallet-adapter-base";
 
 export function useRefetchAccountData() {
     const queryClient = useQueryClient();
@@ -67,7 +68,7 @@ export function useOpenKycLink() {
 }
 
 export function useLoginCardUser() {
-    const { setJwtToken } = useStore();
+    const { setJwtToken, setIsSigningLoginMessage } = useStore();
     const wallet = useWallet();
 
     const signMessage = async (wallet: WalletContextState, message: string) => {
@@ -83,12 +84,25 @@ export function useLoginCardUser() {
       mutationFn: async () => {
         if (!wallet) throw new Error("Wallet not found");
 
-        const message = `
-        Sign this message to authenticate ownership. This signature will not trigger any blockchain transaction or cost any gas fees.\n\n
-        Wallet address: ${wallet.publicKey}\n
-        Timestamp: ${Date.now()}\n
-        `;
-        const signature = await signMessage(wallet, message);
+        const message = [
+            "Sign this message to authenticate ownership. This signature will not trigger any blockchain transaction or cost any gas fees.\n",
+            `Wallet address: ${wallet.publicKey}`,
+            `Timestamp: ${Date.now()}`
+        ].join("\n");
+
+        let signature: string;
+        setIsSigningLoginMessage(true);
+        try {
+            signature = await signMessage(wallet, message);
+        } catch (error) {
+            setIsSigningLoginMessage(false);
+            if (error instanceof WalletSignMessageError) {
+                setJwtToken(false);
+                return;
+            } else {
+                throw error;
+            }
+        }
 
         const cardToken = await fetchAndParse(`${config.NEXT_PUBLIC_INTERNAL_API_URL}/auth/user`, {
             method: 'POST',
@@ -104,6 +118,7 @@ export function useLoginCardUser() {
         });
 
         setJwtToken(cardToken.token);
+        setIsSigningLoginMessage(false);
       },
       onError: (error) => {
         console.error("Failed to log in: ", error);

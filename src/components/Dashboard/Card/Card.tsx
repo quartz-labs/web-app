@@ -1,12 +1,13 @@
 import { useStore } from "@/src/utils/store";
 import styles from "./Card.module.css";
-import type { CardsForUserResponse } from "@/src/types/interfaces/CardUserResponse.interface";
+import { AuthLevel, type CardsForUserResponse } from "@/src/types/interfaces/CardUserResponse.interface";
 import { useState } from "react";
 import { fetchAndParse } from "@/src/utils/helpers";
 import config from "@/src/config/config";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
 import { TailSpin } from "react-loader-spinner";
-import { useOpenKycLink } from "@/src/utils/hooks";
+import { useLoginCardUser, useOpenKycLink } from "@/src/utils/hooks";
+import { PuffLoader } from "react-spinners";
 
 export default function Card() {
     const { 
@@ -14,13 +15,19 @@ export default function Card() {
         quartzCardUser, 
         jwtToken, 
         setCardDetails, 
-        cardDetails 
+        cardDetails,
+        providerCardUser,
+        isSigningLoginMessage
     } = useStore();
     const [showDetails, setShowDetails] = useState(false);
     const openKycLink = useOpenKycLink();
 
     const [cardPan, setCardPan] = useState<string[] | null>(null);
     const [cardCvc, setCardCvc] = useState<string[] | null>(null);
+
+    const link = providerCardUser?.applicationCompletionLink ? (
+        `${providerCardUser.applicationCompletionLink.url}?userId=${providerCardUser.applicationCompletionLink.params.userId}`
+    ) : undefined;
 
     const createCard = async () => {
         // if user has no cards, kyc is approved.
@@ -42,7 +49,6 @@ export default function Card() {
         );
 
         setCardDetails(cardDetails ? [...cardDetails, createCardResponse] : [createCardResponse]);
-        console.log(createCardResponse);
     }
 
     const getCardDetails = async (cardId: string) => {
@@ -59,6 +65,31 @@ export default function Card() {
         setCardPan([response.pan]);
         setCardCvc([response.cvc]);
         setShowDetails(true);
+    }
+    
+    const loginCardUser = useLoginCardUser();
+    if (!jwtToken) {
+        return (
+            <div className={styles.cardsContainer}>
+                <button
+                    className={`glass-button ${styles.loginButton}`}
+                    onClick={() => loginCardUser.mutate()}
+                >
+                    {isSigningLoginMessage && (
+                        <PuffLoader
+                            color={"#ffffff"}
+                            size={30}
+                            aria-label="Loading"
+                            data-testid="loader"
+                        />
+                    )}
+                    
+                    {!isSigningLoginMessage && (
+                        <p>Verify Wallet</p>
+                    )}
+                </button>
+            </div>
+        )
     }
 
     if (cardDetails !== undefined && cardDetails.length > 0) {
@@ -97,30 +128,48 @@ export default function Card() {
         )
     }
 
-    return (
-        <div className={styles.cardsContainer}>
-            {!quartzCardUser?.auth_level && (
+    if (quartzCardUser?.auth_level === undefined) {
+        return (
+            <div className={styles.cardsContainer}>
                 <button
                     className={`glass-button ${styles.mainButton}`}
                     onClick={() => setModalVariation(ModalVariation.CARD_SIGNUP)}
                 >
                     Sign up for Quartz Card ✨
                 </button>
-            )}
+            </div>
+        )
+    }
 
-            {quartzCardUser?.auth_level === "Base" && (
-                <button
-                    className={`glass-button ${styles.mainButton}`}
-                    onClick={() => {
-                        throw new Error("Not implemented"); // TODO: Fetch the ProviderCardUser once at the start, and only refetch if pending
-                        openKycLink("");
-                    }}
-                >
-                    KYC for Quartz Card
-                </button>
-            )}
+    if (quartzCardUser?.auth_level === AuthLevel.BASE) {
+        return (
+            <div className={styles.cardsContainer}>
+                {link && (
+                    <button
+                        className={`glass-button ${styles.mainButton}`}
+                        onClick={() => openKycLink(link)}
+                    >
+                        KYC for Quartz Card
+                    </button>
+                )}
+                {!link && (
+                    <TailSpin
+                        height="18.5"
+                        width="18.5"
+                        color="#ffffffA5"
+                        ariaLabel="loading-spinner"
+                        wrapperStyle={{
+                            width: "25px"
+                        }}
+                    />
+                )}
+            </div>
+        )
+    }
 
-            {quartzCardUser?.auth_level === "Pending" && (
+    if (quartzCardUser?.auth_level === AuthLevel.PENDING) {
+        return (
+            <div className={styles.cardsContainer}>
                 <div className={styles.pending}>
                     <p>KYC pending...</p>
                     <TailSpin
@@ -133,16 +182,20 @@ export default function Card() {
                         }}
                     />
                 </div>
-            )}
+            </div>
+        )
+    }
 
-            {quartzCardUser?.auth_level === "Card" &&
+    if (quartzCardUser?.auth_level === AuthLevel.CARD) {
+        return (
+            <div className={styles.cardsContainer}>
                 <button
                     className={`glass-button ${styles.mainButton}`}
                     onClick={createCard}
                 >
                     Create Card
                 </button>
-            }
-        </div>
-    )
+            </div>
+        )
+    }
 }

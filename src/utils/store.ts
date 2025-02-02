@@ -3,6 +3,7 @@ import { create } from "zustand";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
 import type { MarketIndex } from "@quartz-labs/sdk/browser";
 import type { CardsForUserResponse, ProviderCardUser, QuartzCardUser } from "../types/interfaces/CardUserResponse.interface";
+import type { JwtToken } from "../types/jwtToken.types";
 
 type State = {
   isInitialized: boolean;
@@ -12,7 +13,8 @@ type State = {
   withdrawLimits?: Record<MarketIndex, number>;
   health?: number;
   modalVariation: ModalVariation;
-  jwtToken?: string;
+  jwtToken?: JwtToken;
+  isSigningLoginMessage: boolean;
   kycLink?: string;
   quartzCardUser?: QuartzCardUser;
   providerCardUser?: ProviderCardUser;
@@ -29,7 +31,8 @@ type Action = {
   setWithdrawLimits: (withdrawLimits?: Record<MarketIndex, number>) => void;
   setHealth: (health?: number) => void;
   setModalVariation: (modalVariation: ModalVariation) => void;
-  setJwtToken: (jwtToken?: string) => void;
+  setJwtToken: (jwtToken?: JwtToken) => void;
+  setIsSigningLoginMessage: (isSigningLoginMessage: boolean) => void;
   setKycLink: (kycLink?: string) => void;
   setQuartzCardUser: (quartzCardUser?: QuartzCardUser) => void;
   setProviderCardUser: (providerCardUser?: ProviderCardUser) => void;
@@ -47,12 +50,14 @@ export const useStore = create<State & Action>((set) => ({
   health: undefined,
   modalVariation: ModalVariation.DISABLED,
   jwtToken: undefined,
+  isSigningLoginMessage: false,
   kycLink: undefined,
   quartzCardUser: undefined,
   providerCardUser: undefined,
   cardDetails: undefined,
   pendingCardTopup: false,
   topupSignature: undefined,
+  
   setIsInitialized: (isInitialized: boolean) => set({ isInitialized }),
   setPrices: (prices?: Record<MarketIndex, number>) => set({ prices }),
   setRates: (rates?: Record<MarketIndex, Rate>) => set({ rates }),
@@ -60,7 +65,8 @@ export const useStore = create<State & Action>((set) => ({
   setWithdrawLimits: (withdrawLimits?: Record<MarketIndex, number>) => set({ withdrawLimits }),
   setHealth: (health?: number) => set({ health }),
   setModalVariation: (modalVariation: ModalVariation) => set({ modalVariation }),
-  setJwtToken: (jwtToken?: string) => set({ jwtToken }),
+  setJwtToken: (jwtToken?: JwtToken) => set({ jwtToken }),
+  setIsSigningLoginMessage: (isSigningLoginMessage: boolean) => set({ isSigningLoginMessage }),
   setKycLink: (kycLink?: string) => set({ kycLink }),
   setQuartzCardUser: (quartzCardUser?: QuartzCardUser) => set({ quartzCardUser }),
   setProviderCardUser: (providerCardUser?: ProviderCardUser) => set({ providerCardUser }),

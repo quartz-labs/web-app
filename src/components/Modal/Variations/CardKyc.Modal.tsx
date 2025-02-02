@@ -1,24 +1,18 @@
 import { useStore } from "@/src/utils/store";
 import styles from "../Modal.module.css";
-import { useEffect } from "react";
-import { captureError } from "@/src/utils/errors";
-import { useError } from "@/src/context/error-provider";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
 import { useRefetchCardUser } from "@/src/utils/hooks";
+import { useEffect } from "react";
 
 export default function CardKycModal() {
-    const { showError } = useError();
     const { kycLink, setModalVariation } = useStore();
     const refetchCardUser = useRefetchCardUser();
 
     useEffect(() => {
-        if (kycLink) {
-            window.open(kycLink, "_blank", "noopener noreferrer");
-        } else {
-            captureError(showError, "No KYC link found", "/CardKyc.Modal.tsx", null, null);
+        return () => {
+            refetchCardUser();
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [kycLink]);
+    }, [refetchCardUser]);
 
     if (!kycLink) {
         return (
@@ -42,10 +36,7 @@ export default function CardKycModal() {
 
             <button
                 className={`glass-button ${styles.mainButton}`}
-                onClick={() => {
-                    setModalVariation(ModalVariation.DISABLED);
-                    refetchCardUser();
-                }}
+                onClick={() => setModalVariation(ModalVariation.DISABLED)}
             >
                 Done
             </button>
