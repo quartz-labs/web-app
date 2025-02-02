@@ -64,7 +64,7 @@ export default function Card() {
                 jwtToken
             })
         });
-        
+
         const formattedPan = response.pan.match(/.{1,4}/g).join(' ');
         setCardPan([formattedPan]);
         setCardCvc([response.cvc]);
@@ -72,7 +72,7 @@ export default function Card() {
     }
     
     const loginCardUser = useLoginCardUser();
-    if (!jwtToken) {
+    if (!jwtToken && quartzCardUser?.auth_level !== undefined) {
         return (
             <div className={styles.cardsContainer}>
                 <button
