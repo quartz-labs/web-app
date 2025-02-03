@@ -104,15 +104,9 @@ export default function Card() {
             <div className={styles.cardsContainer}>
                 <div className={styles.cardWrapper}>
                     <div>
-                        <div>Status: {cardDetails.status}</div>
-                        <div>Limit: ${cardDetails.limit?.amount / 100 || '0.00'} per {cardDetails.limit?.frequency || 'allTime'}</div>
-                        <div>
-                            <p>Balance: {(spendableBalance === undefined) ? "Spenable Card Balance Not Available" : `$${spendableBalance / 100}`}</p>
-                            
-                        </div>
-                        {topupPending && (
-                            <div className={styles.topup}>
-                                <p>Topup pending...</p>
+                        <div className={styles.topup}>
+                            <p>Balance: {(spendableBalance === undefined) ? "Unavailable" : `$${spendableBalance / 100}`}</p>
+                            {topupPending && (
                                 <TailSpin
                                     height="18.5"
                                     width="18.5"
@@ -122,8 +116,8 @@ export default function Card() {
                                         width: "25px"
                                     }}
                                 />
-                            </div>
-                        )}
+                            )}
+                        </div>
                     </div>
 
                     {!showDetails && (
