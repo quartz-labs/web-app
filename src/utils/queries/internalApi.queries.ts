@@ -53,6 +53,7 @@ export const useCardDetailsQuery = (cardUserId: string | null, enabled: boolean)
             id: cardUserId
         } : undefined,
         transformResponse: (data: CardsForUserResponse[]) => {
+            console.log(data);
             return data[0];
         },
         errorMessage: "Could not fetch account information",

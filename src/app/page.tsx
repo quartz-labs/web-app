@@ -47,10 +47,13 @@ export default function Page() {
   }, [quartzCardUser?.topup_pending, setTopupPending]);
 
   // Provider Card User data
-  useCardDetailsQuery(quartzCardUser?.card_api_user_id ?? null, isInitialized);
   const { data: providerCardUser } = useProviderCardUserQuery(
     quartzCardUser?.card_api_user_id ?? null,
     isInitialized && (quartzCardUser?.auth_level === AuthLevel.BASE || quartzCardUser?.auth_level === AuthLevel.PENDING)
+  );
+  useCardDetailsQuery(
+    quartzCardUser?.card_api_user_id ?? null,
+    isInitialized && quartzCardUser?.auth_level === AuthLevel.CARD
   );
 
   // Update QuartzCardUser status if ProviderCardUser status differs
