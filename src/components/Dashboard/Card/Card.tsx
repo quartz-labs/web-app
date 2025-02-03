@@ -107,7 +107,7 @@ export default function Card() {
                         <div>Status: {cardDetails.status}</div>
                         <div>Limit: ${cardDetails.limit?.amount / 100 || '0.00'} per {cardDetails.limit?.frequency || 'allTime'}</div>
                         <div>
-                            <p>Balance: ${spendableBalance ?? 0}</p>
+                            <p>Balance: ${spendableBalance ? spendableBalance / 100 : "Spenable Card Balance Not Available"}</p>
                             
                         </div>
                         {topupPending && (
