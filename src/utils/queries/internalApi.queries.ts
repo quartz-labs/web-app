@@ -52,9 +52,9 @@ export const useCardDetailsQuery = (cardUserId: string | null, enabled: boolean)
         params: cardUserId ? {
             id: cardUserId
         } : undefined,
-        transformResponse: (data: CardsForUserResponse[]) => {
+        transformResponse: (data: CardsForUserResponse) => {
             console.log(data);
-            return data[0];
+            return data;
         },
         errorMessage: "Could not fetch account information",
         enabled: cardUserId != null && enabled,
