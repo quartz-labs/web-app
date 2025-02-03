@@ -13,7 +13,7 @@ import { TxStatus, useTxStatus } from "@/src/context/tx-status-provider";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
 import { MarketIndex, TOKENS, baseUnitToDecimal, decimalToBaseUnit } from "@quartz-labs/sdk/browser";
 import type { RepayLoanInnerModalProps } from "./RepayLoan.Modal";
-import { useJupiterSwapModeQuery } from "@/src/utils/queries";
+import { useJupiterSwapModeQuery } from "@/src/utils/queries/misc.queries";
 import { SwapMode } from "@jup-ag/api";
 
 interface RepayWithCollateralProps extends RepayLoanInnerModalProps {

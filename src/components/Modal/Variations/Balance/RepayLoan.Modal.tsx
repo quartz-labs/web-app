@@ -3,7 +3,7 @@ import RepayWithCollateral from "./RepayWithCollateral";
 import RepayWithWallet from "./RepayWithWallet";
 import styles from "../../Modal.module.css";
 import { useRefetchAccountData } from "@/src/utils/hooks";
-import { useDepositLimitsQuery } from "@/src/utils/queries";
+import { useDepositLimitsQuery } from "@/src/utils/queries/protocol.queries";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useStore } from "@/src/utils/store";
 import { MarketIndex } from "@quartz-labs/sdk/browser";
