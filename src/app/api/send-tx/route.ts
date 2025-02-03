@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { Connection } from '@solana/web3.js';
 import { VersionedTransaction } from '@solana/web3.js';
+import { retryWithBackoff } from '@quartz-labs/sdk';
 
 const envSchema = z.object({
     RPC_URL: z.string().url(),
@@ -42,9 +43,12 @@ export async function POST(request: Request) {
     }
 
     try {
-        const signature = await connection.sendRawTransaction(body.transaction, {
-            skipPreflight: body.skipPreflight,
-        });
+        const signature = await retryWithBackoff(
+            async () => connection.sendRawTransaction(body.transaction, {
+                skipPreflight: body.skipPreflight,
+            }),
+            3
+        );
         return NextResponse.json({ signature });
     } catch (error) {
         console.error(error);

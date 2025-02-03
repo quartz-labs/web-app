@@ -1,4 +1,4 @@
-import { validateAmount, fetchAndParse, deserializeTransaction, signAndSendTransaction, buildEndpointURL, formatPreciseDecimal } from "@/src/utils/helpers";
+import { validateAmount, fetchAndParse, deserializeTransaction, signAndSendTransaction, buildEndpointURL, formatPreciseDecimal, generateAssetInfos } from "@/src/utils/helpers";
 import { useRefetchAccountData, useRefetchWithdrawLimits } from "@/src/utils/hooks";
 import { useStore } from "@/src/utils/store";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
@@ -12,6 +12,7 @@ import { captureError } from "@/src/utils/errors";
 import { TxStatus, useTxStatus } from "@/src/context/tx-status-provider";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
 import { MarketIndex, TOKENS, baseUnitToDecimal, decimalToBaseUnit } from "@quartz-labs/sdk/browser";
+import type { AssetInfo } from "@/src/types/interfaces/AssetInfo.interface";
 
 export default function BorrowModal() {
     const wallet = useAnchorWallet();
@@ -26,8 +27,27 @@ export default function BorrowModal() {
     const [errorText, setErrorText] = useState("");
     const [amountStr, setAmountStr] = useState("");
     const amountDecimals = Number(amountStr);
+    const [suppliedAssets, setSuppliedAssets] = useState<AssetInfo[]>([]);
 
-    const [ marketIndex, setMarketIndex ] = useState<MarketIndex>(MarketIndex[0]);
+    // Set starting index to MarketIndex[1], unless that's the only collateral
+    const startingIndex = MarketIndex[1];
+    useEffect(() => {
+        if (prices && balances && rates) {
+            const { suppliedAssets } = generateAssetInfos(prices, balances, rates);
+            setSuppliedAssets(suppliedAssets);
+            if (suppliedAssets.length === 1 && suppliedAssets[0]?.marketIndex === startingIndex) {
+                setMarketIndex(MarketIndex[0]);
+            }
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // Empty dependency array to only run once
+    const [ marketIndex, setMarketIndex ] = useState<MarketIndex>(startingIndex);
+
+    // Cannot borrow against your only collateral
+    let selectableMarketIndices = [...MarketIndex];
+    if (suppliedAssets.length === 1) {
+        selectableMarketIndices = [...MarketIndex].filter(index => index !== suppliedAssets[0]?.marketIndex);
+    }
 
     // Warning for PYUSD
     const [ autoRepayWarningDetails, setAutoRepayWarningDetails ] = useState(false);
@@ -62,7 +82,7 @@ export default function BorrowModal() {
                 amountBaseUnits: decimalToBaseUnit(amountDecimals, marketIndex),
                 marketIndex
             });
-            const response = await fetchAndParse(endpoint);
+            const response = await fetchAndParse(endpoint, undefined, 3);
             const transaction = deserializeTransaction(response.transaction);
             const signature = await signAndSendTransaction(transaction, wallet, showTxStatus);
             setAwaitingSign(false);
@@ -97,6 +117,7 @@ export default function BorrowModal() {
                 )}
                 marketIndex={marketIndex}
                 setMarketIndex={setMarketIndex}
+                selectableMarketIndices={selectableMarketIndices}
             />
 
             {isLessThanWithdrawLimit && 

@@ -841,15 +841,10 @@
   resolved "https://registry.yarnpkg.com/@js-sdsl/ordered-map/-/ordered-map-4.4.2.tgz#9299f82874bab9e4c7f9c48d865becbfe8d6907c"
   integrity sha512-iUKgm52T8HOE/makSxjqoWhe95ZJA1/G1sYsGev2JDKUSS14KAgg1LHb+Ba+IPow0xflbnSkOsZcO08C7w1gYw==
 
-"@jup-ag/api@^6.0.30":
-  version "6.0.36"
-  resolved "https://registry.yarnpkg.com/@jup-ag/api/-/api-6.0.36.tgz#3bc5393a25e6d10dece0835b43f80db8a28beb17"
-  integrity sha512-oJsYT1vhb8+uf+wrvRTDyB0/MN5RmxiqtVztEUmDaCxwTcVk3Eo/YsRTqeqKlB7rUMTNyQPqiEW6t3tqitgXzg==
-
-"@jup-ag/api@^6.0.32":
-  version "6.0.32"
-  resolved "https://registry.yarnpkg.com/@jup-ag/api/-/api-6.0.32.tgz#af140c5f85b2898857cfc76bedf9079168ca1246"
-  integrity sha512-MkNmYhTbf8zmT52xpM/f7pfZJTlAz0G+juFqBJo0iWZ52stl6EBDKTUCphUQkn153pkUqsLzvFW/q5EjarUI5A==
+"@jup-ag/api@6.0.30":
+  version "6.0.30"
+  resolved "https://registry.yarnpkg.com/@jup-ag/api/-/api-6.0.30.tgz#1beb8876affb803bea8ff18a24259b48272a3cf2"
+  integrity sha512-+LSo5yXR150kXg+iyVhNCSwK+PSL+MsB9Wvl930zgeeW0LWUTGyMhibz6wcqcViol+F0RMAVOYh6ryJYO1kkZw==
 
 "@metaplex-foundation/beet-solana@^0.3.0":
   version "0.3.1"
@@ -906,10 +901,10 @@
     snake-case "^3.0.4"
     spok "^1.4.3"
 
-"@mrgnlabs/marginfi-client-v2@^4.0.0":
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/@mrgnlabs/marginfi-client-v2/-/marginfi-client-v2-4.0.0.tgz#50676767dc9a06b5ffaccb25f3dc8f7a24b6f52d"
-  integrity sha512-GnXdGdPgU54w517iDXfKoti1i8jrVyOwhxPKS2Lpqac3QH4NL3b4sSbz+pCBDmjk60gveHzu3IAIGscUpbo1yQ==
+"@mrgnlabs/marginfi-client-v2@4.0.4":
+  version "4.0.4"
+  resolved "https://registry.yarnpkg.com/@mrgnlabs/marginfi-client-v2/-/marginfi-client-v2-4.0.4.tgz#cd9689dd35b50ab7c62693dbd3e87228156994b1"
+  integrity sha512-3DYWfhh292LsgPEEvL3fbqmAj9AOkUVm2zh+3t9JDzqqHISQOKSgoD8+sI10NIhnf+0+yvdrwE3vRV75crcucg==
   dependencies:
     "@coral-xyz/anchor" "^0.30.1"
     "@mrgnlabs/mrgn-common" "*"
@@ -1230,14 +1225,14 @@
     bs58 "^5.0.0"
     jito-ts "^3.0.1"
 
-"@quartz-labs/sdk@0.3.7":
-  version "0.3.7"
-  resolved "https://registry.yarnpkg.com/@quartz-labs/sdk/-/sdk-0.3.7.tgz#0c1cb153b66694f3b13df12c0994d269c1ddfb01"
-  integrity sha512-p9e/HK0GgA/tF5H18RpjO+6GA7HibrJwwg9tuSPQr11GqcFe3tjhDr2WRPfZ28S/DTWqTsUz81agVuuVH63xsg==
+"@quartz-labs/sdk@0.4.3":
+  version "0.4.3"
+  resolved "https://registry.yarnpkg.com/@quartz-labs/sdk/-/sdk-0.4.3.tgz#00a6644a3a799ededbed7fbc4f5ddcc1f7178616"
+  integrity sha512-LjQx3oivXPuSU3gkHkK59fr8/Higg+L/qg7xf6O/d/w39qcdFuqQYtXcAyWGdtilKV7WFHC+SWeqjzbMcv7NFA==
   dependencies:
     "@coral-xyz/anchor" "^0.29.0"
     "@drift-labs/sdk" "^2.103.0-beta.9"
-    "@jup-ag/api" "^6.0.30"
+    "@jup-ag/api" "6.0.30"
     "@pythnetwork/pyth-solana-receiver" "^0.9.1"
     "@solana/spl-token" "^0.4.9"
     bn.js "^5.2.1"

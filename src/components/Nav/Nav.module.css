@@ -16,6 +16,8 @@
 .navItems {
     display: flex;
     flex-direction: row;
+    flex-grow: 1;
+    justify-content: flex-end;
     align-items: center;
     gap: var(--nav-items-gap);
     padding: 5px 0px;
@@ -24,6 +26,7 @@
 .notificationsButton {
     height: 100%;
     width: auto;
+    aspect-ratio: 1;
     padding: var(--notifications-button-padding);
     margin-right: -var(--notifications-button-padding);
     border-radius: 100%;
@@ -39,6 +42,7 @@
 
 .loadingSpinner {
     height: 100%;
-    width: 100%;
+    width: auto;
+    aspect-ratio: 1;
     padding: calc(var(--notifications-button-padding) + 1px) 0px;
 }

@@ -5,7 +5,7 @@ import type { AnchorWallet } from "@solana/wallet-adapter-react";
 import { VersionedTransaction } from "@solana/web3.js";
 import { TransactionMessage } from "@solana/web3.js";
 import { TxStatus, type TxStatusProps } from "../context/tx-status-provider";
-import { MarketIndex, TOKENS, baseUnitToDecimal } from "@quartz-labs/sdk/browser";
+import { MarketIndex, TOKENS, baseUnitToDecimal, retryWithBackoff } from "@quartz-labs/sdk/browser";
 import { DEFAULT_COMPUTE_UNIT_LIMIT } from "../config/constants";
 import crypto from "crypto";
 
@@ -172,8 +172,11 @@ export function validateAmount(marketIndex: MarketIndex, amountDecimal: number, 
     return "";
 }
 
-export async function fetchAndParse(url: string, req?: RequestInit): Promise<any> {
-    const response = await fetch(url, req);
+export async function fetchAndParse(url: string, req?: RequestInit | undefined, retries: number = 0): Promise<any> {
+    const response = await retryWithBackoff(
+        async () => fetch(url, req),
+        retries
+    );
     const body = await response.json();
 
     if (!response.ok) {
@@ -284,7 +287,7 @@ export async function signAndSendTransaction(
     const signedTx = await wallet.signTransaction(transaction);
 
     const serializedTransaction = Buffer.from(signedTx.serialize()).toString("base64");
-
+    
     const url = "/api/send-tx";
     const response = await fetch(url, {
         method: "POST",
