@@ -154,7 +154,7 @@ export default function CardTopupModal() {
             }
 
             <Buttons
-                label="Add funds"
+                label="Top up"
                 awaitingSign={awaitingSign}
                 onConfirm={handleConfirm}
                 onCancel={() => setModalVariation(ModalVariation.DISABLED)}

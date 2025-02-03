@@ -10,7 +10,10 @@ export function captureError(
     wallet: PublicKey | null, 
     silentError: boolean = false,
 ) {
-    console.error(error);
+    console.error({
+        message: errorString,
+        error: error
+    });
 
     const walletString = wallet ? wallet.toBase58() : 'AddressNotProvided';
     const errorStack = (error instanceof Error ? error : new Error(errorString)).stack?.split('\n')[1]?.trim() || '';

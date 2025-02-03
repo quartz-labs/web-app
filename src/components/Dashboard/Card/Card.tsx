@@ -151,7 +151,7 @@ export default function Card() {
                     className={`glass-button`}
                 onClick={() => setModalVariation(ModalVariation.CARD_TOPUP)}
                 >
-                    Top up card!
+                    Top Up Card
                 </button>
             </div>
         )

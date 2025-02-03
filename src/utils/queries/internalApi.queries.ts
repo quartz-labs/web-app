@@ -15,7 +15,7 @@ export const useQuartzCardUserQuery = (publicKey: PublicKey | null, refetch: boo
         params: publicKey ? {
             publicKey: publicKey.toBase58()
         } : undefined,
-        errorMessage: "Could not fetch account information",
+        errorMessage: "Could not fetch Quartz Card User",
         enabled: publicKey != null,
         staleTime: refetch ? 5_000 : Infinity,
         refetchInterval: refetch ? 5_000 : undefined,
@@ -34,7 +34,7 @@ export const useProviderCardUserQuery = (cardUserId: string | null, refetch: boo
         params: cardUserId ? {
             id: cardUserId
         } : undefined,
-        errorMessage: "Could not fetch account information",
+        errorMessage: "Could not fetch Provider Card User",
         enabled: cardUserId != null,
         staleTime: refetch ? 5_000 : Infinity,
         refetchInterval: refetch ? 5_000 : undefined,
@@ -46,17 +46,13 @@ export const useProviderCardUserQuery = (cardUserId: string | null, refetch: boo
 export const useCardDetailsQuery = (cardUserId: string | null, enabled: boolean) => {
     const { setCardDetails } = useStore();
 
-    const query = createQuery<CardsForUserResponse | null>({
+    const query = createQuery<CardsForUserResponse>({
         queryKey: ["card-user", "provider-card-user", "card", cardUserId ?? ""],
         url: `${config.NEXT_PUBLIC_INTERNAL_API_URL}/card/issuing/user`,
         params: cardUserId ? {
             id: cardUserId
         } : undefined,
-        transformResponse: (data: CardsForUserResponse[]) => {
-            if (data[0] === undefined) return null;
-            return data[0];
-        },
-        errorMessage: "Could not fetch account information",
+        errorMessage: "Could not fetch card details",
         enabled: cardUserId != null && enabled,
         staleTime: Infinity,
         onSuccess: (data) => setCardDetails(data)
@@ -74,7 +70,7 @@ export const useProviderCardSpendableBalanceQuery = (providerCardUserId: string 
             providerCardUserId: providerCardUserId,
             cardId: cardId
         } : undefined,
-        errorMessage: "Could not fetch account information",
+        errorMessage: "Could not fetch spendable balance",
         enabled: providerCardUserId != null && cardId != null,
         staleTime: refetch ? 30_000 : Infinity,
         refetchInterval: refetch ? 30_000 : undefined,

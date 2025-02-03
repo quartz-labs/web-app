@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { AddressLookupTableAccount, Connection, PublicKey, TransactionInstruction, TransactionMessage, VersionedTransaction} from '@solana/web3.js';
 import { MarketIndex, QUARTZ_ADDRESS_TABLE, QuartzClient, QuartzUser, TOKENS, baseUnitToDecimal, getTokenProgram, makeCreateAtaIxIfNeeded } from '@quartz-labs/sdk';
-import { AllbridgeCoreSdk, ChainSymbol, Messenger, nodeRpcUrlsDefault, type RawBridgeSolanaTransaction } from "@allbridge/bridge-core-sdk";
+import { AllbridgeCoreSdk, ChainSymbol, Messenger, nodeRpcUrlsDefault, SolanaAutoTxFee, type RawBridgeSolanaTransaction } from "@allbridge/bridge-core-sdk";
 import { createCloseAccountInstruction } from '@solana/spl-token';
 import { getWsolMint } from '@/src/utils/helpers';
 import { getAssociatedTokenAddress } from '@solana/spl-token';
@@ -175,30 +175,35 @@ async function makeBridgeIxs(
         throw new Error("Unable to get destination token from Allbridge SDK");
     }
 
+    
+    const bridgeAmount = baseUnitToDecimal(amountBaseUnits, marketIndex).toFixed(2);
+    console.log(bridgeAmount)
+
     let bridgeTx: VersionedTransaction;
     try {
         bridgeTx = (await sdk.bridge.rawTxBuilder.send({
-            amount: `${baseUnitToDecimal(amountBaseUnits, marketIndex).toFixed(2)}`,
+            amount: bridgeAmount,
             fromAccountAddress: address.toBase58(),
             toAccountAddress: cardContractAddress,
             sourceToken: sourceToken,
             destinationToken: destinationToken,
             messenger: Messenger.ALLBRIDGE,
             txFeeParams: {
-                solana: {
-                    pricePerUnitInMicroLamports: "1000000"
-                },
+                solana: SolanaAutoTxFee,
             },
         })) as RawBridgeSolanaTransaction;
     } catch {
         throw new Error("Unable to build bridge transaction");
     }
 
+    const ALLBRIDGE_PROGRAM_ID = "BrdgN2RPzEMWF96ZbnnJaUtQDQx7VRXYaHHbYCBvceWB";
+    // const CCTP_PROGRAM_ID = "CctpV8uRiXws7KZxpUXfPWy9BhCiWaeBRzsJgELvQKvu";
+    
     const decompiledIxs = TransactionMessage.decompile(bridgeTx.message, {
         addressLookupTableAccounts: [bridgeLookupTable]
     }).instructions;
     const bridgeIx = decompiledIxs[1];
-    if (!bridgeIx || bridgeIx.programId.toBase58() !== "BrdgN2RPzEMWF96ZbnnJaUtQDQx7VRXYaHHbYCBvceWB") {
+    if (!bridgeIx || bridgeIx.programId.toBase58() !== ALLBRIDGE_PROGRAM_ID) {
         throw new Error("Unable to build bridge transaction");
     }
 

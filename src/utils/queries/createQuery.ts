@@ -42,7 +42,7 @@ export function createQuery<T>({
 
             if (!response.ok) {
                 if (response.status !== 404 || !accept404) {
-                    throw new Error(body.message ?? errorMessage);
+                    throw new Error(`${errorMessage} - ${body.message}`);
                 }
             }
 
