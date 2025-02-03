@@ -16,11 +16,11 @@ import { useLoginCardUser, useRefetchCardUser } from "../utils/hooks";
 import { AuthLevel } from "../types/enums/AuthLevel.enum";
 import { fetchAndParse } from "../utils/helpers";
 import { useAccountStatusQuery, useWithdrawLimitsQuery, useBalancesQuery, useRatesQuery, usePricesQuery, useHealthQuery } from "../utils/queries/protocol.queries";
-import { useProviderCardUserQuery, useQuartzCardUserQuery, useCardDetailsQuery } from "../utils/queries/internalApi.queries";
+import { useProviderCardUserQuery, useQuartzCardUserQuery, useCardDetailsQuery, useProviderCardSpendableBalanceQuery } from "../utils/queries/internalApi.queries";
 
 export default function Page() {
   const wallet = useWallet();
-  const { setIsInitialized, jwtToken, setTopupPending, topupPending } = useStore();
+  const { setIsInitialized, jwtToken, setTopupPending, topupPending, cardDetails } = useStore();
   const refetchCardUser = useRefetchCardUser();
 
   // Quartz account status
@@ -54,6 +54,12 @@ export default function Page() {
   useCardDetailsQuery(
     quartzCardUser?.card_api_user_id ?? null,
     isInitialized && quartzCardUser?.auth_level === AuthLevel.CARD
+  );
+
+  const { data: spendableBalance } = useProviderCardSpendableBalanceQuery(
+    quartzCardUser?.card_api_user_id ?? null,
+    cardDetails?.id ?? null,
+    isInitialized && (quartzCardUser?.auth_level === AuthLevel.CARD)
   );
 
   // Update QuartzCardUser status if ProviderCardUser status differs
