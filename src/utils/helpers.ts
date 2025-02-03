@@ -192,8 +192,12 @@ export async function fetchAndParse(url: string, req?: RequestInit | undefined, 
         throw new Error(JSON.stringify(error) ?? `Could not fetch ${url}`);
     }
 
-    const body = await response.json();
-    return body;
+    try {
+        const body = await response.json();
+        return body;
+    } catch {
+        return response;
+    }
 }
 
 export function getTokenIcon(marketIndex: MarketIndex) {
