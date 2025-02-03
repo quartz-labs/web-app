@@ -196,7 +196,7 @@ export default function Card() {
         )
     }
 
-    if (quartzCardUser?.auth_level === AuthLevel.PENDING) {
+    if (quartzCardUser?.auth_level === AuthLevel.KYC_PENDING) {
         return (
             <div className={styles.cardsContainer}>
                 <div className={styles.pending}>

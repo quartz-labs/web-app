@@ -23,6 +23,7 @@ export default function Page() {
   const { setIsInitialized, jwtToken, setTopupPending, topupPending, cardDetails } = useStore();
   const refetchCardUser = useRefetchCardUser();
 
+
   // Quartz account status
   const { data: accountStatus, isLoading: isAccountStatusLoading } = useAccountStatusQuery(wallet.publicKey);
   const isInitialized = (accountStatus === AccountStatus.INITIALIZED && !isAccountStatusLoading && !config.NEXT_PUBLIC_UNAVAILABLE_TIME);
@@ -30,6 +31,7 @@ export default function Page() {
     setIsInitialized(isInitialized);
   }, [setIsInitialized, isInitialized]);
   
+
   // Quartz account data
   usePricesQuery();
   useRatesQuery();
@@ -37,6 +39,7 @@ export default function Page() {
   useWithdrawLimitsQuery(isInitialized ? wallet.publicKey : null);
   useHealthQuery(isInitialized ? wallet.publicKey : null);
   
+
   // Quartz Card User data
   const { data: quartzCardUser } = useQuartzCardUserQuery(
     isInitialized ? wallet.publicKey : null,
@@ -45,6 +48,7 @@ export default function Page() {
   useEffect(() => {
     setTopupPending(quartzCardUser?.topup_pending ?? false);
   }, [quartzCardUser?.topup_pending, setTopupPending]);
+
 
   // Provider Card User data
   const { data: providerCardUser } = useProviderCardUserQuery(
@@ -60,6 +64,7 @@ export default function Page() {
     cardDetails?.id ?? null,
     isInitialized && (quartzCardUser?.auth_level === AuthLevel.CARD)
   );
+
 
   // Update QuartzCardUser status if ProviderCardUser status differs
   useEffect(() => {
@@ -88,6 +93,7 @@ export default function Page() {
     }
   }, [quartzCardUser, providerCardUser, wallet.publicKey, refetchCardUser]);
 
+
   // Log in card user
   const loginCardUser = useLoginCardUser();
   useEffect(() => {
@@ -96,6 +102,7 @@ export default function Page() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps	
   }, [isInitialized, quartzCardUser?.auth_level, jwtToken]);
+  
   
   return (
     <main className={styles.container}>

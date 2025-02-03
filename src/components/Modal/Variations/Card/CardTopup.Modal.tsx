@@ -10,7 +10,7 @@ import { useError } from "@/src/context/error-provider";
 import { captureError } from "@/src/utils/errors";
 import { TxStatus, useTxStatus } from "@/src/context/tx-status-provider";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
-import { baseUnitToDecimal, decimalToBaseUnit } from "@quartz-labs/sdk/browser";
+import { baseUnitToDecimal, decimalToBaseUnit, MarketIndex } from "@quartz-labs/sdk/browser";
 import config from "@/src/config/config";
 
 export default function CardTopupModal() {
@@ -27,7 +27,7 @@ export default function CardTopupModal() {
     const [amountStr, setAmountStr] = useState("");
     const amountDecimals = Number(amountStr);
 
-    const marketIndex = 0; // USDC topup only
+    const marketIndex = 0 as MarketIndex; // USDC topup only
     const CHARACTER_LIMIT = 20;
     const value = prices?.[marketIndex] ? prices?.[marketIndex] * Number(amountStr) : undefined;
     const rate = rates?.[marketIndex]?.borrowRate ? rates?.[marketIndex]?.borrowRate * 100 : undefined;
@@ -55,8 +55,7 @@ export default function CardTopupModal() {
         try {
             const topupEndpoint = buildEndpointURL("/api/build-tx/top-up-card", {
                 address: wallet.publicKey.toBase58(),
-                amountBaseUnits: decimalToBaseUnit(amountDecimals, marketIndex),
-                marketIndex
+                amountBaseUnits: decimalToBaseUnit(amountDecimals, marketIndex)
             });
             const topupResponse = await fetchAndParse(topupEndpoint);
             const topupTransaction = deserializeTransaction(topupResponse.transaction);
