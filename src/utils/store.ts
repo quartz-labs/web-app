@@ -22,6 +22,7 @@ type State = {
   providerCardUser?: ProviderCardUser;
   cardDetails?: CardsForUserResponse | null;
   topupPending: boolean;
+  spendableBalance?: number;
 };
 
 type Action = {
@@ -39,6 +40,7 @@ type Action = {
   setProviderCardUser: (providerCardUser?: ProviderCardUser) => void;
   setCardDetails: (cardDetails?: CardsForUserResponse | null) => void;
   setTopupPending: (topupPending: boolean) => void;
+  setSpendableBalance: (spendableBalance?: number) => void;
 }
 
 export const useStore = create<State & Action>((set) => ({
@@ -56,7 +58,8 @@ export const useStore = create<State & Action>((set) => ({
   providerCardUser: undefined,
   cardDetails: undefined,
   topupPending: false,
-  
+  spendableBalance: undefined,
+
   setIsInitialized: (isInitialized: boolean) => set({ isInitialized }),
   setPrices: (prices?: Record<MarketIndex, number>) => set({ prices }),
   setRates: (rates?: Record<MarketIndex, Rate>) => set({ rates }),
@@ -71,4 +74,5 @@ export const useStore = create<State & Action>((set) => ({
   setProviderCardUser: (providerCardUser?: ProviderCardUser) => set({ providerCardUser }),
   setCardDetails: (cardDetails?: CardsForUserResponse | null) => set({ cardDetails }),
   setTopupPending: (topupPending: boolean) => set({ topupPending }),
+  setSpendableBalance: (spendableBalance?: number) => set({ spendableBalance }),
 }));

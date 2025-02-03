@@ -63,3 +63,22 @@ export const useCardDetailsQuery = (cardUserId: string | null, enabled: boolean)
     });
     return query();
 };
+
+export const useProviderCardSpendableBalanceQuery = (providerCardUserId: string | null, cardId: string | null, refetch: boolean) => {
+    const { setSpendableBalance } = useStore();
+
+    const query = createQuery<number>({
+        queryKey: ["card-user", "provider-card-user", "balance", providerCardUserId ?? ""],
+        url: `${config.NEXT_PUBLIC_INTERNAL_API_URL}/card/balance/spendable`,
+        params: providerCardUserId && cardId ? {
+            providerCardUserId: providerCardUserId,
+            cardId: cardId
+        } : undefined,
+        errorMessage: "Could not fetch account information",
+        enabled: providerCardUserId != null && cardId != null,
+        staleTime: refetch ? 30_000 : Infinity,
+        refetchInterval: refetch ? 30_000 : undefined,
+        onSuccess: (data) => setSpendableBalance(data)
+    });
+    return query();
+};

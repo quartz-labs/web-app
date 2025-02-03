@@ -19,7 +19,8 @@ export default function Card() {
         cardDetails,
         providerCardUser,
         isSigningLoginMessage,
-        topupPending
+        topupPending,
+        spendableBalance
     } = useStore();
     const [showDetails, setShowDetails] = useState(false);
     const openKycLink = useOpenKycLink();
@@ -106,7 +107,7 @@ export default function Card() {
                         <div>Status: {cardDetails.status}</div>
                         <div>Limit: ${cardDetails.limit?.amount / 100 || '0.00'} per {cardDetails.limit?.frequency || 'allTime'}</div>
                         <div>
-                            <p>Balance: $?</p>
+                            <p>Balance: ${spendableBalance ? spendableBalance / 100 : "Spenable Card Balance Not Available"}</p>
                             
                         </div>
                         {topupPending && (
