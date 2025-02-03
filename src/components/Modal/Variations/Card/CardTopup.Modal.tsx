@@ -73,7 +73,8 @@ export default function CardTopupModal() {
                     body: JSON.stringify({
                         signature: signature,
                         cardId: cardDetails.id,
-                        providerCardUserId: quartzCardUser.card_api_user_id
+                        providerCardUserId: quartzCardUser.card_api_user_id,
+                        quartzCardUserId: quartzCardUser.id
                     })
                 });
                 refetchCardUser();
