@@ -1,4 +1,4 @@
-import { validateAmount, fetchAndParse, deserializeTransaction, buildEndpointURL, formatPreciseDecimal, signAndSendTransaction, formatTokenDisplay } from "@/src/utils/helpers";
+import { validateAmount, fetchAndParse, deserializeTransaction, buildEndpointURL, formatPreciseDecimal, signAndSendTransaction, formatTokenDisplay, truncToDecimalPlaces } from "@/src/utils/helpers";
 import { useRefetchAccountData, useRefetchCardUser, useRefetchWithdrawLimits } from "@/src/utils/hooks";
 import { useStore } from "@/src/utils/store";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
@@ -64,6 +64,7 @@ export default function CardTopupModal() {
             const signature = await signAndSendTransaction(topupTransaction, wallet, showTxStatus);
             setAwaitingSign(false);
             if (signature) {
+                const amountInDollars = truncToDecimalPlaces(amountDecimals, 2);
                 await fetchAndParse(`${config.NEXT_PUBLIC_INTERNAL_API_URL}/card/balance/topup`, {
                     method: "POST",
                     headers: {
@@ -74,7 +75,8 @@ export default function CardTopupModal() {
                         signature: signature,
                         cardId: cardDetails.id,
                         providerCardUserId: quartzCardUser.card_api_user_id,
-                        quartzCardUserId: quartzCardUser.id
+                        quartzCardUserId: quartzCardUser.id,
+                        amountSent: amountInDollars * 100
                     })
                 });
                 refetchCardUser();
