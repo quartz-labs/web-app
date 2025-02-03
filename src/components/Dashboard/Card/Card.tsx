@@ -18,7 +18,8 @@ export default function Card() {
         setCardDetails, 
         cardDetails,
         providerCardUser,
-        isSigningLoginMessage
+        isSigningLoginMessage,
+        topupPending
     } = useStore();
     const [showDetails, setShowDetails] = useState(false);
     const openKycLink = useOpenKycLink();
@@ -104,7 +105,24 @@ export default function Card() {
                     <div>
                         <div>Status: {cardDetails.status}</div>
                         <div>Limit: ${cardDetails.limit?.amount / 100 || '0.00'} per {cardDetails.limit?.frequency || 'allTime'}</div>
-                        <div>Balance: $?</div>
+                        <div>
+                            <p>Balance: $?</p>
+                            
+                        </div>
+                        {topupPending && (
+                            <div className={styles.topup}>
+                                <p>Topup pending...</p>
+                                <TailSpin
+                                    height="18.5"
+                                    width="18.5"
+                                    color="#ffffffA5"
+                                    ariaLabel="loading-spinner"
+                                    wrapperStyle={{
+                                        width: "25px"
+                                    }}
+                                />
+                            </div>
+                        )}
                     </div>
 
                     {!showDetails && (

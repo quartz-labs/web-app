@@ -6,7 +6,7 @@ import config from "@/src/config/config";
 import type { CardsForUserResponse } from "@/src/types/interfaces/CardsForUserResponse.interface";
 import type { ProviderCardUser } from "@/src/types/interfaces/ProviderCardUser.interface";
 
-export const useQuartzCardUserQuery = (publicKey: PublicKey | null) => {
+export const useQuartzCardUserQuery = (publicKey: PublicKey | null, refetch: boolean) => {
     const { setQuartzCardUser } = useStore();
 
     const query = createQuery<QuartzCardUser>({
@@ -17,7 +17,8 @@ export const useQuartzCardUserQuery = (publicKey: PublicKey | null) => {
         } : undefined,
         errorMessage: "Could not fetch account information",
         enabled: publicKey != null,
-        staleTime: Infinity,
+        staleTime: refetch ? 5_000 : Infinity,
+        refetchInterval: refetch ? 5_000 : undefined,
         accept404: true,
         onSuccess: (data) => setQuartzCardUser(data)
     });

@@ -6,4 +6,5 @@ export interface QuartzCardUser {
     solana_address: string;
     card_api_user_id: string;
     auth_level: AuthLevel;
+    topup_pending: boolean;
 };

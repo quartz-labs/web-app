@@ -21,8 +21,7 @@ type State = {
   quartzCardUser?: QuartzCardUser;
   providerCardUser?: ProviderCardUser;
   cardDetails?: CardsForUserResponse;
-  pendingCardTopup: boolean;
-  topupSignature?: string;
+  topupPending: boolean;
 };
 
 type Action = {
@@ -39,8 +38,7 @@ type Action = {
   setQuartzCardUser: (quartzCardUser?: QuartzCardUser) => void;
   setProviderCardUser: (providerCardUser?: ProviderCardUser) => void;
   setCardDetails: (cardDetails?: CardsForUserResponse) => void;
-  setPendingCardTopup: (pendingCardTopup: boolean) => void;
-  setTopupSignature: (signature?: string) => void;
+  setTopupPending: (topupPending: boolean) => void;
 }
 
 export const useStore = create<State & Action>((set) => ({
@@ -57,8 +55,7 @@ export const useStore = create<State & Action>((set) => ({
   quartzCardUser: undefined,
   providerCardUser: undefined,
   cardDetails: undefined,
-  pendingCardTopup: false,
-  topupSignature: undefined,
+  topupPending: false,
   
   setIsInitialized: (isInitialized: boolean) => set({ isInitialized }),
   setPrices: (prices?: Record<MarketIndex, number>) => set({ prices }),
@@ -73,6 +70,5 @@ export const useStore = create<State & Action>((set) => ({
   setQuartzCardUser: (quartzCardUser?: QuartzCardUser) => set({ quartzCardUser }),
   setProviderCardUser: (providerCardUser?: ProviderCardUser) => set({ providerCardUser }),
   setCardDetails: (cardDetails?: CardsForUserResponse) => set({ cardDetails }),
-  setPendingCardTopup: (pendingCardTopup: boolean) => set({ pendingCardTopup }),
-  setTopupSignature: (signature?: string) => set({ topupSignature: signature }),
+  setTopupPending: (topupPending: boolean) => set({ topupPending }),
 }));

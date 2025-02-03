@@ -20,10 +20,9 @@ import { useProviderCardUserQuery, useQuartzCardUserQuery, useCardDetailsQuery }
 
 export default function Page() {
   const wallet = useWallet();
-  const { setIsInitialized, jwtToken } = useStore();
-  
+  const { setIsInitialized, jwtToken, setTopupPending, topupPending } = useStore();
   const refetchCardUser = useRefetchCardUser();
-  
+
   // Quartz account status
   const { data: accountStatus, isLoading: isAccountStatusLoading } = useAccountStatusQuery(wallet.publicKey);
   const isInitialized = (accountStatus === AccountStatus.INITIALIZED && !isAccountStatusLoading && !config.NEXT_PUBLIC_UNAVAILABLE_TIME);
@@ -38,8 +37,16 @@ export default function Page() {
   useWithdrawLimitsQuery(isInitialized ? wallet.publicKey : null);
   useHealthQuery(isInitialized ? wallet.publicKey : null);
   
-  // Card account data
-  const { data: quartzCardUser } = useQuartzCardUserQuery(isInitialized ? wallet.publicKey : null);
+  // Quartz Card User data
+  const { data: quartzCardUser } = useQuartzCardUserQuery(
+    isInitialized ? wallet.publicKey : null,
+    isInitialized && topupPending
+  );
+  useEffect(() => {
+    setTopupPending(quartzCardUser?.topup_pending ?? false);
+  }, [quartzCardUser?.topup_pending, setTopupPending]);
+
+  // Provider Card User data
   useCardDetailsQuery(quartzCardUser?.card_api_user_id ?? null, isInitialized);
   const { data: providerCardUser } = useProviderCardUserQuery(
     quartzCardUser?.card_api_user_id ?? null,
@@ -82,7 +89,6 @@ export default function Page() {
     // eslint-disable-next-line react-hooks/exhaustive-deps	
   }, [isInitialized, quartzCardUser?.auth_level, jwtToken]);
   
-
   return (
     <main className={styles.container}>
       <Nav
