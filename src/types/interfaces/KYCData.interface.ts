@@ -1,4 +1,4 @@
-import type { Address } from "./CardUserResponse.interface";
+import type { Address } from "./Address.interface";
 
 export interface KYCData {
     id: string;

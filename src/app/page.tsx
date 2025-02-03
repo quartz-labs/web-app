@@ -14,7 +14,7 @@ import { useEffect } from 'react';
 import config from "@/src/config/config";
 import Unavailable from "@/src/components/OtherViews/Unavailable";
 import { useLoginCardUser, useRefetchCardUser } from "../utils/hooks";
-import { AuthLevel } from "../types/interfaces/CardUserResponse.interface";
+import { AuthLevel } from "../types/enums/AuthLevel.enum";
 import { fetchAndParse } from "../utils/helpers";
 
 export default function Page() {

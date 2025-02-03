@@ -1,5 +1,5 @@
 import { PuffLoader } from "react-spinners";
-import styles from "./Modal.module.css";
+import styles from "../Modal.module.css";
 
 interface ButtonsProps {
     label: string;

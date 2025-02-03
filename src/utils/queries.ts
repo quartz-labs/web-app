@@ -9,8 +9,9 @@ import { MarketIndex, TOKENS } from "@quartz-labs/sdk/browser";
 import config from "../config/config";
 import { buildEndpointURL } from "./helpers";
 import { SwapMode, type QuoteResponse } from "@jup-ag/api";
-import type { CardsForUserResponse, ProviderCardUser } from "../types/interfaces/CardUserResponse.interface";
-import type { QuartzCardUser } from "../types/interfaces/CardUserResponse.interface";
+import type { CardsForUserResponse } from "../types/interfaces/CardsForUserResponse.interface";
+import type { ProviderCardUser } from "../types/interfaces/ProviderCardUser.interface";
+import type { QuartzCardUser } from "../types/interfaces/QuartzCardUser.interface";
 import { useStore } from "./store";
 
 interface QueryConfig<T> {

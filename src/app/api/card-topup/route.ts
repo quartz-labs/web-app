@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { AllbridgeCoreSdk, ChainSymbol } from "@allbridge/bridge-core-sdk";
-import type { CardsForUserResponse } from '@/src/types/interfaces/CardUserResponse.interface';
+import type { CardsForUserResponse } from '@/src/types/interfaces/CardsForUserResponse.interface';
 
 const envSchema = z.object({
     RPC_URL: z.string().url(),

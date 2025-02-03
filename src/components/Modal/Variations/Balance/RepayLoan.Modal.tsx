@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import RepayWithCollateral from "../RepayLoan/RepayWithCollateral";
-import RepayWithWallet from "../RepayLoan/RepayWithWallet";
-import styles from "../Modal.module.css";
+import RepayWithCollateral from "./RepayWithCollateral";
+import RepayWithWallet from "./RepayWithWallet";
+import styles from "../../Modal.module.css";
 import { useRefetchAccountData } from "@/src/utils/hooks";
 import { useDepositLimitsQuery } from "@/src/utils/queries";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";

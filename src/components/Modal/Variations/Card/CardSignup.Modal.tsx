@@ -2,16 +2,18 @@ import { useStore } from "@/src/utils/store";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useState } from "react";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
-import styles from "../Modal.module.css";
-import Buttons from "../Buttons.ModalComponent";
+import styles from "../../Modal.module.css";
+import Buttons from "../../Components/Buttons.ModalComponent";
 import { useError } from "@/src/context/error-provider";
 import { captureError } from "@/src/utils/errors";
-import CardSignupInputSection from "../CardSignUp/CardAccountCreate.ModalComponent";
+import CardSignupInputSection from "../../Components/CardSignUp/CardAccountCreate.ModalComponent";
 import config from "@/src/config/config";
 import { fetchAndParse } from "@/src/utils/helpers";
-import type { Address, ApplicationCompletionLink, QuartzCardUser } from "@/src/types/interfaces/CardUserResponse.interface";
+import type { Address } from "@/src/types/interfaces/Address.interface";
+import type { QuartzCardUser } from "@/src/types/interfaces/QuartzCardUser.interface";
 import { useOpenKycLink, useRefetchCardUser } from "@/src/utils/hooks";
 import { DEFAULT_KYC_DATA, type KYCData } from "@/src/types/interfaces/KYCData.interface";
+import type { ApplicationCompletionLink } from "@/src/types/ApplicationCompleteLink.type";
 
 export default function CardSignupModal() {
     const wallet = useAnchorWallet();

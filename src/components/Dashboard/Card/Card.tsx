@@ -1,6 +1,7 @@
 import { useStore } from "@/src/utils/store";
 import styles from "./Card.module.css";
-import { AuthLevel, type CardsForUserResponse } from "@/src/types/interfaces/CardUserResponse.interface";
+import { AuthLevel } from "@/src/types/enums/AuthLevel.enum";
+import type { CardsForUserResponse } from "@/src/types/interfaces/CardsForUserResponse.interface";
 import { useState } from "react";
 import { fetchAndParse } from "@/src/utils/helpers";
 import config from "@/src/config/config";

@@ -2,8 +2,10 @@ import type { Rate } from "@/src/types/interfaces/Rate.interface";
 import { create } from "zustand";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
 import type { MarketIndex } from "@quartz-labs/sdk/browser";
-import type { CardsForUserResponse, ProviderCardUser, QuartzCardUser } from "../types/interfaces/CardUserResponse.interface";
-import type { JwtToken } from "../types/jwtToken.types";
+import type { CardsForUserResponse } from "../types/interfaces/CardsForUserResponse.interface";
+import type { ProviderCardUser } from "../types/interfaces/ProviderCardUser.interface";
+import type { QuartzCardUser } from "../types/interfaces/QuartzCardUser.interface";
+import type { JwtToken } from "../types/JwtToken.type";
 
 type State = {
   isInitialized: boolean;

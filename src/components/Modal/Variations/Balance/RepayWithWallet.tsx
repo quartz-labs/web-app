@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
-import styles from "../Modal.module.css";
+import styles from "../../Modal.module.css";
 import { useError } from "@/src/context/error-provider";
 import { TxStatus, useTxStatus } from "@/src/context/tx-status-provider";
 import { useStore } from "@/src/utils/store";
@@ -9,9 +9,9 @@ import { buildEndpointURL, validateAmount, fetchAndParse, deserializeTransaction
 import { captureError } from "@/src/utils/errors";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
-import Buttons from "../Buttons.ModalComponent";
-import InputSection from "../Input.ModalComponent";
-import type { RepayLoanInnerModalProps } from "../Variations/RepayLoan.Modal";
+import Buttons from "../../Components/Buttons.ModalComponent";
+import InputSection from "../../Components/Input.ModalComponent";
+import type { RepayLoanInnerModalProps } from "./RepayLoan.Modal";
 
 export default function RepayWithWallet({
     depositLimitBaseUnits,

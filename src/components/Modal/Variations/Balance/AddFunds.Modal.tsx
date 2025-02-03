@@ -1,77 +1,72 @@
-import { validateAmount, fetchAndParse, deserializeTransaction, signAndSendTransaction, buildEndpointURL, formatPreciseDecimal } from "@/src/utils/helpers";
-import { useRefetchAccountData, useRefetchWithdrawLimits } from "@/src/utils/hooks";
+"use client";
+
+import { useRefetchAccountData } from "@/src/utils/hooks";
+import { useEffect, useState } from "react";
+import InputSection from "../../Components/Input.ModalComponent";
+import Buttons from "../../Components/Buttons.ModalComponent";
+import styles from "../../Modal.module.css";
+import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
 import { useStore } from "@/src/utils/store";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
-import { useEffect, useState } from "react";
-import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
-import styles from "../Modal.module.css";
-import InputSection from "../Input.ModalComponent";
-import Buttons from "../Buttons.ModalComponent";
 import { useError } from "@/src/context/error-provider";
+import { useDepositLimitsQuery } from "@/src/utils/queries";
+import { validateAmount, fetchAndParse, deserializeTransaction, signAndSendTransaction, buildEndpointURL, formatPreciseDecimal } from "@/src/utils/helpers";
 import { captureError } from "@/src/utils/errors";
 import { TxStatus, useTxStatus } from "@/src/context/tx-status-provider";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
 import { MarketIndex, baseUnitToDecimal, decimalToBaseUnit } from "@quartz-labs/sdk/browser";
 
-export default function WithdrawModal() {
+export default function AddFundsModal() {
     const wallet = useAnchorWallet();
 
-    const { prices, rates, balances, withdrawLimits, setModalVariation } = useStore();
+    const { prices, rates, setModalVariation } = useStore();
     const { showError } = useError();
     const { showTxStatus } = useTxStatus();
     const refetchAccountData = useRefetchAccountData();
-    const refetchWithdrawLimits = useRefetchWithdrawLimits();
 
     const [awaitingSign, setAwaitingSign] = useState(false);
     const [errorText, setErrorText] = useState("");
     const [amountStr, setAmountStr] = useState("");
     const amountDecimals = Number(amountStr);
 
-    const collateralMarketIndices = balances
-        ? Object.entries(balances)
-            .filter(([, balance]) => balance > 0)
-            .map(([marketIndex]) => Number(marketIndex) as MarketIndex)
-        : [];
-
-    const [ marketIndex, setMarketIndex ] = useState<MarketIndex>(collateralMarketIndices[0] ?? MarketIndex[0]);
+    const [ marketIndex, setMarketIndex ] = useState<MarketIndex>(MarketIndex[0]);
+    const [ available, setAvailable ] = useState(0);
 
     useEffect(() => {
         refetchAccountData();
-        
-        const interval = setInterval(refetchWithdrawLimits, 3_000);
-        return () => clearInterval(interval);
-    }, [refetchAccountData, refetchWithdrawLimits]);
-    
-    const collateralBalance = balances?.[marketIndex] ?? 0;
-    const maxWithdrawBaseUnits = collateralBalance > 0
-        ? Math.min(collateralBalance, withdrawLimits?.[marketIndex] ?? 0)
-        : 0;
+    }, [refetchAccountData]);
+
+    const { data: depositLimitBaseUnits } = useDepositLimitsQuery(wallet?.publicKey ?? null, marketIndex);
+    useEffect(() => {
+        if (depositLimitBaseUnits) setAvailable(baseUnitToDecimal(depositLimitBaseUnits, marketIndex));
+    }, [depositLimitBaseUnits, marketIndex]);
 
     const handleConfirm = async () => {
         if (!wallet?.publicKey) return setErrorText("Wallet not connected");
-
-        const errorText = validateAmount(marketIndex, amountDecimals, maxWithdrawBaseUnits);
+        
+        const errorText = validateAmount(marketIndex, amountDecimals, depositLimitBaseUnits ?? 0);
         setErrorText(errorText);
         if (errorText) return;
 
         setAwaitingSign(true);
         try {
-            const endpoint = buildEndpointURL("/api/build-tx/withdraw", {
+            const endpoint = buildEndpointURL("/api/build-tx/deposit", {
                 address: wallet.publicKey.toBase58(),
-                allowLoan: false,
                 amountBaseUnits: decimalToBaseUnit(amountDecimals, marketIndex),
+                repayingLoan: false,
                 marketIndex
             });
             const response = await fetchAndParse(endpoint);
             const transaction = deserializeTransaction(response.transaction);
             const signature = await signAndSendTransaction(transaction, wallet, showTxStatus);
+            
             setAwaitingSign(false);
             if (signature) setModalVariation(ModalVariation.DISABLED);
         } catch (error) {
             if (error instanceof WalletSignTransactionError) showTxStatus({ status: TxStatus.SIGN_REJECTED });
             else {
                 showTxStatus({ status: TxStatus.NONE });
-                captureError(showError, "Failed to withdraw", "/WithdrawModal.tsx", error, wallet.publicKey);
+                captureError(showError, "Failed to add funds", "/AddFundsModal.tsx", error, wallet.publicKey);
             }
         } finally {
             setAwaitingSign(false);
@@ -80,24 +75,23 @@ export default function WithdrawModal() {
     
     return (
         <div className={styles.contentWrapper}>
-            <h2 className={styles.heading}>Withdraw Funds</h2>
+            <h2 className={styles.heading}>Add Funds</h2>
 
             <InputSection
-                borrowing={true}
+                borrowing={false}
                 price={prices?.[marketIndex]}
-                rate={rates?.[marketIndex]?.borrowRate}
-                available={baseUnitToDecimal(maxWithdrawBaseUnits, marketIndex)}
+                rate={rates?.[marketIndex]?.depositRate}
+                available={available}
                 amountStr={amountStr}
                 setAmountStr={setAmountStr}
                 setMaxAmount={() => setAmountStr(
-                    maxWithdrawBaseUnits ? formatPreciseDecimal(baseUnitToDecimal(maxWithdrawBaseUnits, marketIndex)) : "0"
+                    depositLimitBaseUnits ? formatPreciseDecimal(baseUnitToDecimal(depositLimitBaseUnits, marketIndex)) : "0"
                 )}
                 setHalfAmount={() => setAmountStr(
-                    maxWithdrawBaseUnits ? formatPreciseDecimal(baseUnitToDecimal(Math.trunc(maxWithdrawBaseUnits / 2), marketIndex)) : "0"
+                    depositLimitBaseUnits ? formatPreciseDecimal(baseUnitToDecimal(Math.trunc(depositLimitBaseUnits / 2), marketIndex)) : "0"
                 )}
                 marketIndex={marketIndex}
                 setMarketIndex={setMarketIndex}
-                selectableMarketIndices={collateralMarketIndices}
             />
 
             {errorText &&
@@ -107,7 +101,7 @@ export default function WithdrawModal() {
             } 
 
             <Buttons 
-                label="Withdraw" 
+                label="Add" 
                 awaitingSign={awaitingSign} 
                 onConfirm={handleConfirm} 
                 onCancel={() => setModalVariation(ModalVariation.DISABLED)}

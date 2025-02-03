@@ -1,18 +1,18 @@
 import { useStore } from "@/src/utils/store";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useState } from "react";
-import styles from "../Modal.module.css";
-import InputSection from "../Input.ModalComponent";
+import styles from "../../Modal.module.css";
+import InputSection from "../../Components/Input.ModalComponent";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
-import Buttons from "../Buttons.ModalComponent";
+import Buttons from "../../Components/Buttons.ModalComponent";
 import { formatTokenDisplay, truncToDecimalPlaces, signAndSendTransaction, fetchAndParse, deserializeTransaction, buildEndpointURL, formatPreciseDecimal } from "@/src/utils/helpers";
-import TokenSelect from "../TokenSelect/TokenSelect";
+import TokenSelect from "../../Components/TokenSelect/TokenSelect";
 import { useError } from "@/src/context/error-provider";
 import { captureError } from "@/src/utils/errors";
 import { TxStatus, useTxStatus } from "@/src/context/tx-status-provider";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
 import { MarketIndex, TOKENS, baseUnitToDecimal, decimalToBaseUnit } from "@quartz-labs/sdk/browser";
-import type { RepayLoanInnerModalProps } from "../Variations/RepayLoan.Modal";
+import type { RepayLoanInnerModalProps } from "./RepayLoan.Modal";
 import { useJupiterSwapModeQuery } from "@/src/utils/queries";
 import { SwapMode } from "@jup-ag/api";
 

@@ -1,5 +1,5 @@
 import { useStore } from "@/src/utils/store";
-import styles from "../Modal.module.css";
+import styles from "../../Modal.module.css";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
 import { useRefetchCardUser } from "@/src/utils/hooks";
 import { useEffect } from "react";

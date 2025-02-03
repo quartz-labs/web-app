@@ -1,13 +1,13 @@
 import { ModalVariation } from "../types/enums/ModalVariation.enum";
-import AddFundsModal from "@/src/components/Modal/Variations/AddFunds.Modal";
+import AddFundsModal from "@/src/components/Modal/Variations/Balance/AddFunds.Modal";
 import CloseAccountModal from "@/src/components/Modal/Variations/CloseAccount.Modal";
 import NotificationsModal from "@/src/components/Modal/Variations/Notifications.Modal";
-import RepayLoanModal from "@/src/components/Modal/Variations/RepayLoan.Modal";
-import WithdrawModal from "@/src/components/Modal/Variations/Withdraw.Modal";
-import BorrowModal from "../components/Modal/Variations/Borrow.Modal";
-import CardSignupModal from "../components/Modal/Variations/CardSignup.Modal";
-import CardKycModal from "../components/Modal/Variations/CardKyc.Modal";
-import CardTopupModal from "../components/Modal/Variations/CardTopup.Modal";
+import RepayLoanModal from "@/src/components/Modal/Variations/Balance/RepayLoan.Modal";
+import WithdrawModal from "@/src/components/Modal/Variations/Balance/Withdraw.Modal";
+import BorrowModal from "../components/Modal/Variations/Balance/Borrow.Modal";
+import CardSignupModal from "../components/Modal/Variations/Card/CardSignup.Modal";
+import CardKycModal from "../components/Modal/Variations/Card/CardKyc.Modal";
+import CardTopupModal from "../components/Modal/Variations/Card/CardTopup.Modal";
 
 export const ModalComponents = {
     [ModalVariation.NOTIFICATIONS]: NotificationsModal,
