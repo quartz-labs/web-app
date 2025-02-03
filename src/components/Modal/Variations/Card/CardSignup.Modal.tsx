@@ -201,7 +201,7 @@ export default function CardSignupModal() {
                 />
 
                 <div style={{display: "flex", flexDirection: "column", marginBottom: "8px", alignItems: "flex-start"}}>
-                    <label>Do you accept the Quartz card terms of service?</label>
+                    <label>Do you accept the Quartz Card <a href="#" target="_blank" rel="noopener noreferrer">terms of service</a>?</label>
                     <input 
                         type="checkbox" 
                         checked={formData.isTermsOfServiceAccepted}

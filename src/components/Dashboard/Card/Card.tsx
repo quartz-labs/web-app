@@ -98,7 +98,7 @@ export default function Card() {
         )
     }
 
-    if (cardDetails !== undefined && cardDetails !== undefined) {
+    if (cardDetails) {
         return (
             <div className={styles.cardsContainer}>
                 <div className={styles.cardWrapper}>

@@ -1,6 +1,6 @@
 export enum AuthLevel {
     BASE = "Base",
-    PENDING = "Pending",
+    KYC_PENDING = "KYCPending",
     CARD = "Card",
     ADMIN = "Admin",
 }

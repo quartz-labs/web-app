@@ -79,7 +79,7 @@ export default function TxStatusPopup() {
             </div>
 
             <div className={styles.message}>
-                <p>Check the transaction on <a href={explorerUrl} target="_blank">Solscan</a> to see if it&apos;s been confirmed.</p>
+                <p>Check the transaction on <a href={explorerUrl} target="_blank" rel="noopener noreferrer">Solscan</a> to see if it&apos;s been confirmed.</p>
             </div>
         </div>
     );
@@ -94,7 +94,7 @@ export default function TxStatusPopup() {
             </div>
 
             <div className={styles.message}>
-                <p>Check the transaction on <a href={explorerUrl} target="_blank">Solscan</a> to see details.</p>
+                <p>Check the transaction on <a href={explorerUrl} target="_blank" rel="noopener noreferrer">Solscan</a> to see details.</p>
             </div>
         </div>
     );
@@ -160,7 +160,7 @@ export default function TxStatusPopup() {
                     alt=""
                     src="/checkmark.png"
                 />
-                <a href={explorerUrl} target="_blank">View on Solscan</a>
+                <a href={explorerUrl} target="_blank" rel="noopener noreferrer">View on Solscan</a>
             </div>
         </div>
     );
@@ -179,8 +179,8 @@ export default function TxStatusPopup() {
                     alt=""
                     src="/checkmark.png"
                 />
-                <a href={explorerUrl} target="_blank">View on Solscan</a>
-                <a href={allbridgeWalletUrl} target="_blank">View on Allbridge</a>
+                <a href={explorerUrl} target="_blank" rel="noopener noreferrer">View on Solscan</a>
+                <a href={allbridgeWalletUrl} target="_blank" rel="noopener noreferrer">View on Allbridge</a>
             </div>
         </div>
     );
@@ -198,8 +198,8 @@ export default function TxStatusPopup() {
                     alt=""
                     src="/checkmark.png"
                 />
-                <a href={explorerUrl} target="_blank">View on Solscan</a>
-                <a href={allbridgeWalletUrl} target="_blank">View on Allbridge</a>
+                <a href={explorerUrl} target="_blank" rel="noopener noreferrer">View on Solscan</a>
+                <a href={allbridgeWalletUrl} target="_blank" rel="noopener noreferrer">View on Allbridge</a>
             </div>
         </div>
     );
@@ -217,8 +217,8 @@ export default function TxStatusPopup() {
                     alt=""
                     src="/checkmark.png"
                 />
-                <a href={explorerUrl} target="_blank">View on Solscan</a>
-                <a href={allbridgeWalletUrl} target="_blank">View on Allbridge</a>
+                <a href={explorerUrl} target="_blank" rel="noopener noreferrer">View on Solscan</a>
+                <a href={allbridgeWalletUrl} target="_blank" rel="noopener noreferrer">View on Allbridge</a>
             </div>
         </div>
     );
@@ -239,7 +239,7 @@ export default function TxStatusPopup() {
                         width: "25px"
                     }}
                 />
-                <a href={explorerUrl} target="_blank">View on Solscan</a>
+                <a href={explorerUrl} target="_blank" rel="noopener noreferrer">View on Solscan</a>
             </div>
         </div>
     );

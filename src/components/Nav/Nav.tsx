@@ -20,7 +20,7 @@ export default function Nav({
 
   return (
     <div className={styles["nav"]}>
-      <a href="https://quartzpay.io/" target="_blank" className={styles.logoContainer}>
+      <a href="https://quartzpay.io/" target="_blank" rel="noopener noreferrer" className={styles.logoContainer}>
         <Image 
             className={"image-fill"}
             src="/logo.svg" 

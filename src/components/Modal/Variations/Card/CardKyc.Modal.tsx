@@ -32,7 +32,9 @@ export default function CardKycModal() {
                 <a href={kycLink} target="_blank" rel="noopener noreferrer" className={styles.kycLink}>click here</a>.
             </p>
 
-            <p>Once you have completed the KYC, please click done below.</p>
+            <p style={{marginBottom: "55px", marginTop: "10px"}}>
+                Once you have completed the KYC, please click done below.
+            </p>
 
             <button
                 className={`glass-button ${styles.mainButton}`}

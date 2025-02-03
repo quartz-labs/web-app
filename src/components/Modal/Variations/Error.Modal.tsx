@@ -36,7 +36,7 @@ export default function ErrorModal() {
                         </div>
                         
                         <p className="small-text light-text">
-                            Contact support through <a href="https://discord.gg/K3byNmnKNm" target="_blank">Discord</a> or <a href={email} target="_blank">email</a> with the following <span className="no-wrap">Error ID: {errorId}</span>
+                            Contact support through <a href="https://discord.gg/K3byNmnKNm" target="_blank" rel="noopener noreferrer">Discord</a> or <a href={email} target="_blank" rel="noopener noreferrer">email</a> with the following <span className="no-wrap">Error ID: {errorId}</span>
                         </p>
                     </div>
 

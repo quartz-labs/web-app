@@ -64,7 +64,7 @@ export default function NotificationsModal() {
                 style={{marginBottom: "55px"}}
             >Telegram Notifications</h2>
         
-            <p style={{marginBottom: "25px"}}>Send your wallet address to our Telegram bot <a href="https://telegram.me/QuartzLTVBot" target="_blank">@QuartzLTVBot</a> to receive Telegram notifications when your Quartz account health drops <span className={"no-wrap"}>close to 0%.</span></p>
+            <p style={{marginBottom: "25px"}}>Send your wallet address to our Telegram bot <a href="https://telegram.me/QuartzLTVBot" target="_blank" rel="noopener noreferrer">@QuartzLTVBot</a> to receive Telegram notifications when your Quartz account health drops <span className={"no-wrap"}>close to 0%.</span></p>
 
             <div 
                 className={styles.inputSection}

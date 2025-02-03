@@ -50,6 +50,6 @@ export const DEFAULT_KYC_DATA: KYCData = {
     annualSalary: "",
     accountPurpose: "",
     expectedMonthlyVolume: "",
-    isTermsOfServiceAccepted: true,
+    isTermsOfServiceAccepted: false,
     hasExistingDocuments: "",
 }

@@ -20,7 +20,7 @@ export default function Onboarding() {
   const [attemptFailed, setAttemptFailed] = useState(false);
   const [awaitingSign, setAwaitingSign] = useState(false);
 
-  const handleCheckboxChange = (index: number) => {
+  const handleCheckboxChange = (index: number): void => {
     const newCheckboxes = [...checkboxes];
     newCheckboxes[index] = !newCheckboxes[index];
     setCheckboxes(newCheckboxes);
@@ -74,7 +74,7 @@ export default function Onboarding() {
                         onChange={() => handleCheckboxChange(0)} 
                     />
                     <span className={styles.checkboxText}>
-                        I accept the <a href="https://docs.quartzpay.io/terms-and-conditions" target="_blank">terms and conditions</a>.
+                        I accept the <a href="https://docs.quartzpay.io/terms-and-conditions" target="_blank" rel="noopener noreferrer">terms and conditions</a>.
                     </span>
                 </label>
             </li>
@@ -87,7 +87,7 @@ export default function Onboarding() {
                         onChange={() => handleCheckboxChange(1)} 
                     />
                     <span className={styles.checkboxText}>
-                        I accept the <a href="https://docs.quartzpay.io/privacy-policy" target="_blank">privacy policy</a>.
+                        I accept the <a href="https://docs.quartzpay.io/privacy-policy" target="_blank" rel="noopener noreferrer">privacy policy</a>.
                     </span>
                 </label>
             </li>
@@ -100,7 +100,7 @@ export default function Onboarding() {
                         onChange={() => handleCheckboxChange(2)} 
                     />
                     <span className={styles.checkboxText}>
-                        I have read and understood the <a href="https://docs.quartzpay.io/risks" target="_blank">protocol disclaimer</a>.
+                        I have read and understood the <a href="https://docs.quartzpay.io/risks" target="_blank" rel="noopener noreferrer">protocol disclaimer</a>.
                     </span>
                 </label>
             </li>

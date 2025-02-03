@@ -49,7 +49,7 @@ export default function Page() {
   // Provider Card User data
   const { data: providerCardUser } = useProviderCardUserQuery(
     quartzCardUser?.card_api_user_id ?? null,
-    isInitialized && (quartzCardUser?.auth_level === AuthLevel.BASE || quartzCardUser?.auth_level === AuthLevel.PENDING)
+    isInitialized && (quartzCardUser?.auth_level === AuthLevel.BASE || quartzCardUser?.auth_level === AuthLevel.KYC_PENDING)
   );
   useCardDetailsQuery(
     quartzCardUser?.card_api_user_id ?? null,
@@ -64,7 +64,7 @@ export default function Page() {
     if (providerCardUser?.applicationStatus === "approved") {
       providerCardUserStatus = AuthLevel.CARD;
     } else if (providerCardUser?.applicationStatus === "pending") {
-      providerCardUserStatus = AuthLevel.PENDING;
+      providerCardUserStatus = AuthLevel.KYC_PENDING;
     } else {
       providerCardUserStatus = AuthLevel.BASE;
     }
