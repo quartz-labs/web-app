@@ -248,12 +248,15 @@ export const useProviderCardUserQuery = (cardUserId: string | null, refetch: boo
 export const useCardDetailsQuery = (cardUserId: string | null, enabled: boolean) => {
     const { setCardDetails } = useStore();
 
-    const query = createQuery<CardsForUserResponse[]>({
+    const query = createQuery<CardsForUserResponse>({
         queryKey: ["card-user", "provider-card-user", "card", cardUserId ?? ""],
         url: `${config.NEXT_PUBLIC_INTERNAL_API_URL}/card/issuing/user`,
         params: cardUserId ? {
             id: cardUserId
         } : undefined,
+        transformResponse: (data: CardsForUserResponse[]) => {
+            return data[0];
+        },
         errorMessage: "Could not fetch account information",
         enabled: cardUserId != null && enabled,
         staleTime: Infinity,

@@ -14,25 +14,13 @@ import { useEffect } from 'react';
 import config from "@/src/config/config";
 import Unavailable from "@/src/components/OtherViews/Unavailable";
 import { useLoginCardUser, useRefetchCardUser } from "../utils/hooks";
-import { useError } from "../context/error-provider";
-import { captureError } from "../utils/errors";
-import { TxStatus, useTxStatus } from "../context/tx-status-provider";
 import { AuthLevel } from "../types/interfaces/CardUserResponse.interface";
 import { fetchAndParse } from "../utils/helpers";
 
 export default function Page() {
   const wallet = useWallet();
-  const {
-    setIsInitialized,
-    setPendingCardTopup,
-    setTopupSignature,
-    pendingCardTopup,
-    topupSignature,
-    jwtToken
-  } = useStore();
+  const { setIsInitialized, jwtToken } = useStore();
   
-  const { showError } = useError();
-  const { showTxStatus } = useTxStatus();
   const refetchCardUser = useRefetchCardUser();
   
   // Quartz account status
@@ -51,11 +39,13 @@ export default function Page() {
   
   // Card account data
   const { data: quartzCardUser } = useQuartzCardUserQuery(isInitialized ? wallet.publicKey : null);
-  const { data: cardDetails } = useCardDetailsQuery(quartzCardUser?.card_api_user_id ?? null, isInitialized);
+  useCardDetailsQuery(quartzCardUser?.card_api_user_id ?? null, isInitialized);
   const { data: providerCardUser } = useProviderCardUserQuery(
     quartzCardUser?.card_api_user_id ?? null,
     isInitialized && (quartzCardUser?.auth_level === AuthLevel.BASE || quartzCardUser?.auth_level === AuthLevel.PENDING)
   );
+
+  // Update QuartzCardUser status if ProviderCardUser status differs
   useEffect(() => {
     if (!providerCardUser || !quartzCardUser || !wallet.publicKey) return;
 
@@ -68,7 +58,6 @@ export default function Page() {
       providerCardUserStatus = AuthLevel.BASE;
     }
 
-    // Update QuartzCardUser if ProviderCardUser differs
     if (quartzCardUser?.auth_level !== providerCardUserStatus) {
       fetchAndParse(`${config.NEXT_PUBLIC_INTERNAL_API_URL}/auth/auth-level?publicKey=${wallet.publicKey}`, {
         method: 'PATCH',
@@ -92,82 +81,6 @@ export default function Page() {
     // eslint-disable-next-line react-hooks/exhaustive-deps	
   }, [isInitialized, quartzCardUser?.auth_level, jwtToken]);
   
-  // const [kycApplicationStatus, setKycApplicationStatus] = useState<string | null>(null);
-  
-
-
-  // Topup Card
-  useEffect(() => {
-    if (!pendingCardTopup || !topupSignature) return;
-
-    const cardInfo = cardDetails?.find(card => card !== null);
-    if (!cardInfo) return;
-
-    showTxStatus({ status: TxStatus.TOPUP_IN_PROGRESS, signature: topupSignature, walletAddress: wallet.publicKey?.toBase58() });
-
-    const startTime = Date.now();
-    const TIMEOUT_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
-
-    const processCardTopup = async () => {
-      // Check if we've exceeded the timeout
-      if (Date.now() - startTime > TIMEOUT_DURATION) {
-        clearInterval(interval);
-        captureError(showError, "Card topup process timed out after 5 minutes, please notify support", "/page.tsx", null, wallet.publicKey);
-        showTxStatus({ status: TxStatus.TOPUP_FAILED, signature: topupSignature, walletAddress: wallet.publicKey?.toBase58() });
-        setPendingCardTopup(false);
-        setTopupSignature(undefined);
-        return;
-      }
-      //call the card topup POST endpoint
-      const response = await fetch(`/api/card-topup`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          signature: topupSignature,
-          cardId: cardInfo.id,
-          jwtToken: jwtToken
-        })
-      });
-
-      let responseBody;
-      try {
-        responseBody = await response.json();
-
-        if (response.status === 404) {
-          return;
-        }
-
-        if (response.status === 500) {
-          return;
-        }
-
-        if (!responseBody) {
-          console.log("Didn't update the card limit, response is undefined: ", responseBody);
-          return;
-        }
-
-      } catch (error) {
-        showTxStatus({ status: TxStatus.TOPUP_FAILED, signature: topupSignature, walletAddress: wallet.publicKey?.toBase58() });
-        captureError(showError, "Failed to update the card limit after topup", "/page.tsx", error, wallet.publicKey);
-        return;
-      }
-
-      refetchCardUser();
-      setPendingCardTopup(false);
-      setTopupSignature(undefined);
-      showTxStatus({ status: TxStatus.TOPUP_SUCCESS, signature: topupSignature, walletAddress: wallet.publicKey?.toBase58() });
-    };
-
-    // Set up interval to run every 3 seconds
-    const interval = setInterval(processCardTopup, 3000);
-
-    // Cleanup function to clear interval when component unmounts
-    // or when pendingCardTopup/topupSignature changes
-    return () => clearInterval(interval);
-
-  }, [cardDetails, jwtToken, pendingCardTopup, topupSignature, setTopupSignature, setPendingCardTopup, refetchCardUser, showTxStatus, showError, wallet.publicKey]);
 
   return (
     <main className={styles.container}>

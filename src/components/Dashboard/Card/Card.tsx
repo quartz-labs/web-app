@@ -50,7 +50,7 @@ export default function Card() {
             }
         );
         setCreatingCard(false);
-        setCardDetails(cardDetails ? [...cardDetails, createCardResponse] : [createCardResponse]);
+        setCardDetails(createCardResponse);
     }
 
     const getCardDetails = async (cardId: string) => {
@@ -96,24 +96,23 @@ export default function Card() {
         )
     }
 
-    if (cardDetails !== undefined && cardDetails[0] !== undefined) {
-        const card = cardDetails[0];
+    if (cardDetails !== undefined && cardDetails !== undefined) {
         return (
             <div className={styles.cardsContainer}>
                 <div className={styles.cardWrapper}>
                     <div>
-                        <div>Status: {card.status}</div>
-                        <div>Limit: ${card.limit?.amount / 100 || '0.00'} per {card.limit?.frequency || 'allTime'}</div>
+                        <div>Status: {cardDetails.status}</div>
+                        <div>Limit: ${cardDetails.limit?.amount / 100 || '0.00'} per {cardDetails.limit?.frequency || 'allTime'}</div>
                         <div>Balance: $?</div>
                     </div>
 
                     {!showDetails && (
                         <button
                             className={styles.cardDetails}
-                            onClick={() => getCardDetails(card.id)}
+                            onClick={() => getCardDetails(cardDetails.id)}
                         >
-                            <div className={styles.cardNumber}>**** **** **** {card.last4}</div>
-                            <div>Expires: {card.expirationMonth}/{card.expirationYear}</div>
+                            <div className={styles.cardNumber}>**** **** **** {cardDetails.last4}</div>
+                            <div>Expires: {cardDetails.expirationMonth}/{cardDetails.expirationYear}</div>
                         </button>
                     )}
 
@@ -121,7 +120,7 @@ export default function Card() {
                         <div className={styles.cardDetails}>
                             <div className={styles.cardNumber}>{cardPan}</div>
                             <div className={styles.cardDetailsRow}>
-                                <div>Expires: {card.expirationMonth}/{card.expirationYear}</div>
+                                <div>Expires: {cardDetails.expirationMonth}/{cardDetails.expirationYear}</div>
                                 <div>CVC: {cardCvc}</div>
                             </div>
                         </div>

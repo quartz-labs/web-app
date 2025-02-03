@@ -52,7 +52,7 @@ export async function POST(request: Request) {
     try {
         transferStatus = await sdk.getTransferStatus(chainSymbol, signature);
     }
-    catch (error) {
+    catch {
         return NextResponse.json({"status": "Transfer status not found"}, { status: 404 });
     }
 
@@ -69,7 +69,7 @@ export async function POST(request: Request) {
 
         amount = Math.round(roundedAmount * 100);
 
-    } catch (error) {
+    } catch {
         return NextResponse.json({"status": "Transfer status not found"}, { status: 404 });
     }
 

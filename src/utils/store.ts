@@ -18,7 +18,7 @@ type State = {
   kycLink?: string;
   quartzCardUser?: QuartzCardUser;
   providerCardUser?: ProviderCardUser;
-  cardDetails?: CardsForUserResponse[];
+  cardDetails?: CardsForUserResponse;
   pendingCardTopup: boolean;
   topupSignature?: string;
 };
@@ -36,7 +36,7 @@ type Action = {
   setKycLink: (kycLink?: string) => void;
   setQuartzCardUser: (quartzCardUser?: QuartzCardUser) => void;
   setProviderCardUser: (providerCardUser?: ProviderCardUser) => void;
-  setCardDetails: (cardDetails?: CardsForUserResponse[]) => void;
+  setCardDetails: (cardDetails?: CardsForUserResponse) => void;
   setPendingCardTopup: (pendingCardTopup: boolean) => void;
   setTopupSignature: (signature?: string) => void;
 }
@@ -70,7 +70,7 @@ export const useStore = create<State & Action>((set) => ({
   setKycLink: (kycLink?: string) => set({ kycLink }),
   setQuartzCardUser: (quartzCardUser?: QuartzCardUser) => set({ quartzCardUser }),
   setProviderCardUser: (providerCardUser?: ProviderCardUser) => set({ providerCardUser }),
-  setCardDetails: (cardDetails?: CardsForUserResponse[]) => set({ cardDetails }),
+  setCardDetails: (cardDetails?: CardsForUserResponse) => set({ cardDetails }),
   setPendingCardTopup: (pendingCardTopup: boolean) => set({ pendingCardTopup }),
   setTopupSignature: (signature?: string) => set({ topupSignature: signature }),
 }));
