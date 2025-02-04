@@ -7,6 +7,7 @@ import { fetchAndParse } from "./helpers";
 import { useStore } from "./store";
 import { ModalVariation } from "../types/enums/ModalVariation.enum";
 import { WalletSignMessageError } from "@solana/wallet-adapter-base";
+import { TandCsNeeded } from "../types/enums/AuthLevel.enum";
 
 export function useRefetchAccountData() {
     const queryClient = useQueryClient();
@@ -68,7 +69,7 @@ export function useOpenKycLink() {
 }
 
 export function useLoginCardUser() {
-    const { setJwtToken, setIsSigningLoginMessage, acceptTandcs, quartzCardUser } = useStore();
+    const { setJwtToken, setIsSigningLoginMessage, quartzCardUser } = useStore();
     const wallet = useWallet();
 
     const signMessage = async (wallet: WalletContextState, message: string) => {
@@ -81,7 +82,7 @@ export function useLoginCardUser() {
   
     return useMutation({
       mutationKey: ['login-card-user', wallet?.publicKey?.toBase58()],
-      mutationFn: async () => {
+      mutationFn: async (acceptTandcsParam?: TandCsNeeded) => {
         if (!wallet) throw new Error("Wallet not found");
 
         const message = [
@@ -103,9 +104,7 @@ export function useLoginCardUser() {
                 throw error;
             }
         }
-
-        //TODO : Ask Iarla how to fix the store not updating issue, that shows a stale acceptTandcs value
-        console.log("acceptTandcs", acceptTandcs);
+        const acceptTandcs = acceptTandcsParam === TandCsNeeded.ACCEPTED;
 
         const cardToken = await fetchAndParse(`${config.NEXT_PUBLIC_INTERNAL_API_URL}/auth/user`, {
             method: 'POST',
@@ -117,9 +116,9 @@ export function useLoginCardUser() {
               publicKey: wallet.publicKey,
               signature,
               message,
-              acceptQuartzCardTerms: true,
-              id: quartzCardUser?.id
-              //...(acceptTandcs && { acceptQuartzCardTerms: acceptTandcs }),
+              id: quartzCardUser?.id,
+              //change tbis so that 
+              ...(acceptTandcsParam && { acceptQuartzCardTerms: acceptTandcs }),
             })
         });
         

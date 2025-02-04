@@ -1,6 +1,6 @@
 import { useStore } from "@/src/utils/store";
 import styles from "./Card.module.css";
-import { AuthLevel } from "@/src/types/enums/AuthLevel.enum";
+import { AuthLevel, TandCsNeeded } from "@/src/types/enums/AuthLevel.enum";
 import type { CardsForUserResponse } from "@/src/types/interfaces/CardsForUserResponse.interface";
 import { useState } from "react";
 import { fetchAndParse } from "@/src/utils/helpers";
@@ -80,7 +80,7 @@ export default function Card() {
             <div className={styles.cardsContainer}>
                 <button
                     className={`glass-button ${styles.loginButton}`}
-                    onClick={() => loginCardUser.mutate()}
+                    onClick={() => loginCardUser.mutate(TandCsNeeded.NOT_NEEDED)}
                 >
                     {isSigningLoginMessage && (
                         <PuffLoader

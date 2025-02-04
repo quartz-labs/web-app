@@ -3,9 +3,10 @@ import styles from "../../Modal.module.css";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
 import { useLoginCardUser, useRefetchCardUser } from "@/src/utils/hooks";
 import { useEffect } from "react";
+import { TandCsNeeded } from "@/src/types/enums/AuthLevel.enum";
 
 export default function AcceptTandcsModal() {
-    const { setModalVariation, setAcceptTandcs } = useStore();
+    const { setModalVariation } = useStore();
     const refetchCardUser = useRefetchCardUser();
 
     const loginCardUser = useLoginCardUser();
@@ -30,10 +31,7 @@ export default function AcceptTandcsModal() {
             <button
                 className={`glass-button ${styles.mainButton}`}
                 onClick={() => {
-                    const acceptTandcs = true;
-                    console.log("acceptTandcs", acceptTandcs);
-                    setAcceptTandcs(acceptTandcs);
-                    loginCardUser.mutate();
+                    loginCardUser.mutate(TandCsNeeded.ACCEPTED);
                     setModalVariation(ModalVariation.DISABLED)
                 }}
             >

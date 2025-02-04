@@ -4,3 +4,9 @@ export enum AuthLevel {
     CARD = "Card",
     ADMIN = "Admin",
 }
+
+export enum TandCsNeeded {
+    NOT_NEEDED = "NotNeeded",
+    ACCEPTED = "Accepted",
+    REJECTED = "Rejected",
+}
