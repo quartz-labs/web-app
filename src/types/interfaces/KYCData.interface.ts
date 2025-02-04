@@ -53,3 +53,22 @@ export const DEFAULT_KYC_DATA: KYCData = {
     isTermsOfServiceAccepted: false,
     hasExistingDocuments: "",
 }
+
+
+export interface TandCs {
+    acceptEsignConsent: boolean;
+    openingDisclosure: boolean | undefined;
+    acceptQuartzCardTerms: boolean;
+    privacyPolicy: boolean;
+    informationIsAccurate: boolean;
+    applyingForCardNotSolicitation: boolean;
+}
+
+export const DEFAULT_TANDCS: TandCs = {
+    acceptEsignConsent: false,
+    openingDisclosure: undefined,
+    acceptQuartzCardTerms: false,
+    privacyPolicy: false,
+    informationIsAccurate: false,
+    applyingForCardNotSolicitation: false,
+}

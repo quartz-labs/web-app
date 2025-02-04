@@ -12,7 +12,7 @@ import { fetchAndParse } from "@/src/utils/helpers";
 import type { Address } from "@/src/types/interfaces/Address.interface";
 import type { QuartzCardUser } from "@/src/types/interfaces/QuartzCardUser.interface";
 import { useOpenKycLink, useRefetchCardUser } from "@/src/utils/hooks";
-import { DEFAULT_KYC_DATA, type KYCData } from "@/src/types/interfaces/KYCData.interface";
+import { DEFAULT_KYC_DATA, DEFAULT_TANDCS, type KYCData, type TandCs } from "@/src/types/interfaces/KYCData.interface";
 import type { ApplicationCompletionLink } from "@/src/types/ApplicationCompleteLink.type";
 
 export default function CardSignupModal() {
@@ -24,6 +24,7 @@ export default function CardSignupModal() {
 
     const [formData, setFormData] = useState<KYCData>(DEFAULT_KYC_DATA);
     const [loading, setLoading] = useState(false);
+    const [tandCs, setTandCs] = useState<TandCs>(DEFAULT_TANDCS);
 
     const handleFormDataChange = <K extends keyof KYCData>(field: K, value: KYCData[K]) => {
         setFormData(prev => ({
@@ -31,6 +32,14 @@ export default function CardSignupModal() {
             [field]: value
         }));
     };
+
+    const handleTandCsChange = <K extends keyof TandCs>(field: K, value: TandCs[K]) => {
+        setTandCs(prev => ({
+            ...prev,
+            [field]: value
+        }));
+    };
+
 
     const handleAddressChange = <K extends keyof Address>(field: K, value: Address[K]) => {
         setFormData(prev => ({
@@ -53,13 +62,14 @@ export default function CardSignupModal() {
             const submitData = {
                 ...formData,
                 walletAddress: wallet.publicKey.toBase58(),
+                ...tandCs
             }
 
             const response: {
                 quartzCardUser: QuartzCardUser;
                 applicationCompletionLink: ApplicationCompletionLink;
             } = await fetchAndParse(
-                `${config.NEXT_PUBLIC_INTERNAL_API_URL}/card/application/create`, 
+                `${config.NEXT_PUBLIC_INTERNAL_API_URL}/card/application/create`,
                 {
                     method: 'POST',
                     headers: {
@@ -96,8 +106,8 @@ export default function CardSignupModal() {
                     setAmountStr={(value) => handleFormDataChange("lastName", value)}
                 />
 
-                <div style={{display: "flex", flexDirection: "column", marginBottom: "8px"}}>
-                    <label style={{marginRight: "10px"}}>Birth Date:</label>
+                <div style={{ display: "flex", flexDirection: "column", marginBottom: "8px" }}>
+                    <label style={{ marginRight: "10px" }}>Birth Date:</label>
                     <input
                         className={styles.dobInput}
                         type="date"
@@ -200,12 +210,61 @@ export default function CardSignupModal() {
                     }}
                 />
 
-                <div style={{display: "flex", flexDirection: "column", marginBottom: "8px", alignItems: "flex-start"}}>
-                    <label>Do you accept the Quartz Card <a href="#" target="_blank" rel="noopener noreferrer">terms of service</a>?</label>
-                    <input 
-                        type="checkbox" 
+                <div style={{ display: "flex", flexDirection: "column", marginBottom: "8px", alignItems: "flex-start" }}>
+                    <label>I accept the <a href="#" target="_blank" rel="noopener noreferrer">E-Sign Consent</a>?</label>
+                    <input
+                        type="checkbox"
+                        checked={tandCs.acceptEsignConsent}
+                        onChange={(e) => handleTandCsChange("acceptEsignConsent", e.target.checked)}
+                    />
+                </div>
+
+                {formData.address.country === "US" && (
+                    <div style={{ display: "flex", flexDirection: "column", marginBottom: "8px", alignItems: "flex-start" }}>
+                        <label>I accept the <a href="#" target="_blank" rel="noopener noreferrer">Account Opening Disclosure</a>?</label>
+                        <input
+                            type="checkbox"
+                            checked={tandCs.openingDisclosure}
+                            onChange={(e) => handleTandCsChange("openingDisclosure", e.target.checked)}
+                        />
+                    </div>
+                )}
+
+                <div style={{ display: "flex", flexDirection: "column", marginBottom: "8px", alignItems: "flex-start" }}>
+                    <label>I accept the Quartz Card <a href="#" target="_blank" rel="noopener noreferrer">terms of service</a>?</label>
+                    <input
+                        type="checkbox"
                         checked={formData.isTermsOfServiceAccepted}
-                        onChange={(e) => handleFormDataChange("isTermsOfServiceAccepted", e.target.checked)}
+                        onChange={(e) => {
+                            handleFormDataChange("isTermsOfServiceAccepted", e.target.checked)
+                            handleTandCsChange("acceptQuartzCardTerms", e.target.checked)
+                        }}
+                    />
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", marginBottom: "8px", alignItems: "flex-start" }}>
+                    <label>I accept the <a href="https://docs.quartzpay.io/privacy-policy" target="_blank" rel="noopener noreferrer">privacy policy</a>.</label>
+                    <input
+                        type="checkbox"
+                        checked={tandCs.privacyPolicy}
+                        onChange={(e) => handleTandCsChange("privacyPolicy", e.target.checked)}
+                    />
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", marginBottom: "8px", alignItems: "flex-start" }}>
+                    <label>I certify that the information I have provided is accurate and that I will abide by all the rules and requiremtns that related to my Quartz Spend Card.</label>
+                    <input
+                        type="checkbox"
+                        checked={tandCs.informationIsAccurate}
+                        onChange={(e) => handleTandCsChange("informationIsAccurate", e.target.checked)}
+                    />
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", marginBottom: "8px", alignItems: "flex-start" }}>
+                    <label>I acknowledge that applying for the Quartz Spend Card does not constitute an unauthorized solicitation of any kind.</label>
+                    <input
+                        type="checkbox"
+                        checked={tandCs.applyingForCardNotSolicitation}
+                        onChange={(e) => handleTandCsChange("applyingForCardNotSolicitation", e.target.checked)}
                     />
                 </div>
             </div>

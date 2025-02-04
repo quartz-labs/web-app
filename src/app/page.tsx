@@ -12,15 +12,16 @@ import { useStore } from "@/src/utils/store";
 import { useEffect } from 'react';
 import config from "@/src/config/config";
 import Unavailable from "@/src/components/OtherViews/Unavailable";
-import { useLoginCardUser, useRefetchCardUser } from "../utils/hooks";
+import { useRefetchCardUser } from "../utils/hooks";
 import { AuthLevel } from "../types/enums/AuthLevel.enum";
 import { fetchAndParse } from "../utils/helpers";
 import { useAccountStatusQuery, useWithdrawLimitsQuery, useBalancesQuery, useRatesQuery, usePricesQuery, useHealthQuery } from "../utils/queries/protocol.queries";
 import { useProviderCardUserQuery, useQuartzCardUserQuery, useCardDetailsQuery, useProviderCardSpendableBalanceQuery } from "../utils/queries/internalApi.queries";
+import { ModalVariation } from "../types/enums/ModalVariation.enum";
 
 export default function Page() {
   const wallet = useWallet();
-  const { setIsInitialized, jwtToken, setTopupPending, topupPending, cardDetails } = useStore();
+  const { setIsInitialized, jwtToken, setTopupPending, topupPending, cardDetails, setModalVariation } = useStore();
   const refetchCardUser = useRefetchCardUser();
 
 
@@ -95,10 +96,9 @@ export default function Page() {
 
 
   // Log in card user
-  const loginCardUser = useLoginCardUser();
   useEffect(() => {
     if (isInitialized && quartzCardUser?.auth_level === AuthLevel.CARD && jwtToken === undefined) {
-      loginCardUser.mutate();
+      setModalVariation(ModalVariation.ACCEPT_TANDCS)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps	
   }, [isInitialized, quartzCardUser?.auth_level, jwtToken]);

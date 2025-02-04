@@ -68,7 +68,7 @@ export function useOpenKycLink() {
 }
 
 export function useLoginCardUser() {
-    const { setJwtToken, setIsSigningLoginMessage } = useStore();
+    const { setJwtToken, setIsSigningLoginMessage, acceptTandcs, quartzCardUser } = useStore();
     const wallet = useWallet();
 
     const signMessage = async (wallet: WalletContextState, message: string) => {
@@ -104,6 +104,9 @@ export function useLoginCardUser() {
             }
         }
 
+        //TODO : Ask Iarla how to fix the store not updating issue, that shows a stale acceptTandcs value
+        console.log("acceptTandcs", acceptTandcs);
+
         const cardToken = await fetchAndParse(`${config.NEXT_PUBLIC_INTERNAL_API_URL}/auth/user`, {
             method: 'POST',
             headers: {
@@ -113,7 +116,10 @@ export function useLoginCardUser() {
             body: JSON.stringify({
               publicKey: wallet.publicKey,
               signature,
-              message
+              message,
+              acceptQuartzCardTerms: true,
+              id: quartzCardUser?.id
+              //...(acceptTandcs && { acceptQuartzCardTerms: acceptTandcs }),
             })
         });
         

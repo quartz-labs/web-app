@@ -8,6 +8,7 @@ import BorrowModal from "../components/Modal/Variations/Balance/Borrow.Modal";
 import CardSignupModal from "../components/Modal/Variations/Card/CardSignup.Modal";
 import CardKycModal from "../components/Modal/Variations/Card/CardKyc.Modal";
 import CardTopupModal from "../components/Modal/Variations/Card/CardTopup.Modal";
+import AcceptTandcsModal from "../components/Modal/Variations/Card/AcceptTandcs.Modal";
 
 export const ModalComponents = {
     [ModalVariation.NOTIFICATIONS]: NotificationsModal,
@@ -19,5 +20,6 @@ export const ModalComponents = {
     [ModalVariation.CLOSE_ACCOUNT]: CloseAccountModal,
     [ModalVariation.CARD_SIGNUP]: CardSignupModal,
     [ModalVariation.CARD_KYC]: CardKycModal,
-    [ModalVariation.CARD_TOPUP]: CardTopupModal
+    [ModalVariation.CARD_TOPUP]: CardTopupModal,
+    [ModalVariation.ACCEPT_TANDCS]: AcceptTandcsModal
 };
