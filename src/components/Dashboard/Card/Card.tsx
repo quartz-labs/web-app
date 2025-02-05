@@ -11,11 +11,11 @@ import { useLoginCardUser, useOpenKycLink } from "@/src/utils/hooks";
 import { PuffLoader } from "react-spinners";
 
 export default function Card() {
-    const { 
-        setModalVariation, 
-        quartzCardUser, 
-        jwtToken, 
-        setCardDetails, 
+    const {
+        setModalVariation,
+        quartzCardUser,
+        jwtToken,
+        setCardDetails,
         cardDetails,
         providerCardUser,
         isSigningLoginMessage,
@@ -73,14 +73,20 @@ export default function Card() {
         setCardCvc([response.cvc]);
         setShowDetails(true);
     }
-    
+
     const loginCardUser = useLoginCardUser();
     if (!jwtToken && quartzCardUser?.auth_level !== undefined) {
         return (
             <div className={styles.cardsContainer}>
                 <button
                     className={`glass-button ${styles.loginButton}`}
-                    onClick={() => loginCardUser.mutate(TandCsNeeded.NOT_NEEDED)}
+                    onClick={() => {
+                        if (quartzCardUser?.auth_level === AuthLevel.CARD) {
+                            setModalVariation(ModalVariation.ACCEPT_TANDCS);
+                        } else {
+                            loginCardUser.mutate(TandCsNeeded.NOT_NEEDED)
+                        }
+                    }}
                 >
                     {isSigningLoginMessage && (
                         <PuffLoader
@@ -90,7 +96,7 @@ export default function Card() {
                             data-testid="loader"
                         />
                     )}
-                    
+
                     {!isSigningLoginMessage && (
                         <p>Verify Wallet</p>
                     )}
@@ -143,7 +149,7 @@ export default function Card() {
 
                 <button
                     className={`glass-button`}
-                onClick={() => setModalVariation(ModalVariation.CARD_TOPUP)}
+                    onClick={() => setModalVariation(ModalVariation.CARD_TOPUP)}
                 >
                     Top Up Card
                 </button>
@@ -224,7 +230,7 @@ export default function Card() {
                             data-testid="loader"
                         />
                     )}
-                    
+
                     {!creatingCard && (
                         <p>Create Card</p>
                     )}
