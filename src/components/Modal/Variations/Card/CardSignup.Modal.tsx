@@ -219,9 +219,9 @@ export default function CardSignupModal() {
                     />
                 </div>
 
-                {formData.address.country === "US" && (
+                {formData.address.country === "US" || formData.address.country === "United States" && (
                     <div style={{ display: "flex", flexDirection: "column", marginBottom: "8px", alignItems: "flex-start" }}>
-                        <label>I accept the <a href="#" target="_blank" rel="noopener noreferrer">Account Opening Disclosure</a>?</label>
+                        <label>I accept the <a href="https://docs.quartzpay.io/glba" target="_blank" rel="noopener noreferrer">Account Opening Disclosure</a>?</label>
                         <input
                             type="checkbox"
                             checked={tandCs.openingDisclosure}
@@ -242,7 +242,7 @@ export default function CardSignupModal() {
                     />
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", marginBottom: "8px", alignItems: "flex-start" }}>
-                    <label>I accept the <a href="https://docs.quartzpay.io/privacy-policy" target="_blank" rel="noopener noreferrer">privacy policy</a>.</label>
+                    <label>I accept the <a href="https://docs.quartzpay.io/card-privacy-policy" target="_blank" rel="noopener noreferrer">privacy policy</a>.</label>
                     <input
                         type="checkbox"
                         checked={tandCs.privacyPolicy}
