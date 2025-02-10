@@ -106,12 +106,15 @@ export default function Card() {
     }
 
     if (cardDetails) {
+        const spendableBalanceDisplay = (spendableBalance === undefined) 
+            ? undefined 
+            : (spendableBalance / 100).toFixed(2);
         return (
             <div className={styles.cardsContainer}>
                 <div className={styles.cardWrapper}>
                     <div>
                         <div className={styles.topup}>
-                            <p>Balance: {(spendableBalance === undefined) ? "Unavailable" : `$${spendableBalance / 100}`}</p>
+                            <p>Balance: {(spendableBalanceDisplay === undefined) ? "Unavailable" : `$${spendableBalanceDisplay}`}</p>
                             {topupPending && (
                                 <TailSpin
                                     height="18.5"
