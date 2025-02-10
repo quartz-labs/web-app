@@ -237,6 +237,7 @@ export async function getComputeUnitLimit(
     );
 
     const estimatedComputeUnits = simulation.value.unitsConsumed;
+    if (!estimatedComputeUnits) console.log("Could not simulate for CUs, using default limit");
     const computeUnitLimit = estimatedComputeUnits 
         ? Math.ceil(estimatedComputeUnits * 1.3) 
         : DEFAULT_COMPUTE_UNIT_LIMIT;
@@ -256,13 +257,18 @@ export async function getComputerUnitLimitIx(
     });
 }
 
-export async function getComputeUnitPrice() {
-    // TODO: Calculate actual fee
-    return 1_250_000;
+export async function getComputeUnitPrice(connection: Connection, instructions: TransactionInstruction[]) {
+    const accounts = instructions.flatMap(instruction => instruction.keys);
+    const writeableAccounts = accounts.filter(account => account.isWritable).map(account => account.pubkey);
+    const recentFees = await connection.getRecentPrioritizationFees({
+        lockedWritableAccounts: writeableAccounts
+    });
+
+    return Math.min(...recentFees.map(fee => fee.prioritizationFee));
 };
 
-export async function getComputeUnitPriceIx() {
-    const computeUnitPrice = await getComputeUnitPrice();
+export async function getComputeUnitPriceIx(connection: Connection, instructions: TransactionInstruction[]) {
+    const computeUnitPrice = await getComputeUnitPrice(connection, instructions);
     return ComputeBudgetProgram.setComputeUnitPrice({
         microLamports: computeUnitPrice,
     });
@@ -276,7 +282,7 @@ export async function buildTransaction(
 ): Promise<VersionedTransaction> {
     const blockhash = (await connection.getLatestBlockhash()).blockhash;
     const ix_computeLimit = await getComputerUnitLimitIx(connection, instructions, address, blockhash, lookupTables);
-    const ix_computePrice = await getComputeUnitPriceIx();
+    const ix_computePrice = await getComputeUnitPriceIx(connection, instructions);
     instructions.unshift(ix_computeLimit, ix_computePrice);
 
     const messageV0 = new TransactionMessage({
