@@ -174,7 +174,7 @@ async function buildFlashLoanTransaction(
     if (loanBank === null) throw new Error("Could not find Flash Loan MarginFi bank");
     
     // Set compute unit price
-    const ix_computePrice = await getComputeUnitPriceIx();
+    const ix_computePrice = await getComputeUnitPriceIx(connection, instructions);
 
     // Make ATA instructions (closing ATA at the end if wSol is used)
     const mintLoan = TOKENS[flashLoanMarketIndex].mint;
