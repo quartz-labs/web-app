@@ -9,13 +9,14 @@ import Image from "next/image";
 import { captureError } from "@/src/utils/errors";
 import { useError } from "@/src/context/error-provider";
 import { useRefetchAccountData } from "@/src/utils/hooks";
-
+import { useRefetchCardUser } from "@/src/utils/hooks";
 
 export default function TxStatusPopup() {
     const { props, enabled, hideTxStatus } = useTxStatus();
     const { showError } = useError();
     const wallet = useAnchorWallet();
     const refetchAccountData = useRefetchAccountData();
+    const refetchCardUser = useRefetchCardUser();
 
     const [status, setStatus] = useState(TxStatus.NONE);
 
@@ -41,6 +42,19 @@ export default function TxStatusPopup() {
 
                 refetchAccountData(signature);
                 if (body.success) {
+                    if (props.status === TxStatus.TOPUP_SENT && props.topupPromise !== undefined) {
+                        setStatus(TxStatus.TOPUP_PROCESSING);
+                        try {
+                            await props.topupPromise;
+                            refetchCardUser();
+                        } catch {
+                            setStatus(TxStatus.TOPUP_FAILED);
+                            setClosePopup(TIMEOUT_TIME_ERROR);
+                            refetchCardUser();
+                            return;
+                        }
+                    }
+
                     setStatus(TxStatus.CONFIRMED);
                     setClosePopup(TIMEOUT_TIME);
                 } else {
@@ -63,12 +77,11 @@ export default function TxStatusPopup() {
         } else if (props?.status === TxStatus.SIGN_REJECTED || props?.status === TxStatus.BLOCKHASH_EXPIRED) {
             setClosePopup(TIMEOUT_TIME);
         }
-    }, [props, enabled, hideTxStatus, showError, wallet, refetchAccountData]);
+    }, [props, enabled, hideTxStatus, showError, wallet, refetchAccountData, refetchCardUser]);
 
     if (!props || !enabled || status === TxStatus.NONE) return (<></>);
 
     const explorerUrl = `https://solscan.io/tx/${props.signature}`;
-    const allbridgeWalletUrl = `https://core.allbridge.io/explorer/address/SOL/${props.walletAddress}`;
 
     if (status === TxStatus.TIMEOUT) return (
         <div className={`${styles.popup} ${styles.error}`}>
@@ -166,62 +179,39 @@ export default function TxStatusPopup() {
     );
 
 
-    if (status === TxStatus.TOPUP_IN_PROGRESS) return (
+    if (status === TxStatus.TOPUP_PROCESSING) return (
         <div className={styles.popup}>
             <div className={styles.heading}>
-                <p>Card top up in progress</p>
+                <p>Processing top up...</p>
             </div>
 
             <div className={styles.message}>
-                <Image
-                    height="25"
-                    width="25"
-                    alt=""
-                    src="/checkmark.png"
+                <TailSpin
+                    height="18.5"
+                    width="18.5"
+                    color="#ffffffA5"
+                    ariaLabel="loading-spinner"
+                    wrapperStyle={{
+                        width: "25px"
+                    }}
                 />
-                <a href={explorerUrl} target="_blank" rel="noopener noreferrer">View on Solscan</a>
-                <a href={allbridgeWalletUrl} target="_blank" rel="noopener noreferrer">View on Allbridge</a>
+                <p>Moving funds to your card.</p>
             </div>
         </div>
     );
-
     if (status === TxStatus.TOPUP_FAILED) return (
-        <div className={styles.popup}>
-            <div className={styles.headingError}>
-                <p>Card top up failed or timed out</p>
-            </div>
-
-            <div className={styles.message}>
-                <Image
-                    height="25"
-                    width="25"
-                    alt=""
-                    src="/checkmark.png"
-                />
-                <a href={explorerUrl} target="_blank" rel="noopener noreferrer">View on Solscan</a>
-                <a href={allbridgeWalletUrl} target="_blank" rel="noopener noreferrer">View on Allbridge</a>
-            </div>
-        </div>
-    );
-
-    if (status === TxStatus.TOPUP_SUCCESS) return (
-        <div className={styles.popup}>
+        <div className={`${styles.popup} ${styles.error}`}>
             <div className={styles.heading}>
-                <p>Card top up successful!</p>
+                <p className={styles.headingError}>
+                    Top up failed
+                </p>
             </div>
 
             <div className={styles.message}>
-                <Image
-                    height="25"
-                    width="25"
-                    alt=""
-                    src="/checkmark.png"
-                />
-                <a href={explorerUrl} target="_blank" rel="noopener noreferrer">View on Solscan</a>
-                <a href={allbridgeWalletUrl} target="_blank" rel="noopener noreferrer">View on Allbridge</a>
+                <p>The team have been notified. Please get in touch on <a href={"https://discord.gg/K3byNmnKNm"} target="_blank" rel="noopener noreferrer">Discord</a>.</p>
             </div>
         </div>
-    );
+    )
 
     return (
         <div className={styles.popup}>

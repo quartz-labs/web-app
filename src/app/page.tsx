@@ -18,10 +18,12 @@ import { fetchAndParse } from "../utils/helpers";
 import { useAccountStatusQuery, useWithdrawLimitsQuery, useBalancesQuery, useRatesQuery, usePricesQuery, useHealthQuery } from "../utils/queries/protocol.queries";
 import { useProviderCardUserQuery, useQuartzCardUserQuery, useCardDetailsQuery, useProviderCardSpendableBalanceQuery } from "../utils/queries/internalApi.queries";
 import { ModalVariation } from "../types/enums/ModalVariation.enum";
+import { TxStatus, useTxStatus } from "../context/tx-status-provider";
 
 export default function Page() {
   const wallet = useWallet();
-  const { setIsInitialized, jwtToken, setTopupPending, topupPending, cardDetails, setModalVariation } = useStore();
+  const { setIsInitialized, jwtToken, cardDetails, setModalVariation, topupPending, setTopupPending } = useStore();
+  const { props: txStatusProps } = useTxStatus();
   const refetchCardUser = useRefetchCardUser();
 
 
@@ -44,11 +46,13 @@ export default function Page() {
   // Quartz Card User data
   const { data: quartzCardUser } = useQuartzCardUserQuery(
     isInitialized ? wallet.publicKey : null,
-    isInitialized && topupPending
+    isInitialized && topupPending && txStatusProps?.status !== TxStatus.TOPUP_PROCESSING
   );
   useEffect(() => {
-    setTopupPending(quartzCardUser?.topup_pending ?? false);
-  }, [quartzCardUser?.topup_pending, setTopupPending]);
+    const txStatusPending = txStatusProps?.status === TxStatus.TOPUP_PROCESSING;
+    const displayPendingInBalance = (quartzCardUser?.topup_pending ?? false) && !txStatusPending;
+    setTopupPending(displayPendingInBalance);
+  }, [quartzCardUser?.topup_pending, setTopupPending, txStatusProps?.status]);
 
 
   // Provider Card User data

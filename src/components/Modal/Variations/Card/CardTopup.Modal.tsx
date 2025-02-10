@@ -60,10 +60,10 @@ export default function CardTopupModal() {
             const topupResponse = await fetchAndParse(topupEndpoint);
             const topupTransaction = deserializeTransaction(topupResponse.transaction);
 
-            const signature = await signAndSendTransaction(topupTransaction, wallet, showTxStatus);
+            const signature = await signAndSendTransaction(topupTransaction, wallet, showTxStatus, false, true);
             setAwaitingSign(false);
             if (signature) {
-                await fetchAndParse(`${config.NEXT_PUBLIC_INTERNAL_API_URL}/card/balance/topup`, {
+                const topupResponse = fetchAndParse(`${config.NEXT_PUBLIC_INTERNAL_API_URL}/card/balance/topup`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -73,6 +73,11 @@ export default function CardTopupModal() {
                         signature: signature,
                         address: wallet.publicKey.toBase58(),
                     })
+                });
+                showTxStatus({ 
+                    signature: signature,
+                    status: TxStatus.TOPUP_SENT,
+                    topupPromise: topupResponse
                 });
                 refetchCardUser();
                 setModalVariation(ModalVariation.DISABLED);

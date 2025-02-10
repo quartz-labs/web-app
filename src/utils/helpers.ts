@@ -6,7 +6,7 @@ import { VersionedTransaction } from "@solana/web3.js";
 import { TransactionMessage } from "@solana/web3.js";
 import { TxStatus, type TxStatusProps } from "../context/tx-status-provider";
 import { MarketIndex, TOKENS, baseUnitToDecimal, retryWithBackoff } from "@quartz-labs/sdk/browser";
-import { DEFAULT_COMPUTE_UNIT_LIMIT } from "../config/constants";
+import { DEFAULT_COMPUTE_UNIT_LIMIT, DEFAULT_COMPUTE_UNIT_PRICE } from "../config/constants";
 import crypto from "crypto";
 
 export function truncToDecimalPlaces(value: number, decimalPlaces: number): number {
@@ -262,9 +262,30 @@ export async function getComputeUnitPrice(connection: Connection, instructions: 
     const writeableAccounts = accounts.filter(account => account.isWritable).map(account => account.pubkey);
     const recentFees = await connection.getRecentPrioritizationFees({
         lockedWritableAccounts: writeableAccounts
-    });
+    }).then(fees => fees.map(fee => fee.prioritizationFee));
 
-    return Math.min(...recentFees.map(fee => fee.prioritizationFee));
+    if (recentFees.length === 0) return DEFAULT_COMPUTE_UNIT_PRICE;
+
+    const positiveFees = recentFees.filter(fee => fee > 0);
+    const sortedFees = [...positiveFees].sort((a, b) => a - b);
+
+    // Calculate Q1 and Q3
+    const q1Index = Math.floor(sortedFees.length * 0.25);
+    const q3Index = Math.floor(sortedFees.length * 0.75);
+    const q1 = sortedFees[q1Index];
+    const q3 = sortedFees[q3Index];
+    if (q1 === undefined || q3 === undefined) return Math.min(...recentFees);
+    
+    // Calculate IQR and bounds
+    const iqr = q3 - q1;
+    const lowerBound = q1 - 1.5 * iqr;
+    const upperBound = q3 + 1.5 * iqr;
+    
+    // Filter out outliers and calculate average
+    const filteredFees = sortedFees.filter(fee => fee >= lowerBound && fee <= upperBound);
+    const average = filteredFees.reduce((sum, fee) => sum + fee, 0) / filteredFees.length;
+
+    return Math.ceil(average);
 };
 
 export async function getComputeUnitPriceIx(connection: Connection, instructions: TransactionInstruction[]) {
@@ -298,7 +319,8 @@ export async function signAndSendTransaction(
     transaction: VersionedTransaction, 
     wallet: AnchorWallet, 
     showTxStatus: (props: TxStatusProps) => void,
-    skipPreflight: boolean = false
+    skipPreflight: boolean = false,
+    skipTxProcessing: boolean = false
 ): Promise<string> {
     showTxStatus({ status: TxStatus.SIGNING });
     const signedTx = await wallet.signTransaction(transaction);
@@ -327,10 +349,12 @@ export async function signAndSendTransaction(
         }
     }
 
-    showTxStatus({ 
-        signature: body.signature,
-        status: TxStatus.SENT 
-    });
+    if (!skipTxProcessing) {
+        showTxStatus({ 
+            signature: body.signature,
+            status: TxStatus.SENT 
+        });
+    }
     return body.signature;
 }
 
