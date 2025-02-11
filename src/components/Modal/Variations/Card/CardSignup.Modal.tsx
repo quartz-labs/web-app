@@ -14,6 +14,7 @@ import type { QuartzCardUser } from "@/src/types/interfaces/QuartzCardUser.inter
 import { useOpenKycLink, useRefetchCardUser } from "@/src/utils/hooks";
 import { DEFAULT_KYC_DATA, DEFAULT_TANDCS, type KYCData, type TandCs } from "@/src/types/interfaces/KYCData.interface";
 import type { ApplicationCompletionLink } from "@/src/types/ApplicationCompleteLink.type";
+import { getCode, getCountry, getCountries } from "@/src/utils/countries";
 
 export default function CardSignupModal() {
     const wallet = useAnchorWallet();
@@ -39,7 +40,6 @@ export default function CardSignupModal() {
             [field]: value
         }));
     };
-
 
     const handleAddressChange = <K extends keyof Address>(field: K, value: Address[K]) => {
         setFormData(prev => ({
@@ -89,11 +89,12 @@ export default function CardSignupModal() {
     };
 
     return (
-        <div className={styles.contentWrapper2}>
-            <h2 className={styles.heading}>Sign up for a Quartz Card</h2>
+        <div className={styles.contentWrapperSignup}>
+            <div className={styles.signupHeader}>
+                <h2 className={styles.heading}>Sign up for a Quartz Card</h2>
+            </div>
 
             <div className={styles.scrollableContent}>
-
                 <CardSignupInputSection
                     label="First Name"
                     amountStr={formData.firstName}
@@ -124,25 +125,29 @@ export default function CardSignupModal() {
                 />
 
                 <CardSignupInputSection
+                    label="Phone Country Code (eg: +1)"
+                    amountStr={
+                        formData.phoneCountryCode.startsWith('+') 
+                        ? formData.phoneCountryCode 
+                        : `+${formData.phoneCountryCode}`
+                    }
+                    setAmountStr={(value) => handleFormDataChange("phoneCountryCode", value.replace("+", ""))}
+                />
+
+                <CardSignupInputSection
                     label="Phone Number"
                     amountStr={formData.phoneNumber}
                     setAmountStr={(value) => handleFormDataChange("phoneNumber", value)}
                 />
 
                 <CardSignupInputSection
-                    label="Phone Country Code"
-                    amountStr={formData.phoneCountryCode}
-                    setAmountStr={(value) => handleFormDataChange("phoneCountryCode", value)}
-                />
-
-                <CardSignupInputSection
-                    label="Address line 1"
+                    label="Address Line 1"
                     amountStr={formData.address.line1}
                     setAmountStr={(value) => handleAddressChange("line1", value)}
                 />
 
                 <CardSignupInputSection
-                    label="Address line 2"
+                    label="Address Line 2"
                     amountStr={formData.address.line2 || ""}
                     setAmountStr={(value) => handleAddressChange("line2", value)}
                 />
@@ -165,11 +170,27 @@ export default function CardSignupModal() {
                     setAmountStr={(value) => handleAddressChange("region", value)}
                 />
 
-                <CardSignupInputSection
-                    label="Country"
-                    amountStr={formData.address.country}
-                    setAmountStr={(value) => handleAddressChange("country", value)}
-                />
+                <div className={styles.inputGroup}>
+                    <label>Country</label>
+                    <select
+                        className={styles.select}
+                        value={formData.address.country}
+                        onChange={(e) => {
+                            const countryCode = getCode(e.target.value);
+                            if (!countryCode) throw new Error("Invalid country");
+
+                            handleAddressChange("countryCode", countryCode);
+                            handleAddressChange("country", e.target.value);
+                        }}
+                    >
+                        <option value="">Select a country</option>
+                        {getCountries().map((country) => (
+                            <option key={country} value={country}>
+                                {country}
+                            </option>
+                        ))}
+                    </select>
+                </div>
 
                 <CardSignupInputSection
                     label="Occupation"
@@ -184,34 +205,45 @@ export default function CardSignupModal() {
                 />
 
                 <CardSignupInputSection
-                    label="Account purpose"
+                    label="Account Purpose"
                     amountStr={formData.accountPurpose}
                     setAmountStr={(value) => handleFormDataChange("accountPurpose", value)}
                 />
 
                 <CardSignupInputSection
-                    label="Expected monthly spend"
+                    label="Expected Monthly Spend"
                     amountStr={formData.expectedMonthlyVolume}
                     setAmountStr={(value) => handleFormDataChange("expectedMonthlyVolume", value)}
                 />
 
                 <CardSignupInputSection
-                    label="National ID number"
+                    label="National ID Number"
                     amountStr={formData.nationalId}
                     setAmountStr={(value) => handleFormDataChange("nationalId", value)}
                 />
 
-                <CardSignupInputSection
-                    label="Country Code for Country of Issue (eg: US, IE)"
-                    amountStr={formData.countryOfIssue}
-                    setAmountStr={(value) => {
-                        handleAddressChange("countryCode", value);
-                        handleFormDataChange("countryOfIssue", value);
-                    }}
-                />
+                <div className={styles.inputGroup}>
+                    <label>National ID Country of Issue</label>
+                    <select
+                        className={styles.select}
+                        value={getCountry(formData.countryOfIssue) ?? ""}
+                        onChange={(e) => {
+                            const countryCode = getCode(e.target.value);
+                            if (!countryCode) throw new Error("Invalid country");
+                            handleFormDataChange("countryOfIssue", countryCode)
+                        }}
+                    >
+                        <option value="">Select a country</option>
+                        {getCountries().map((country) => (
+                            <option key={country} value={country}>
+                                {country}
+                            </option>
+                        ))}
+                    </select>
+                </div>
 
                 <div style={{ display: "flex", flexDirection: "column", marginBottom: "8px", alignItems: "flex-start" }}>
-                    <label>I accept the <a href="#" target="_blank" rel="noopener noreferrer">E-Sign Consent</a>?</label>
+                    <label>I accept the <a href="#" target="_blank" rel="noopener noreferrer">E-Sign Consent</a></label>
                     <input
                         type="checkbox"
                         checked={tandCs.acceptEsignConsent}
@@ -221,7 +253,7 @@ export default function CardSignupModal() {
 
                 {formData.address.country === "US" || formData.address.country === "United States" && (
                     <div style={{ display: "flex", flexDirection: "column", marginBottom: "8px", alignItems: "flex-start" }}>
-                        <label>I accept the <a href="https://docs.quartzpay.io/glba" target="_blank" rel="noopener noreferrer">Account Opening Disclosure</a>?</label>
+                        <label>I accept the <a href="https://docs.quartzpay.io/glba" target="_blank" rel="noopener noreferrer">Account Opening Disclosure</a></label>
                         <input
                             type="checkbox"
                             checked={tandCs.openingDisclosure}
@@ -231,7 +263,7 @@ export default function CardSignupModal() {
                 )}
 
                 <div style={{ display: "flex", flexDirection: "column", marginBottom: "8px", alignItems: "flex-start" }}>
-                    <label>I accept the Quartz Card <a href="#" target="_blank" rel="noopener noreferrer">terms of service</a>?</label>
+                    <label>I accept the Quartz Card <a href="#" target="_blank" rel="noopener noreferrer">terms of service</a></label>
                     <input
                         type="checkbox"
                         checked={formData.isTermsOfServiceAccepted}
@@ -251,7 +283,7 @@ export default function CardSignupModal() {
                 </div>
 
                 <div style={{ display: "flex", flexDirection: "column", marginBottom: "8px", alignItems: "flex-start" }}>
-                    <label>I certify that the information I have provided is accurate and that I will abide by all the rules and requiremtns that related to my Quartz Spend Card.</label>
+                    <label>I certify that the information I have provided is accurate and that I will abide by all the rules and requirements that related to my Quartz Spend Card.</label>
                     <input
                         type="checkbox"
                         checked={tandCs.informationIsAccurate}

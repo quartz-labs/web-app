@@ -48,9 +48,9 @@ export default function TxStatusPopup() {
                             await props.topupPromise;
                             refetchCardUser();
                         } catch {
+                            refetchCardUser();
                             setStatus(TxStatus.TOPUP_FAILED);
                             setClosePopup(TIMEOUT_TIME_ERROR);
-                            refetchCardUser();
                             return;
                         }
                     }

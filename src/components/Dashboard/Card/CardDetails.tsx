@@ -63,17 +63,19 @@ export default function CardDetails() {
     ) {
         return (
             <div className={styles.cardWrapper}>
-                <Card
-                    cvc={cardCvc}
-                    pan={cardPan}
-                />
+                <div className={styles.cardContainer}>
+                    <Card
+                        cvc={cardCvc}
+                        pan={cardPan}
+                    />  
 
-                <button
-                    className={`glass-button ${styles.cardButton}`}
-                    onClick={() => setModalVariation(ModalVariation.CARD_SIGNUP)}
-                >
-                    Get Quartz Card
-                </button>
+                    <button
+                        className={`glass-button ${styles.cardButton}`}
+                        onClick={() => setModalVariation(ModalVariation.CARD_SIGNUP)}
+                    >
+                        Get Quartz Card
+                    </button>
+                </div>
             </div>
         )
     }
@@ -81,34 +83,36 @@ export default function CardDetails() {
     if (!jwtToken) {
         return (
             <div className={styles.cardWrapper}>
-                <Card
-                    cvc={cardCvc}
-                    pan={cardPan}
-                />
+                <div className={styles.cardContainer}>
+                    <Card
+                        cvc={cardCvc}
+                        pan={cardPan}
+                    />
 
-                <button
-                    className={`glass-button ${styles.cardButton}`}
-                    onClick={() => {
-                        if (quartzCardUser?.auth_level === AuthLevel.CARD) {
-                            setModalVariation(ModalVariation.ACCEPT_TANDCS);
-                        } else {
-                            loginCardUser.mutate(TandCsNeeded.NOT_NEEDED)
-                        }
-                    }}
-                >
-                    {isSigningLoginMessage && (
-                        <PuffLoader
-                            color={"#ffffff"}
-                            size={30}
-                            aria-label="Loading"
-                            data-testid="loader"
-                        />
-                    )}
+                    <button
+                        className={`glass-button ${styles.cardButton}`}
+                        onClick={() => {
+                            if (quartzCardUser?.auth_level === AuthLevel.CARD) {
+                                setModalVariation(ModalVariation.ACCEPT_TANDCS);
+                            } else {
+                                loginCardUser.mutate(TandCsNeeded.NOT_NEEDED)
+                            }
+                        }}
+                    >
+                        {isSigningLoginMessage && (
+                            <PuffLoader
+                                color={"#ffffff"}
+                                size={30}
+                                aria-label="Loading"
+                                data-testid="loader"
+                            />
+                        )}
 
-                    {!isSigningLoginMessage && (
-                        <p>Authorize Wallet</p>
-                    )}
-                </button>
+                        {!isSigningLoginMessage && (
+                            <p>Authorize Wallet</p>
+                        )}
+                    </button>
+                </div>
             </div>
         )
     }
@@ -119,23 +123,52 @@ export default function CardDetails() {
         ) : undefined;
         return (
             <div className={styles.cardWrapper}>
-                <Card
-                    cvc={cardCvc}
-                    pan={cardPan}
-                />
+                <div className={styles.cardContainer}>
+                    <Card
+                        cvc={cardCvc}
+                        pan={cardPan}
+                    />
 
-                {link && (
-                    <button
-                        className={`glass-button ${styles.cardButton}`}
-                        onClick={() => openKycLink(link)}
-                    >
-                        Complete KYC
-                    </button>
-                )}
+                    {link && (
+                        <button
+                            className={`glass-button ${styles.cardButton}`}
+                            onClick={() => openKycLink(link)}
+                        >
+                            Complete KYC
+                        </button>
+                    )}
 
-                {!link && (
+                    {!link && (
+                        <div className={styles.kycPending}>
+                            <p>Loading KYC link...</p>
+
+                            <TailSpin
+                                height="18.5"
+                                width="18.5"
+                                color="#ffffffA5"
+                                ariaLabel="loading-spinner"
+                                wrapperStyle={{
+                                    width: "25px"
+                                }}
+                            />
+                        </div>
+                    )}
+                </div>
+            </div>
+        )
+    }
+
+    if (quartzCardUser?.auth_level === AuthLevel.KYC_PENDING) {
+        return (
+            <div className={styles.cardWrapper}>
+                <div className={styles.cardContainer}>
+                    <Card
+                        cvc={cardCvc}
+                        pan={cardPan}
+                    />
+
                     <div className={styles.kycPending}>
-                        <p>Loading KYC link...</p>
+                        <p>KYC verification pending...</p>
 
                         <TailSpin
                             height="18.5"
@@ -147,31 +180,6 @@ export default function CardDetails() {
                             }}
                         />
                     </div>
-                )}
-            </div>
-        )
-    }
-
-    if (quartzCardUser?.auth_level === AuthLevel.KYC_PENDING) {
-        return (
-            <div className={styles.cardWrapper}>
-                <Card
-                    cvc={cardCvc}
-                    pan={cardPan}
-                />
-
-                <div className={styles.kycPending}>
-                    <p>KYC verification pending...</p>
-
-                    <TailSpin
-                        height="18.5"
-                        width="18.5"
-                        color="#ffffffA5"
-                        ariaLabel="loading-spinner"
-                        wrapperStyle={{
-                            width: "25px"
-                        }}
-                    />
                 </div>
             </div>
         )
@@ -182,54 +190,56 @@ export default function CardDetails() {
             : (spendableBalance / 100).toFixed(2);
     return (
         <div className={styles.cardWrapper}>
-            <Card
-                cvc={cardCvc}
-                pan={cardPan}
-            />
+            <div className={styles.cardContainer}>
+                <Card
+                    cvc={cardCvc}
+                    pan={cardPan}
+                />  
 
-            <div className={styles.balance}>
-                <p>Balance:</p>
+                <div className={styles.balance}>
+                    <p>Balance:</p>
 
-                <div className={styles.topUpWrapper}>
-                    {topupPending && (
-                        <TailSpin
-                            height="18.5"
-                            width="18.5"
-                            color="#ffffffA5"
-                            ariaLabel="loading-spinner"
-                            wrapperStyle={{
-                                width: "25px"
-                            }}
-                        />
-                    )}
-                    <p>{(spendableBalanceDisplay === undefined) ? "Unavailable" : `$${spendableBalanceDisplay}`}</p>
+                    <div className={styles.topUpWrapper}>
+                        {topupPending && (
+                            <TailSpin
+                                height="18.5"
+                                width="18.5"
+                                color="#ffffffA5"
+                                ariaLabel="loading-spinner"
+                                wrapperStyle={{
+                                    width: "25px"
+                                }}
+                            />
+                        )}
+                        <p>{(spendableBalanceDisplay === undefined) ? "Unavailable" : `$${spendableBalanceDisplay}`}</p>
+                    </div>
                 </div>
-            </div>
 
-            <div className={styles.buttonsRow}>
-                <button
-                    className={`glass-button ${styles.cardButton}`}
-                    onClick={() => setModalVariation(ModalVariation.CARD_TOPUP)}
-                >
-                    Top Up Card
-                </button>
-                <button
-                    className={`glass-button ${styles.cardButton}`}
-                    onClick={() => swapCardDetailsVisibility()}
-                >
-                    {loadingDetails &&
-                        <PuffLoader
-                            color={"#ffffff"}
-                            size={30}
-                            aria-label="Loading"
-                            data-testid="loader"
-                        />
-                    }
+                <div className={styles.buttonsRow}>
+                    <button
+                        className={`glass-button ${styles.cardButton}`}
+                        onClick={() => setModalVariation(ModalVariation.CARD_TOPUP)}
+                    >
+                        Top Up Card
+                    </button>
+                    <button
+                        className={`glass-button ${styles.cardButton}`}
+                        onClick={() => swapCardDetailsVisibility()}
+                    >
+                        {loadingDetails &&
+                            <PuffLoader
+                                color={"#ffffff"}
+                                size={30}
+                                aria-label="Loading"
+                                data-testid="loader"
+                            />
+                        }
 
-                    {!loadingDetails &&
-                        <p>{showDetails ? "Hide Details" : "View Details"}</p>
-                    }
-                </button>
+                        {!loadingDetails &&
+                            <p>{showDetails ? "Hide Details" : "View Details"}</p>
+                        }
+                    </button>
+                </div>
             </div>
         </div>
     );

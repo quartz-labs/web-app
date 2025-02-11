@@ -4,6 +4,6 @@ export interface Address {
     city: string;
     region: string;
     postalCode: string;
-    countryCode: string;
+    countryCode: string; // ISO 3166-1 alpha-2
     country: string;
 }

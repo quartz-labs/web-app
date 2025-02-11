@@ -95,12 +95,11 @@ export default function CardTopupModal() {
 
     return (
         <div className={styles.contentWrapper}>
-            <h2 className={styles.heading}>Add USDC to your card balance</h2>
+            <h2 className={styles.heading}>Top Up Card with USDC</h2>
 
             <div className={styles.inputSection}>
                 <p>Amount</p>
                 
-
                 <div className={styles.inputFieldWrapper}>
                     <input 
                         className={`${styles.inputField} ${styles.inputFieldAmount}`}

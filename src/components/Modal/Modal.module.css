@@ -319,26 +319,51 @@
     font-size: var(--font-size-h3);
 }
 
+.signupHeader {
+    width: 100%;
+    text-align: center;
+    margin-bottom: -25px;
+}
 
-.contentWrapper2 {
+.contentWrapperSignup {
     display: flex;
     flex-direction: column;
     height: 100%;
     max-height: 90vh;
     position: relative;
+    padding: 15px;
 }
 
 .scrollableContent {
     flex: 1;
     overflow-y: auto;
     padding: 20px;
-    padding-bottom: 80px; /* Add space for fixed buttons */
+    padding-bottom: 80px;
 }
 
 .fixedButtons {
     position: sticky;
     bottom: 0;
-    background: var(--background-color); /* Match your modal's background */
+    background: var(--background-color);
     padding: 20px;
-    border-top: 1px solid var(--border-color); /* Optional: adds separation */
+    border-top: 1px solid var(--border-color);
+}
+
+.select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: var(--color-background);
+    font-size: 14px;
+}
+
+.inputGroup {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 8px;
+}
+
+.inputGroup label {
+    margin-bottom: 4px;
 }

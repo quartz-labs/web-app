@@ -1,3 +1,4 @@
+import { getCountry } from "@/src/utils/countries";
 import type { Address } from "./Address.interface";
 
 export interface KYCData {
@@ -23,13 +24,14 @@ export interface KYCData {
     hasExistingDocuments?: string;
 }
 
+const DEFAULT_COUNTRY = "US";
 export const DEFAULT_KYC_DATA: KYCData = {
     id: "",
     firstName: "",
     lastName: "",
     birthDate: "",
     nationalId: "",
-    countryOfIssue: "",
+    countryOfIssue: DEFAULT_COUNTRY,
     email: "",
     phoneCountryCode: "",
     phoneNumber: "",
@@ -39,8 +41,8 @@ export const DEFAULT_KYC_DATA: KYCData = {
         city: "",
         region: "",
         postalCode: "",
-        countryCode: "",
-        country: "",
+        countryCode: DEFAULT_COUNTRY,
+        country: getCountry(DEFAULT_COUNTRY) ?? "",
     },
     walletAddress: "",
     chainId: "",
