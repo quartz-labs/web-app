@@ -52,7 +52,7 @@ export default function WithdrawModal() {
 
         const errorText = validateAmount(marketIndex, amountDecimals, maxWithdrawBaseUnits);
         setErrorText(errorText);
-        if (errorText) return;
+        //if (errorText) return;
 
         setAwaitingSign(true);
         try {

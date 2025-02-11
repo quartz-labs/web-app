@@ -1,8 +1,10 @@
 .inputWrapper {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 4px;
     margin-bottom: 8px;
+    width: 100%;
+    min-height: 47.19px;
 }
 
 .kycInput {

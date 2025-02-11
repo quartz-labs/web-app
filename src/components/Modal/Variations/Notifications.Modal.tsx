@@ -64,7 +64,7 @@ export default function NotificationsModal() {
                 style={{marginBottom: "55px"}}
             >Telegram Notifications</h2>
         
-            <p style={{marginBottom: "25px"}}>Send your wallet address to our Telegram bot <a href="https://telegram.me/QuartzLTVBot" target="_blank" rel="noopener noreferrer">@QuartzLTVBot</a> to receive Telegram notifications when your Quartz account health drops <span className={"no-wrap"}>close to 0%.</span></p>
+            <p style={{marginBottom: "25px"}}>Message <a href="https://telegram.me/QuartzLTVBot" target="_blank" rel="noopener noreferrer">@QuartzLTVBot</a> to start receiving Telegram notifications about your Quartz <span className={"no-wrap"}>account health.</span></p>
 
             <div 
                 className={styles.inputSection}
@@ -94,7 +94,7 @@ export default function NotificationsModal() {
             </div>
                 
             <p style={{marginBottom: "55px"}}>
-                If you don&apos;t repay your loan before reaching 0% health, your collateral will automatically be sold at market rate to <span className={"no-wrap"}>cover your loan.</span>
+                If you don&apos;t repay some of your loans before reaching 0% health, your collateral will automatically be sold at market rate to <span className={"no-wrap"}>cover your debt.</span>
             </p>
             
 

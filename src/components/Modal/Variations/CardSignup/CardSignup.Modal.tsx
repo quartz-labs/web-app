@@ -15,6 +15,7 @@ import { useOpenKycLink, useRefetchCardUser } from "@/src/utils/hooks";
 import { DEFAULT_KYC_DATA, DEFAULT_TANDCS, type KYCData, type TandCs } from "@/src/types/interfaces/KYCData.interface";
 import type { ApplicationCompletionLink } from "@/src/types/ApplicationCompleteLink.type";
 import { getCode, getCountry, getCountries } from "@/src/utils/countries";
+import PagePersonalDetails from "./PagePersonalDetails";
 
 export default function CardSignupModal() {
     const wallet = useAnchorWallet();
@@ -94,154 +95,13 @@ export default function CardSignupModal() {
                 <h2 className={styles.heading}>Sign up for a Quartz Card</h2>
             </div>
 
+            <PagePersonalDetails
+                formData={formData}
+                handleFormDataChange={handleFormDataChange}
+                handleAddressChange={handleAddressChange}
+            />
+
             <div className={styles.scrollableContent}>
-                <CardSignupInputSection
-                    label="First Name"
-                    amountStr={formData.firstName}
-                    setAmountStr={(value) => handleFormDataChange("firstName", value)}
-                />
-
-                <CardSignupInputSection
-                    label="Last Name"
-                    amountStr={formData.lastName}
-                    setAmountStr={(value) => handleFormDataChange("lastName", value)}
-                />
-
-                <div style={{ display: "flex", flexDirection: "column", marginBottom: "8px" }}>
-                    <label style={{ marginRight: "10px" }}>Birth Date:</label>
-                    <input
-                        className={styles.dobInput}
-                        type="date"
-                        value={formData.birthDate}
-                        onChange={(e) => handleFormDataChange("birthDate", e.target.value)}
-                        max={new Date().toISOString().split('T')[0]} // Prevents future dates
-                    />
-                </div>
-
-                <CardSignupInputSection
-                    label="Email"
-                    amountStr={formData.email}
-                    setAmountStr={(value) => handleFormDataChange("email", value)}
-                />
-
-                <CardSignupInputSection
-                    label="Phone Country Code (eg: +1)"
-                    amountStr={
-                        formData.phoneCountryCode.startsWith('+') 
-                        ? formData.phoneCountryCode 
-                        : `+${formData.phoneCountryCode}`
-                    }
-                    setAmountStr={(value) => handleFormDataChange("phoneCountryCode", value.replace("+", ""))}
-                />
-
-                <CardSignupInputSection
-                    label="Phone Number"
-                    amountStr={formData.phoneNumber}
-                    setAmountStr={(value) => handleFormDataChange("phoneNumber", value)}
-                />
-
-                <CardSignupInputSection
-                    label="Address Line 1"
-                    amountStr={formData.address.line1}
-                    setAmountStr={(value) => handleAddressChange("line1", value)}
-                />
-
-                <CardSignupInputSection
-                    label="Address Line 2"
-                    amountStr={formData.address.line2 || ""}
-                    setAmountStr={(value) => handleAddressChange("line2", value)}
-                />
-
-                <CardSignupInputSection
-                    label="City"
-                    amountStr={formData.address.city}
-                    setAmountStr={(value) => handleAddressChange("city", value)}
-                />
-
-                <CardSignupInputSection
-                    label="Postcode"
-                    amountStr={formData.address.postalCode}
-                    setAmountStr={(value) => handleAddressChange("postalCode", value)}
-                />
-
-                <CardSignupInputSection
-                    label="State"
-                    amountStr={formData.address.region}
-                    setAmountStr={(value) => handleAddressChange("region", value)}
-                />
-
-                <div className={styles.inputGroup}>
-                    <label>Country</label>
-                    <select
-                        className={styles.select}
-                        value={formData.address.country}
-                        onChange={(e) => {
-                            const countryCode = getCode(e.target.value);
-                            if (!countryCode) throw new Error("Invalid country");
-
-                            handleAddressChange("countryCode", countryCode);
-                            handleAddressChange("country", e.target.value);
-                        }}
-                    >
-                        <option value="">Select a country</option>
-                        {getCountries().map((country) => (
-                            <option key={country} value={country}>
-                                {country}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-
-                <CardSignupInputSection
-                    label="Occupation"
-                    amountStr={formData.occupation}
-                    setAmountStr={(value) => handleFormDataChange("occupation", value)}
-                />
-
-                <CardSignupInputSection
-                    label="Annual Income"
-                    amountStr={formData.annualSalary}
-                    setAmountStr={(value) => handleFormDataChange("annualSalary", value)}
-                />
-
-                <CardSignupInputSection
-                    label="Account Purpose"
-                    amountStr={formData.accountPurpose}
-                    setAmountStr={(value) => handleFormDataChange("accountPurpose", value)}
-                />
-
-                <CardSignupInputSection
-                    label="Expected Monthly Spend"
-                    amountStr={formData.expectedMonthlyVolume}
-                    setAmountStr={(value) => handleFormDataChange("expectedMonthlyVolume", value)}
-                />
-
-                <CardSignupInputSection
-                    label="National ID Number"
-                    amountStr={formData.nationalId}
-                    setAmountStr={(value) => handleFormDataChange("nationalId", value)}
-                />
-
-                <div className={styles.inputGroup}>
-                    <label>National ID Country of Issue</label>
-                    <select
-                        className={styles.select}
-                        value={getCountry(formData.countryOfIssue) ?? ""}
-                        onChange={(e) => {
-                            const countryCode = getCode(e.target.value);
-                            if (!countryCode) throw new Error("Invalid country");
-                            handleFormDataChange("countryOfIssue", countryCode)
-                        }}
-                    >
-                        <option value="">Select a country</option>
-                        {getCountries().map((country) => (
-                            <option key={country} value={country}>
-                                {country}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-
                 <div style={{ display: "flex", flexDirection: "column", marginBottom: "8px", alignItems: "flex-start" }}>
                     <label>I accept the <a href="#" target="_blank" rel="noopener noreferrer">E-Sign Consent</a></label>
                     <input

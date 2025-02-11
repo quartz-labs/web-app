@@ -40,7 +40,7 @@ export default function Assets() {
                 </ul>
             </div>
             <div className={styles.listWrapper}>
-                <h3 className={styles.title}>Borrwed</h3>
+                <h3 className={styles.title}>Borrowed</h3>
                 <ul className={styles.assetList}>
                     {borrowedAssets.length > 0 &&
                         borrowedAssets.map((assetInfo) => (
