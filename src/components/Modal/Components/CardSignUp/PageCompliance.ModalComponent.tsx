@@ -1,11 +1,11 @@
 import type { KYCData } from "@/src/types/interfaces/KYCData.interface";
-import CardSignupInputSection from "../../Components/CardSignUp/CardAccountCreate.ModalComponent";
-import pageStyles from "./CardSignup.module.css";
+import CardSignupInputSection from "./CardAccountCreate.ModalComponent";
+import componentStyles from "./CardSignup.ModalComponent.module.css";
 import modalStyles from "../../Modal.module.css";
 import { getCountries, getCountry } from "@/src/utils/countries";
 import { getCode } from "@/src/utils/countries";
 
-interface SignupPage1Props {
+interface PageComplianceProps {
     formData: KYCData;
     handleFormDataChange: <K extends keyof KYCData>(field: K, value: KYCData[K]) => void;
 }
@@ -13,14 +13,13 @@ interface SignupPage1Props {
 export default function PageCompliance({
     formData,
     handleFormDataChange
-}: SignupPage1Props) {
+}: PageComplianceProps) {
     return (
-        <div className={pageStyles.signupPage}>
-
-            <div style={{ display: "flex", flexDirection: "column", marginBottom: "8px" }}>
+        <div className={componentStyles.signupPage}>
+            <div className={componentStyles.dateSelectWrapper}>
                 <label style={{ marginRight: "10px" }}>Birth Date:</label>
                 <input
-                    className={modalStyles.dobInput}
+                    className={componentStyles.dateSelect}
                     type="date"
                     value={formData.birthDate}
                     onChange={(e) => handleFormDataChange("birthDate", e.target.value)}
@@ -34,11 +33,27 @@ export default function PageCompliance({
                 setAmountStr={(value) => handleFormDataChange("occupation", value)}
             />
 
-            <CardSignupInputSection
-                label="Annual Income"
-                amountStr={formData.annualSalary}
-                setAmountStr={(value) => handleFormDataChange("annualSalary", value)}
-            />
+            <div className={componentStyles.row}>
+                <CardSignupInputSection
+                    label="Annual Income"
+                    amountStr={
+                        formData.annualSalary.startsWith('$') 
+                        ? formData.annualSalary 
+                        : `$${formData.annualSalary}`
+                    }
+                    setAmountStr={(value) => handleFormDataChange("annualSalary", value.replace("$", ""))}
+                />
+
+                <CardSignupInputSection
+                    label="Expected Monthly Spend"
+                        amountStr={
+                        formData.expectedMonthlyVolume.startsWith('$') 
+                        ? formData.expectedMonthlyVolume 
+                        : `$${formData.expectedMonthlyVolume}`
+                    }
+                    setAmountStr={(value) => handleFormDataChange("expectedMonthlyVolume", value.replace("$", ""))}
+                />
+            </div>
 
             <CardSignupInputSection
                 label="Account Purpose"
@@ -47,21 +62,15 @@ export default function PageCompliance({
             />
 
             <CardSignupInputSection
-                label="Expected Monthly Spend"
-                amountStr={formData.expectedMonthlyVolume}
-                setAmountStr={(value) => handleFormDataChange("expectedMonthlyVolume", value)}
-            />
-
-            <CardSignupInputSection
                 label="National ID Number"
                 amountStr={formData.nationalId}
                 setAmountStr={(value) => handleFormDataChange("nationalId", value)}
             />
 
-            <div className={pageStyles.inputGroup}>
+            <div className={modalStyles.inputGroup}>
                 <label>National ID Country of Issue</label>
                 <select
-                    className={pageStyles.select}
+                    className={modalStyles.select}
                     value={getCountry(formData.countryOfIssue) ?? ""}
                     onChange={(e) => {
                         const countryCode = getCode(e.target.value);

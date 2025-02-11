@@ -220,6 +220,7 @@ a:hover {
   --asset-card-height: 73px;
   --modal-width: 780px;
   --modal-content-width: 75%;
+  --signup-field-height: 47.19px;
   --input-field-height: 80px;
   --address-copy-button-height: 57px;
   --popup-position-bottom: 50px;
@@ -289,6 +290,7 @@ a:hover {
     --nav-height: 40px;
     --modal-content-width: 90%;
     --input-field-height: 75px;
+    --signup-field-height: 44.24px;
     --address-copy-button-height: 53.4px;
     --balance-wrapper-width: 100%;
     --buttons-row-gap: 10px;
@@ -301,6 +303,7 @@ a:hover {
   :root {
     --nav-height: 35px;
     --input-field-height: 65px;
+    --signup-field-height: 38.34px;
     --address-copy-button-height: 46.3px;
     --notifications-button-padding: 3px;
   }

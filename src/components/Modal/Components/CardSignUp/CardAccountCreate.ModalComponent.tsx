@@ -1,5 +1,5 @@
 import type { MarketIndex } from "@quartz-labs/sdk/browser";
-import styles from "./CardAccountCreate.ModalComponent.module.css";
+import styles from "./CardSignup.ModalComponent.module.css";
 
 interface InputSectionProps {
     label?: string;

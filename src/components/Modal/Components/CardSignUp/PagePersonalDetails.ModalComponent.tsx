@@ -1,11 +1,11 @@
 import type { KYCData } from "@/src/types/interfaces/KYCData.interface";
-import CardSignupInputSection from "../../Components/CardSignUp/CardAccountCreate.ModalComponent";
-import pageStyles from "./CardSignup.module.css";
+import CardSignupInputSection from "./CardAccountCreate.ModalComponent";
+import componentStyles from "./CardSignup.ModalComponent.module.css";
 import modalStyles from "../../Modal.module.css";
 import { getCode, getCountries } from "@/src/utils/countries";
 import type { Address } from "@/src/types/interfaces/Address.interface";
 
-interface SignupPage1Props {
+interface PagePersonalDetailsProps {
     formData: KYCData;
     handleFormDataChange: <K extends keyof KYCData>(field: K, value: KYCData[K]) => void;
     handleAddressChange: <K extends keyof Address>(field: K, value: Address[K]) => void;
@@ -15,10 +15,10 @@ export default function PagePersonalDetails({
     formData,
     handleFormDataChange,
     handleAddressChange
-}: SignupPage1Props) {
+}: PagePersonalDetailsProps) {
     return (
-        <div className={pageStyles.signupPage}>
-            <div className={pageStyles.row}>
+        <div className={componentStyles.signupPage}>
+            <div className={componentStyles.row}>
                 <CardSignupInputSection
                     label="First Name"
                     amountStr={formData.firstName}
@@ -38,7 +38,7 @@ export default function PagePersonalDetails({
                 setAmountStr={(value) => handleFormDataChange("email", value)}
             />
 
-            <div className={pageStyles.row}>
+            <div className={componentStyles.row}>
                 <CardSignupInputSection
                     label="Phone Country Code (eg: +1)"
                     amountStr={
@@ -56,7 +56,7 @@ export default function PagePersonalDetails({
                 />
             </div>
 
-            <div className={pageStyles.row}>
+            <div className={componentStyles.row}>
                 <CardSignupInputSection
                     label="Address Line 1"
                     amountStr={formData.address.line1}
@@ -70,7 +70,7 @@ export default function PagePersonalDetails({
                 />
             </div>
 
-            <div className={pageStyles.row}>
+            <div className={componentStyles.row}>
                 <CardSignupInputSection
                     label="City"
                     amountStr={formData.address.city}
@@ -84,7 +84,7 @@ export default function PagePersonalDetails({
                 />
             </div>
 
-            <div className={pageStyles.row}>
+            <div className={componentStyles.row}>
                 <CardSignupInputSection
                     label="State"
                     amountStr={formData.address.region}

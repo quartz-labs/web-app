@@ -5,7 +5,7 @@ import NotificationsModal from "@/src/components/Modal/Variations/Notifications.
 import RepayLoanModal from "@/src/components/Modal/Variations/Balance/RepayLoan.Modal";
 import WithdrawModal from "@/src/components/Modal/Variations/Balance/Withdraw.Modal";
 import BorrowModal from "../components/Modal/Variations/Balance/Borrow.Modal";
-import CardSignupModal from "../components/Modal/Variations/CardSignup/CardSignup.Modal";
+import CardSignupModal from "../components/Modal/Variations/CardSignup.Modal";
 import AcceptTandcsModal from "../components/Modal/Variations/AcceptTandcs.Modal";
 import CardKycModal from "../components/Modal/Variations/CardKyc.Modal";
 import CardTopupModal from "../components/Modal/Variations/CardTopup.Modal";

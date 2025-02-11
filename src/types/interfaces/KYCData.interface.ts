@@ -57,7 +57,7 @@ export const DEFAULT_KYC_DATA: KYCData = {
 }
 
 
-export interface TandCs {
+export interface Terms {
     acceptEsignConsent: boolean;
     openingDisclosure: boolean | undefined;
     acceptQuartzCardTerms: boolean;
@@ -66,7 +66,7 @@ export interface TandCs {
     applyingForCardNotSolicitation: boolean;
 }
 
-export const DEFAULT_TANDCS: TandCs = {
+export const DEFAULT_TERMS: Terms = {
     acceptEsignConsent: false,
     openingDisclosure: undefined,
     acceptQuartzCardTerms: false,
