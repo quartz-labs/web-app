@@ -1,244 +1,77 @@
 import { useStore } from "@/src/utils/store";
 import styles from "./Card.module.css";
-import { AuthLevel, TandCsNeeded } from "@/src/types/enums/AuthLevel.enum";
-import type { CardsForUserResponse } from "@/src/types/interfaces/CardsForUserResponse.interface";
-import { useState } from "react";
-import { fetchAndParse } from "@/src/utils/helpers";
-import config from "@/src/config/config";
-import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
-import { TailSpin } from "react-loader-spinner";
-import { useLoginCardUser, useOpenKycLink } from "@/src/utils/hooks";
-import { PuffLoader } from "react-spinners";
+import Image from "next/image";
+import CopyText from "./CopyText";
 
-export default function Card() {
-    const {
-        setModalVariation,
-        quartzCardUser,
-        jwtToken,
-        setCardDetails,
-        cardDetails,
-        providerCardUser,
-        isSigningLoginMessage,
-        topupPending,
-        spendableBalance
-    } = useStore();
-    const [showDetails, setShowDetails] = useState(false);
-    const openKycLink = useOpenKycLink();
+interface CardDetails {
+    cvc: string | null;
+    pan: string | null;
+}
 
-    const [creatingCard, setCreatingCard] = useState(false);
-    const [cardPan, setCardPan] = useState<string[] | null>(null);
-    const [cardCvc, setCardCvc] = useState<string[] | null>(null);
+export default function Card({ cvc, pan }: CardDetails) {
+    const { cardDetails, jwtToken } = useStore();
 
-    const link = providerCardUser?.applicationCompletionLink ? (
-        `${providerCardUser.applicationCompletionLink.url}?userId=${providerCardUser.applicationCompletionLink.params.userId}`
-    ) : undefined;
-
-    const createCard = async () => {
-        // if user has no cards, kyc is approved.
-        setCreatingCard(true);
-        const createCardResponse: CardsForUserResponse = await fetchAndParse(
-            `${config.NEXT_PUBLIC_INTERNAL_API_URL}/card/issuing/create`,
-            {
-                method: 'POST',
-                headers: {
-                    "Authorization": `Bearer ${jwtToken}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    id: quartzCardUser?.card_api_user_id,
-                    type: "virtual",
-                    frequency: "allTime",
-                    amountLimit: "0"
-                }),
-            }
+    if (!cardDetails || !jwtToken) {
+        return (
+            <div className={styles.card}>
+                <Image 
+                    className={styles.visaLogo}
+                    src="/visa.svg"
+                    alt="Visa"
+                    width={77}
+                    height={25}
+                />
+                <div className={styles.detail}>
+                    <p className={styles.label}>Virtual Card</p>
+                    <p>•••• ••••</p>
+                </div>
+            </div>
         );
-        setCreatingCard(false);
-        setCardDetails(createCardResponse);
     }
 
-    const getCardDetails = async (cardId: string) => {
-        const response = await fetchAndParse(`/api/card-details?id=${cardId}`, {
-            method: 'POST',
-            headers: {
-                "Authorization": `Bearer ${jwtToken}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                jwtToken
-            })
-        });
-
-        const formattedPan = response.pan.match(/.{1,4}/g).join(' ');
-        setCardPan([formattedPan]);
-        setCardCvc([response.cvc]);
-        setShowDetails(true);
-    }
-
-    const loginCardUser = useLoginCardUser();
-    if (!jwtToken && quartzCardUser?.auth_level !== undefined) {
+    if (!pan || !cvc) {
         return (
-            <div className={styles.cardsContainer}>
-                <button
-                    className={`glass-button ${styles.loginButton}`}
-                    onClick={() => {
-                        if (quartzCardUser?.auth_level === AuthLevel.CARD) {
-                            setModalVariation(ModalVariation.ACCEPT_TANDCS);
-                        } else {
-                            loginCardUser.mutate(TandCsNeeded.NOT_NEEDED)
-                        }
-                    }}
-                >
-                    {isSigningLoginMessage && (
-                        <PuffLoader
-                            color={"#ffffff"}
-                            size={30}
-                            aria-label="Loading"
-                            data-testid="loader"
-                        />
-                    )}
-
-                    {!isSigningLoginMessage && (
-                        <p>Verify Wallet</p>
-                    )}
-                </button>
-            </div>
-        )
-    }
-
-    if (cardDetails) {
-        const spendableBalanceDisplay = (spendableBalance === undefined) 
-            ? undefined 
-            : (spendableBalance / 100).toFixed(2);
-        return (
-            <div className={styles.cardsContainer}>
-                <div className={styles.cardWrapper}>
-                    <div>
-                        <div className={styles.topup}>
-                            <p>Balance: {(spendableBalanceDisplay === undefined) ? "Unavailable" : `$${spendableBalanceDisplay}`}</p>
-                            {topupPending && (
-                                <TailSpin
-                                    height="18.5"
-                                    width="18.5"
-                                    color="#ffffffA5"
-                                    ariaLabel="loading-spinner"
-                                    wrapperStyle={{
-                                        width: "25px"
-                                    }}
-                                />
-                            )}
-                        </div>
-                    </div>
-
-                    {!showDetails && (
-                        <button
-                            className={styles.cardDetails}
-                            onClick={() => getCardDetails(cardDetails.id)}
-                        >
-                            <div className={styles.cardNumber}>**** **** **** {cardDetails.last4}</div>
-                            <div>Expires: {cardDetails.expirationMonth}/{cardDetails.expirationYear}</div>
-                        </button>
-                    )}
-
-                    {showDetails && (
-                        <div className={styles.cardDetails}>
-                            <div className={styles.cardNumber}>{cardPan}</div>
-                            <div className={styles.cardDetailsRow}>
-                                <div>Expires: {cardDetails.expirationMonth}/{cardDetails.expirationYear}</div>
-                                <div>CVC: {cardCvc}</div>
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                <button
-                    className={`glass-button`}
-                    onClick={() => setModalVariation(ModalVariation.CARD_TOPUP)}
-                >
-                    Top Up Card
-                </button>
-            </div>
-        )
-    }
-
-    if (quartzCardUser?.auth_level === undefined) {
-        return (
-            <div className={styles.cardsContainer}>
-                <button
-                    className={`glass-button`}
-                    onClick={() => setModalVariation(ModalVariation.CARD_SIGNUP)}
-                >
-                    Sign up for Quartz Card ✨
-                </button>
-            </div>
-        )
-    }
-
-    if (quartzCardUser?.auth_level === AuthLevel.BASE) {
-        return (
-            <div className={styles.cardsContainer}>
-                {link && (
-                    <button
-                        className={`glass-button`}
-                        onClick={() => openKycLink(link)}
-                    >
-                        KYC for Quartz Card
-                    </button>
-                )}
-                {!link && (
-                    <TailSpin
-                        height="18.5"
-                        width="18.5"
-                        color="#ffffffA5"
-                        ariaLabel="loading-spinner"
-                        wrapperStyle={{
-                            width: "25px"
-                        }}
-                    />
-                )}
-            </div>
-        )
-    }
-
-    if (quartzCardUser?.auth_level === AuthLevel.KYC_PENDING) {
-        return (
-            <div className={styles.cardsContainer}>
-                <div className={styles.pending}>
-                    <p>KYC pending...</p>
-                    <TailSpin
-                        height="18.5"
-                        width="18.5"
-                        color="#ffffffA5"
-                        ariaLabel="loading-spinner"
-                        wrapperStyle={{
-                            width: "25px"
-                        }}
-                    />
+            <div className={styles.card}>
+                <Image 
+                    className={styles.visaLogo}
+                    src="/visa.svg"
+                    alt="Visa"
+                    width={77}
+                    height={25}
+                />
+                <div className={styles.detail}>
+                    <p className={styles.label}>Virtual Card</p>
+                    <p>•••• {cardDetails.last4}</p>
                 </div>
             </div>
-        )
+        );
     }
 
-    if (quartzCardUser?.auth_level === AuthLevel.CARD) {
-        return (
-            <div className={styles.cardsContainer}>
-                <button
-                    className={`glass-button`}
-                    onClick={createCard}
-                >
-                    {creatingCard && (
-                        <PuffLoader
-                            color={"#ffffff"}
-                            size={30}
-                            aria-label="Loading"
-                            data-testid="loader"
-                        />
-                    )}
-
-                    {!creatingCard && (
-                        <p>Create Card</p>
-                    )}
-                </button>
+    const expiryYear = cardDetails.expirationYear.toString().slice(-2);
+    const expiryMonth = cardDetails.expirationMonth.toString().padStart(2, '0');
+    return (
+        <div className={styles.card}>
+            <Image 
+                className={styles.visaLogo}
+                src="/visa.svg"
+                alt="Visa"
+                width={77}
+                height={25}
+            />
+            <div className={styles.cardNumber}>
+                <p className={styles.label}>Card Number</p>
+                <CopyText text={pan} />
             </div>
-        )
-    }
+            <div className={styles.cardDetails}>
+                <div className={styles.detail}>
+                    <p className={styles.label}>Expiry</p>
+                    <CopyText text={`${expiryMonth}/${expiryYear}`} />
+                </div>
+                <div className={styles.detail}>
+                    <p className={styles.label}>CVC</p>
+                    <CopyText text={cvc} />
+                </div>
+            </div>
+        </div>
+    );
 }

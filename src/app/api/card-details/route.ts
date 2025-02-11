@@ -46,11 +46,7 @@ export async function POST(request: Request) {
     const queryString = QueryString.stringify({
         id: id
     });
-
-    console.log("queryString", queryString);
-
-    const sessionId = await generateSessionId(env.NEXT_PUBLIC_CARD_PEM!)
-    console.log("sessionId", sessionId);
+    const sessionId = await generateSessionId(env.NEXT_PUBLIC_CARD_PEM!);
 
     const options = {
         method: 'POST',
@@ -62,15 +58,12 @@ export async function POST(request: Request) {
         body: JSON.stringify({ sessionId: sessionId.sessionId })
     };
     const response = await fetchAndParse(`${env.NEXT_PUBLIC_INTERNAL_API_URL}card/issuing/secrets?${queryString}`, options);
-    console.log("response", response);
     try {
         const decryptedPan = (await decryptSecret(response.encryptedPan.data, response.encryptedPan.iv, sessionId.secretKey))
             .replace(/[^\d]/g, '').slice(0, 16);
-        console.log("decryptedPan", decryptedPan);
         
         const decryptedCvc = (await decryptSecret(response.encryptedCvc.data, response.encryptedCvc.iv, sessionId.secretKey))
             .replace(/[^\d]/g, '').slice(0, 3);
-        console.log("decryptedCvc", decryptedCvc);
 
         return NextResponse.json({
             pan: decryptedPan,

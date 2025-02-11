@@ -5,7 +5,7 @@ import Health from "./Health/Health";
 import ButtonRow from "./ButtonRow/ButtonRow";
 import Assets from "./Assets/Assets";
 import Modal from "../Modal/Modal";
-import Card from "./Card/Card";
+import CardDetails from "./Card/CardDetails";
 
 export default function Dashboard() {
   const { isInitialized } = useStore();
@@ -35,10 +35,7 @@ export default function Dashboard() {
       <div className={`glass panel ${styles.assetsPanel}`}>
         <div className={styles.assetsPanelContent}>
           {isInitialized && (
-            <>
-              <h2 className={styles.title}>Card</h2>  
-              <Card />
-            </>
+            <CardDetails />
           )}
 
           <h2 className={styles.title}>Assets</h2>

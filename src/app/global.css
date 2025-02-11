@@ -195,6 +195,7 @@ a:hover {
   --font-size-h3-base: 29.03px;
   --font-size-h4-base: 24.19px;
   --font-size-large-base: 20.16px;
+  --font-size-card-base: 18.5px;
   --font-size-p-base: 16.8px;
   --font-size-small-base: 14px;
   --font-size-tiny-base: 12px;
@@ -207,6 +208,7 @@ a:hover {
   --font-size-h3: var(--font-size-h3-base);
   --font-size-h4: var(--font-size-h4-base);
   --font-size-large: var(--font-size-large-base);
+  --font-size-card: var(--font-size-card-base);
   --font-size-p: var(--font-size-p-base);
   --font-size-small: var(--font-size-small-base);
   --font-size-tiny: var(--font-size-tiny-base);
@@ -254,6 +256,7 @@ a:hover {
     --font-size-h3: calc(0.9 * var(--font-size-h3-base));
     --font-size-h4: calc(0.9 * var(--font-size-h4-base));
     --font-size-large: calc(0.9 * var(--font-size-large-base));
+    --font-size-card: calc(0.9 * var(--font-size-card-base));
     --font-size-p: calc(0.9 * var(--font-size-p-base));
     --font-size-small: calc(0.9 * var(--font-size-small-base));
     --font-size-tiny: calc(0.9 * var(--font-size-tiny-base));
@@ -276,6 +279,7 @@ a:hover {
     --font-size-h3: calc(0.8 * var(--font-size-h3-base));
     --font-size-h4: calc(0.8 * var(--font-size-h4-base));
     --font-size-large: calc(0.8 * var(--font-size-large-base));
+    --font-size-card: calc(0.8 * var(--font-size-card-base));
     --font-size-p: calc(0.8 * var(--font-size-p-base));
     --font-size-small: calc(0.8 * var(--font-size-small-base));
     --font-size-tiny: calc(0.8 * var(--font-size-tiny-base));
