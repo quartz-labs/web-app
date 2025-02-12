@@ -27,6 +27,13 @@
     justify-content: space-between;
 }
 
+@media only screen and (max-width: 580px) {
+    .row {
+        flex-direction: column;
+        gap: 0px;
+    }
+}
+
 .dateSelectWrapper {
     display: flex;
     flex-direction: column;
@@ -52,6 +59,7 @@
     display: flex;
     width: 100%;
     gap: 25px;
+    margin-top: 30px;
 }
 
 .mainButton {

@@ -66,7 +66,7 @@ export default function PageTerms({
                     </label>
                 </li>
 
-                {(formData.address.countryCode === "US" || formData.countryOfIssue === "US") && (
+                {(formData.countryOfIssue === "US") && (
                     <li>
                         <label>
                             <input 
