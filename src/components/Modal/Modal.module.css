@@ -3,13 +3,23 @@
     z-index: 999;
     top: 0px;
     left: 0px;
-    min-height: 100VH;
-    width: 100VW;
-    background: rgb(0, 0, 0, 0.35);
+    min-height: 100%;
+    width: 100%;
 
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.modalWrapper::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgb(0, 0, 0, 0.35);
+    z-index: 998;
 }
 
 .errorModalWrapper {
@@ -23,6 +33,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    position: relative;
+    z-index: 1000;
 }
 
 .repayInnerModal {

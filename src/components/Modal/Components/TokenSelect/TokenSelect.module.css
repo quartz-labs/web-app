@@ -33,7 +33,7 @@
     border: 1px solid var(--placeholder-glass-stroke);
     border-radius: 14px;
     padding: 8px;
-    z-index: 1000;
+    z-index: 1001;
 }
 
 .dropdownItem {
