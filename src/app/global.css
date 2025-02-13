@@ -58,6 +58,9 @@ a:hover {
   background-image: var(--gradient-glass-stroke);
   background-origin: border-box;
   background-clip: padding-box, border-box;
+
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .glass-button:hover {

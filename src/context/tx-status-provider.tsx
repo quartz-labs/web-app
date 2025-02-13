@@ -7,13 +7,15 @@ export enum TxStatus {
   SIGNING,
   SIGN_REJECTED,
   SENT,
+  SENT_TIME_WARNING,
   CONFIRMED,
   TIMEOUT,
   FAILED,
   BLOCKHASH_EXPIRED,
   TOPUP_SENT,
   TOPUP_PROCESSING,
-  TOPUP_FAILED
+  TOPUP_FAILED,
+  ERROR
 }
 
 export interface TxStatusProps {

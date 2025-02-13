@@ -22,6 +22,7 @@ export default function TxStatusPopup() {
 
     const TIMEOUT_TIME = 4_000;
     const TIMEOUT_TIME_ERROR = 8_000;
+    const CONFIRMATION_WARNING_TIME = 30_000;
 
     useEffect(() => {
         const setClosePopup = (timeout: number) => {
@@ -35,10 +36,20 @@ export default function TxStatusPopup() {
             if (!props) return;
             if (!wallet) return captureError(showError, "No wallet connected", "/TxStatusPopup.tsx", "Could not find wallet", null);
 
+            // Set a warning status if the transaction has been sent for a while
+            setTimeout(() => {
+                setStatus(currentStatus => {
+                    if (currentStatus === TxStatus.SENT) {
+                        return TxStatus.SENT_TIME_WARNING;
+                    }
+                    return currentStatus;
+                });
+            }, CONFIRMATION_WARNING_TIME);
+
             try {
                 const response = await fetch(`/api/confirm-tx?signature=${signature}`);
                 const body = await response.json();
-                if (!response.ok) throw new Error(body.error);
+                if (!response.ok) throw new Error(body);
 
                 refetchAccountData(signature);
                 if (body.success) {
@@ -58,14 +69,22 @@ export default function TxStatusPopup() {
                     setStatus(TxStatus.CONFIRMED);
                     setClosePopup(TIMEOUT_TIME);
                 } else {
-                    if (body.timeout) setStatus(TxStatus.TIMEOUT);
-                    else setStatus(TxStatus.FAILED);
+                    if (body.timeout) {
+                        setStatus(TxStatus.TIMEOUT);
+                    } else {
+                        setStatus(TxStatus.FAILED);
+                    }
                     setClosePopup(TIMEOUT_TIME_ERROR);
+
+                    refetchCardUser();
+                    refetchAccountData();
                 }
             } catch (error) {
-                setStatus(TxStatus.FAILED);
-                refetchAccountData(signature);
+                setStatus(TxStatus.ERROR);
                 setClosePopup(TIMEOUT_TIME_ERROR);
+
+                refetchCardUser();
+                refetchAccountData(signature);
                 captureError(showError, "Transaction failed.", "utils: /instructions.ts", error, wallet.publicKey, true);
             }
         }
@@ -77,6 +96,7 @@ export default function TxStatusPopup() {
         } else if (props?.status === TxStatus.SIGN_REJECTED || props?.status === TxStatus.BLOCKHASH_EXPIRED) {
             setClosePopup(TIMEOUT_TIME);
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [props, enabled, hideTxStatus, showError, wallet, refetchAccountData, refetchCardUser]);
 
     if (!props || !enabled || status === TxStatus.NONE) return (<></>);
@@ -108,6 +128,20 @@ export default function TxStatusPopup() {
 
             <div className={styles.message}>
                 <p>Check the transaction on <a href={explorerUrl} target="_blank" rel="noopener noreferrer">Solscan</a> to see details.</p>
+            </div>
+        </div>
+    );
+
+    if (status === TxStatus.ERROR) return (
+        <div className={`${styles.popup} ${styles.error}`}>
+            <div className={styles.heading}>
+                <p className={styles.headingError}>
+                    Connection error
+                </p>
+            </div>
+
+            <div className={styles.message}>
+                <p>Transaction status unknown. Check <a href={explorerUrl} target="_blank" rel="noopener noreferrer">Solscan</a> for details.</p>
             </div>
         </div>
     );
@@ -209,6 +243,27 @@ export default function TxStatusPopup() {
 
             <div className={styles.message}>
                 <p>The team have been notified. Please get in touch on <a href={"https://discord.gg/K3byNmnKNm"} target="_blank" rel="noopener noreferrer">Discord</a>.</p>
+            </div>
+        </div>
+    )
+
+    if (status === TxStatus.SENT_TIME_WARNING) return (
+        <div className={styles.popup}>
+            <div className={styles.heading}>
+                <p>Still confirming...</p>
+            </div>
+
+            <div className={styles.message}>
+                <TailSpin
+                    height="18.5"
+                    width="18.5"
+                    color="#ffffffA5"
+                    ariaLabel="loading-spinner"
+                    wrapperStyle={{
+                        width: "25px"
+                    }}
+                />
+                <a href={explorerUrl} target="_blank" rel="noopener noreferrer">View on Solscan</a>
             </div>
         </div>
     )
