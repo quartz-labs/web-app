@@ -14,8 +14,8 @@ export default function PageTerms({
     handleTermsChange,
     handleFormDataChange
 }: PageTermsProps) {
-    const ESIGN_CONTRACT_URL = "#";
-    const TERMS_OF_SERVICE = "#";
+    const ESIGN_CONTRACT_URL = "https://docs.quartzpay.io/e-sign-consent";
+    const TERMS_OF_SERVICE = "https://docs.quartzpay.io/card-terms";
     const PRIVACY_POLICY = "https://docs.quartzpay.io/card-privacy-policy";
     const ACCOUNT_OPENING_DISCLOSURE = "https://docs.quartzpay.io/glba";
 
@@ -33,35 +33,6 @@ export default function PageTerms({
                         />
                         <span className={styles.checkboxText}>
                             I accept the <a href={ESIGN_CONTRACT_URL} target="_blank" rel="noopener noreferrer">E-Sign Consent</a>
-                        </span>
-                    </label>
-                </li>
-
-                <li>
-                    <label>
-                        <input 
-                            type="checkbox" 
-                            checked={formData.isTermsOfServiceAccepted}
-                            onChange={(e) => {
-                                handleFormDataChange("isTermsOfServiceAccepted", e.target.checked)
-                                handleTermsChange("acceptQuartzCardTerms", e.target.checked)
-                            }}
-                        />
-                        <span className={styles.checkboxText}>
-                            I accept the Quartz Card <a href={TERMS_OF_SERVICE} target="_blank" rel="noopener noreferrer">Terms of Service</a>
-                        </span>
-                    </label>
-                </li>
-
-                <li>
-                    <label>
-                        <input 
-                            type="checkbox" 
-                            checked={terms.privacyPolicy}
-                            onChange={(e) => handleTermsChange("privacyPolicy", e.target.checked)}
-                        />
-                        <span className={styles.checkboxText}>
-                            I accept the <a href={PRIVACY_POLICY} target="_blank" rel="noopener noreferrer">Privacy Policy</a>
                         </span>
                     </label>
                 </li>
@@ -85,11 +56,40 @@ export default function PageTerms({
                     <label>
                         <input 
                             type="checkbox" 
+                            checked={formData.isTermsOfServiceAccepted}
+                            onChange={(e) => {
+                                handleFormDataChange("isTermsOfServiceAccepted", e.target.checked)
+                                handleTermsChange("acceptQuartzCardTerms", e.target.checked)
+                            }}
+                        />
+                        <span className={styles.checkboxText}>
+                            I accept the <a href={TERMS_OF_SERVICE} target="_blank" rel="noopener noreferrer">Quartz Card Terms</a>.
+                        </span>
+                    </label>
+                </li>
+
+                <li>
+                    <label>
+                        <input 
+                            type="checkbox" 
+                            checked={terms.privacyPolicy}
+                            onChange={(e) => handleTermsChange("privacyPolicy", e.target.checked)}
+                        />
+                        <span className={styles.checkboxText}>
+                            I accept the <a href={PRIVACY_POLICY} target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+                        </span>
+                    </label>
+                </li>
+
+                <li>
+                    <label>
+                        <input 
+                            type="checkbox" 
                             checked={terms.informationIsAccurate}
                             onChange={(e) => handleTermsChange("informationIsAccurate", e.target.checked)}
                         />
                         <span className={styles.checkboxText}>
-                            I certify that the information I have provided is accurate and that I will abide by all the rules and requirements that related to my Quartz Spend Card.
+                            I certify that the information I have provided is accurate and that I will abide by all the rules and requirements that related to my Quartz Card.
                         </span>
                     </label>
                 </li>
@@ -102,7 +102,7 @@ export default function PageTerms({
                             onChange={(e) => handleTermsChange("applyingForCardNotSolicitation", e.target.checked)}
                         />
                         <span className={styles.checkboxText}>
-                            I acknowledge that applying for the Quartz Spend Card does not constitute an unauthorized solicitation of any kind.
+                            I acknowledge that applying for the Quartz Card does not constitute an unauthorized solicitation of any kind.
                         </span>
                     </label>
                 </li>
