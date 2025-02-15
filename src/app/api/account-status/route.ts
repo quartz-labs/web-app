@@ -35,15 +35,19 @@ export async function GET(request: Request) {
     }
 
     try {
-        const [hasVaultHistory, isMissingBetaKey, isVaultInitialized] = await Promise.all([
+        const [hasVaultHistory, isMissingBetaKey, isVaultInitialized, requiresUpgrade] = await Promise.all([
             checkHasVaultHistory(connection, pubkey),
             checkIsMissingBetaKey(connection, pubkey),
-            checkIsVaultInitialized(connection, pubkey)
+            checkIsVaultInitialized(connection, pubkey),
+            checkRequiresUpgrade(connection, pubkey)
         ]);
         
         if (!isVaultInitialized && hasVaultHistory) return NextResponse.json({ status: AccountStatus.CLOSED });
         else if (isMissingBetaKey) return NextResponse.json({ status: AccountStatus.NO_BETA_KEY });
-        else if (isVaultInitialized) return NextResponse.json({ status: AccountStatus.INITIALIZED });
+        else if (isVaultInitialized) {
+            if (requiresUpgrade) return NextResponse.json({ status: AccountStatus.UPGRADE_REQUIRED });
+            else return NextResponse.json({ status: AccountStatus.INITIALIZED });
+        }
         else return NextResponse.json({ status: AccountStatus.NOT_INITIALIZED });
     } catch (error) {
         console.error(error);
@@ -98,4 +102,13 @@ async function checkIsVaultInitialized(connection: Connection, wallet: PublicKey
     const vaultPda = getVaultPublicKey(wallet);
     const vaultPdaAccount = await connection.getAccountInfo(vaultPda);
     return (vaultPdaAccount !== null);
+}
+
+async function checkRequiresUpgrade(connection: Connection, wallet: PublicKey): Promise<boolean> {
+    const vaultPda = getVaultPublicKey(wallet);
+    const vaultPdaAccount = await connection.getAccountInfo(vaultPda);
+    if (vaultPdaAccount === null) return false;
+
+    const OLD_VAULT_SIZE = 41;
+    return (vaultPdaAccount.data.length <= OLD_VAULT_SIZE);
 }

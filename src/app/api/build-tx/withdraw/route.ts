@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { Connection, PublicKey, TransactionInstruction } from '@solana/web3.js';
+import { AddressLookupTableAccount, Connection, PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { getTokenProgram, MarketIndex, QuartzClient, QuartzUser, TOKENS, makeCreateAtaIxIfNeeded } from '@quartz-labs/sdk';
 import { createCloseAccountInstruction } from '@solana/spl-token';
 import { getAssociatedTokenAddress } from '@solana/spl-token';
@@ -76,7 +76,10 @@ export async function GET(request: Request) {
     }
 
     try {
-        const instructions = await makeWithdrawIxs(
+        const {
+            ixs,
+            lookupTables
+        } = await makeWithdrawIxs(
             connection, 
             address, 
             amountBaseUnits, 
@@ -84,7 +87,7 @@ export async function GET(request: Request) {
             user, 
             allowLoan
         );
-        const transaction = await buildTransaction(connection, instructions, address);
+        const transaction = await buildTransaction(connection, ixs, address, lookupTables);
         const serializedTx = Buffer.from(transaction.serialize()).toString("base64");
         return NextResponse.json({ transaction: serializedTx });
     } catch (error) {
@@ -103,7 +106,10 @@ async function makeWithdrawIxs(
     marketIndex: MarketIndex,
     user: QuartzUser,
     allowLoan: boolean
-): Promise<TransactionInstruction[]> {
+): Promise<{
+    ixs: TransactionInstruction[],
+    lookupTables: AddressLookupTableAccount[]
+}> {
     const mint = TOKENS[marketIndex].mint;
     const mintTokenProgram = await getTokenProgram(connection, mint);
     const walletAta = await getAssociatedTokenAddress(mint, address, false, mintTokenProgram);
@@ -115,6 +121,12 @@ async function makeWithdrawIxs(
     }
 
     const reduceOnly = !allowLoan;
-    const ix_withdraw = await user.makeWithdrawIx(amountBaseUnits, marketIndex, reduceOnly);
-    return [...oix_createAta, ix_withdraw, ...oix_closeWsol];
+    const {
+        ixs,
+        lookupTables
+    } = await user.makeWithdrawIx(amountBaseUnits, marketIndex, reduceOnly);
+    return {
+        ixs: [...oix_createAta, ...ixs, ...oix_closeWsol],
+        lookupTables: [...lookupTables]
+    };
 }

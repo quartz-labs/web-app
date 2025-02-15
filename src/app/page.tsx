@@ -19,6 +19,7 @@ import { useAccountStatusQuery, useWithdrawLimitsQuery, useBalancesQuery, useRat
 import { useProviderCardUserQuery, useQuartzCardUserQuery, useCardDetailsQuery, useProviderCardSpendableBalanceQuery } from "../utils/queries/internalApi.queries";
 import { ModalVariation } from "../types/enums/ModalVariation.enum";
 import { TxStatus, useTxStatus } from "../context/tx-status-provider";
+import UpgradeRequired from "../components/OtherViews/UpgradeRequired";
 
 export default function Page() {
   const wallet = useWallet();
@@ -129,11 +130,14 @@ export default function Page() {
               case AccountStatus.NO_BETA_KEY:
                 return <NoBetaKey />;
 
-              case AccountStatus.NOT_INITIALIZED:
-                return <Onboarding />;
+            case AccountStatus.NOT_INITIALIZED:
+              return <Onboarding />;
 
-              default:
-                return <Dashboard />;
+            case AccountStatus.UPGRADE_REQUIRED:
+              return <UpgradeRequired />;
+
+            default:
+              return <Dashboard />;
             }
           })()
         }

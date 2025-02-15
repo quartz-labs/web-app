@@ -102,6 +102,6 @@ async function makeWithdrawIxs(
     const walletAta = await getAssociatedTokenAddress(usdcMint, user.pubkey);
     const oix_createAta = await makeCreateAtaIxIfNeeded(connection, walletAta, user.pubkey, usdcMint, TOKEN_PROGRAM_ID);
 
-    const ix_withdraw = await user.makeWithdrawIx(amountBaseUnits, MARKET_INDEX_USDC, false);
-    return [...oix_createAta, ix_withdraw];
+    const { ixs: ix_withdraw } = await user.makeWithdrawIx(amountBaseUnits, MARKET_INDEX_USDC, false);
+    return [...oix_createAta, ...ix_withdraw];
 }

@@ -504,7 +504,7 @@
     snake-case "^3.0.4"
     spok "^1.4.3"
 
-"@mrgnlabs/marginfi-client-v2@4.0.4":
+"@mrgnlabs/marginfi-client-v2@4.0.4", "@mrgnlabs/marginfi-client-v2@^4.0.4":
   version "4.0.4"
   resolved "https://registry.yarnpkg.com/@mrgnlabs/marginfi-client-v2/-/marginfi-client-v2-4.0.4.tgz#cd9689dd35b50ab7c62693dbd3e87228156994b1"
   integrity sha512-3DYWfhh292LsgPEEvL3fbqmAj9AOkUVm2zh+3t9JDzqqHISQOKSgoD8+sI10NIhnf+0+yvdrwE3vRV75crcucg==
@@ -807,14 +807,15 @@
     bs58 "^5.0.0"
     jito-ts "^3.0.1"
 
-"@quartz-labs/sdk@0.5.0":
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/@quartz-labs/sdk/-/sdk-0.5.0.tgz#392af84d003fc4c65d279a66eeeaf83c6400794e"
-  integrity sha512-fRK6V+Jz/6AsXlQ1v7ydNrqGVPxAYDJzGmSGzesE2QrH5dXDeB119Zszj5EDLBv0YPio/+ChncsnsA8aXeTDCQ==
+"@quartz-labs/sdk@0.6.0":
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/@quartz-labs/sdk/-/sdk-0.6.0.tgz#22215ec012d3af0f53b570c27d304b9870e2bc6a"
+  integrity sha512-J2zIb8HLTH5/jTHm/Q+byBne3TlOI6nn+ejspqxxgzpWMBvR+qc+RsnNm7xSzGzu6MbMkprrn8/osFYRKZcdJA==
   dependencies:
     "@coral-xyz/anchor" "^0.29.0"
     "@drift-labs/sdk" "^2.103.0-beta.9"
     "@jup-ag/api" "6.0.30"
+    "@mrgnlabs/marginfi-client-v2" "^4.0.4"
     "@pythnetwork/pyth-solana-receiver" "^0.9.1"
     "@solana/spl-token" "^0.4.9"
     bn.js "^5.2.1"
@@ -1304,11 +1305,6 @@
   integrity sha512-K6uROf1LD88uDQqJCktA4yzL1YYAK6NgfsI0v/mTgyPKWsX1CnJ0XPSDhViejru1GcRkLWb8RlzFYJRqGUbaug==
   dependencies:
     "@types/node" "*"
-
-"@types/iso-3166-1-alpha-2@^1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@types/iso-3166-1-alpha-2/-/iso-3166-1-alpha-2-1.0.2.tgz#fef28eb5bcfe24e9cf6fc3700fb41c5b1e60c28e"
-  integrity sha512-TjGZDMSS7s5dG6uW2pJbFP5G4jJqHkVGJvLx0nG3gyOdk/ssNiiYR/yx4AxYLd3dbKz6uZrkRnDNZbkfeUmmmw==
 
 "@types/json5@^0.0.29":
   version "0.0.29"
@@ -3325,13 +3321,6 @@ isexe@^2.0.0:
   resolved "https://registry.yarnpkg.com/isexe/-/isexe-2.0.0.tgz#e8fbf374dc556ff8947a10dcb0572d633f2cfa10"
   integrity sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==
 
-iso-3166-1-alpha-2@^1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/iso-3166-1-alpha-2/-/iso-3166-1-alpha-2-1.0.2.tgz#48ff2176664c40da5071726a4b2322fd29b952dc"
-  integrity sha512-B9xyzPQIpVKJnEvVfjzgWA/P6c6tL6LqqxrR14NJaw2RpGtCMcyFYcwcJw6h/PYMTq7hAZp63oIhxqcfO90TRA==
-  dependencies:
-    mout "^1.2.4"
-
 isomorphic-ws@^4.0.1:
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/isomorphic-ws/-/isomorphic-ws-4.0.1.tgz#55fd4cd6c5e6491e76dc125938dd863f5cd4f2dc"
@@ -3638,11 +3627,6 @@ minimist@^1.2.0, minimist@^1.2.6:
   version "7.1.2"
   resolved "https://registry.yarnpkg.com/minipass/-/minipass-7.1.2.tgz#93a9626ce5e5e66bd4db86849e7515e92340a707"
   integrity sha512-qOOzS1cBTWYF4BH8fVePDBOO9iptMnGUEZwNc/cMWnTV2nVLZ7VoNWEPHkYczZA0pdoA7dl6e7FL659nX9S2aw==
-
-mout@^1.2.4:
-  version "1.2.4"
-  resolved "https://registry.yarnpkg.com/mout/-/mout-1.2.4.tgz#9ffd261c4d6509e7ebcbf6b641a89b36ecdf8155"
-  integrity sha512-mZb9uOruMWgn/fw28DG4/yE3Kehfk1zKCLhuDU2O3vlKdnBBr4XaOCqVTflJ5aODavGUPqFHZgrFX3NJVuxGhQ==
 
 ms@^2.0.0, ms@^2.1.1, ms@^2.1.3:
   version "2.1.3"

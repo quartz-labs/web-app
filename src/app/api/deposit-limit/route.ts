@@ -78,15 +78,16 @@ async function fetchMaxDepositLamports(pubkey: PublicKey, connection: Connection
     const user = await quartzClient.getQuartzAccount(pubkey);
     const balanceLamportsPromise = connection.getBalance(pubkey);
     const wSolAtaRentPromise = connection.getMinimumBalanceForRentExemption(AccountLayout.span);
-    const depositIxsPromise = makeDepositIxs(connection, pubkey, 1, marketIndexSol, user, false);
+    const depositPromise = makeDepositIxs(connection, pubkey, 1, marketIndexSol, user, false);
 
     const [
-        depositIxs,
+        deposit,
         blockhash
     ] = await Promise.all([
-        depositIxsPromise,
+        depositPromise,
         connection.getLatestBlockhash().then(res => res.blockhash)
     ]);
+    const { ixs: depositIxs } = deposit;
 
     const [
         computeUnitLimit, 
