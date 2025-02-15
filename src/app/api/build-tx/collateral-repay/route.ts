@@ -85,7 +85,7 @@ export async function GET(request: Request) {
 
     try {
         const {
-            instructions,
+            ixs,
             lookupTables,
             flashLoanAmountBaseUnits
         } = await makeCollateralRepayIxs(
@@ -103,7 +103,7 @@ export async function GET(request: Request) {
             address,
             flashLoanAmountBaseUnits,
             marketIndexCollateral,
-            instructions,
+            ixs,
             lookupTables
         );
 
@@ -127,7 +127,7 @@ async function makeCollateralRepayIxs(
     user: QuartzUser,
     swapMode: SwapMode
 ): Promise<{
-    instructions: TransactionInstruction[],
+    ixs: TransactionInstruction[],
     lookupTables: AddressLookupTableAccount[],
     flashLoanAmountBaseUnits: number
 }> {
@@ -139,17 +139,98 @@ async function makeCollateralRepayIxs(
     const jupiterQuote: QuoteResponse = await fetchAndParse(jupiterQuoteEndpoint);
     const collateralRequiredForSwap = Math.ceil(Number(jupiterQuote.inAmount) * (1 + (JUPITER_SLIPPAGE_BPS / 10_000)));
 
-    const { ixs: ixs_collateralRepay, lookupTables } = await user.makeCollateralRepayIxs(
+    const {
+        ix: jupiterIx,
+        lookupTables: jupiterLookupTables
+    } = await makeJupiterIx(connection, jupiterQuote, address);
+
+    const { 
+        ixs, 
+        lookupTables: quartzLookupTables 
+    } = await user.makeCollateralRepayIxs(
         address,
         marketIndexLoan,
         marketIndexCollateral,
-        jupiterQuote
+        jupiterIx
     );
 
     return {
-        instructions: ixs_collateralRepay,
-        lookupTables,
+        ixs,
+        lookupTables: [...jupiterLookupTables, ...quartzLookupTables],
         flashLoanAmountBaseUnits: collateralRequiredForSwap
+    };
+}
+
+async function makeJupiterIx(
+    connection: Connection,
+    jupiterQuote: QuoteResponse,
+    address: PublicKey
+): Promise<{
+    ix: TransactionInstruction,
+    lookupTables: AddressLookupTableAccount[]
+}> {
+    const instructions = await (
+        await fetch('https://api.jup.ag/swap/v1/swap-instructions', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            jupiterQuote,
+            userPublicKey: address.toBase58(),
+        })
+        })
+    ).json();
+    
+    if (instructions.error) {
+        throw new Error("Failed to get swap instructions: " + instructions.error);
+    }
+
+    const {
+        swapInstruction,
+        addressLookupTableAddresses
+    } = instructions;
+
+    const deserializeInstruction = (instruction: any) => {
+        return new TransactionInstruction({
+        programId: new PublicKey(instruction.programId),
+        keys: instruction.accounts.map((key: any) => ({
+            pubkey: new PublicKey(key.pubkey),
+            isSigner: key.isSigner,
+            isWritable: key.isWritable,
+        })),
+        data: Buffer.from(instruction.data, "base64"),
+        });
+    };
+    
+    const getAddressLookupTableAccounts = async (
+        keys: string[]
+    ): Promise<AddressLookupTableAccount[]> => {
+        const addressLookupTableAccountInfos =
+        await connection.getMultipleAccountsInfo(
+            keys.map((key) => new PublicKey(key))
+        );
+    
+        return addressLookupTableAccountInfos.reduce((acc, accountInfo, index) => {
+        const addressLookupTableAddress = keys[index];
+        if (accountInfo && addressLookupTableAddress) {
+            const addressLookupTableAccount = new AddressLookupTableAccount({
+            key: new PublicKey(addressLookupTableAddress),
+            state: AddressLookupTableAccount.deserialize(accountInfo.data),
+            });
+            acc.push(addressLookupTableAccount);
+        }
+    
+        return acc;
+        }, new Array<AddressLookupTableAccount>());
+    };
+    
+    const addressLookupTableAccounts = await getAddressLookupTableAccounts(addressLookupTableAddresses);
+
+
+    return {
+        ix: deserializeInstruction(swapInstruction),
+        lookupTables: addressLookupTableAccounts
     };
 }
 

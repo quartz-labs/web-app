@@ -1,6 +1,6 @@
 import { createCloseAccountInstruction, createSyncNativeInstruction, getAssociatedTokenAddress } from "@solana/spl-token";
 import { makeCreateAtaIxIfNeeded, getTokenProgram, QuartzUser, TOKENS, MarketIndex } from "@quartz-labs/sdk";
-import { Connection, PublicKey, TransactionInstruction, SystemProgram } from "@solana/web3.js";
+import { Connection, PublicKey, TransactionInstruction, SystemProgram, AddressLookupTableAccount } from "@solana/web3.js";
 import { getWsolMint } from "@/src/utils/helpers";
 
 export async function makeDepositIxs(
@@ -10,7 +10,10 @@ export async function makeDepositIxs(
     marketIndex: MarketIndex,
     user: QuartzUser,
     repayingLoan: boolean
-): Promise<TransactionInstruction[]> {
+): Promise<{
+    ixs: TransactionInstruction[],
+    lookupTables: AddressLookupTableAccount[],
+}> {
     const mint = TOKENS[marketIndex].mint;
     const mintTokenProgram = await getTokenProgram(connection, mint);
     const walletAta = await getAssociatedTokenAddress(mint, address, false, mintTokenProgram);
@@ -29,6 +32,13 @@ export async function makeDepositIxs(
         oix_closeWsol.push(createCloseAccountInstruction(walletAta, address, address));
     }
 
-    const ix_deposit = await user.makeDepositIx(amountBaseUnits, marketIndex, repayingLoan);
-    return [...oix_createAta, ...oix_wrapSol, ix_deposit, ...oix_closeWsol];
+    const {
+        ixs,
+        lookupTables,
+    } = await user.makeDepositIx(amountBaseUnits, marketIndex, repayingLoan);
+    
+    return {
+        ixs: [...oix_createAta, ...oix_wrapSol, ...ixs, ...oix_closeWsol],
+        lookupTables: [...lookupTables]
+    };
 }

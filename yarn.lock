@@ -444,7 +444,7 @@
   resolved "https://registry.yarnpkg.com/@js-sdsl/ordered-map/-/ordered-map-4.4.2.tgz#9299f82874bab9e4c7f9c48d865becbfe8d6907c"
   integrity sha512-iUKgm52T8HOE/makSxjqoWhe95ZJA1/G1sYsGev2JDKUSS14KAgg1LHb+Ba+IPow0xflbnSkOsZcO08C7w1gYw==
 
-"@jup-ag/api@6.0.30", "@jup-ag/api@^6.0.30":
+"@jup-ag/api@6.0.30":
   version "6.0.30"
   resolved "https://registry.yarnpkg.com/@jup-ag/api/-/api-6.0.30.tgz#1beb8876affb803bea8ff18a24259b48272a3cf2"
   integrity sha512-+LSo5yXR150kXg+iyVhNCSwK+PSL+MsB9Wvl930zgeeW0LWUTGyMhibz6wcqcViol+F0RMAVOYh6ryJYO1kkZw==
@@ -504,7 +504,7 @@
     snake-case "^3.0.4"
     spok "^1.4.3"
 
-"@mrgnlabs/marginfi-client-v2@4.0.4":
+"@mrgnlabs/marginfi-client-v2@4.0.4", "@mrgnlabs/marginfi-client-v2@^4.0.4":
   version "4.0.4"
   resolved "https://registry.yarnpkg.com/@mrgnlabs/marginfi-client-v2/-/marginfi-client-v2-4.0.4.tgz#cd9689dd35b50ab7c62693dbd3e87228156994b1"
   integrity sha512-3DYWfhh292LsgPEEvL3fbqmAj9AOkUVm2zh+3t9JDzqqHISQOKSgoD8+sI10NIhnf+0+yvdrwE3vRV75crcucg==
@@ -807,14 +807,15 @@
     bs58 "^5.0.0"
     jito-ts "^3.0.1"
 
-"@quartz-labs/sdk@0.4.1":
-  version "0.4.1"
-  resolved "https://registry.yarnpkg.com/@quartz-labs/sdk/-/sdk-0.4.1.tgz#6fac96f9fa134906ac8675384037d7ad52d5bc34"
-  integrity sha512-idoim1yJEnBWj9/lLW/fgwESw9321vRuXibXYg1uvrSDR72GT5gYE5rRY8LgZHLo8oAkXTshBFQT/99PHFksfQ==
+"@quartz-labs/sdk@0.6.0":
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/@quartz-labs/sdk/-/sdk-0.6.0.tgz#22215ec012d3af0f53b570c27d304b9870e2bc6a"
+  integrity sha512-J2zIb8HLTH5/jTHm/Q+byBne3TlOI6nn+ejspqxxgzpWMBvR+qc+RsnNm7xSzGzu6MbMkprrn8/osFYRKZcdJA==
   dependencies:
     "@coral-xyz/anchor" "^0.29.0"
     "@drift-labs/sdk" "^2.103.0-beta.9"
-    "@jup-ag/api" "^6.0.30"
+    "@jup-ag/api" "6.0.30"
+    "@mrgnlabs/marginfi-client-v2" "^4.0.4"
     "@pythnetwork/pyth-solana-receiver" "^0.9.1"
     "@solana/spl-token" "^0.4.9"
     bn.js "^5.2.1"

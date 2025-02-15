@@ -57,8 +57,14 @@ export async function GET(request: Request) {
     }
 
     try {
-        const instructions = await user.makeCloseAccountIxs();
-        const transaction = await buildTransaction(connection, instructions, address);
+        const { 
+            ixs,
+            lookupTables,
+            signers
+        } = await user.makeCloseAccountIxs();
+        const transaction = await buildTransaction(connection, ixs, address, lookupTables);
+        transaction.sign(signers);
+        
         const serializedTx = Buffer.from(transaction.serialize()).toString("base64");
         return NextResponse.json({ transaction: serializedTx });
     } catch (error) {

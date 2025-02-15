@@ -13,6 +13,7 @@ import { useStore } from "@/src/utils/store";
 import { useEffect } from 'react';
 import config from "@/src/config/config";
 import Unavailable from "@/src/components/OtherViews/Unavailable";
+import UpgradeRequired from "../components/OtherViews/UpgradeRequired";
 
 export default function Page() {
   const wallet = useWallet();
@@ -69,7 +70,10 @@ export default function Page() {
 
             case AccountStatus.NOT_INITIALIZED:
               return <Onboarding />;
-              
+
+            case AccountStatus.UPGRADE_REQUIRED:
+              return <UpgradeRequired />;
+
             default:
               return <Dashboard />;
             }

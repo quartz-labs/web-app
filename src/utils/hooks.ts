@@ -1,5 +1,4 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { useWallet } from "@solana/wallet-adapter-react";
 import { useCallback } from "react";
 
 export function useRefetchAccountData() {
@@ -26,7 +25,6 @@ export function useRefetchWithdrawLimits() {
 
 export function useRefetchAccountStatus() {
     const queryClient = useQueryClient();
-    const wallet = useWallet();
 
     return useCallback(async (signature?: string) => {
         if (signature) {
@@ -36,9 +34,6 @@ export function useRefetchAccountStatus() {
             } catch { }
         }
 
-        queryClient.invalidateQueries({
-          predicate: (query) => query.queryKey.includes(wallet.publicKey?.toBase58()), 
-          refetchType: "all" 
-        });
-    }, [queryClient, wallet.publicKey]);
+        queryClient.invalidateQueries({ queryKey: ["account-status"], refetchType: "all" });
+    }, [queryClient]);
 }
