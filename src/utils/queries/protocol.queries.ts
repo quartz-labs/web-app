@@ -129,7 +129,7 @@ export const useHealthQuery = (address: PublicKey | null) => {
 
     const query = createQuery<number>({
         queryKey: ["user", "health", address?.toBase58() ?? ""],
-        url: "https://api.quartzpay.io/user/health",
+        url: `${config.NEXT_PUBLIC_API_URL}/user/health`,
         params: address ? { 
             address: address.toBase58()
         } : undefined,
