@@ -807,10 +807,10 @@
     bs58 "^5.0.0"
     jito-ts "^3.0.1"
 
-"@quartz-labs/sdk@0.6.0":
-  version "0.6.0"
-  resolved "https://registry.yarnpkg.com/@quartz-labs/sdk/-/sdk-0.6.0.tgz#22215ec012d3af0f53b570c27d304b9870e2bc6a"
-  integrity sha512-J2zIb8HLTH5/jTHm/Q+byBne3TlOI6nn+ejspqxxgzpWMBvR+qc+RsnNm7xSzGzu6MbMkprrn8/osFYRKZcdJA==
+"@quartz-labs/sdk@0.6.1":
+  version "0.6.1"
+  resolved "https://registry.yarnpkg.com/@quartz-labs/sdk/-/sdk-0.6.1.tgz#97a6e39baabc0118c58f2b1a2038fa1f5fadae7b"
+  integrity sha512-sq8uK+JC3wscEZ/nY9QBjvKi6B7bxBsYOG2AzMq12HfwKrB5rfnopukvgN38JBt38MnYQ9swGSk+Lnqw66v7sw==
   dependencies:
     "@coral-xyz/anchor" "^0.29.0"
     "@drift-labs/sdk" "^2.103.0-beta.9"

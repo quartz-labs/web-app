@@ -5,7 +5,7 @@ import { AccountStatus } from "@/src/types/enums/AccountStatus.enum";
 import type { PublicKey } from "@solana/web3.js";
 import { DEFAULT_REFETCH_INTERVAL, JUPITER_SLIPPAGE_BPS } from "@/src/config/constants";
 import type { Rate } from "@/src/types/interfaces/Rate.interface";
-import { MarketIndex, TOKENS } from "@quartz-labs/sdk/browser";
+import { MarketIndex } from "@quartz-labs/sdk/browser";
 import config from "../config/config";
 import { buildEndpointURL } from "./helpers";
 import { SwapMode, type QuoteResponse } from "@jup-ag/api";
@@ -97,14 +97,6 @@ export const useAccountStatusQuery = (address: PublicKey | null) => {
 export const usePricesQuery = createQuery<Record<MarketIndex, number>>({
     queryKey: ["prices"],
     url: `${config.NEXT_PUBLIC_API_URL}/data/price`,
-    params: { ids: Object.values(TOKENS).map((token) => token.coingeckoPriceId).join(',') },
-    transformResponse: (body) => {
-        // Iterate through all tokens and map the marketIndex to the priceId
-        return Object.entries(TOKENS).reduce((acc, [marketIndex, token]) => {
-            acc[Number(marketIndex) as MarketIndex] = body[token.coingeckoPriceId];
-            return acc;
-        }, {} as Record<MarketIndex, number>);
-    },
     refetchInterval: DEFAULT_REFETCH_INTERVAL,
     errorMessage: "Could not fetch prices"
 });
