@@ -141,6 +141,21 @@ export const useWithdrawLimitsQuery = (address: PublicKey | null) => {
     return query();
 };
 
+export const useBorrowLimitsQuery = (address: PublicKey | null) => {
+    const query = createQuery<Record<MarketIndex, number>>({
+        queryKey: ["user", "borrow-limits", address?.toBase58() ?? ""],
+        url: `${config.NEXT_PUBLIC_API_URL}/user/borrow-limit`,
+        params: address ? { 
+            address: address.toBase58(),
+            marketIndices: MarketIndex.join(',')
+        } : undefined,
+        errorMessage: "Could not fetch borrow limits",
+        refetchInterval: DEFAULT_REFETCH_INTERVAL,
+        enabled: address != null,
+    });
+    return query();
+};
+
 export const useDepositLimitsQuery = (address: PublicKey | null, marketIndex: MarketIndex) => {
     const query = createQuery<number>({
         queryKey: ["user", "deposit-limits", address?.toBase58() ?? "", marketIndex.toString()],

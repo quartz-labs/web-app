@@ -8,7 +8,7 @@ import NoBetaKey from "@/src/components/OtherViews/NoBetaKey";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { AccountStatus } from "@/src/types/enums/AccountStatus.enum";
 import styles from "./page.module.css";
-import { useAccountStatusQuery, useBalancesQuery, useHealthQuery, usePricesQuery, useRatesQuery, useWithdrawLimitsQuery } from "@/src/utils/queries";
+import { useAccountStatusQuery, useBalancesQuery, useBorrowLimitsQuery, useHealthQuery, usePricesQuery, useRatesQuery, useWithdrawLimitsQuery } from "@/src/utils/queries";
 import { useStore } from "@/src/utils/store";
 import { useEffect } from 'react';
 import config from "@/src/config/config";
@@ -23,6 +23,7 @@ export default function Page() {
     setRates, 
     setBalances, 
     setWithdrawLimits, 
+    setBorrowLimits,
     setHealth
   } = useStore();
 
@@ -33,6 +34,7 @@ export default function Page() {
   const { data: rates } = useRatesQuery();
   const { data: balances } = useBalancesQuery(isInitialized ? wallet.publicKey : null);
   const { data: withdrawLimits } = useWithdrawLimitsQuery(isInitialized ? wallet.publicKey : null);
+  const { data: borrowLimits } = useBorrowLimitsQuery(isInitialized ? wallet.publicKey : null);
   const { data: health } = useHealthQuery(isInitialized ? wallet.publicKey : null);
 
   useEffect(() => {
@@ -40,11 +42,12 @@ export default function Page() {
     setRates(rates);
     setBalances(balances);
     setWithdrawLimits(withdrawLimits);
+    setBorrowLimits(borrowLimits);
     setHealth(health);
     setIsInitialized(isInitialized);
   }, [
-    isInitialized, prices, rates, balances, withdrawLimits, health, 
-    setPrices, setRates, setBalances, setWithdrawLimits, setHealth, setIsInitialized
+    isInitialized, prices, rates, balances, withdrawLimits, borrowLimits, health, 
+    setPrices, setRates, setBalances, setWithdrawLimits, setBorrowLimits, setHealth, setIsInitialized
   ]);
 
   return (
