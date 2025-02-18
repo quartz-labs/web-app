@@ -84,10 +84,6 @@ export const useWithdrawLimitsQuery = (address: PublicKey | null) => {
             address: address.toBase58(),
             marketIndices: MarketIndex.join(',')
         } : undefined,
-        transformResponse: (data: any) => {
-            console.log(data);
-            return data;
-        },
         errorMessage: "Could not fetch withdraw limits",
         refetchInterval: DEFAULT_REFETCH_INTERVAL,
         enabled: address != null,
@@ -106,10 +102,6 @@ export const useBorrowLimitsQuery = (address: PublicKey | null) => {
             address: address.toBase58(),
             marketIndices: MarketIndex.join(',')
         } : undefined,
-        transformResponse: (data: any) => {
-            console.log(data);
-            return data;
-        },
         errorMessage: "Could not fetch borrow limits",
         refetchInterval: DEFAULT_REFETCH_INTERVAL,
         enabled: address != null,
