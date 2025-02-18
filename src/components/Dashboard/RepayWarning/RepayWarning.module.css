@@ -1,0 +1,19 @@
+.repayWarning {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+
+    gap: 15px;
+    padding: 10px;
+    margin-bottom: 25px;
+
+    font-size: var(--font-size-p);
+    border-radius: 5px;
+    background: transparent;
+    border: 1.5px solid var(--placeholder-glass-stroke);
+}
+
+.repayWarning p {
+    color: var(--color-text-less-light);
+}

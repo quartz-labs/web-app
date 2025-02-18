@@ -1,6 +1,6 @@
 import { useStore } from "@/src/utils/store";
 import styles from "./Assets.module.css";
-import { generateAssetInfos } from "@/src/utils/helpers";
+import { calculateBalanceDollarValues, calculateBalances, formatDollarValue, generateAssetInfos } from "@/src/utils/helpers";
 import type { AssetInfo } from "@/src/types/interfaces/AssetInfo.interface";
 import AssetCard from "./AssetCard/AssetCard";
 import EmptyAssetCard from "./AssetCard/EmptyAssetCard";
@@ -11,6 +11,8 @@ export default function Assets() {
 
     const [suppliedAssets, setSuppliedAssets] = useState<AssetInfo[]>([]);
     const [borrowedAssets, setBorrowedAssets] = useState<AssetInfo[]>([]);
+    const [suppliedValue, setSuppliedValue] = useState<string>("0.00");
+    const [borrowedValue, setBorrowedValue] = useState<string>("0.00");
 
     useEffect(() => {
         if (!prices || !balances || !rates || !isInitialized) {
@@ -18,15 +20,25 @@ export default function Assets() {
             setBorrowedAssets([]);
             return;
         };
+        
         const assetInfos = generateAssetInfos(prices, balances, rates);
         setSuppliedAssets(assetInfos.suppliedAssets);
         setBorrowedAssets(assetInfos.borrowedAssets);
+
+        const balanceValues = calculateBalanceDollarValues(prices, balances);
+        const { collateralBalance, loanBalance } = calculateBalances(balanceValues);
+        setSuppliedValue(
+            formatDollarValue(collateralBalance, 2).join(".")
+        );
+        setBorrowedValue(
+            formatDollarValue(loanBalance, 2).join(".")
+        );
     }, [prices, balances, rates, isInitialized]);
 
     return (
         <>
             <div className={styles.listWrapper}>
-                <h3 className={styles.title}>Supplied</h3>
+                <h3 className={styles.title}>Supplied{isInitialized ? `: $${suppliedValue}` : ""}</h3>
                 <ul className={styles.assetList}>
                     {suppliedAssets.length > 0 &&
                         suppliedAssets.map((assetInfo) => (
@@ -40,7 +52,7 @@ export default function Assets() {
                 </ul>
             </div>
             <div className={styles.listWrapper}>
-                <h3 className={styles.title}>Borrowed</h3>
+                <h3 className={styles.title}>Borrowed{isInitialized ? `: $${borrowedValue}` : ""}</h3>
                 <ul className={styles.assetList}>
                     {borrowedAssets.length > 0 &&
                         borrowedAssets.map((assetInfo) => (

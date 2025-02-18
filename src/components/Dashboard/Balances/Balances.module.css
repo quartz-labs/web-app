@@ -6,9 +6,8 @@
     margin-bottom: 30px;
 }
 
-.detailBalances {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+.detailBalanceWrapper {
+    height: 100%;
 }
 
 @media only screen and (max-width: 580px) {

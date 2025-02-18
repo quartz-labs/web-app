@@ -186,8 +186,9 @@ a:hover {
   --color-background: #0B111D;
   --color-background-light: #0B111D33;
   --color-text: #ffffff;
-  --color-text-light: #ffffffA5;
-  --color-text-extra-light: #ffffff99;
+  --color-text-less-light: rgba(255, 255, 255, 0.8);
+  --color-text-light: rgba(255, 255, 255, 0.65);
+  --color-text-extra-light: rgba(255, 255, 255, 0.6);
   --color-error: #FF8080;
   --color-link-hover: #d8f3ff;
   --color-light-green: #DCFFEA;

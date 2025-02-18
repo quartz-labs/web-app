@@ -1,7 +1,7 @@
 import styles from "./Dashboard.module.css";
 import { useStore } from "@/src/utils/store";
 import Balances from "./Balances/Balances";
-import Health from "./Health/Health";
+import Health from "./RepayWarning/RepayWarning";
 import ButtonRow from "./ButtonRow/ButtonRow";
 import Assets from "./Assets/Assets";
 import Modal from "../Modal/Modal";
@@ -15,7 +15,7 @@ export default function Dashboard() {
 
       <div className={`glass panel ${styles.mainPanel}`}>
         <div className={styles.mainPanelContent}>
-          <h1 className={styles.title}>Balance</h1>
+          <h1 className={styles.title}>Available Credit</h1>
           <Balances />
         
           {isInitialized && (
