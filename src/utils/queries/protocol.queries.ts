@@ -1,4 +1,4 @@
-import { MarketIndex, TOKENS } from "@quartz-labs/sdk/browser";
+import { MarketIndex } from "@quartz-labs/sdk/browser";
 import { createQuery } from "./createQuery";
 import { AccountStatus } from "@/src/types/enums/AccountStatus.enum";
 import type { PublicKey } from "@solana/web3.js";
@@ -9,7 +9,7 @@ import { DEFAULT_REFETCH_INTERVAL } from "@/src/config/constants";
 
 export const useAccountStatusQuery = (address: PublicKey | null) => {
     const query = createQuery<AccountStatus>({
-        queryKey: ["account-status", address?.toBase58() ?? ""],
+        queryKey: ["account-status"],
         url: "/api/account-status",
         params: address ? {
             wallet: address.toBase58()
@@ -33,14 +33,6 @@ export const usePricesQuery = () => {
     const query = createQuery<Record<MarketIndex, number>>({
         queryKey: ["prices"],
         url: `${config.NEXT_PUBLIC_API_URL}/data/price`,
-        params: { ids: Object.values(TOKENS).map((token) => token.coingeckoPriceId).join(',') },
-        transformResponse: (body: any) => {
-            // Iterate through all tokens and map the marketIndex to the priceId
-            return Object.entries(TOKENS).reduce((acc, [marketIndex, token]) => {
-                acc[Number(marketIndex) as MarketIndex] = body[token.coingeckoPriceId];
-                return acc;
-            }, {} as Record<MarketIndex, number>);
-        },
         refetchInterval: DEFAULT_REFETCH_INTERVAL,
         errorMessage: "Could not fetch prices",
         onSuccess: (data) => setPrices(data)
@@ -55,8 +47,8 @@ export const useRatesQuery = () => {
         queryKey: ["rates"],
         url: `${config.NEXT_PUBLIC_API_URL}/user/rate`,
         params: { 
-        marketIndices: MarketIndex.join(',') 
-    },
+            marketIndices: MarketIndex.join(',') 
+        },
         refetchInterval: DEFAULT_REFETCH_INTERVAL,
         errorMessage: "Could not fetch rates",
         onSuccess: (data) => setRates(data)
@@ -68,7 +60,7 @@ export const useBalancesQuery = (address: PublicKey | null) => {
     const { setBalances } = useStore();
 
     const query = createQuery<Record<MarketIndex, number>>({
-        queryKey: ["user", "balances", address?.toBase58() ?? ""],
+        queryKey: ["user", "balances"],
         url: `${config.NEXT_PUBLIC_API_URL}/user/balance`,
         params: address ? { 
             address: address.toBase58(),
@@ -86,7 +78,7 @@ export const useWithdrawLimitsQuery = (address: PublicKey | null) => {
     const { setWithdrawLimits } = useStore();
 
     const query = createQuery<Record<MarketIndex, number>>({
-        queryKey: ["user", "withdraw-limits", address?.toBase58() ?? ""],
+        queryKey: ["user", "withdraw-limits"],
         url: `${config.NEXT_PUBLIC_API_URL}/user/withdraw-limit`,
         params: address ? { 
             address: address.toBase58(),
@@ -102,7 +94,7 @@ export const useWithdrawLimitsQuery = (address: PublicKey | null) => {
 
 export const useDepositLimitsQuery = (address: PublicKey | null, marketIndex: MarketIndex) => {
     const query = createQuery<number>({
-        queryKey: ["user", "deposit-limits", address?.toBase58() ?? "", marketIndex.toString()],
+        queryKey: ["user", "deposit-limits", marketIndex.toString()],
         url: "/api/deposit-limit",
         params: address ? { 
             address: address.toBase58(),
