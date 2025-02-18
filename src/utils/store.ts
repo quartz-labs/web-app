@@ -13,6 +13,7 @@ type State = {
   rates?: Record<MarketIndex, Rate>;
   balances?: Record<MarketIndex, number>;
   withdrawLimits?: Record<MarketIndex, number>;
+  borrowLimits?: Record<MarketIndex, number>;
   health?: number;
   modalVariation: ModalVariation;
   jwtToken?: JwtToken;
@@ -31,6 +32,7 @@ type Action = {
   setRates: (rates?: Record<MarketIndex, Rate>) => void;
   setBalances: (balances?: Record<MarketIndex, number>) => void;
   setWithdrawLimits: (withdrawLimits?: Record<MarketIndex, number>) => void;
+  setBorrowLimits: (borrowLimits?: Record<MarketIndex, number>) => void;
   setHealth: (health?: number) => void;
   setModalVariation: (modalVariation: ModalVariation) => void;
   setJwtToken: (jwtToken?: JwtToken) => void;
@@ -49,6 +51,7 @@ export const useStore = create<State & Action>((set) => ({
   rates: undefined,
   balances: undefined,
   withdrawLimits: undefined,
+  borrowLimits: undefined,
   health: undefined,
   modalVariation: ModalVariation.DISABLED,
   jwtToken: undefined,
@@ -65,6 +68,7 @@ export const useStore = create<State & Action>((set) => ({
   setRates: (rates?: Record<MarketIndex, Rate>) => set({ rates }),
   setBalances: (balances?: Record<MarketIndex, number>) => set({ balances }),
   setWithdrawLimits: (withdrawLimits?: Record<MarketIndex, number>) => set({ withdrawLimits }),
+  setBorrowLimits: (borrowLimits?: Record<MarketIndex, number>) => set({ borrowLimits }),
   setHealth: (health?: number) => set({ health }),
   setModalVariation: (modalVariation: ModalVariation) => set({ modalVariation }),
   setJwtToken: (jwtToken?: JwtToken) => set({ jwtToken }),

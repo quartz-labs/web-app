@@ -15,7 +15,7 @@ import Unavailable from "@/src/components/OtherViews/Unavailable";
 import { useRefetchCardUser } from "../utils/hooks";
 import { AuthLevel } from "../types/enums/AuthLevel.enum";
 import { fetchAndParse } from "../utils/helpers";
-import { useAccountStatusQuery, useWithdrawLimitsQuery, useBalancesQuery, useRatesQuery, usePricesQuery, useHealthQuery } from "../utils/queries/protocol.queries";
+import { useAccountStatusQuery, useWithdrawLimitsQuery, useBalancesQuery, useRatesQuery, usePricesQuery, useHealthQuery, useBorrowLimitsQuery } from "../utils/queries/protocol.queries";
 import { useProviderCardUserQuery, useQuartzCardUserQuery, useCardDetailsQuery, useProviderCardSpendableBalanceQuery } from "../utils/queries/internalApi.queries";
 import { ModalVariation } from "../types/enums/ModalVariation.enum";
 import { TxStatus, useTxStatus } from "../context/tx-status-provider";
@@ -41,6 +41,7 @@ export default function Page() {
   useRatesQuery();
   useBalancesQuery(isInitialized ? wallet.publicKey : null);
   useWithdrawLimitsQuery(isInitialized ? wallet.publicKey : null);
+  useBorrowLimitsQuery(isInitialized ? wallet.publicKey : null);
   useHealthQuery(isInitialized ? wallet.publicKey : null);
   
 

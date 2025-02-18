@@ -37,6 +37,7 @@ export default function WithdrawModal() {
 
     useEffect(() => {
         refetchAccountData();
+        refetchWithdrawLimits();
         
         const interval = setInterval(refetchWithdrawLimits, 3_000);
         return () => clearInterval(interval);

@@ -31,6 +31,14 @@ export function useRefetchWithdrawLimits() {
     }, [queryClient]);
 }
 
+export function useRefetchBorrowLimits() {
+    const queryClient = useQueryClient();
+
+    return useCallback(async () => {
+        queryClient.invalidateQueries({ queryKey: ["user", "borrow-limits"], refetchType: "all" });
+    }, [queryClient]);
+}
+
 export function useRefetchAccountStatus() {
     const queryClient = useQueryClient();
 

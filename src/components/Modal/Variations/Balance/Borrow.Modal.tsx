@@ -1,5 +1,5 @@
 import { validateAmount, fetchAndParse, deserializeTransaction, signAndSendTransaction, buildEndpointURL, formatPreciseDecimal, generateAssetInfos } from "@/src/utils/helpers";
-import { useRefetchAccountData, useRefetchWithdrawLimits } from "@/src/utils/hooks";
+import { useRefetchAccountData, useRefetchBorrowLimits } from "@/src/utils/hooks";
 import { useStore } from "@/src/utils/store";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useEffect, useState } from "react";
@@ -17,11 +17,11 @@ import type { AssetInfo } from "@/src/types/interfaces/AssetInfo.interface";
 export default function BorrowModal() {
     const wallet = useAnchorWallet();
 
-    const { prices, balances, rates, withdrawLimits, setModalVariation } = useStore();
+    const { prices, balances, rates, borrowLimits, setModalVariation } = useStore();
     const { showError } = useError();
     const { showTxStatus } = useTxStatus();
     const refetchAccountData = useRefetchAccountData();
-    const refetchWithdrawLimits = useRefetchWithdrawLimits();
+    const refetchBorrowLimits = useRefetchBorrowLimits();
 
     const [awaitingSign, setAwaitingSign] = useState(false);
     const [errorText, setErrorText] = useState("");
@@ -57,15 +57,16 @@ export default function BorrowModal() {
 
     useEffect(() => {
         refetchAccountData();
+        refetchBorrowLimits();
         
-        const interval = setInterval(refetchWithdrawLimits, 3_000);
+        const interval = setInterval(refetchBorrowLimits, 3_000);
         return () => clearInterval(interval);
-    }, [refetchAccountData, refetchWithdrawLimits]);
+    }, [refetchAccountData, refetchBorrowLimits]);
 
     const balance = balances?.[marketIndex] ?? 0;
-    const maxBorrowBaseUnits = withdrawLimits?.[marketIndex] ?? 0;
+    const maxBorrowBaseUnits = borrowLimits?.[marketIndex] ?? 0;
 
-    const isLessThanWithdrawLimit = (amountDecimals !== 0 && decimalToBaseUnit(amountDecimals, marketIndex) <= balance);
+    const isLessThanBorrowLimit = (amountDecimals !== 0 && decimalToBaseUnit(amountDecimals, marketIndex) <= balance);
 
     const handleConfirm = async () => {
         if (!wallet?.publicKey) return setErrorText("Wallet not connected");
@@ -120,7 +121,7 @@ export default function BorrowModal() {
                 selectableMarketIndices={selectableMarketIndices}
             />
 
-            {isLessThanWithdrawLimit && 
+            {isLessThanBorrowLimit && 
                 <div className={styles.messageTextWrapper}>
                     <p className={"light-text small-text"}>The selected amount is less than your balance and will result in a withdrawal, <span className="no-wrap">not a borrow.</span></p>
                 </div>
