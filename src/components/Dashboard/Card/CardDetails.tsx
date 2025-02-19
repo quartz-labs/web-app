@@ -197,7 +197,7 @@ export default function CardDetails() {
                 />  
 
                 <div className={styles.balance}>
-                    <p>Balance:</p>
+                    <p>Credit Loaded on Card:</p>
 
                     <div className={styles.topUpWrapper}>
                         {topupPending && (
