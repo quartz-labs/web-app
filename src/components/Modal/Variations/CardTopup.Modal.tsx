@@ -10,13 +10,13 @@ import { useError } from "@/src/context/error-provider";
 import { captureError } from "@/src/utils/errors";
 import { TxStatus, useTxStatus } from "@/src/context/tx-status-provider";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
-import { baseUnitToDecimal, decimalToBaseUnit, MarketIndex } from "@quartz-labs/sdk/browser";
+import { baseUnitToDecimal, decimalToBaseUnit, MARKET_INDEX_USDC } from "@quartz-labs/sdk/browser";
 import config from "@/src/config/config";
 
 export default function CardTopupModal() {
     const wallet = useAnchorWallet();
 
-    const { prices, rates, withdrawLimits, setModalVariation, jwtToken, quartzCardUser, cardDetails } = useStore();
+    const { prices, rates, borrowLimits, setModalVariation, jwtToken, quartzCardUser, cardDetails } = useStore();
     const { showError } = useError();
     const { showTxStatus } = useTxStatus();
     const refetchAccountData = useRefetchAccountData();
@@ -27,12 +27,11 @@ export default function CardTopupModal() {
     const [amountStr, setAmountStr] = useState("");
     const amountDecimals = Number(amountStr);
 
-    const marketIndex = 0 as MarketIndex; // USDC topup only
     const CHARACTER_LIMIT = 20;
-    const value = prices?.[marketIndex] ? prices?.[marketIndex] * Number(amountStr) : undefined;
-    const rate = rates?.[marketIndex]?.borrowRate ? rates?.[marketIndex]?.borrowRate * 100 : undefined;
-    const maxBorrowBaseUnits = withdrawLimits?.[marketIndex] ?? 0;
-    const available = baseUnitToDecimal(maxBorrowBaseUnits, marketIndex);
+    const value = prices?.[MARKET_INDEX_USDC] ? prices?.[MARKET_INDEX_USDC] * Number(amountStr) : undefined;
+    const rate = rates?.[MARKET_INDEX_USDC]?.borrowRate ? rates?.[MARKET_INDEX_USDC]?.borrowRate * 100 : undefined;
+    const maxBorrowBaseUnits = borrowLimits?.[MARKET_INDEX_USDC] ?? 0;
+    const available = baseUnitToDecimal(maxBorrowBaseUnits, MARKET_INDEX_USDC);
     
     useEffect(() => {
         refetchAccountData();
@@ -47,7 +46,7 @@ export default function CardTopupModal() {
         if (!quartzCardUser?.card_api_user_id) return setErrorText("Card user not found");
         if (!cardDetails?.id) return setErrorText("Card not found");
 
-        const errorText = validateAmount(marketIndex, amountDecimals, maxBorrowBaseUnits);
+        const errorText = validateAmount(MARKET_INDEX_USDC, amountDecimals, maxBorrowBaseUnits);
         setErrorText(errorText);
         if (errorText) return;
 
@@ -55,7 +54,7 @@ export default function CardTopupModal() {
         try {
             const topupEndpoint = buildEndpointURL("/api/build-tx/top-up-card", {
                 address: wallet.publicKey.toBase58(),
-                amountBaseUnits: decimalToBaseUnit(amountDecimals, marketIndex)
+                amountBaseUnits: decimalToBaseUnit(amountDecimals, MARKET_INDEX_USDC)
             });
             const topupResponse = await fetchAndParse(topupEndpoint);
             const topupTransaction = deserializeTransaction(topupResponse.transaction);
@@ -130,7 +129,7 @@ export default function CardTopupModal() {
                     <div className={styles.amount}>
                         <button className={`glass-button ghost ${styles.balanceButton}`} onClick={() => {
                             setAmountStr(
-                                maxBorrowBaseUnits ? formatPreciseDecimal(baseUnitToDecimal(Math.trunc(maxBorrowBaseUnits / 2), marketIndex)) : "0"
+                                maxBorrowBaseUnits ? formatPreciseDecimal(baseUnitToDecimal(Math.trunc(maxBorrowBaseUnits / 2), MARKET_INDEX_USDC)) : "0"
                             )
                         }}>
                             Half
@@ -138,7 +137,7 @@ export default function CardTopupModal() {
 
                         <button className={`glass-button ghost ${styles.balanceButton}`} onClick={() => {
                             setAmountStr(
-                                maxBorrowBaseUnits ? formatPreciseDecimal(baseUnitToDecimal(maxBorrowBaseUnits, marketIndex)) : "0"
+                                maxBorrowBaseUnits ? formatPreciseDecimal(baseUnitToDecimal(maxBorrowBaseUnits, MARKET_INDEX_USDC)) : "0"
                             )
                         }}>
                             Max
