@@ -3,15 +3,13 @@ import { useState } from "react";
 import styles from "./Balances.module.css";
 import { calculateBalances, calculateBalanceDollarValues, calculateRateChanges, plusOrMinus, formatDollarValue } from "@/src/utils/helpers";
 import { useStore } from "@/src/utils/store";
+import { baseUnitToDecimal, MARKET_INDEX_USDC } from "@quartz-labs/sdk";
 
 export default function Balances() {
-    const { isInitialized, prices, balances, rates } = useStore(); 
+    const { isInitialized, prices, balances, rates, borrowLimits } = useStore(); 
 
-    const [netBalance, setNetBalance] = useState<[string, string]>(["0", "00"]);
-    const [loanBalance, setLoanBalance] = useState<[string, string]>(["0", "00"]);
     const [collateralBalance, setCollateralBalance] = useState<[string, string]>(["0", "00"]);
     const [netRate, setNetRate] = useState<number>(0);
-    const [loanRate, setLoanRate] = useState<number>(0);
     const [collateralRate, setCollateralRate] = useState<number>(0);
 
     const displayBalances = isInitialized && prices !== undefined && balances !== undefined;
@@ -20,17 +18,20 @@ export default function Balances() {
         if (!balances || !prices) return;
         const balanceValues = calculateBalanceDollarValues(prices, balances);
 
-        const { collateralBalance, loanBalance, netBalance } = calculateBalances(balanceValues);
+        const { collateralBalance } = calculateBalances(balanceValues);
         setCollateralBalance(formatDollarValue(collateralBalance, 2));
-        setLoanBalance(formatDollarValue(loanBalance, 2));
-        setNetBalance(formatDollarValue(netBalance, 2));
 
         if (!rates) return;
-        const { netRate, loanRate, collateralRate } = calculateRateChanges(balanceValues, rates);
+        const { netRate, collateralRate } = calculateRateChanges(balanceValues, rates);
         setNetRate(netRate);
-        setLoanRate(loanRate);
         setCollateralRate(collateralRate);
     }, [prices, balances, rates]);
+
+    const usdcBorrowLimitBaseUnits = borrowLimits?.[MARKET_INDEX_USDC] ?? 0;
+    const availableCredit = formatDollarValue(
+        baseUnitToDecimal(usdcBorrowLimitBaseUnits, MARKET_INDEX_USDC),
+        2
+    );
 
     const netRateClass = netRate > 0 
         ? styles.netRatePositive 
@@ -44,7 +45,7 @@ export default function Balances() {
                 {displayBalances && (
                     <>
                         <p className={styles.netBalance}>
-                            ${netBalance[0]}<span className={styles.netBalanceDecimal}>.{netBalance[1]}</span>
+                            ${availableCredit[0]}<span className={styles.netBalanceDecimal}>.{availableCredit[1]}</span>
                         </p>
                         {rates !== undefined && (
                             <p className={`${styles.rateHeight} ${netRateClass}`}>{plusOrMinus(netRate, "$")} /day</p>
@@ -58,48 +59,25 @@ export default function Balances() {
                 )}
             </div>
 
-            <div className={styles.detailBalances}>
-                <div>
-                    <h2 className={styles.detailBalanceTitle}>Loans</h2>
-                    {displayBalances && (
-                        <>
-                            <p className={styles.detailBalance}>    
-                                ${loanBalance[0]}<span className={styles.detailBalanceDecimal}>.{loanBalance[1]}</span>
-                            </p>
-                            {rates !== undefined && (
-                                <p className={`${styles.detailBalanceRate} ${styles.rateHeight}`}>{plusOrMinus(loanRate, "$")} /day</p>
-                            )}
-                        </>
-                    )}
-                    {!displayBalances && (
-                        <>
-                            <p className={`${styles.detailBalance} ${styles.notInitialized}`}>
-                                $--<span className={styles.detailBalanceDecimal}>.--</span>
-                            </p>
-                        </>
-                    )}
-                </div>
-
-                <div>
-                    <h2 className={styles.detailBalanceTitle}>Total Collateral</h2>
-                    {displayBalances && (
-                        <>
-                            <p className={styles.detailBalance}>
-                                ${collateralBalance[0]}<span className={styles.detailBalanceDecimal}>.{collateralBalance[1]}</span>
-                            </p>
-                            {rates !== undefined && (
-                                <p className={`${styles.detailBalanceRate} ${styles.rateHeight}`}>{plusOrMinus(collateralRate, "$")} /day</p>
-                            )}
-                        </>
-                    )}
-                    {!displayBalances && (
-                        <>
-                            <p className={`${styles.detailBalance} ${styles.notInitialized}`}>
-                                $--<span className={styles.detailBalanceDecimal}>.--</span>
-                            </p>
-                        </>
-                    )}
-                </div>
+            <div className={styles.detailBalanceWrapper}>
+                <h2 className={styles.detailBalanceTitle}>Total Collateral</h2>
+                {displayBalances && (
+                    <>
+                        <p className={styles.detailBalance}>
+                            ${collateralBalance[0]}<span className={styles.detailBalanceDecimal}>.{collateralBalance[1]}</span>
+                        </p>
+                        {rates !== undefined && (
+                            <p className={`${styles.detailBalanceRate} ${styles.rateHeight}`}>{plusOrMinus(collateralRate, "$")} /day</p>
+                        )}
+                    </>
+                )}
+                {!displayBalances && (
+                    <>
+                        <p className={`${styles.detailBalance} ${styles.notInitialized}`}>
+                            $--<span className={styles.detailBalanceDecimal}>.--</span>
+                        </p>
+                    </>
+                )}
             </div>
         </div>
     );
