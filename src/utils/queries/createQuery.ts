@@ -1,6 +1,6 @@
 import { useError } from "@/src/context/error-provider";
 import { buildEndpointURL } from "../helpers";
-import { captureError } from "../errors";
+import { captureError } from "@/src/utils/errors";
 import { useQuery } from "@tanstack/react-query";
 
 interface QueryConfig<T> {

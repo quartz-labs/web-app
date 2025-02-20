@@ -34,18 +34,14 @@ export async function GET(request: Request) {
         const quartzClient = await QuartzClient.fetchClient(connection);
         const user = await quartzClient.getQuartzAccount(pubkey);
         const currentSlot = await connection.getSlot();
-
-        const timeframe = user.timeframeInSlots;
-
-        const spendLimitTransactionCents = user.spendLimitPerTransaction.div(new BN(10_000));
         
-        const spendLimitTimeframe = getTimeframeLimit(user, new BN(currentSlot))
-        const spendLimitTimeframeCents = spendLimitTimeframe.div(new BN(10_000));
+        const spendLimitTImeframeRemaining = getRemainingTimeframeLimit(user, new BN(currentSlot));
 
         return NextResponse.json({
-            timeframe: timeframe.toNumber(),
-            spendLimitTransactionCents: spendLimitTransactionCents.toNumber(),
-            spendLimitTimeframeCents: spendLimitTimeframeCents.toNumber(),
+            timeframe: user.timeframeInSlots.toNumber(),
+            spendLimitTransactionBaseUnits: user.spendLimitPerTransaction.toNumber(),
+            spendLimitTimeframeBaseUnits: user.spendLimitPerTimeframe.toNumber(),
+            spendLimitTimeframeRemainingBaseUnits: spendLimitTImeframeRemaining.toNumber()
         });
     } catch (error) {
         console.error(error);
@@ -56,7 +52,7 @@ export async function GET(request: Request) {
     }
 }
 
-function getTimeframeLimit(
+function getRemainingTimeframeLimit(
     quartzUser: QuartzUser,
     currentSlot: BN
 ) {

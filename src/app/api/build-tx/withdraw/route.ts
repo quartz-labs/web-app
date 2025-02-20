@@ -32,6 +32,7 @@ const paramsSchema = z.object({
         (value: number) => MarketIndex.includes(value as MarketIndex),
         { message: "marketIndex must be a valid market index" }
     ),
+    useMaxAmount: z.boolean().optional().default(false),
 });
 
 export async function GET(request: Request) {
@@ -50,7 +51,8 @@ export async function GET(request: Request) {
         address: searchParams.get('address'),
         amountBaseUnits: Number(searchParams.get('amountBaseUnits')),
         marketIndex: Number(searchParams.get('marketIndex')),
-        allowLoan: searchParams.get('allowLoan') === 'true'
+        allowLoan: searchParams.get('allowLoan') === 'true',
+        useMaxAmount: searchParams.get('useMaxAmount') === 'true',
     };
 
     let body: z.infer<typeof paramsSchema>;
@@ -62,9 +64,10 @@ export async function GET(request: Request) {
 
     const connection = new Connection(env.RPC_URL);
     const address = new PublicKey(body.address);
-    const amountBaseUnits = body.amountBaseUnits;
+    let amountBaseUnits = body.amountBaseUnits;
     const allowLoan = body.allowLoan;
     const marketIndex = body.marketIndex as MarketIndex;
+    const useMaxAmount = body.useMaxAmount;
 
     const quartzClient = await QuartzClient.fetchClient(connection);
     let user: QuartzUser;
@@ -75,6 +78,10 @@ export async function GET(request: Request) {
     }
 
     try {
+        if (useMaxAmount) {
+            amountBaseUnits = await user.getWithdrawalLimit(marketIndex, !allowLoan);
+        }
+
         const {
             ixs,
             lookupTables

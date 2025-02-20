@@ -22,8 +22,9 @@ type State = {
   quartzCardUser?: QuartzCardUser;
   providerCardUser?: ProviderCardUser;
   cardDetails?: CardsForUserResponse;
-  spendLimitTransactionCents?: number;
-  spendLimitTimeframeCents?: number;
+  spendLimitTransactionBaseUnits?: number;
+  spendLimitTimeframeBaseUnits?: number;
+  spendLimitTimeframeRemainingBaseUnits?: number;
   spendLimitTimeframeLength?: number;
 };
 
@@ -42,8 +43,9 @@ type Action = {
   setQuartzCardUser: (quartzCardUser?: QuartzCardUser) => void;
   setProviderCardUser: (providerCardUser?: ProviderCardUser) => void;
   setCardDetails: (cardDetails?: CardsForUserResponse) => void;
-  setSpendLimitTransactionCents: (spendLimitTransaction?: number) => void;
-  setSpendLimitTimeframeCents: (spendLimitTimeframe?: number) => void;
+  setSpendLimitTransactionBaseUnits: (spendLimitTransaction?: number) => void;
+  setSpendLimitTimeframeBaseUnits: (spendLimitTimeframe?: number) => void;
+  setSpendLimitTimeframeRemainingBaseUnits: (spendLimitTimeframeRemaining?: number) => void;
   setSpendLimitTimeframeLength: (timeframe?: number) => void;
 }
 
@@ -62,8 +64,9 @@ export const useStore = create<State & Action>((set) => ({
   quartzCardUser: undefined,
   providerCardUser: undefined,
   cardDetails: undefined,
-  spendLimitTransactionCents: undefined,
-  spendLimitTimeframeCents: undefined,
+  spendLimitTransactionBaseUnits: undefined,
+  spendLimitTimeframeBaseUnits: undefined,
+  spendLimitTimeframeRemainingBaseUnits: undefined,
   spendLimitTimeframeLength: undefined,
 
   setIsInitialized: (isInitialized: boolean) => set({ isInitialized }),
@@ -80,7 +83,8 @@ export const useStore = create<State & Action>((set) => ({
   setQuartzCardUser: (quartzCardUser?: QuartzCardUser) => set({ quartzCardUser }),
   setProviderCardUser: (providerCardUser?: ProviderCardUser) => set({ providerCardUser }),
   setCardDetails: (cardDetails?: CardsForUserResponse) => set({ cardDetails }),
-  setSpendLimitTransactionCents: (spendLimitTransaction?: number) => set({ spendLimitTransactionCents: spendLimitTransaction }),
-  setSpendLimitTimeframeCents: (spendLimitTimeframe?: number) => set({ spendLimitTimeframeCents: spendLimitTimeframe }),
+  setSpendLimitTransactionBaseUnits: (spendLimitTransaction?: number) => set({ spendLimitTransactionBaseUnits: spendLimitTransaction }),
+  setSpendLimitTimeframeBaseUnits: (spendLimitTimeframe?: number) => set({ spendLimitTimeframeBaseUnits: spendLimitTimeframe }),
+  setSpendLimitTimeframeRemainingBaseUnits: (spendLimitTimeframeRemaining?: number) => set({ spendLimitTimeframeRemainingBaseUnits: spendLimitTimeframeRemaining }),
   setSpendLimitTimeframeLength: (timeframe?: number) => set({ spendLimitTimeframeLength: timeframe }),
 }));

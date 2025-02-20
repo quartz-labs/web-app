@@ -68,6 +68,16 @@ export default function BorrowModal() {
 
     const isLessThanBorrowLimit = (amountDecimals !== 0 && decimalToBaseUnit(amountDecimals, marketIndex) <= balance);
 
+    const [useMaxAmount, setUseMaxAmount] = useState(false);
+    useEffect(() => {
+        if (useMaxAmount) {
+            setAmountStr(
+                maxBorrowBaseUnits ? formatPreciseDecimal(baseUnitToDecimal(maxBorrowBaseUnits, marketIndex)) : "0"
+            );
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [useMaxAmount, maxBorrowBaseUnits]);
+
     const handleConfirm = async () => {
         if (!wallet?.publicKey) return setErrorText("Wallet not connected");
 
@@ -81,7 +91,8 @@ export default function BorrowModal() {
                 address: wallet.publicKey.toBase58(),
                 allowLoan: true,
                 amountBaseUnits: decimalToBaseUnit(amountDecimals, marketIndex),
-                marketIndex
+                marketIndex,
+                useMaxAmount,
             });
             const response = await fetchAndParse(endpoint, undefined, 3);
             const transaction = deserializeTransaction(response.transaction);
@@ -109,10 +120,11 @@ export default function BorrowModal() {
                 rate={rates?.[marketIndex]?.borrowRate}
                 available={baseUnitToDecimal(maxBorrowBaseUnits, marketIndex)}
                 amountStr={amountStr}
-                setAmountStr={setAmountStr}
-                setMaxAmount={() => setAmountStr(
-                    maxBorrowBaseUnits ? formatPreciseDecimal(baseUnitToDecimal(maxBorrowBaseUnits, marketIndex)) : "0"
-                )}
+                setAmountStr={(value: string) => {
+                    setUseMaxAmount(false);
+                    setAmountStr(value);
+                }}
+                setMaxAmount={() => setUseMaxAmount(true)}
                 setHalfAmount={() => setAmountStr(
                     maxBorrowBaseUnits ? formatPreciseDecimal(baseUnitToDecimal(Math.trunc(maxBorrowBaseUnits / 2), marketIndex)) : "0"
                 )}

@@ -6,6 +6,7 @@ import { Connection, PublicKey } from '@solana/web3.js';
 import { MarketIndex, QuartzClient, QuartzUser } from '@quartz-labs/sdk';
 import { buildTransaction } from '@/src/utils/helpers';
 import { makeDepositIxs } from '../../_utils/utils.server';
+import { DUST_BUFFER_BASE_UNITS } from '@/src/config/constants';
 
 const envSchema = z.object({
     RPC_URL: z.string().url(),
@@ -32,6 +33,7 @@ const paramsSchema = z.object({
         (value) => MarketIndex.includes(value as any),
         { message: "marketIndex must be a valid market index" }
     ),
+    useMaxAmount: z.boolean().optional().default(false),
 });
 
 export async function GET(request: Request) {
@@ -50,7 +52,8 @@ export async function GET(request: Request) {
         address: searchParams.get('address'),
         amountBaseUnits: Number(searchParams.get('amountBaseUnits')),
         repayingLoan: searchParams.get('repayingLoan') === 'true',
-        marketIndex: Number(searchParams.get('marketIndex'))
+        marketIndex: Number(searchParams.get('marketIndex')),
+        useMaxAmount: searchParams.get('useMaxAmount') === 'true',
     };
 
     let body: z.infer<typeof paramsSchema>;
@@ -62,10 +65,10 @@ export async function GET(request: Request) {
 
     const connection = new Connection(env.RPC_URL);
     const address = new PublicKey(body.address);
-    const amountBaseUnits = body.amountBaseUnits;
+    let amountBaseUnits = body.amountBaseUnits;
     const marketIndex = body.marketIndex as MarketIndex;
     const repayingLoan = body.repayingLoan;
-
+    const useMaxAmount = body.useMaxAmount;
     const quartzClient = await QuartzClient.fetchClient(connection);
     let user: QuartzUser;
     try {
@@ -75,6 +78,11 @@ export async function GET(request: Request) {
     }
 
     try {
+        if (useMaxAmount && repayingLoan) {
+            amountBaseUnits = await user.getTokenBalance(marketIndex).then(Number).then(Math.abs);
+            amountBaseUnits += DUST_BUFFER_BASE_UNITS;
+        }
+
         const { 
             ixs,
             lookupTables

@@ -48,6 +48,16 @@ export default function WithdrawModal() {
         ? Math.min(collateralBalance, withdrawLimits?.[marketIndex] ?? 0)
         : 0;
 
+    const [useMaxAmount, setUseMaxAmount] = useState(false);
+    useEffect(() => {
+        if (useMaxAmount) {
+            setAmountStr(
+                maxWithdrawBaseUnits ? formatPreciseDecimal(baseUnitToDecimal(maxWithdrawBaseUnits, marketIndex)) : "0"
+            );
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [useMaxAmount, maxWithdrawBaseUnits]);
+
     const handleConfirm = async () => {
         if (!wallet?.publicKey) return setErrorText("Wallet not connected");
 
@@ -61,7 +71,8 @@ export default function WithdrawModal() {
                 address: wallet.publicKey.toBase58(),
                 allowLoan: false,
                 amountBaseUnits: decimalToBaseUnit(amountDecimals, marketIndex),
-                marketIndex
+                marketIndex,
+                useMaxAmount,
             });
             const response = await fetchAndParse(endpoint, undefined, 3);
             const transaction = deserializeTransaction(response.transaction);
@@ -89,10 +100,11 @@ export default function WithdrawModal() {
                 rate={rates?.[marketIndex]?.borrowRate}
                 available={baseUnitToDecimal(maxWithdrawBaseUnits, marketIndex)}
                 amountStr={amountStr}
-                setAmountStr={setAmountStr}
-                setMaxAmount={() => setAmountStr(
-                    maxWithdrawBaseUnits ? formatPreciseDecimal(baseUnitToDecimal(maxWithdrawBaseUnits, marketIndex)) : "0"
-                )}
+                setAmountStr={(value: string) => {
+                    setUseMaxAmount(false);
+                    setAmountStr(value);
+                }}
+                setMaxAmount={() => setUseMaxAmount(true)}
                 setHalfAmount={() => setAmountStr(
                     maxWithdrawBaseUnits ? formatPreciseDecimal(baseUnitToDecimal(Math.trunc(maxWithdrawBaseUnits / 2), marketIndex)) : "0"
                 )}

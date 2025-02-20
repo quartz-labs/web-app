@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { AddressLookupTableAccount, Connection, PublicKey, TransactionInstruction, VersionedTransaction } from '@solana/web3.js';
 import { baseUnitToDecimal, MarketIndex, QuartzClient, TOKENS, DummyWallet, QuartzUser, getTokenProgram, makeCreateAtaIxIfNeeded } from '@quartz-labs/sdk';
 import { fetchAndParse, getComputeUnitPriceIx } from '@/src/utils/helpers';
-import { JUPITER_SLIPPAGE_BPS } from '@/src/config/constants';
+import { DUST_BUFFER_BASE_UNITS, JUPITER_SLIPPAGE_BPS } from '@/src/config/constants';
 import { getConfig as getMarginfiConfig, MarginfiClient } from '@mrgnlabs/marginfi-client-v2';
 import { SwapMode, type QuoteResponse } from '@jup-ag/api';
 import { createCloseAccountInstruction, getAssociatedTokenAddress } from '@solana/spl-token';
@@ -39,6 +39,7 @@ const paramsSchema = z.object({
         { message: "marketIndexCollateral must be a valid market index" }
     ),
     swapMode: z.nativeEnum(SwapMode),
+    useMaxAmount: z.boolean().optional().default(false),
 });
 
 export async function GET(request: Request) {
@@ -58,7 +59,8 @@ export async function GET(request: Request) {
         amountSwapBaseUnits: Number(searchParams.get('amountSwapBaseUnits')),
         marketIndexLoan: Number(searchParams.get('marketIndexLoan')),
         marketIndexCollateral: Number(searchParams.get('marketIndexCollateral')),
-        swapMode: searchParams.get('swapMode')
+        swapMode: searchParams.get('swapMode'),
+        useMaxAmount: searchParams.get('useMaxAmount') === 'true',
     };
 
     let body: z.infer<typeof paramsSchema>;
@@ -70,10 +72,11 @@ export async function GET(request: Request) {
 
     const connection = new Connection(env.RPC_URL);
     const address = new PublicKey(body.address);
-    const amountSwapBaseUnits = body.amountSwapBaseUnits;
+    let amountSwapBaseUnits = body.amountSwapBaseUnits;
     const marketIndexLoan = body.marketIndexLoan as MarketIndex;
     const marketIndexCollateral = body.marketIndexCollateral as MarketIndex;
     const swapMode = body.swapMode;
+    const useMaxAmount = body.useMaxAmount;
 
     const quartzClient = await QuartzClient.fetchClient(connection);
     let user: QuartzUser;
@@ -84,6 +87,11 @@ export async function GET(request: Request) {
     }
 
     try {
+        if (useMaxAmount) {
+            amountSwapBaseUnits = await user.getTokenBalance(marketIndexLoan).then(Number).then(Math.abs);
+            amountSwapBaseUnits += DUST_BUFFER_BASE_UNITS;
+        }
+
         const {
             ixs,
             lookupTables,
@@ -161,7 +169,7 @@ async function makeCollateralRepayIxs(
     };
 }
 
-async function makeJupiterIx(
+export async function makeJupiterIx(
     connection: Connection,
     jupiterQuote: QuoteResponse,
     address: PublicKey
@@ -171,19 +179,20 @@ async function makeJupiterIx(
 }> {
     const instructions = await (
         await fetch('https://api.jup.ag/swap/v1/swap-instructions', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            jupiterQuote,
-            userPublicKey: address.toBase58(),
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                quoteResponse: jupiterQuote,
+                userPublicKey: address.toBase58(),
+            })
         })
-        })
-    ).json();
+        // biome-ignore lint: Allow any for Jupiter API response
+    ).json() as any;
     
     if (instructions.error) {
-        throw new Error("Failed to get swap instructions: " + instructions.error);
+        throw new Error(`Failed to get swap instructions: ${instructions.error}`);
     }
 
     const {
@@ -191,15 +200,17 @@ async function makeJupiterIx(
         addressLookupTableAddresses
     } = instructions;
 
+    // biome-ignore lint: Allow any for Jupiter API response
     const deserializeInstruction = (instruction: any) => {
         return new TransactionInstruction({
-        programId: new PublicKey(instruction.programId),
-        keys: instruction.accounts.map((key: any) => ({
-            pubkey: new PublicKey(key.pubkey),
-            isSigner: key.isSigner,
-            isWritable: key.isWritable,
-        })),
-        data: Buffer.from(instruction.data, "base64"),
+            programId: new PublicKey(instruction.programId),
+            // biome-ignore lint: Allow any for Jupiter API response
+            keys: instruction.accounts.map((key: any) => ({
+                pubkey: new PublicKey(key.pubkey),
+                isSigner: key.isSigner,
+                isWritable: key.isWritable,
+            })),
+            data: Buffer.from(instruction.data, "base64"),
         });
     };
     

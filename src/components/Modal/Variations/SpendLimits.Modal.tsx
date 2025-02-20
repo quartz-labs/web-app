@@ -12,6 +12,7 @@ import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
 import { captureError } from "@/src/utils/errors";
 import Buttons from "../Components/Buttons.ModalComponent";
 import { timeframeToDisplay, displayToTimeframe, SpendLimitTimeframe, SpendLimitTimeframeDisplay } from "@/src/types/enums/SpendLimitTimeframe.enum";
+import { baseUnitToDecimal, decimalToBaseUnit, MARKET_INDEX_USDC } from "@quartz-labs/sdk";
 
 export default function SpendLimitsModal() {
     const wallet = useAnchorWallet();
@@ -20,7 +21,7 @@ export default function SpendLimitsModal() {
 
     const { 
         setModalVariation,
-        spendLimitTimeframeCents,
+        spendLimitTimeframeBaseUnits,
         spendLimitTimeframeLength
     } = useStore();
     const refetchSpendLimits = useRefetchSpendLimits();
@@ -29,7 +30,9 @@ export default function SpendLimitsModal() {
     const [errorText, setErrorText] = useState("");
 
     
-    let existingSpendLimitDollars = spendLimitTimeframeCents ? spendLimitTimeframeCents / 100 : 0;
+    let existingSpendLimitDollars = spendLimitTimeframeBaseUnits 
+        ? baseUnitToDecimal(spendLimitTimeframeBaseUnits, MARKET_INDEX_USDC) 
+        : 0;
     if (spendLimitTimeframeLength === 0) existingSpendLimitDollars = 0; // If timeframe is 0, limit is 0
 
     const [newLimitTimeframeDollarsStr, setNewLimitTimeframeDollarsStr] = useState<string>(
@@ -53,14 +56,14 @@ export default function SpendLimitsModal() {
         if (Number.isNaN(limitTimeframeDollarsNum)) return setErrorText("Invalid spend limit");
         if (limitTimeframeDollarsNum < 0) return setErrorText("Spend limit cannot be negative");
 
-        const limitTimeframeCents = Math.trunc(limitTimeframeDollarsNum * 100);
+        const limitTimeframeBaseUnits = decimalToBaseUnit(limitTimeframeDollarsNum, MARKET_INDEX_USDC);
 
         setAwaitingSign(true);
         try {
             const endpoint = buildEndpointURL("/api/build-tx/adjust-spend-limits", {
                 address: wallet.publicKey.toBase58(),
-                spendLimitTransactionCents: DEFAULT_CARD_TRANSACTION_LIMIT.toNumber(),
-                spendLimitTimeframeCents: limitTimeframeCents,
+                spendLimitTransactionBaseUnits: DEFAULT_CARD_TRANSACTION_LIMIT.toNumber(),
+                spendLimitTimeframeBaseUnits: limitTimeframeBaseUnits,
                 spendLimitTimeframe: newLimitTimeframeLength
             });
             const response = await fetchAndParse(endpoint, undefined, 3);

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import styles from "../../Modal.module.css";
 import { useError } from "@/src/context/error-provider";
@@ -36,6 +36,16 @@ export default function RepayWithWallet({
         Math.abs(balances?.[marketIndexLoan] ?? 0)
     );
 
+    const [useMaxAmount, setUseMaxAmount] = useState(false);
+    useEffect(() => {
+        if (useMaxAmount) {
+            setAmountLoanStr(
+                maxRepayBaseUnits ? formatPreciseDecimal(baseUnitToDecimal(maxRepayBaseUnits, marketIndexLoan)) : "0"
+            );
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [useMaxAmount, maxRepayBaseUnits]);
+
     const handleConfirm = async () => {
         if (!wallet?.publicKey) return setErrorText("Wallet not connected");
         
@@ -49,7 +59,8 @@ export default function RepayWithWallet({
                 address: wallet.publicKey.toBase58(),
                 amountBaseUnits: decimalToBaseUnit(amountDecimals, marketIndexLoan),
                 repayingLoan: true,
-                marketIndex: marketIndexLoan
+                marketIndex: marketIndexLoan,
+                useMaxAmount,
             });
             const response = await fetchAndParse(endpoint, undefined, 3);
             const transaction = deserializeTransaction(response.transaction);
@@ -78,10 +89,11 @@ export default function RepayWithWallet({
                 rate={rates?.[marketIndexLoan]?.borrowRate}
                 available={baseUnitToDecimal(maxRepayBaseUnits, marketIndexLoan)}
                 amountStr={amountLoanStr}
-                setAmountStr={setAmountLoanStr}
-                setMaxAmount={() => setAmountLoanStr(
-                    maxRepayBaseUnits ? formatPreciseDecimal(baseUnitToDecimal(maxRepayBaseUnits, marketIndexLoan)) : "0"
-                )}
+                setAmountStr={(value: string) => {
+                    setUseMaxAmount(false);
+                    setAmountLoanStr(value);
+                }}
+                setMaxAmount={() => setUseMaxAmount(true)}
                 setHalfAmount={() => setAmountLoanStr(
                     maxRepayBaseUnits ? formatPreciseDecimal(baseUnitToDecimal(Math.trunc(maxRepayBaseUnits / 2), marketIndexLoan)) : "0"
                 )}

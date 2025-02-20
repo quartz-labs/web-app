@@ -22,13 +22,13 @@ const paramsSchema = z.object({
         },
         { message: "Address is not a valid public key" }
     ),
-    spendLimitTransactionCents: z.number().refine(
+    spendLimitTransactionBaseUnits: z.number().refine(
         Number.isInteger,
-        { message: "spendLimitTransactionCents must be an integer" }
-    ),
-    spendLimitTimeframeCents: z.number().refine(
+        { message: "spendLimitTransactionBaseUnits must be an integer" }
+    ),  
+    spendLimitTimeframeBaseUnits: z.number().refine(
         Number.isInteger,
-        { message: "spendLimitTimeframeCents must be an integer" }
+        { message: "spendLimitTimeframeBaseUnits must be an integer" }
     ),
     spendLimitTimeframe: z.number().refine(
         Number.isInteger,
@@ -50,8 +50,8 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const params = {
         address: searchParams.get('address'),
-        spendLimitTransactionCents: Number(searchParams.get('spendLimitTransactionCents')),
-        spendLimitTimeframeCents: Number(searchParams.get('spendLimitTimeframeCents')),
+        spendLimitTransactionBaseUnits: Number(searchParams.get('spendLimitTransactionBaseUnits')),
+        spendLimitTimeframeBaseUnits: Number(searchParams.get('spendLimitTimeframeBaseUnits')),
         spendLimitTimeframe: Number(searchParams.get('spendLimitTimeframe')),
     };
 
@@ -64,8 +64,8 @@ export async function GET(request: Request) {
 
     const connection = new Connection(env.RPC_URL);
     const address = new PublicKey(body.address);
-    const spendLimitTransactionCents = body.spendLimitTransactionCents;
-    const spendLimitTimeframeCents = body.spendLimitTimeframeCents;
+    const spendLimitTransactionBaseUnits = body.spendLimitTransactionBaseUnits;
+    const spendLimitTimeframeBaseUnits = body.spendLimitTimeframeBaseUnits;
     const spendLimitTimeframe = body.spendLimitTimeframe;
 
     const quartzClient = await QuartzClient.fetchClient(connection);
@@ -82,10 +82,14 @@ export async function GET(request: Request) {
             lookupTables,
             signers
         } = await user.makeAdjustSpendLimitsIxs(
-            new BN(spendLimitTransactionCents),
-            new BN(spendLimitTimeframeCents),
+            new BN(spendLimitTransactionBaseUnits),
+            new BN(spendLimitTimeframeBaseUnits),
             new BN(spendLimitTimeframe)
         );
+
+        console.log("spendLimitTransactionBaseUnits: ", spendLimitTransactionBaseUnits);
+        console.log("spendLimitTimeframeBaseUnits: ", spendLimitTimeframeBaseUnits);
+        console.log("spendLimitTimeframe: ", spendLimitTimeframe);
 
         const transaction = await buildTransaction(connection, ixs, address, lookupTables);
         transaction.sign(signers);

@@ -13,3 +13,5 @@ export const DEFAULT_CARD_TIMEFRAME = new BN(0);
 const SLOT_LENGTH_MS = 400;
 const MS_PER_DAY = 1_000 * 60 * 60 * 24;
 export const SLOTS_PER_DAY = MS_PER_DAY / SLOT_LENGTH_MS;
+
+export const DUST_BUFFER_BASE_UNITS = 100;

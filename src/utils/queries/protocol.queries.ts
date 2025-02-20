@@ -125,24 +125,32 @@ export const useDepositLimitsQuery = (address: PublicKey | null, marketIndex: Ma
 };
 
 export const useSpendLimitQuery = (address: PublicKey | null) => {
-    const { setSpendLimitTransactionCents, setSpendLimitTimeframeCents, setSpendLimitTimeframeLength: setTimeframe } = useStore();
+    const { 
+        setSpendLimitTransactionBaseUnits, 
+        setSpendLimitTimeframeBaseUnits, 
+        setSpendLimitTimeframeRemainingBaseUnits, 
+        setSpendLimitTimeframeLength
+    } = useStore();
 
     const query = createQuery<{
-        spendLimitTransactionCents: number;
-        spendLimitTimeframeCents: number;
+        spendLimitTransactionBaseUnits: number;
+        spendLimitTimeframeBaseUnits: number;
+        spendLimitTimeframeRemainingBaseUnits: number;
         timeframe: number;
     }>({
-        queryKey: ["user", "spend-limit"],
-        url: "/api/spend-limit",
+        queryKey: ["user", "spend-limits"],
+        url: "/api/get-spend-limits",
         params: address ? { 
             address: address.toBase58(),
         } : undefined,
         enabled: address != null,
         errorMessage: "Could not fetch spend limits",
         onSuccess: (data) => {
-            setSpendLimitTransactionCents(data.spendLimitTransactionCents);
-            setSpendLimitTimeframeCents(data.spendLimitTimeframeCents);
-            setTimeframe(data.timeframe);
+            console.log(data);
+            setSpendLimitTransactionBaseUnits(data.spendLimitTransactionBaseUnits);
+            setSpendLimitTimeframeBaseUnits(data.spendLimitTimeframeBaseUnits);
+            setSpendLimitTimeframeRemainingBaseUnits(data.spendLimitTimeframeRemainingBaseUnits);
+            setSpendLimitTimeframeLength(data.timeframe);
         }
     });
     return query();
