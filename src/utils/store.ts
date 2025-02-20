@@ -22,8 +22,6 @@ type State = {
   quartzCardUser?: QuartzCardUser;
   providerCardUser?: ProviderCardUser;
   cardDetails?: CardsForUserResponse;
-  topupPending: boolean;
-  spendableBalance?: number;
   spendLimitTransactionCents?: number;
   spendLimitTimeframeCents?: number;
   timeframe?: number;
@@ -44,8 +42,6 @@ type Action = {
   setQuartzCardUser: (quartzCardUser?: QuartzCardUser) => void;
   setProviderCardUser: (providerCardUser?: ProviderCardUser) => void;
   setCardDetails: (cardDetails?: CardsForUserResponse) => void;
-  setTopupPending: (topupPending: boolean) => void;
-  setSpendableBalance: (spendableBalance?: number) => void;
   setSpendLimitTransactionCents: (spendLimitTransaction?: number) => void;
   setSpendLimitTimeframeCents: (spendLimitTimeframe?: number) => void;
   setTimeframe: (timeframe?: number) => void;
@@ -66,8 +62,6 @@ export const useStore = create<State & Action>((set) => ({
   quartzCardUser: undefined,
   providerCardUser: undefined,
   cardDetails: undefined,
-  topupPending: false,
-  spendableBalance: undefined,
   spendLimitTransactionCents: undefined,
   spendLimitTimeframeCents: undefined,
   timeframe: undefined,
@@ -86,8 +80,6 @@ export const useStore = create<State & Action>((set) => ({
   setQuartzCardUser: (quartzCardUser?: QuartzCardUser) => set({ quartzCardUser }),
   setProviderCardUser: (providerCardUser?: ProviderCardUser) => set({ providerCardUser }),
   setCardDetails: (cardDetails?: CardsForUserResponse) => set({ cardDetails }),
-  setTopupPending: (topupPending: boolean) => set({ topupPending }),
-  setSpendableBalance: (spendableBalance?: number) => set({ spendableBalance }),
   setSpendLimitTransactionCents: (spendLimitTransaction?: number) => set({ spendLimitTransactionCents: spendLimitTransaction }),
   setSpendLimitTimeframeCents: (spendLimitTimeframe?: number) => set({ spendLimitTimeframeCents: spendLimitTimeframe }),
   setTimeframe: (timeframe?: number) => set({ timeframe }),

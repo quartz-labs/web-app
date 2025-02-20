@@ -9,6 +9,5 @@ export enum ModalVariation {
     CLOSE_ACCOUNT = "CLOSE_ACCOUNT",
     CARD_SIGNUP = "CARD_SIGNUP",
     CARD_KYC = "CARD_KYC",
-    CARD_TOPUP = "CARD_TOPUP",
     ACCEPT_TANDCS = "ACCEPT_TANDCS"
 }

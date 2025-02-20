@@ -1,9 +1,30 @@
+.assetsWrapper {
+    margin-top: 60px;
+}
+
+.assetsGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+}
+
+@media (max-width: 1300px) {
+    .assetsGrid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+}
+
 .listWrapper {
     margin-top: 26px;
     width: 100%;
 }
 
 .title {
+    font-size: var(--font-size-h3);
+}
+
+.subtitle {
     font-size: var(--font-size-p);
     color: var(--color-text-light);
 }

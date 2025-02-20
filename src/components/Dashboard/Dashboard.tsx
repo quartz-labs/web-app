@@ -6,16 +6,23 @@ import ButtonRow from "./ButtonRow/ButtonRow";
 import Assets from "./Assets/Assets";
 import Modal from "../Modal/Modal";
 import CardDetails from "./Card/CardDetails";
-import { formatDollarValue } from "@/src/utils/helpers";
 
 export default function Dashboard() {
-  const { isInitialized, spendLimitTransactionCents, spendLimitTimeframeCents, timeframe } = useStore();
+  const { isInitialized } = useStore();
 
-  const spendLimitTransactionDollars = spendLimitTransactionCents ? spendLimitTransactionCents / 100 : 0;
-  const spendLimitTimeframeDollars = spendLimitTimeframeCents ? spendLimitTimeframeCents / 100 : 0;
+  // const spendLimitTransactionDollars = spendLimitTransactionCents ? spendLimitTransactionCents / 100 : 0;
+  // const spendLimitTimeframeDollars = spendLimitTimeframeCents ? spendLimitTimeframeCents / 100 : 0;
 
-  const slotsPerHour = Math.trunc(2.5 * 60 * 60);
-  const timeframeInHours = timeframe ? Math.trunc(timeframe / slotsPerHour) : 0;
+  // const slotsPerHour = Math.trunc(2.5 * 60 * 60);
+  // const timeframeInHours = timeframe ? Math.trunc(timeframe / slotsPerHour) : 0;
+
+  
+  // <div>
+  //   <h2>Spend Limit</h2>
+  //   <p>Transaction Limit: ${formatDollarValue(spendLimitTransactionDollars, 2)[0]}</p>
+  //   <p>Timeframe Limit: ${formatDollarValue(spendLimitTimeframeDollars, 2)[0]}</p>
+  //   <p>Timeframe (hours): {timeframeInHours}</p>
+  // </div>
 
   return (
     <>
@@ -30,12 +37,7 @@ export default function Dashboard() {
             <>
               <Health />
               <ButtonRow />
-              <div>
-                <h2>Spend Limit</h2>
-                <p>Transaction Limit: ${formatDollarValue(spendLimitTransactionDollars, 2)[0]}</p>
-                <p>Timeframe Limit: ${formatDollarValue(spendLimitTimeframeDollars, 2)[0]}</p>
-                <p>Timeframe (hours): {timeframeInHours}</p>
-              </div>
+              <Assets />
             </>
           )}
 
@@ -50,9 +52,6 @@ export default function Dashboard() {
           {isInitialized && (
             <CardDetails />
           )}
-
-          <h2 className={styles.title}>Assets</h2>
-          <Assets />
         </div>
       </div>
     </>

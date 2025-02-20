@@ -16,9 +16,7 @@ export default function CardDetails() {
         jwtToken,
         cardDetails,
         providerCardUser,
-        isSigningLoginMessage,
-        topupPending,
-        spendableBalance
+        isSigningLoginMessage
     } = useStore();
     const openKycLink = useOpenKycLink();
 
@@ -185,9 +183,6 @@ export default function CardDetails() {
         )
     }
 
-    const spendableBalanceDisplay = (spendableBalance === undefined) 
-            ? undefined 
-            : (spendableBalance / 100).toFixed(2);
     return (
         <div className={styles.cardWrapper}>
             <div className={styles.cardContainer}>
@@ -196,32 +191,7 @@ export default function CardDetails() {
                     pan={cardPan}
                 />  
 
-                <div className={styles.balance}>
-                    <p>Credit Loaded on Card:</p>
-
-                    <div className={styles.topUpWrapper}>
-                        {topupPending && (
-                            <TailSpin
-                                height="18.5"
-                                width="18.5"
-                                color="#ffffffA5"
-                                ariaLabel="loading-spinner"
-                                wrapperStyle={{
-                                    width: "25px"
-                                }}
-                            />
-                        )}
-                        <p>{(spendableBalanceDisplay === undefined) ? "Unavailable" : `$${spendableBalanceDisplay}`}</p>
-                    </div>
-                </div>
-
                 <div className={styles.buttonsRow}>
-                    <button
-                        className={`glass-button ${styles.cardButton}`}
-                        onClick={() => setModalVariation(ModalVariation.CARD_TOPUP)}
-                    >
-                        Top Up Card
-                    </button>
                     <button
                         className={`glass-button ${styles.cardButton}`}
                         onClick={() => swapCardDetailsVisibility()}

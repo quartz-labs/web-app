@@ -36,35 +36,39 @@ export default function Assets() {
     }, [prices, balances, rates, isInitialized]);
 
     return (
-        <>
-            <div className={styles.listWrapper}>
-                <h3 className={styles.title}>Supplied{isInitialized ? `: $${suppliedValue}` : ""}</h3>
-                <ul className={styles.assetList}>
-                    {suppliedAssets.length > 0 &&
-                        suppliedAssets.map((assetInfo) => (
-                            <AssetCard key={assetInfo.marketIndex} assetInfo={assetInfo} />
-                        ))
-                    }
+        <div className={styles.assetsWrapper}>
+            <h2 className={styles.title}>Assets</h2>
 
-                    {suppliedAssets.length === 0 && (
-                        <EmptyAssetCard category="supplied" />
-                    )}
-                </ul>
-            </div>
-            <div className={styles.listWrapper}>
-                <h3 className={styles.title}>Borrowed{isInitialized ? `: $${borrowedValue}` : ""}</h3>
-                <ul className={styles.assetList}>
-                    {borrowedAssets.length > 0 &&
-                        borrowedAssets.map((assetInfo) => (
-                            <AssetCard key={assetInfo.marketIndex} assetInfo={assetInfo} />
-                        ))
-                    }
+            <div className={styles.assetsGrid}>
+                <div className={styles.listWrapper}>
+                    <h3 className={styles.subtitle}>Supplied{isInitialized ? `: $${suppliedValue}` : ""}</h3>
+                    <ul className={styles.assetList}>
+                        {suppliedAssets.length > 0 &&
+                            suppliedAssets.map((assetInfo) => (
+                                <AssetCard key={assetInfo.marketIndex} assetInfo={assetInfo} />
+                            ))
+                        }
 
-                    {borrowedAssets.length === 0 && (
-                        <EmptyAssetCard category="borrowed" />
-                    )}
-                </ul>
+                        {suppliedAssets.length === 0 && (
+                            <EmptyAssetCard category="supplied" />
+                        )}
+                    </ul>
+                </div>
+                <div className={styles.listWrapper}>
+                    <h3 className={styles.subtitle}>Borrowed{isInitialized ? `: $${borrowedValue}` : ""}</h3>
+                    <ul className={styles.assetList}>
+                        {borrowedAssets.length > 0 &&
+                            borrowedAssets.map((assetInfo) => (
+                                <AssetCard key={assetInfo.marketIndex} assetInfo={assetInfo} />
+                            ))
+                        }
+
+                        {borrowedAssets.length === 0 && (
+                            <EmptyAssetCard category="borrowed" />
+                        )}
+                    </ul>
+                </div>
             </div>
-        </>
+        </div>
     );
 }

@@ -16,15 +16,13 @@ import { useRefetchCardUser } from "../utils/hooks";
 import { AuthLevel } from "../types/enums/AuthLevel.enum";
 import { fetchAndParse } from "../utils/helpers";
 import { useAccountStatusQuery, useWithdrawLimitsQuery, useBalancesQuery, useRatesQuery, usePricesQuery, useHealthQuery, useBorrowLimitsQuery, useSpendLimitQuery } from "../utils/queries/protocol.queries";
-import { useProviderCardUserQuery, useQuartzCardUserQuery, useCardDetailsQuery, useProviderCardSpendableBalanceQuery } from "../utils/queries/internalApi.queries";
+import { useProviderCardUserQuery, useQuartzCardUserQuery, useCardDetailsQuery } from "../utils/queries/internalApi.queries";
 import { ModalVariation } from "../types/enums/ModalVariation.enum";
-import { TxStatus, useTxStatus } from "../context/tx-status-provider";
 import UpgradeRequired from "../components/OtherViews/UpgradeRequired";
 
 export default function Page() {
   const wallet = useWallet();
-  const { setIsInitialized, jwtToken, cardDetails, setModalVariation, topupPending, setTopupPending } = useStore();
-  const { props: txStatusProps } = useTxStatus();
+  const { setIsInitialized, jwtToken, setModalVariation } = useStore();
   const refetchCardUser = useRefetchCardUser();
 
 
@@ -46,19 +44,8 @@ export default function Page() {
   useSpendLimitQuery(isInitialized ? wallet.publicKey : null);
   
 
-  // Quartz Card User data
-  const { data: quartzCardUser } = useQuartzCardUserQuery(
-    isInitialized ? wallet.publicKey : null,
-    isInitialized && topupPending && txStatusProps?.status !== TxStatus.TOPUP_PROCESSING
-  );
-  useEffect(() => {
-    const txStatusPending = txStatusProps?.status === TxStatus.TOPUP_PROCESSING;
-    const displayPendingInBalance = (quartzCardUser?.topup_pending ?? false) && !txStatusPending;
-    setTopupPending(displayPendingInBalance);
-  }, [quartzCardUser?.topup_pending, setTopupPending, txStatusProps?.status]);
-
-
-  // Provider Card User data
+  // Card data
+  const { data: quartzCardUser } = useQuartzCardUserQuery(isInitialized ? wallet.publicKey : null);
   const { data: providerCardUser } = useProviderCardUserQuery(
     quartzCardUser?.card_api_user_id ?? null,
     isInitialized && (quartzCardUser?.auth_level === AuthLevel.BASE || quartzCardUser?.auth_level === AuthLevel.KYC_PENDING)
@@ -66,11 +53,6 @@ export default function Page() {
   useCardDetailsQuery(
     quartzCardUser?.card_api_user_id ?? null,
     isInitialized && quartzCardUser?.auth_level === AuthLevel.CARD
-  );
-  useProviderCardSpendableBalanceQuery(
-    quartzCardUser?.card_api_user_id ?? null,
-    cardDetails?.id ?? null,
-    isInitialized && (quartzCardUser?.auth_level === AuthLevel.CARD)
   );
 
 
