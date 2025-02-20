@@ -194,6 +194,12 @@ export default function CardDetails() {
                 <div className={styles.buttonsRow}>
                     <button
                         className={`glass-button ${styles.cardButton}`}
+                        onClick={() => setModalVariation(ModalVariation.SPEND_LIMITS)}
+                    >
+                        Spend Limits
+                    </button>
+                    <button
+                        className={`glass-button ${styles.cardButton}`}
                         onClick={() => swapCardDetailsVisibility()}
                     >
                         {loadingDetails &&

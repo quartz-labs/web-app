@@ -53,19 +53,6 @@ export default function TxStatusPopup() {
 
                 refetchAccountData(signature);
                 if (body.success) {
-                    if (props.status === TxStatus.TOPUP_SENT && props.topupPromise !== undefined) {
-                        setStatus(TxStatus.TOPUP_PROCESSING);
-                        try {
-                            await props.topupPromise;
-                            refetchCardUser();
-                        } catch {
-                            refetchCardUser();
-                            setStatus(TxStatus.TOPUP_FAILED);
-                            setClosePopup(TIMEOUT_TIME_ERROR);
-                            return;
-                        }
-                    }
-
                     setStatus(TxStatus.CONFIRMED);
                     setClosePopup(TIMEOUT_TIME);
                 } else {
@@ -211,41 +198,6 @@ export default function TxStatusPopup() {
             </div>
         </div>
     );
-
-
-    if (status === TxStatus.TOPUP_PROCESSING) return (
-        <div className={styles.popup}>
-            <div className={styles.heading}>
-                <p>Processing top up...</p>
-            </div>
-
-            <div className={styles.message}>
-                <TailSpin
-                    height="18.5"
-                    width="18.5"
-                    color="#ffffffA5"
-                    ariaLabel="loading-spinner"
-                    wrapperStyle={{
-                        width: "25px"
-                    }}
-                />
-                <p>Moving funds to your card.</p>
-            </div>
-        </div>
-    );
-    if (status === TxStatus.TOPUP_FAILED) return (
-        <div className={`${styles.popup} ${styles.error}`}>
-            <div className={styles.heading}>
-                <p className={styles.headingError}>
-                    Top up failed
-                </p>
-            </div>
-
-            <div className={styles.message}>
-                <p>The team have been notified. Please get in touch on <a href={"https://discord.gg/K3byNmnKNm"} target="_blank" rel="noopener noreferrer">Discord</a>.</p>
-            </div>
-        </div>
-    )
 
     if (status === TxStatus.SENT_TIME_WARNING) return (
         <div className={styles.popup}>

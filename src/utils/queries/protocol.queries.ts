@@ -125,7 +125,7 @@ export const useDepositLimitsQuery = (address: PublicKey | null, marketIndex: Ma
 };
 
 export const useSpendLimitQuery = (address: PublicKey | null) => {
-    const { setSpendLimitTransactionCents, setSpendLimitTimeframeCents, setTimeframe } = useStore();
+    const { setSpendLimitTransactionCents, setSpendLimitTimeframeCents, setSpendLimitTimeframeLength: setTimeframe } = useStore();
 
     const query = createQuery<{
         spendLimitTransactionCents: number;

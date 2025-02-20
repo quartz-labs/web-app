@@ -19,6 +19,7 @@ export function useRefetchAccountData() {
                 await new Promise(resolve => setTimeout(resolve, 500));
             } catch { }
         }
+        
         queryClient.invalidateQueries({ queryKey: ["user"], refetchType: "all" });
     }, [queryClient]);
 }
@@ -26,7 +27,14 @@ export function useRefetchAccountData() {
 export function useRefetchWithdrawLimits() {
     const queryClient = useQueryClient();
 
-    return useCallback(async () => {
+    return useCallback(async (signature?: string) => {
+        if (signature) {
+            try { 
+                await fetch(`/api/confirm-tx?signature=${signature}`); 
+                await new Promise(resolve => setTimeout(resolve, 500));
+            } catch { }
+        }
+
         queryClient.invalidateQueries({ queryKey: ["user", "withdraw-limits"], refetchType: "all" });
     }, [queryClient]);
 }
@@ -34,8 +42,30 @@ export function useRefetchWithdrawLimits() {
 export function useRefetchBorrowLimits() {
     const queryClient = useQueryClient();
 
-    return useCallback(async () => {
+    return useCallback(async (signature?: string) => {
+        if (signature) {
+            try { 
+                await fetch(`/api/confirm-tx?signature=${signature}`); 
+                await new Promise(resolve => setTimeout(resolve, 500));
+            } catch { }
+        }
+
         queryClient.invalidateQueries({ queryKey: ["user", "borrow-limits"], refetchType: "all" });
+    }, [queryClient]);
+}
+
+export function useRefetchSpendLimits() {
+    const queryClient = useQueryClient();
+
+    return useCallback(async (signature?: string) => {
+        if (signature) {
+            try { 
+                await fetch(`/api/confirm-tx?signature=${signature}`); 
+                await new Promise(resolve => setTimeout(resolve, 500));
+            } catch { }
+        }
+
+        queryClient.invalidateQueries({ queryKey: ["user", "spend-limits"], refetchType: "all" });
     }, [queryClient]);
 }
 
@@ -57,7 +87,14 @@ export function useRefetchAccountStatus() {
 export function useRefetchCardUser() {
     const queryClient = useQueryClient();
 
-    return useCallback(async () => {
+    return useCallback(async (signature?: string) => {
+        if (signature) {
+            try { 
+                await fetch(`/api/confirm-tx?signature=${signature}`); 
+                await new Promise(resolve => setTimeout(resolve, 500));
+            } catch { }
+        }
+
         queryClient.invalidateQueries({ queryKey: ["card-user"], refetchType: "all" });
     }, [queryClient]);
 }

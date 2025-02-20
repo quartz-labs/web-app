@@ -28,8 +28,11 @@
     width: auto;
     aspect-ratio: 1;
     padding: var(--notifications-button-padding);
-    margin-right: -var(--notifications-button-padding);
+    margin-left: calc(var(--notifications-button-padding) * -1);
     border-radius: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .notificationsButton:hover {

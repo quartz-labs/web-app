@@ -12,9 +12,6 @@ export enum TxStatus {
   TIMEOUT,
   FAILED,
   BLOCKHASH_EXPIRED,
-  TOPUP_SENT,
-  TOPUP_PROCESSING,
-  TOPUP_FAILED,
   ERROR
 }
 
@@ -22,7 +19,6 @@ export interface TxStatusProps {
   signature?: string;
   walletAddress?: string;
   status: TxStatus;
-  topupPromise?: Promise<any>;
 }
 
 interface TxStatusContextProps {

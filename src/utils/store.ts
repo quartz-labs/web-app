@@ -24,7 +24,7 @@ type State = {
   cardDetails?: CardsForUserResponse;
   spendLimitTransactionCents?: number;
   spendLimitTimeframeCents?: number;
-  timeframe?: number;
+  spendLimitTimeframeLength?: number;
 };
 
 type Action = {
@@ -44,7 +44,7 @@ type Action = {
   setCardDetails: (cardDetails?: CardsForUserResponse) => void;
   setSpendLimitTransactionCents: (spendLimitTransaction?: number) => void;
   setSpendLimitTimeframeCents: (spendLimitTimeframe?: number) => void;
-  setTimeframe: (timeframe?: number) => void;
+  setSpendLimitTimeframeLength: (timeframe?: number) => void;
 }
 
 export const useStore = create<State & Action>((set) => ({
@@ -64,7 +64,7 @@ export const useStore = create<State & Action>((set) => ({
   cardDetails: undefined,
   spendLimitTransactionCents: undefined,
   spendLimitTimeframeCents: undefined,
-  timeframe: undefined,
+  spendLimitTimeframeLength: undefined,
 
   setIsInitialized: (isInitialized: boolean) => set({ isInitialized }),
   setPrices: (prices?: Record<MarketIndex, number>) => set({ prices }),
@@ -82,5 +82,5 @@ export const useStore = create<State & Action>((set) => ({
   setCardDetails: (cardDetails?: CardsForUserResponse) => set({ cardDetails }),
   setSpendLimitTransactionCents: (spendLimitTransaction?: number) => set({ spendLimitTransactionCents: spendLimitTransaction }),
   setSpendLimitTimeframeCents: (spendLimitTimeframe?: number) => set({ spendLimitTimeframeCents: spendLimitTimeframe }),
-  setTimeframe: (timeframe?: number) => set({ timeframe }),
+  setSpendLimitTimeframeLength: (timeframe?: number) => set({ spendLimitTimeframeLength: timeframe }),
 }));

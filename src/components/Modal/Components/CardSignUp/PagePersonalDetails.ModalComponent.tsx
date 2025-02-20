@@ -104,7 +104,6 @@ export default function PagePersonalDetails({
                             handleAddressChange("country", e.target.value);
                         }}
                     >
-                        <option value="">Select a country</option>
                         {getCountries().map((country) => (
                             <option key={country} value={country}>
                                 {country}

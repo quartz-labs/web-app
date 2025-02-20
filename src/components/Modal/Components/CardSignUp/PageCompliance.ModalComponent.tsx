@@ -78,7 +78,6 @@ export default function PageCompliance({
                         handleFormDataChange("countryOfIssue", countryCode)
                     }}
                 >
-                    <option value="">Select a country</option>
                     {getCountries().map((country) => (
                         <option key={country} value={country}>
                             {country}

@@ -10,20 +10,6 @@ import CardDetails from "./Card/CardDetails";
 export default function Dashboard() {
   const { isInitialized } = useStore();
 
-  // const spendLimitTransactionDollars = spendLimitTransactionCents ? spendLimitTransactionCents / 100 : 0;
-  // const spendLimitTimeframeDollars = spendLimitTimeframeCents ? spendLimitTimeframeCents / 100 : 0;
-
-  // const slotsPerHour = Math.trunc(2.5 * 60 * 60);
-  // const timeframeInHours = timeframe ? Math.trunc(timeframe / slotsPerHour) : 0;
-
-  
-  // <div>
-  //   <h2>Spend Limit</h2>
-  //   <p>Transaction Limit: ${formatDollarValue(spendLimitTransactionDollars, 2)[0]}</p>
-  //   <p>Timeframe Limit: ${formatDollarValue(spendLimitTimeframeDollars, 2)[0]}</p>
-  //   <p>Timeframe (hours): {timeframeInHours}</p>
-  // </div>
-
   return (
     <>
       <Modal />
