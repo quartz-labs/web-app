@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { AddressLookupTableAccount, Connection, PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { getTokenProgram, MarketIndex, TOKENS, makeCreateAtaIxIfNeeded, QuartzUser, QuartzClient } from '@quartz-labs/sdk';
 import { buildTransaction, getWsolMint } from '@/src/utils/helpers';
+import { createCloseAccountInstruction, getAssociatedTokenAddress } from '@solana/spl-token';
 
 const envSchema = z.object({
     RPC_URL: z.string().url(),
