@@ -169,7 +169,7 @@ async function makeCollateralRepayIxs(
     };
 }
 
-export async function makeJupiterIx(
+async function makeJupiterIx(
     connection: Connection,
     jupiterQuote: QuoteResponse,
     address: PublicKey
