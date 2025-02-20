@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { AddressLookupTableAccount, Connection, PublicKey, TransactionInstruction, VersionedTransaction } from '@solana/web3.js';
 import { baseUnitToDecimal, MarketIndex, QuartzClient, TOKENS, DummyWallet, QuartzUser, getTokenProgram, makeCreateAtaIxIfNeeded } from '@quartz-labs/sdk';
 import { fetchAndParse, getComputeUnitPriceIx } from '@/src/utils/helpers';
-import { DUST_BUFFER_BASE_UNITS, JUPITER_SLIPPAGE_BPS } from '@/src/config/constants';
+import { JUPITER_SLIPPAGE_BPS } from '@/src/config/constants';
 import { getConfig as getMarginfiConfig, MarginfiClient } from '@mrgnlabs/marginfi-client-v2';
 import { SwapMode, type QuoteResponse } from '@jup-ag/api';
 import { createCloseAccountInstruction, getAssociatedTokenAddress } from '@solana/spl-token';
@@ -89,7 +89,6 @@ export async function GET(request: Request) {
     try {
         if (useMaxAmount) {
             amountSwapBaseUnits = await user.getTokenBalance(marketIndexLoan).then(Number).then(Math.abs);
-            amountSwapBaseUnits += DUST_BUFFER_BASE_UNITS;
         }
 
         const {
