@@ -36,7 +36,7 @@ export async function GET(request: Request) {
         const currentSlot = await connection.getSlot();
 
         const timeframe = user.timeframeInSlots;
-        
+
         const spendLimitTransactionCents = user.spendLimitPerTransaction.div(new BN(10_000));
         
         const spendLimitTimeframe = getTimeframeLimit(user, new BN(currentSlot))

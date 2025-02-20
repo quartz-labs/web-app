@@ -128,8 +128,8 @@ export const useSpendLimitQuery = (address: PublicKey | null) => {
     const { setSpendLimitTransactionCents, setSpendLimitTimeframeCents, setTimeframe } = useStore();
 
     const query = createQuery<{
-        spendLimitTransaction: number;
-        spendLimitTimeframe: number;
+        spendLimitTransactionCents: number;
+        spendLimitTimeframeCents: number;
         timeframe: number;
     }>({
         queryKey: ["user", "spend-limit"],
@@ -140,8 +140,8 @@ export const useSpendLimitQuery = (address: PublicKey | null) => {
         enabled: address != null,
         errorMessage: "Could not fetch spend limits",
         onSuccess: (data) => {
-            setSpendLimitTransactionCents(data.spendLimitTransaction);
-            setSpendLimitTimeframeCents(data.spendLimitTimeframe);
+            setSpendLimitTransactionCents(data.spendLimitTransactionCents);
+            setSpendLimitTimeframeCents(data.spendLimitTimeframeCents);
             setTimeframe(data.timeframe);
         }
     });
