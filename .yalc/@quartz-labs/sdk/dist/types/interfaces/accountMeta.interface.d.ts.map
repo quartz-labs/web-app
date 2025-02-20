@@ -1,1 +1,0 @@
-{"version":3,"file":"accountMeta.interface.d.ts","sourceRoot":"","sources":["../../../src/types/interfaces/accountMeta.interface.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,SAAS,EAAE,MAAM,iBAAiB,CAAC;AAEjD,MAAM,WAAW,WAAW;IAC1B,MAAM,EAAE,SAAS,CAAC;IAClB,QAAQ,EAAE,OAAO,CAAC;IAClB,UAAU,EAAE,OAAO,CAAC;CACrB"}
