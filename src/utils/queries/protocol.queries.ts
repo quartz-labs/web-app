@@ -124,6 +124,30 @@ export const useDepositLimitsQuery = (address: PublicKey | null, marketIndex: Ma
     return query();
 };
 
+export const useSpendLimitQuery = (address: PublicKey | null) => {
+    const { setSpendLimitTransactionCents, setSpendLimitTimeframeCents, setTimeframe } = useStore();
+
+    const query = createQuery<{
+        spendLimitTransaction: number;
+        spendLimitTimeframe: number;
+        timeframe: number;
+    }>({
+        queryKey: ["user", "spend-limit"],
+        url: "/api/spend-limit",
+        params: address ? { 
+            address: address.toBase58(),
+        } : undefined,
+        enabled: address != null,
+        errorMessage: "Could not fetch spend limits",
+        onSuccess: (data) => {
+            setSpendLimitTransactionCents(data.spendLimitTransaction);
+            setSpendLimitTimeframeCents(data.spendLimitTimeframe);
+            setTimeframe(data.timeframe);
+        }
+    });
+    return query();
+};
+
 export const useHealthQuery = (address: PublicKey | null) => {
     const { setHealth } = useStore();
 

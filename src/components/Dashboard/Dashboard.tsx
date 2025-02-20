@@ -6,9 +6,16 @@ import ButtonRow from "./ButtonRow/ButtonRow";
 import Assets from "./Assets/Assets";
 import Modal from "../Modal/Modal";
 import CardDetails from "./Card/CardDetails";
+import { formatDollarValue } from "@/src/utils/helpers";
 
 export default function Dashboard() {
-  const { isInitialized } = useStore();
+  const { isInitialized, spendLimitTransactionCents: spendLimitTransaction, spendLimitTimeframeCents: spendLimitTimeframe, timeframe } = useStore();
+
+  const spendLimitTransactionDollars = spendLimitTransaction ? spendLimitTransaction / 100 : 0;
+  const spendLimitTimeframeDollars = spendLimitTimeframe ? spendLimitTimeframe / 100 : 0;
+
+  const slotsPerHour = Math.trunc(2.5 * 60 * 60);
+  const timeframeInHours = timeframe ? timeframe / slotsPerHour : 0;
 
   return (
     <>
@@ -23,6 +30,12 @@ export default function Dashboard() {
             <>
               <Health />
               <ButtonRow />
+              <div>
+                <h2>Spend Limit</h2>
+                <p>Transaction Limit: {formatDollarValue(spendLimitTransactionDollars, 2)}</p>
+                <p>Timeframe Limit: {formatDollarValue(spendLimitTimeframeDollars, 2)}</p>
+                <p>Timeframe (hours): {timeframeInHours}</p>
+              </div>
             </>
           )}
 

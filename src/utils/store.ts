@@ -24,6 +24,9 @@ type State = {
   cardDetails?: CardsForUserResponse;
   topupPending: boolean;
   spendableBalance?: number;
+  spendLimitTransactionCents?: number;
+  spendLimitTimeframeCents?: number;
+  timeframe?: number;
 };
 
 type Action = {
@@ -43,6 +46,9 @@ type Action = {
   setCardDetails: (cardDetails?: CardsForUserResponse) => void;
   setTopupPending: (topupPending: boolean) => void;
   setSpendableBalance: (spendableBalance?: number) => void;
+  setSpendLimitTransactionCents: (spendLimitTransaction?: number) => void;
+  setSpendLimitTimeframeCents: (spendLimitTimeframe?: number) => void;
+  setTimeframe: (timeframe?: number) => void;
 }
 
 export const useStore = create<State & Action>((set) => ({
@@ -62,6 +68,9 @@ export const useStore = create<State & Action>((set) => ({
   cardDetails: undefined,
   topupPending: false,
   spendableBalance: undefined,
+  spendLimitTransactionCents: undefined,
+  spendLimitTimeframeCents: undefined,
+  timeframe: undefined,
 
   setIsInitialized: (isInitialized: boolean) => set({ isInitialized }),
   setPrices: (prices?: Record<MarketIndex, number>) => set({ prices }),
@@ -79,4 +88,7 @@ export const useStore = create<State & Action>((set) => ({
   setCardDetails: (cardDetails?: CardsForUserResponse) => set({ cardDetails }),
   setTopupPending: (topupPending: boolean) => set({ topupPending }),
   setSpendableBalance: (spendableBalance?: number) => set({ spendableBalance }),
+  setSpendLimitTransactionCents: (spendLimitTransaction?: number) => set({ spendLimitTransactionCents: spendLimitTransaction }),
+  setSpendLimitTimeframeCents: (spendLimitTimeframe?: number) => set({ spendLimitTimeframeCents: spendLimitTimeframe }),
+  setTimeframe: (timeframe?: number) => set({ timeframe }),
 }));
