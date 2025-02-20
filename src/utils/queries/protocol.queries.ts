@@ -146,13 +146,13 @@ export const useSpendLimitQuery = (address: PublicKey | null) => {
         enabled: address != null,
         errorMessage: "Could not fetch spend limits",
         onSuccess: (data) => {
-            console.log(data);
             setSpendLimitTransactionBaseUnits(data.spendLimitTransactionBaseUnits);
             setSpendLimitTimeframeBaseUnits(data.spendLimitTimeframeBaseUnits);
             setSpendLimitTimeframeRemainingBaseUnits(data.spendLimitTimeframeRemainingBaseUnits);
             setSpendLimitTimeframeLength(data.timeframe);
         }
     });
+
     return query();
 };
 

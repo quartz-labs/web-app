@@ -22,7 +22,7 @@ import UpgradeRequired from "../components/OtherViews/UpgradeRequired";
 
 export default function Page() {
   const wallet = useWallet();
-  const { setIsInitialized, jwtToken, setModalVariation } = useStore();
+  const { setIsInitialized, jwtToken, setModalVariation, setSpendLimitRefreshing } = useStore();
   const refetchCardUser = useRefetchCardUser();
 
 
@@ -41,7 +41,10 @@ export default function Page() {
   useWithdrawLimitsQuery(isInitialized ? wallet.publicKey : null);
   useBorrowLimitsQuery(isInitialized ? wallet.publicKey : null);
   useHealthQuery(isInitialized ? wallet.publicKey : null);
-  useSpendLimitQuery(isInitialized ? wallet.publicKey : null);
+  const { isStale  } = useSpendLimitQuery(isInitialized ? wallet.publicKey : null);
+  useEffect(() => {
+    setSpendLimitRefreshing(isStale);
+  }, [isStale, setSpendLimitRefreshing]);
   
 
   // Card data

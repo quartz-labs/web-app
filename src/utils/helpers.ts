@@ -229,7 +229,7 @@ export async function getComputeUnitLimit(
     );
 
     const estimatedComputeUnits = simulation.value.unitsConsumed;
-    if (!estimatedComputeUnits) console.log("Could not simulate for CUs, using default limit");
+    if (!estimatedComputeUnits) console.warn("Could not simulate for CUs, using default limit");
     const computeUnitLimit = estimatedComputeUnits 
         ? Math.ceil(estimatedComputeUnits * 1.3) 
         : DEFAULT_COMPUTE_UNIT_LIMIT;

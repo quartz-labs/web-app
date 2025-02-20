@@ -87,10 +87,6 @@ export async function GET(request: Request) {
             new BN(spendLimitTimeframe)
         );
 
-        console.log("spendLimitTransactionBaseUnits: ", spendLimitTransactionBaseUnits);
-        console.log("spendLimitTimeframeBaseUnits: ", spendLimitTimeframeBaseUnits);
-        console.log("spendLimitTimeframe: ", spendLimitTimeframe);
-
         const transaction = await buildTransaction(connection, ixs, address, lookupTables);
         transaction.sign(signers);
         

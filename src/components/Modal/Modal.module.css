@@ -148,6 +148,9 @@
 .inputFieldSpendLimits {
     font-size: var(--font-size-large);
     height: calc(var(--input-field-height) * 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
 }
 
 .inputFieldCollateral {
@@ -389,4 +392,11 @@
 
 .inputGroup label {
     margin-bottom: 6px;
+}
+
+.loadingSpinner {
+    height: 75%;
+    width: auto;
+    aspect-ratio: 1;
+    padding-left: 5px;
 }

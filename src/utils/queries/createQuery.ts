@@ -56,7 +56,7 @@ export function createQuery<T>({
             queryFn,
             refetchInterval,
             enabled,
-            staleTime,
+            staleTime: staleTime ?? Infinity,
             retry : retry ? 3 : false,
         });
 

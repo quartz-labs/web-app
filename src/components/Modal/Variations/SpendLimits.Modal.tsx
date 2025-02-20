@@ -13,6 +13,7 @@ import { captureError } from "@/src/utils/errors";
 import Buttons from "../Components/Buttons.ModalComponent";
 import { timeframeToDisplay, displayToTimeframe, SpendLimitTimeframe, SpendLimitTimeframeDisplay } from "@/src/types/enums/SpendLimitTimeframe.enum";
 import { baseUnitToDecimal, decimalToBaseUnit, MARKET_INDEX_USDC } from "@quartz-labs/sdk";
+import { TailSpin } from "react-loader-spinner";
 
 export default function SpendLimitsModal() {
     const wallet = useAnchorWallet();
@@ -22,7 +23,8 @@ export default function SpendLimitsModal() {
     const { 
         setModalVariation,
         spendLimitTimeframeBaseUnits,
-        spendLimitTimeframeLength
+        spendLimitTimeframeLength,
+        spendLimitRefreshing
     } = useStore();
     const refetchSpendLimits = useRefetchSpendLimits();
 
@@ -86,6 +88,8 @@ export default function SpendLimitsModal() {
         }
     }
 
+    const showLoading = (spendLimitTimeframeBaseUnits === undefined) || spendLimitRefreshing;
+
     return (
         <div className={styles.contentWrapper}>
             <h2 
@@ -102,21 +106,34 @@ export default function SpendLimitsModal() {
                 <p>Spend Limit:</p>
 
                 <div className={styles.inputFieldWrapper}>
-                    <input 
-                        className={`${styles.inputField} ${styles.inputFieldAmount} ${styles.inputFieldSpendLimits}`}
-                        type="text" 
-                        placeholder={"0.0"} 
-                        value={
-                            newLimitTimeframeDollarsStr.startsWith("$")
-                            ? newLimitTimeframeDollarsStr
-                            : `$${newLimitTimeframeDollarsStr}`
-                        } 
-                        onChange={(e) => 
-                            setNewLimitTimeframeDollarsStr(
-                                e.target.value.replace("$", "").replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1')
-                            )
-                        }
-                    />
+                    {!showLoading &&
+                        <input 
+                            className={`${styles.inputField} ${styles.inputFieldAmount} ${styles.inputFieldSpendLimits}`}
+                            type="text" 
+                            placeholder={"0.0"} 
+                            value={
+                                newLimitTimeframeDollarsStr.startsWith("$")
+                                ? newLimitTimeframeDollarsStr
+                                : `$${newLimitTimeframeDollarsStr}`
+                            } 
+                            onChange={(e) => 
+                                setNewLimitTimeframeDollarsStr(
+                                    e.target.value.replace("$", "").replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1')
+                                )
+                            }
+                        />
+                    }
+                    {showLoading &&
+                        <div className={`${styles.inputField} ${styles.inputFieldAmount} ${styles.inputFieldSpendLimits}`}>
+                            <TailSpin
+                                height="100%"
+                                width="100%"
+                                color="#ffffff"
+                                ariaLabel="loading-spinner"
+                                wrapperClass={styles.loadingSpinner}
+                            />
+                        </div>
+                    }
                 </div>
             </div>
 

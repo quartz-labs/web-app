@@ -26,6 +26,7 @@ type State = {
   spendLimitTimeframeBaseUnits?: number;
   spendLimitTimeframeRemainingBaseUnits?: number;
   spendLimitTimeframeLength?: number;
+  spendLimitRefreshing?: boolean;
 };
 
 type Action = {
@@ -47,6 +48,7 @@ type Action = {
   setSpendLimitTimeframeBaseUnits: (spendLimitTimeframe?: number) => void;
   setSpendLimitTimeframeRemainingBaseUnits: (spendLimitTimeframeRemaining?: number) => void;
   setSpendLimitTimeframeLength: (timeframe?: number) => void;
+  setSpendLimitRefreshing: (refreshing?: boolean) => void;
 }
 
 export const useStore = create<State & Action>((set) => ({
@@ -68,7 +70,8 @@ export const useStore = create<State & Action>((set) => ({
   spendLimitTimeframeBaseUnits: undefined,
   spendLimitTimeframeRemainingBaseUnits: undefined,
   spendLimitTimeframeLength: undefined,
-
+  spendLimitRefreshing: false,
+  
   setIsInitialized: (isInitialized: boolean) => set({ isInitialized }),
   setPrices: (prices?: Record<MarketIndex, number>) => set({ prices }),
   setRates: (rates?: Record<MarketIndex, Rate>) => set({ rates }),
@@ -87,4 +90,5 @@ export const useStore = create<State & Action>((set) => ({
   setSpendLimitTimeframeBaseUnits: (spendLimitTimeframe?: number) => set({ spendLimitTimeframeBaseUnits: spendLimitTimeframe }),
   setSpendLimitTimeframeRemainingBaseUnits: (spendLimitTimeframeRemaining?: number) => set({ spendLimitTimeframeRemainingBaseUnits: spendLimitTimeframeRemaining }),
   setSpendLimitTimeframeLength: (timeframe?: number) => set({ spendLimitTimeframeLength: timeframe }),
+  setSpendLimitRefreshing: (refreshing?: boolean) => set({ spendLimitRefreshing: refreshing }),
 }));
