@@ -1,0 +1,24 @@
+import { PublicKey } from "@solana/web3.js";
+import type { MarketIndex } from "../config/tokens.js";
+export declare const getVaultPublicKey: (user: PublicKey) => PublicKey;
+export declare const getVaultSplPublicKey: (user: PublicKey, mint: PublicKey) => PublicKey;
+export declare const getCollateralRepayLedgerPublicKey: (user: PublicKey) => PublicKey;
+export declare const getBridgeRentPayerPublicKey: () => PublicKey;
+export declare const getInitRentPayerPublicKey: () => PublicKey;
+export declare const getDriftUserPublicKey: (vaultPda: PublicKey) => PublicKey;
+export declare const getDriftUserStatsPublicKey: (vaultPda: PublicKey) => PublicKey;
+export declare const getDriftStatePublicKey: () => PublicKey;
+export declare const getDriftSignerPublicKey: () => PublicKey;
+export declare const getDriftSpotMarketVaultPublicKey: (marketIndex: number) => PublicKey;
+export declare const getDriftSpotMarketPublicKey: (marketIndex: number) => PublicKey;
+export declare const getPythPriceFeedAccount: (shardId: number, priceFeedId: string) => PublicKey;
+export declare const getPythOracle: (marketIndex: MarketIndex) => PublicKey;
+export declare const getSenderAuthority: () => PublicKey;
+export declare const getMessageTransmitter: () => PublicKey;
+export declare const getTokenMessenger: () => PublicKey;
+export declare const getTokenMinter: () => PublicKey;
+export declare const getLocalToken: () => PublicKey;
+export declare const getRemoteTokenMessenger: () => PublicKey;
+export declare const getEventAuthority: () => PublicKey;
+export declare const getSpendMulePda: (user: PublicKey) => PublicKey;
+//# sourceMappingURL=accounts.d.ts.map

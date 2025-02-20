@@ -3,9 +3,7 @@ export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { AddressLookupTableAccount, Connection, PublicKey, TransactionInstruction } from '@solana/web3.js';
-import { getTokenProgram, MarketIndex, QuartzClient, QuartzUser, TOKENS, makeCreateAtaIxIfNeeded } from '@quartz-labs/sdk';
-import { createCloseAccountInstruction } from '@solana/spl-token';
-import { getAssociatedTokenAddress } from '@solana/spl-token';
+import { getTokenProgram, MarketIndex, TOKENS, makeCreateAtaIxIfNeeded, QuartzUser, QuartzClient } from '@quartz-labs/sdk';
 import { buildTransaction, getWsolMint } from '@/src/utils/helpers';
 
 const envSchema = z.object({
@@ -14,7 +12,7 @@ const envSchema = z.object({
 
 const paramsSchema = z.object({
     address: z.string().refine(
-        (value) => {
+        (value: string) => {
             try {
                 new PublicKey(value);
                 return true;
@@ -30,7 +28,7 @@ const paramsSchema = z.object({
     ),
     allowLoan: z.boolean(),
     marketIndex: z.number().refine(
-        (value) => MarketIndex.includes(value as any),
+        (value: number) => MarketIndex.includes(value as MarketIndex),
         { message: "marketIndex must be a valid market index" }
     ),
 });

@@ -2,15 +2,25 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { Connection, PublicKey } from '@solana/web3.js';
-import { makeCreateAtaIxIfNeeded, MARKET_INDEX_USDC, QuartzClient, QuartzUser, TOKENS } from '@quartz-labs/sdk';
+import { Connection, PublicKey, SendTransactionError } from '@solana/web3.js';
+import { bs58, makeCreateAtaIxIfNeeded, MARKET_INDEX_USDC, QuartzClient, QuartzUser, TOKENS } from '@quartz-labs/sdk';
 import { buildTransaction } from '@/src/utils/helpers';
 import type { TransactionInstruction } from '@solana/web3.js';
 import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from '@solana/spl-token';
+import { Keypair } from '@solana/web3.js';
 
 
 const envSchema = z.object({
-    RPC_URL: z.string().url()
+    RPC_URL: z.string().url(),
+    SPEND_CALLER: z.string()
+        .transform((value: string) => {
+            try {
+                return Keypair.fromSecretKey(bs58.decode(value));
+            } catch {
+                throw new Error("Spend caller is not a valid public key");
+            }
+        }
+    ),
 });
 
 const paramsSchema = z.object({
@@ -36,8 +46,7 @@ export async function GET(request: Request) {
     try {
         env = envSchema.parse({
             RPC_URL: process.env.RPC_URL,
-            BASE_RPC_URL: process.env.BASE_RPC_URL,
-            CARD_CONTRACT_ADDRESS: process.env.CARD_CONTRACT_ADDRESS
+            SPEND_CALLER: process.env.SPEND_CALLER
         });
     } catch (error) {
         console.error("Error validating environment variables: ", error);
@@ -64,21 +73,54 @@ export async function GET(request: Request) {
     const quartzClient = await QuartzClient.fetchClient(connection);
     const user = await quartzClient.getQuartzAccount(address);
 
-    const ixs_withdraw = await makeWithdrawIxs(connection, user, amountBaseUnits);
+    // const ixs_withdraw = await makeWithdrawIxs(connection, user, amountBaseUnits);
+
+    // const {
+    //     ixs: ixs_topUpCard,
+    //     lookupTables: lookupTables,
+    //     signers: signers
+    // } = await user.makeTopUpCardIxs(amountBaseUnits);
 
     const {
-        ixs: ixs_topUpCard,
-        lookupTables: lookupTables,
-        signerKeypair: signerKeypair
-    } = await user.makeTopUpCardIxs(amountBaseUnits);
+        ixs: ixs_spend,
+        lookupTables,
+        signers
+    } = await user.makeSpendIxs(amountBaseUnits, env.SPEND_CALLER);
 
     const transaction = await buildTransaction(
         connection, 
-        [...ixs_withdraw, ...ixs_topUpCard], 
+        ixs_spend, 
         address,
         lookupTables
     );
-    transaction.sign([signerKeypair]);
+
+    // Debug logging for required signers
+    const messageAccounts = transaction.message.staticAccountKeys;
+    console.log("Required signers:", transaction.message.header.numRequiredSignatures);
+    messageAccounts.slice(0, transaction.message.header.numRequiredSignatures).forEach((pubkey, index) => {
+        console.log(`${index}: ${pubkey.toBase58()} (required)`);
+    });
+
+    console.log("\nActual signers being provided:");
+    signers.forEach((signer, index) => {
+        console.log(`${index}: ${signer.publicKey.toBase58()}`);
+    });
+
+    transaction.sign(signers);
+
+    const simulation = await connection.simulateTransaction(transaction);
+    console.log(simulation);
+
+    try {
+        const signature = await connection.sendTransaction(transaction);
+        console.log(signature);
+    } catch (error) {
+        if (error instanceof SendTransactionError) {
+            console.error(error.getLogs(connection));
+        } else {
+            console.error(error);
+        }
+    }
 
     try {
         const serializedTx = Buffer.from(transaction.serialize()).toString("base64");
