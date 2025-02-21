@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { QuartzClient } from '@quartz-labs/sdk';
 import { buildTransaction } from '@/src/utils/helpers';
-import { DEFAULT_CARD_TIMEFRAME, DEFAULT_CARD_TIMEFRAME_LIMIT, DEFAULT_CARD_TRANSACTION_LIMIT } from '@/src/config/constants';
+import { DEFAULT_CARD_TIMEFRAME, DEFAULT_CARD_TIMEFRAME_LIMIT, DEFAULT_CARD_TIMEFRAME_RESET, DEFAULT_CARD_TRANSACTION_LIMIT } from '@/src/config/constants';
 
 const envSchema = z.object({
     RPC_URL: z.string().url(),
@@ -59,7 +59,8 @@ export async function GET(request: Request) {
             address,
             DEFAULT_CARD_TRANSACTION_LIMIT,
             DEFAULT_CARD_TIMEFRAME_LIMIT,
-            DEFAULT_CARD_TIMEFRAME
+            DEFAULT_CARD_TIMEFRAME,
+            DEFAULT_CARD_TIMEFRAME_RESET
         );
 
         const transaction = await buildTransaction(connection, ixs, address, lookupTables);

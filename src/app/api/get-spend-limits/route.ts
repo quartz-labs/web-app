@@ -38,7 +38,7 @@ export async function GET(request: Request) {
         const spendLimitTImeframeRemaining = getRemainingTimeframeLimit(user, new BN(currentSlot));
 
         return NextResponse.json({
-            timeframe: user.timeframeInSlots.toNumber(),
+            timeframe: user.timeframeInSeconds.toNumber(),
             spendLimitTransactionBaseUnits: user.spendLimitPerTransaction.toNumber(),
             spendLimitTimeframeBaseUnits: user.spendLimitPerTimeframe.toNumber(),
             spendLimitTimeframeRemainingBaseUnits: spendLimitTImeframeRemaining.toNumber()
@@ -57,11 +57,11 @@ function getRemainingTimeframeLimit(
     currentSlot: BN
 ) {
     let spendLimit: BN;
-    if (quartzUser.timeframeInSlots.lte(new BN(0))) {
+    if (quartzUser.timeframeInSeconds.lte(new BN(0))) {
         // If timeframe is 0, spendlimit is 0
         spendLimit = new BN(0);
     } else {
-        if ((currentSlot).gte(quartzUser.nextTimeframeResetSlot)) {
+        if ((currentSlot).gte(quartzUser.nextTimeframeResetTimestamp)) {
             // If spendLimitPerTimeframe will be reset, use full spendLimit
             spendLimit = quartzUser.spendLimitPerTimeframe;
         } else {

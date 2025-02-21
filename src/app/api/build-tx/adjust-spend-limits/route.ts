@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { BN, QuartzClient, QuartzUser } from '@quartz-labs/sdk';
 import { buildTransaction } from '@/src/utils/helpers';
+import { SpendLimitTimeframe } from '@/src/types/enums/SpendLimitTimeframe.enum';
 
 const envSchema = z.object({
     RPC_URL: z.string().url(),
@@ -31,8 +32,10 @@ const paramsSchema = z.object({
         { message: "spendLimitTimeframeBaseUnits must be an integer" }
     ),
     spendLimitTimeframe: z.number().refine(
-        Number.isInteger,
-        { message: "spendLimitTimeframe must be an integer" }
+        (value) => {
+            return Object.values(SpendLimitTimeframe).filter(v => typeof v === 'number').includes(value);
+        },
+        { message: "spendLimitTimeframe must be a valid SpendLimitTimeframe" }
     ),
 });
 
@@ -66,7 +69,10 @@ export async function GET(request: Request) {
     const address = new PublicKey(body.address);
     const spendLimitTransactionBaseUnits = body.spendLimitTransactionBaseUnits;
     const spendLimitTimeframeBaseUnits = body.spendLimitTimeframeBaseUnits;
-    const spendLimitTimeframe = body.spendLimitTimeframe;
+    const spendLimitTimeframe = body.spendLimitTimeframe as SpendLimitTimeframe;
+
+    const nextTimeframeResetTimestamp = getNextTimeframeReset(spendLimitTimeframe);
+    console.log("nextTimeframeResetTimestamp", nextTimeframeResetTimestamp);
 
     const quartzClient = await QuartzClient.fetchClient(connection);
     let user: QuartzUser;
@@ -84,7 +90,8 @@ export async function GET(request: Request) {
         } = await user.makeAdjustSpendLimitsIxs(
             new BN(spendLimitTransactionBaseUnits),
             new BN(spendLimitTimeframeBaseUnits),
-            new BN(spendLimitTimeframe)
+            new BN(spendLimitTimeframe),
+            new BN(nextTimeframeResetTimestamp)
         );
 
         const transaction = await buildTransaction(connection, ixs, address, lookupTables);
@@ -99,4 +106,38 @@ export async function GET(request: Request) {
             { status: 500 }
         );
     }
+}
+
+function getNextTimeframeReset(timeframe: SpendLimitTimeframe): number {
+    const reset = new Date();
+
+    switch (timeframe) {    
+        case SpendLimitTimeframe.DAY:
+            reset.setUTCDate(reset.getUTCDate() + 1);
+            reset.setUTCHours(0, 0, 0, 0);
+            break;
+
+        case SpendLimitTimeframe.WEEK:
+            reset.setUTCDate(reset.getUTCDate() + ((8 - reset.getUTCDay()) % 7 || 7)); // Get next Monday
+            reset.setUTCHours(0, 0, 0, 0);
+            break;
+
+        case SpendLimitTimeframe.MONTH:
+            reset.setUTCMonth(reset.getUTCMonth() + 1); // Automatically handles rollover to next year
+            reset.setUTCDate(1);
+            reset.setUTCHours(0, 0, 0, 0);
+            break;
+
+        case SpendLimitTimeframe.YEAR:
+            reset.setUTCFullYear(reset.getUTCFullYear() + 1);
+            reset.setUTCMonth(0);
+            reset.setUTCDate(1);
+            reset.setUTCHours(0, 0, 0, 0);
+            break;
+
+        default:
+            throw new Error("Invalid spend limit timeframe");
+    }
+
+    return Math.trunc(reset.getTime() / 1000); // Convert milliseconds to seconds
 }

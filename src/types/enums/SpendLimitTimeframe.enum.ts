@@ -1,11 +1,11 @@
-import { SLOTS_PER_DAY } from "@/src/config/constants";
+import { SECONDS_PER_DAY } from "@/src/config/constants";
 
 export enum SpendLimitTimeframe {
     UNKNOWN = 0,
-    DAY = SLOTS_PER_DAY,
-    WEEK = SLOTS_PER_DAY * 7,
-    MONTH = SLOTS_PER_DAY * 30,
-    YEAR = SLOTS_PER_DAY * 365
+    DAY = SECONDS_PER_DAY,
+    WEEK = SECONDS_PER_DAY * 7,
+    MONTH = SECONDS_PER_DAY * 30,
+    YEAR = SECONDS_PER_DAY * 365
 }
 export enum SpendLimitTimeframeDisplay {
     UNKNOWN = 'Unknown',

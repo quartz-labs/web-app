@@ -799,10 +799,10 @@
     bs58 "^5.0.0"
     jito-ts "^3.0.1"
 
-"@quartz-labs/sdk@0.7.1":
-  version "0.7.1"
-  resolved "https://registry.yarnpkg.com/@quartz-labs/sdk/-/sdk-0.7.1.tgz#179ff6d21835309e5a3dd37b70bd38e2644cf173"
-  integrity sha512-sVrivkNRQiRVPXVmJ4pwvWxSUTV9WK/xDrKEzsyK/aQyBs8pN180dqq+H9kpHHoluHSEFQeHJ/3jkqR/4LhTAw==
+"@quartz-labs/sdk@0.8.0":
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/@quartz-labs/sdk/-/sdk-0.8.0.tgz#29439bd4db0654263e36b2b3725c94c3db7c27bf"
+  integrity sha512-3+MvOYozszVpHlgOTF9YOaUGIbZ0pIVbUdCHKLw1uSG53DKnAjI06AoWh04WN9djDLiIABCkXxWdGLyq1kS8og==
   dependencies:
     "@coral-xyz/anchor" "^0.29.0"
     "@drift-labs/sdk" "^2.110.0-beta.22"

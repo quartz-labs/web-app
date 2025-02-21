@@ -43,7 +43,15 @@ export default function SpendLimitsModal() {
     );
 
     let existingSpendLimitTimeframe = spendLimitTimeframeLength;
-    if (!existingSpendLimitTimeframe || existingSpendLimitTimeframe === SpendLimitTimeframe.UNKNOWN) {
+    const isValidSpendLimitTimeframe = (existingSpendLimitTimeframe === undefined)
+        ? false
+        : Object.values(SpendLimitTimeframe).filter(v => typeof v === 'number').includes(existingSpendLimitTimeframe);
+
+    if (
+        !isValidSpendLimitTimeframe 
+        || existingSpendLimitTimeframe === undefined 
+        || existingSpendLimitTimeframe === SpendLimitTimeframe.UNKNOWN
+    ) {
         existingSpendLimitTimeframe = SpendLimitTimeframe.DAY;
     }
     const [newLimitTimeframeLength, setNewLimitTimeframeLength] = useState<SpendLimitTimeframe>(existingSpendLimitTimeframe);
