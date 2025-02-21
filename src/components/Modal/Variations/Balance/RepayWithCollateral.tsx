@@ -74,7 +74,9 @@ export default function RepayWithCollateral({
     const valueCollateral = prices?.[marketIndexCollateral] 
         ? prices?.[marketIndexCollateral] * amountCollateralDecimalDisplay 
         : undefined;
-    const canRepayWithWallet = (amountLoanDecimal > 0 && amountLoanDecimal <= baseUnitToDecimal(depositLimitBaseUnits, marketIndexLoan));
+    const canRepayWithWallet = (depositLimitBaseUnits === undefined)
+        ? false
+        : (amountLoanDecimal > 0 && amountLoanDecimal <= baseUnitToDecimal(depositLimitBaseUnits, marketIndexLoan));
 
     const [useMaxAmount, setUseMaxAmount] = useState(false);
     useEffect(() => {
