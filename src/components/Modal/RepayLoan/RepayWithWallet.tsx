@@ -32,16 +32,18 @@ export default function RepayWithWallet({
     const amountDecimals = Number(amountLoanStr);
 
     const maxRepayBaseUnits = Math.min(
-        depositLimitBaseUnits, 
+        depositLimitBaseUnits ?? 0, 
         Math.abs(balances?.[marketIndexLoan] ?? 0)
     );
 
     const handleConfirm = async () => {
         if (!wallet?.publicKey) return setErrorText("Wallet not connected");
         
-        const errorText = validateAmount(marketIndexLoan, amountDecimals, depositLimitBaseUnits);
-        setErrorText(errorText);
-        if (errorText) return;
+        if (depositLimitBaseUnits !== undefined) {
+            const errorText = validateAmount(marketIndexLoan, amountDecimals, depositLimitBaseUnits);
+            setErrorText(errorText);
+            if (errorText) return;
+        }
 
         setAwaitingSign(true);
         try {
