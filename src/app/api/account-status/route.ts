@@ -100,13 +100,19 @@ async function checkIsMissingBetaKey(connection: Connection, address: PublicKey)
 
 async function checkIsVaultInitialized(connection: Connection, wallet: PublicKey): Promise<boolean> {
     const vaultPda = getVaultPublicKey(wallet);
-    const vaultPdaAccount = await connection.getAccountInfo(vaultPda);
+    const vaultPdaAccount = await retryWithBackoff(
+        async () => connection.getAccountInfo(vaultPda),
+        2
+    );
     return (vaultPdaAccount !== null);
 }
 
 async function checkRequiresUpgrade(connection: Connection, wallet: PublicKey): Promise<boolean> {
     const vaultPda = getVaultPublicKey(wallet);
-    const vaultPdaAccount = await connection.getAccountInfo(vaultPda);
+    const vaultPdaAccount = await retryWithBackoff(
+        async () => connection.getAccountInfo(vaultPda),
+        2
+    );
     if (vaultPdaAccount === null) return false;
 
     const OLD_VAULT_SIZE = 41;
