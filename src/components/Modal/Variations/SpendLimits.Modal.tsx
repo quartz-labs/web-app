@@ -48,7 +48,8 @@ export default function SpendLimitsModal() {
     }
     const [newLimitTimeframeLength, setNewLimitTimeframeLength] = useState<SpendLimitTimeframe>(existingSpendLimitTimeframe);
 
-    const remainingSpendLimitDollars = decimalToBaseUnit(spendLimitTimeframeRemainingBaseUnits ?? 0, MARKET_INDEX_USDC);
+    let remainingSpendLimitDollars = baseUnitToDecimal(spendLimitTimeframeRemainingBaseUnits ?? 0, MARKET_INDEX_USDC);
+    if (spendLimitTimeframeLength === 0) remainingSpendLimitDollars = 0;
 
 
     useEffect(() => {
