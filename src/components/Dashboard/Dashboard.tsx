@@ -26,11 +26,11 @@ export default function Dashboard() {
             </>
           )}
 
-          <Assets />
-
           {!isInitialized && (
             <p className={styles.notInitialized}>No wallet connected</p>
           )}
+
+          <Assets />
         </div>
       </div>
 
