@@ -24,7 +24,8 @@ export default function SpendLimitsModal() {
         setModalVariation,
         spendLimitTimeframeBaseUnits,
         spendLimitTimeframeLength,
-        spendLimitRefreshing
+        spendLimitRefreshing,
+        spendLimitTimeframeRemainingBaseUnits
     } = useStore();
     const refetchSpendLimits = useRefetchSpendLimits();
 
@@ -46,6 +47,8 @@ export default function SpendLimitsModal() {
         existingSpendLimitTimeframe = SpendLimitTimeframe.DAY;
     }
     const [newLimitTimeframeLength, setNewLimitTimeframeLength] = useState<SpendLimitTimeframe>(existingSpendLimitTimeframe);
+
+    const remainingSpendLimitDollars = decimalToBaseUnit(spendLimitTimeframeRemainingBaseUnits ?? 0, MARKET_INDEX_USDC);
 
 
     useEffect(() => {
@@ -100,7 +103,9 @@ export default function SpendLimitsModal() {
                 style={{marginBottom: "15px"}}
             >Card Spend Limits</h2>
         
-            <p style={{marginBottom: "50px"}}>Set the maximum limit the Quartz card can debit from <span className={"no-wrap"}>your account.</span></p>
+            <p style={{marginBottom: "40px"}}>Set the maximum limit the Quartz card can debit from <span className={"no-wrap"}>your account.</span></p>
+
+            <p style={{marginBottom: "10px"}}>Remaining spend limit: <span className={"no-wrap"}>${remainingSpendLimitDollars}</span></p>
 
             <div 
                 className={styles.inputSection}
