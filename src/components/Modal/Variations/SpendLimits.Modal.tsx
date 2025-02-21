@@ -96,7 +96,7 @@ export default function SpendLimitsModal() {
             if (error instanceof WalletSignTransactionError) showTxStatus({ status: TxStatus.SIGN_REJECTED });
             else {
                 showTxStatus({ status: TxStatus.NONE });
-                captureError(showError, "Failed to add funds", "/AddFundsModal.tsx", error, wallet.publicKey);
+                captureError(showError, "Failed to adjust spend limit", "/AddFundsModal.tsx", error, wallet.publicKey);
             }
         } finally {
             setAwaitingSign(false);
