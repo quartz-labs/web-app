@@ -7,7 +7,7 @@ import { z } from 'zod';
 import { MICRO_LAMPORTS_PER_LAMPORT } from '@/src/config/constants';
 import { AccountLayout } from '@solana/spl-token';
 import { getAssociatedTokenAddress } from '@solana/spl-token';
-import { getTokenProgram, MarketIndex, TOKENS } from '@quartz-labs/sdk/browser';
+import { getTokenProgram, MarketIndex, retryWithBackoff, TOKENS } from '@quartz-labs/sdk/browser';
 import { makeDepositIxs } from '../_utils/utils.server';
 import { QuartzClient } from '@quartz-labs/sdk';
 import { getComputeUnitLimit, getComputeUnitPrice } from '@/src/utils/helpers';
@@ -111,6 +111,13 @@ async function fetchMaxDepositLamports(pubkey: PublicKey, connection: Connection
 async function fetchMaxDepositSpl(pubkey: PublicKey, connection: Connection, mint: PublicKey) {
     const tokenProgram = await getTokenProgram(connection, mint);
     const tokenAccount = await getAssociatedTokenAddress(mint, pubkey, false, tokenProgram);
-    const balance = await connection.getTokenAccountBalance(tokenAccount);
-    return Number(balance.value.amount);
+    try {
+        const balance = await retryWithBackoff(
+            async () => connection.getTokenAccountBalance(tokenAccount),
+            2
+        );
+        return Number(balance.value.amount);
+    } catch {
+        return 0;
+    }
 }

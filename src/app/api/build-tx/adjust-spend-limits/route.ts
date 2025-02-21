@@ -72,7 +72,6 @@ export async function GET(request: Request) {
     const spendLimitTimeframe = body.spendLimitTimeframe as SpendLimitTimeframe;
 
     const nextTimeframeResetTimestamp = getNextTimeframeReset(spendLimitTimeframe);
-    console.log("nextTimeframeResetTimestamp", nextTimeframeResetTimestamp);
 
     const quartzClient = await QuartzClient.fetchClient(connection);
     let user: QuartzUser;
