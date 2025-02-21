@@ -1,6 +1,6 @@
 "use client";
 
-import { useRefetchAccountData } from "@/src/utils/hooks";
+import { useRefetchAccountData, useRefetchDepositLimits } from "@/src/utils/hooks";
 import { useEffect, useState } from "react";
 import InputSection from "../../Components/Input.ModalComponent";
 import Buttons from "../../Components/Buttons.ModalComponent";
@@ -9,7 +9,6 @@ import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
 import { useStore } from "@/src/utils/store";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useError } from "@/src/context/error-provider";
-import { useDepositLimitsQuery } from "@/src/utils/queries/protocol.queries";
 import { validateAmount, fetchAndParse, deserializeTransaction, signAndSendTransaction, buildEndpointURL, formatPreciseDecimal } from "@/src/utils/helpers";
 import { captureError } from "@/src/utils/errors";
 import { TxStatus, useTxStatus } from "@/src/context/tx-status-provider";
@@ -19,10 +18,11 @@ import { MarketIndex, baseUnitToDecimal, decimalToBaseUnit } from "@quartz-labs/
 export default function AddFundsModal() {
     const wallet = useAnchorWallet();
 
-    const { prices, rates, setModalVariation } = useStore();
+    const { prices, rates, setModalVariation, depositLimits } = useStore();
     const { showError } = useError();
     const { showTxStatus } = useTxStatus();
     const refetchAccountData = useRefetchAccountData();
+    const refetchDepositLimits = useRefetchDepositLimits();
 
     const [awaitingSign, setAwaitingSign] = useState(false);
     const [errorText, setErrorText] = useState("");
@@ -30,23 +30,21 @@ export default function AddFundsModal() {
     const amountDecimals = Number(amountStr);
 
     const [ marketIndex, setMarketIndex ] = useState<MarketIndex>(MarketIndex[0]);
-    const [ available, setAvailable ] = useState(0);
+    const depositLimitDecimal = depositLimits ? baseUnitToDecimal(depositLimits[marketIndex], marketIndex) : undefined;
 
     useEffect(() => {
         refetchAccountData();
-    }, [refetchAccountData]);
-
-    const { data: depositLimitBaseUnits } = useDepositLimitsQuery(wallet?.publicKey ?? null, marketIndex);
-    useEffect(() => {
-        if (depositLimitBaseUnits) setAvailable(baseUnitToDecimal(depositLimitBaseUnits, marketIndex));
-    }, [depositLimitBaseUnits, marketIndex]);
+        refetchDepositLimits();
+    }, [refetchAccountData, refetchDepositLimits]);
 
     const handleConfirm = async () => {
         if (!wallet?.publicKey) return setErrorText("Wallet not connected");
         
-        const errorText = validateAmount(marketIndex, amountDecimals, depositLimitBaseUnits ?? 0);
-        setErrorText(errorText);
-        if (errorText) return;
+        if (depositLimitDecimal !== undefined) {
+            const errorText = validateAmount(marketIndex, amountDecimals, depositLimits?.[marketIndex] ?? 0);
+            setErrorText(errorText);
+            if (errorText) return;
+        }
 
         setAwaitingSign(true);
         try {
@@ -81,14 +79,14 @@ export default function AddFundsModal() {
                 borrowing={false}
                 price={prices?.[marketIndex]}
                 rate={rates?.[marketIndex]?.depositRate}
-                available={available}
+                available={depositLimitDecimal}
                 amountStr={amountStr}
                 setAmountStr={setAmountStr}
                 setMaxAmount={() => setAmountStr(
-                    depositLimitBaseUnits ? formatPreciseDecimal(baseUnitToDecimal(depositLimitBaseUnits, marketIndex)) : "0"
+                    depositLimitDecimal ? formatPreciseDecimal(depositLimitDecimal) : "0"
                 )}
                 setHalfAmount={() => setAmountStr(
-                    depositLimitBaseUnits ? formatPreciseDecimal(baseUnitToDecimal(Math.trunc(depositLimitBaseUnits / 2), marketIndex)) : "0"
+                    depositLimitDecimal ? formatPreciseDecimal(depositLimitDecimal / 2) : "0"
                 )}
                 marketIndex={marketIndex}
                 setMarketIndex={setMarketIndex}

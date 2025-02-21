@@ -54,6 +54,21 @@ export function useRefetchBorrowLimits() {
     }, [queryClient]);
 }
 
+export function useRefetchDepositLimits() {
+    const queryClient = useQueryClient();
+
+    return useCallback(async (signature?: string) => {
+        if (signature) {
+            try { 
+                await fetch(`/api/confirm-tx?signature=${signature}`); 
+                await new Promise(resolve => setTimeout(resolve, 500));
+            } catch { }
+        }
+
+        queryClient.invalidateQueries({ queryKey: ["user", "deposit-limits"], refetchType: "all" });
+    }, [queryClient]);
+}
+
 export function useRefetchSpendLimits() {
     const queryClient = useQueryClient();
 

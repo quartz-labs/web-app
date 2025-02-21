@@ -15,7 +15,7 @@ import Unavailable from "@/src/components/OtherViews/Unavailable";
 import { useRefetchCardUser } from "../utils/hooks";
 import { AuthLevel } from "../types/enums/AuthLevel.enum";
 import { fetchAndParse } from "../utils/helpers";
-import { useAccountStatusQuery, useWithdrawLimitsQuery, useBalancesQuery, useRatesQuery, usePricesQuery, useHealthQuery, useBorrowLimitsQuery, useSpendLimitQuery } from "../utils/queries/protocol.queries";
+import { useAccountStatusQuery, useWithdrawLimitsQuery, useBalancesQuery, useRatesQuery, usePricesQuery, useHealthQuery, useBorrowLimitsQuery, useSpendLimitQuery, useDepositLimitsQuery } from "../utils/queries/protocol.queries";
 import { useProviderCardUserQuery, useQuartzCardUserQuery, useCardDetailsQuery } from "../utils/queries/internalApi.queries";
 import { ModalVariation } from "../types/enums/ModalVariation.enum";
 import UpgradeRequired from "../components/OtherViews/UpgradeRequired";
@@ -40,6 +40,7 @@ export default function Page() {
   useBalancesQuery(isInitialized ? wallet.publicKey : null);
   useWithdrawLimitsQuery(isInitialized ? wallet.publicKey : null);
   useBorrowLimitsQuery(isInitialized ? wallet.publicKey : null);
+  useDepositLimitsQuery(isInitialized ? wallet.publicKey : null);
   useHealthQuery(isInitialized ? wallet.publicKey : null);
   const { isStale  } = useSpendLimitQuery(isInitialized ? wallet.publicKey : null);
   useEffect(() => {
