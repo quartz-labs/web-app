@@ -41,7 +41,7 @@ export default function SpendLimitsModal() {
         existingSpendLimitDollars.toFixed(2)
     );
     const [newLimitTimeframeLength, setNewLimitTimeframeLength] = useState<SpendLimitTimeframe>(
-        spendLimitTimeframeLength ?? SpendLimitTimeframe.UNKNOWN
+        spendLimitTimeframeLength ?? SpendLimitTimeframe.DAY
     );
 
 
