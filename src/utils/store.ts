@@ -11,6 +11,7 @@ type State = {
   withdrawLimits?: Record<MarketIndex, number>;
   borrowLimits?: Record<MarketIndex, number>;
   health?: number;
+  depositLimits?: Record<MarketIndex, number>;
   modalVariation: ModalVariation;
 };
 
@@ -22,6 +23,7 @@ type Action = {
   setWithdrawLimits: (withdrawLimits?: Record<MarketIndex, number>) => void;
   setBorrowLimits: (borrowLimits?: Record<MarketIndex, number>) => void;
   setHealth: (health?: number) => void;
+  setDepositLimits: (depositLimits?: Record<MarketIndex, number>) => void;
   setModalVariation: (modalVariation: ModalVariation) => void;
 }
 
@@ -33,6 +35,7 @@ export const useStore = create<State & Action>((set) => ({
   withdrawLimits: undefined,
   borrowLimits: undefined,
   health: undefined,
+  depositLimits: undefined,
   modalVariation: ModalVariation.DISABLED,
 
   setIsInitialized: (isInitialized: boolean) => set({ isInitialized }),
@@ -42,5 +45,6 @@ export const useStore = create<State & Action>((set) => ({
   setWithdrawLimits: (withdrawLimits?: Record<MarketIndex, number>) => set({ withdrawLimits }),
   setBorrowLimits: (borrowLimits?: Record<MarketIndex, number>) => set({ borrowLimits }),
   setHealth: (health?: number) => set({ health }),
+  setDepositLimits: (depositLimits?: Record<MarketIndex, number>) => set({ depositLimits }),
   setModalVariation: (modalVariation: ModalVariation) => set({ modalVariation }),
 }));

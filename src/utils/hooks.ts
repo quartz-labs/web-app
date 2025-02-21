@@ -45,3 +45,11 @@ export function useRefetchAccountStatus() {
         queryClient.invalidateQueries({ queryKey: ["account-status"], refetchType: "all" });
     }, [queryClient]);
 }
+
+export function useRefetchDepositLimits() {
+    const queryClient = useQueryClient();
+
+    return useCallback(async () => {
+        queryClient.invalidateQueries({ queryKey: ["user", "deposit-limits"], refetchType: "all" });
+    }, [queryClient]);
+}

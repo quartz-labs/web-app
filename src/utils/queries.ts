@@ -156,13 +156,12 @@ export const useBorrowLimitsQuery = (address: PublicKey | null) => {
     return query();
 };
 
-export const useDepositLimitsQuery = (address: PublicKey | null, marketIndex: MarketIndex) => {
-    const query = createQuery<number>({
-        queryKey: ["user", "deposit-limits", address?.toBase58() ?? "", marketIndex.toString()],
+export const useDepositLimitsQuery = (address: PublicKey | null) => {
+    const query = createQuery<Record<MarketIndex, number>>({
+        queryKey: ["user", "deposit-limits", address?.toBase58() ?? ""],
         url: "/api/deposit-limit",
         params: address ? { 
-            address: address.toBase58(),
-            marketIndex: marketIndex.toString()
+            address: address.toBase58()
         } : undefined,
         enabled: address != null,
         errorMessage: "Could not fetch deposit limits",

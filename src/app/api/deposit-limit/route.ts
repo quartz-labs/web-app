@@ -7,7 +7,7 @@ import { z } from 'zod';
 import { MICRO_LAMPORTS_PER_LAMPORT } from '@/src/config/constants';
 import { AccountLayout } from '@solana/spl-token';
 import { getAssociatedTokenAddress } from '@solana/spl-token';
-import { getTokenProgram, MarketIndex, retryWithBackoff, TOKENS } from '@quartz-labs/sdk/browser';
+import { getMarketIndicesRecord, getTokenProgram, MarketIndex, TOKENS } from '@quartz-labs/sdk/browser';
 import { makeDepositIxs } from '../_utils/utils.server';
 import { QuartzClient } from '@quartz-labs/sdk';
 import { getComputeUnitLimit, getComputeUnitPrice } from '@/src/utils/helpers';
@@ -39,17 +39,13 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: "Invalid wallet address" }, { status: 400 });
     }
 
-    const marketIndexParam = searchParams.get('marketIndex');
-    if (!marketIndexParam) return NextResponse.json({ error: "Market index is required" }, { status: 400 });
-
-    const marketIndex = parseInt(marketIndexParam);
-    if (isNaN(marketIndex) || ![...MarketIndex].includes(marketIndex as any)) {
-        return NextResponse.json({ error: "Invalid market index" }, { status: 400 });
-    }
-
     try {
-        const limit = await fetchDepositLimit(connection, pubkey, marketIndex as MarketIndex);
-        return NextResponse.json(limit);
+        const limits = getMarketIndicesRecord<number>(0);
+        for (const marketIndex of MarketIndex) {
+            limits[marketIndex] = await fetchDepositLimit(connection, pubkey, marketIndex);
+        }
+        
+        return NextResponse.json(limits);
     } catch (error) {
         console.error(error);
         return NextResponse.json(
@@ -112,10 +108,7 @@ async function fetchMaxDepositSpl(pubkey: PublicKey, connection: Connection, min
     const tokenProgram = await getTokenProgram(connection, mint);
     const tokenAccount = await getAssociatedTokenAddress(mint, pubkey, false, tokenProgram);
     try {
-        const balance = await retryWithBackoff(
-            async () => connection.getTokenAccountBalance(tokenAccount),
-            2
-        );
+        const balance = await connection.getTokenAccountBalance(tokenAccount);
         return Number(balance.value.amount);
     } catch {
         return 0;

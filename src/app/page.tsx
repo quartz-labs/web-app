@@ -8,7 +8,7 @@ import NoBetaKey from "@/src/components/OtherViews/NoBetaKey";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { AccountStatus } from "@/src/types/enums/AccountStatus.enum";
 import styles from "./page.module.css";
-import { useAccountStatusQuery, useBalancesQuery, useBorrowLimitsQuery, useHealthQuery, usePricesQuery, useRatesQuery, useWithdrawLimitsQuery } from "@/src/utils/queries";
+import { useAccountStatusQuery, useBalancesQuery, useBorrowLimitsQuery, useDepositLimitsQuery, useHealthQuery, usePricesQuery, useRatesQuery, useWithdrawLimitsQuery } from "@/src/utils/queries";
 import { useStore } from "@/src/utils/store";
 import { useEffect } from 'react';
 import config from "@/src/config/config";
@@ -24,7 +24,8 @@ export default function Page() {
     setBalances, 
     setWithdrawLimits, 
     setBorrowLimits,
-    setHealth
+    setHealth,
+    setDepositLimits
   } = useStore();
 
   const { data: accountStatus, isLoading: isAccountStatusLoading } = useAccountStatusQuery(wallet.publicKey);
@@ -36,6 +37,7 @@ export default function Page() {
   const { data: withdrawLimits } = useWithdrawLimitsQuery(isInitialized ? wallet.publicKey : null);
   const { data: borrowLimits } = useBorrowLimitsQuery(isInitialized ? wallet.publicKey : null);
   const { data: health } = useHealthQuery(isInitialized ? wallet.publicKey : null);
+  const { data: depositLimits } = useDepositLimitsQuery(isInitialized ? wallet.publicKey : null);
 
   useEffect(() => {
     setPrices(prices);
@@ -45,9 +47,10 @@ export default function Page() {
     setBorrowLimits(borrowLimits);
     setHealth(health);
     setIsInitialized(isInitialized);
+    setDepositLimits(depositLimits);
   }, [
-    isInitialized, prices, rates, balances, withdrawLimits, borrowLimits, health, 
-    setPrices, setRates, setBalances, setWithdrawLimits, setBorrowLimits, setHealth, setIsInitialized
+    isInitialized, prices, rates, balances, withdrawLimits, borrowLimits, health, depositLimits,
+    setPrices, setRates, setBalances, setWithdrawLimits, setBorrowLimits, setHealth, setIsInitialized, setDepositLimits
   ]);
 
   return (
