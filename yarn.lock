@@ -788,10 +788,10 @@
     bs58 "^5.0.0"
     jito-ts "^3.0.1"
 
-"@quartz-labs/sdk@0.8.1":
-  version "0.8.1"
-  resolved "https://registry.yarnpkg.com/@quartz-labs/sdk/-/sdk-0.8.1.tgz#50ace5489ad80beb71b335a93835da727ad468fe"
-  integrity sha512-XtL0k2XMw6LZ5O9x9bN59Ld64HAURavP5KCZgUk4PFXkAZLU92Nik2TCk9mgAZG8Monj5dGftBg6lrZ+sXS22w==
+"@quartz-labs/sdk@0.9.0":
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/@quartz-labs/sdk/-/sdk-0.9.0.tgz#e4178190daa4c7c34c8a514b01ab967026fc0212"
+  integrity sha512-4yJayqIPZxSTDUGO6LHc3elrUvosaOOvQHmIDv38yDdKq/Dr9VfXLd1sy26TZJQnaH78YYa+5gmW1x4t5P/NdQ==
   dependencies:
     "@coral-xyz/anchor" "^0.29.0"
     "@drift-labs/sdk" "^2.110.0-beta.22"
@@ -1272,6 +1272,14 @@
   dependencies:
     "@types/node" "*"
 
+"@types/bs58@^4.0.4":
+  version "4.0.4"
+  resolved "https://registry.yarnpkg.com/@types/bs58/-/bs58-4.0.4.tgz#49fbcb0c7db5f7cea26f0e0f61dc4a41a2445aab"
+  integrity sha512-0IEpMFXXQi2zXaXl9GJ3sRwQo0uEkD+yFOv+FnAU5lkPtcu6h61xb7jc2CFPEZ5BUOaiP13ThuGc9HD4R8lR5g==
+  dependencies:
+    "@types/node" "*"
+    base-x "^3.0.6"
+
 "@types/connect@^3.4.33":
   version "3.4.38"
   resolved "https://registry.yarnpkg.com/@types/connect/-/connect-3.4.38.tgz#5ba7f3bc4fbbdeaff8dded952e5ff2cc53f8d858"
@@ -1745,7 +1753,7 @@ balanced-match@^1.0.0:
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-1.0.2.tgz#e83e3a7e3f300b34cb9d87f615fa0cbf357690ee"
   integrity sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==
 
-base-x@^3.0.2:
+base-x@^3.0.2, base-x@^3.0.6:
   version "3.0.10"
   resolved "https://registry.yarnpkg.com/base-x/-/base-x-3.0.10.tgz#62de58653f8762b5d6f8d9fe30fa75f7b2585a75"
   integrity sha512-7d0s06rR9rYaIWHkpfLIFICM/tkSVdoPC9qYAQRpxn9DdKNWNsKC0uk++akckyLq16Tx2WIinnZ6WRriAt6njQ==

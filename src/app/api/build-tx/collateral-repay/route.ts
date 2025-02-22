@@ -2,16 +2,26 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { AddressLookupTableAccount, Connection, PublicKey, TransactionInstruction, VersionedTransaction } from '@solana/web3.js';
+import { AddressLookupTableAccount, Connection, Keypair, PublicKey, TransactionInstruction, VersionedTransaction } from '@solana/web3.js';
 import { baseUnitToDecimal, MarketIndex, QuartzClient, TOKENS, DummyWallet, QuartzUser, getTokenProgram, makeCreateAtaIxIfNeeded } from '@quartz-labs/sdk';
 import { fetchAndParse, getComputeUnitPriceIx } from '@/src/utils/helpers';
 import { JUPITER_SLIPPAGE_BPS } from '@/src/config/constants';
 import { getConfig as getMarginfiConfig, MarginfiClient } from '@mrgnlabs/marginfi-client-v2';
 import { SwapMode, type QuoteResponse } from '@jup-ag/api';
-import { createCloseAccountInstruction, getAssociatedTokenAddress } from '@solana/spl-token';
+import { createCloseAccountInstruction, createTransferCheckedInstruction, getAssociatedTokenAddress } from '@solana/spl-token';
+import bs58 from 'bs58';
 
 const envSchema = z.object({
     RPC_URL: z.string().url(),
+    FLASH_LOAN_CALLER: z.string().transform(
+        (value) => {
+            try {
+                return Keypair.fromSecretKey(bs58.decode(value));
+            } catch {
+                throw new Error("FLASH_LOAN_CALLER must be a valid secret key");
+            }
+        }
+    ),
 });
 
 const paramsSchema = z.object({
@@ -47,6 +57,7 @@ export async function GET(request: Request) {
     try {
         env = envSchema.parse({
             RPC_URL: process.env.RPC_URL,
+            FLASH_LOAN_CALLER: process.env.FLASH_LOAN_CALLER,
         });
     } catch (error) {
         console.error("Error validating environment variables: ", error);
@@ -111,7 +122,8 @@ export async function GET(request: Request) {
             flashLoanAmountBaseUnits,
             marketIndexCollateral,
             ixs,
-            lookupTables
+            lookupTables,
+            env
         );
 
         const serializedTx = Buffer.from(transaction.serialize()).toString("base64");
@@ -250,16 +262,18 @@ async function buildFlashLoanTransaction(
     flashLoanAmountBaseUnits: number,
     flashLoanMarketIndex: MarketIndex,
     instructions: TransactionInstruction[], 
-    lookupTables: AddressLookupTableAccount[] = []
+    lookupTables: AddressLookupTableAccount[] = [],
+    env: z.infer<typeof envSchema>
 ): Promise<VersionedTransaction> {
     const amountLoanDecimal = baseUnitToDecimal(flashLoanAmountBaseUnits, flashLoanMarketIndex);
 
     // Get Marginfi account & bank
-    const wallet = new DummyWallet(address);
+    const flashLoanCaller = env.FLASH_LOAN_CALLER;
+    const wallet = new DummyWallet(flashLoanCaller.publicKey);
     const marginfiClient = await MarginfiClient.fetch(getMarginfiConfig(), wallet, connection);
-    const [ marginfiAccount ] = await marginfiClient.getMarginfiAccountsForAuthority(address);
+    const [ marginfiAccount ] = await marginfiClient.getMarginfiAccountsForAuthority(flashLoanCaller.publicKey);
     if (marginfiAccount === undefined) throw new Error("Could not find Flash Loan MarginFi account");
-    if (marginfiAccount.isDisabled) throw new Error("Flash Loan MarginFi account is disabled"); // TODO: Handle disabled MarginFi accounts
+    if (marginfiAccount.isDisabled) throw new Error("Flash Loan MarginFi account is disabled");
 
     const loanBank = marginfiClient.getBankByMint(TOKENS[flashLoanMarketIndex].mint);
     if (loanBank === null) throw new Error("Could not find Flash Loan MarginFi bank");
@@ -286,6 +300,30 @@ async function buildFlashLoanTransaction(
         );
     }
 
+    const flashLoanCallerAta = await getAssociatedTokenAddress(mintLoan, flashLoanCaller.publicKey, false, mintLoanTokenProgram);
+
+    const ix_sendFlashLoan = createTransferCheckedInstruction(
+        flashLoanCallerAta,
+        mintLoan,
+        walletAtaLoan,
+        flashLoanCaller.publicKey,
+        flashLoanAmountBaseUnits,
+        TOKENS[flashLoanMarketIndex].decimalPrecision.toNumber(),
+        [],
+        mintLoanTokenProgram
+    );
+
+    const ix_receiveFlashLoan = createTransferCheckedInstruction(
+        walletAtaLoan,
+        mintLoan,
+        flashLoanCallerAta,
+        address,
+        flashLoanAmountBaseUnits,
+        TOKENS[flashLoanMarketIndex].decimalPrecision.toNumber(),
+        [],
+        mintLoanTokenProgram
+    )
+
     // Make borrow & deposit instructions
     const { instructions: ix_borrow } = await marginfiAccount.makeBorrowIx(amountLoanDecimal, loanBank.address, {
         createAtas: false,
@@ -300,12 +338,16 @@ async function buildFlashLoanTransaction(
             ix_computePrice, 
             ...oix_createAtaLoan, 
             ...ix_borrow, 
+            ix_sendFlashLoan,
             ...instructions, 
+            ix_receiveFlashLoan,
             ...ix_deposit, 
             ...oix_closeWSolAta
         ],
         addressLookupTableAccounts: lookupTables
     });
+
+    flashloanTx.sign([flashLoanCaller]);
 
     return flashloanTx;
 }
