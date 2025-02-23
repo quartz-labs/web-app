@@ -478,7 +478,7 @@
     snake-case "^3.0.4"
     spok "^1.4.3"
 
-"@mrgnlabs/marginfi-client-v2@4.0.4", "@mrgnlabs/marginfi-client-v2@^4.0.4":
+"@mrgnlabs/marginfi-client-v2@4.0.4":
   version "4.0.4"
   resolved "https://registry.yarnpkg.com/@mrgnlabs/marginfi-client-v2/-/marginfi-client-v2-4.0.4.tgz#cd9689dd35b50ab7c62693dbd3e87228156994b1"
   integrity sha512-3DYWfhh292LsgPEEvL3fbqmAj9AOkUVm2zh+3t9JDzqqHISQOKSgoD8+sI10NIhnf+0+yvdrwE3vRV75crcucg==
@@ -788,15 +788,14 @@
     bs58 "^5.0.0"
     jito-ts "^3.0.1"
 
-"@quartz-labs/sdk@0.9.0":
-  version "0.9.0"
-  resolved "https://registry.yarnpkg.com/@quartz-labs/sdk/-/sdk-0.9.0.tgz#e4178190daa4c7c34c8a514b01ab967026fc0212"
-  integrity sha512-4yJayqIPZxSTDUGO6LHc3elrUvosaOOvQHmIDv38yDdKq/Dr9VfXLd1sy26TZJQnaH78YYa+5gmW1x4t5P/NdQ==
+"@quartz-labs/sdk@0.9.1":
+  version "0.9.1"
+  resolved "https://registry.yarnpkg.com/@quartz-labs/sdk/-/sdk-0.9.1.tgz#7763363f02972fd04f8098a7190ab608c6e6c5e9"
+  integrity sha512-IPajO84HDZVbq/POMowF9vTer0xl40tERDtyrXeXkKwZgTgwiTB1RlHEEoPZ3EQE3WnuFrIvub9HVFHKCeb5VQ==
   dependencies:
     "@coral-xyz/anchor" "^0.29.0"
     "@drift-labs/sdk" "^2.110.0-beta.22"
     "@jup-ag/api" "6.0.30"
-    "@mrgnlabs/marginfi-client-v2" "^4.0.4"
     "@pythnetwork/pyth-solana-receiver" "^0.9.1"
     "@solana/spl-token" "^0.4.9"
     bn.js "^5.2.1"
