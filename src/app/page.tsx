@@ -20,7 +20,6 @@ import { useProviderCardUserQuery, useQuartzCardUserQuery, useCardDetailsQuery }
 import { ModalVariation } from "../types/enums/ModalVariation.enum";
 import UpgradeRequired from "../components/OtherViews/UpgradeRequired";
 import Disconnected from "../components/OtherViews/Disconnected";
-import Background from "../components/Background/Background";
 
 export default function Page() {
   const wallet = useWallet();
