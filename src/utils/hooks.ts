@@ -31,7 +31,7 @@ export function useRefetchWithdrawLimits() {
         if (signature) {
             try { 
                 await fetch(`/api/confirm-tx?signature=${signature}`); 
-                await new Promise(resolve => setTimeout(resolve, 500));
+                await new Promise(resolve => setTimeout(resolve, 1000));
             } catch { }
         }
 

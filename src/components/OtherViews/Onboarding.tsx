@@ -63,7 +63,7 @@ export default function Onboarding() {
     <div className={"glass panel center-content"}>
       <div className={"central-container"}>
       <h1 className={styles.title}>Acknowledge Terms</h1>
-        <p className={styles.subheading}>Creating an account requires 0.05 SOL for rent which can be reclaimed if you ever decide to close your account.</p>
+        <p className={styles.subheading}>Creating an account requires 0.035 SOL for rent which can be reclaimed if you ever decide to close your account.</p>
 
         <ul className={styles.checkboxes}>
             <li>

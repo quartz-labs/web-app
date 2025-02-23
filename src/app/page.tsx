@@ -19,6 +19,8 @@ import { useAccountStatusQuery, useWithdrawLimitsQuery, useBalancesQuery, useRat
 import { useProviderCardUserQuery, useQuartzCardUserQuery, useCardDetailsQuery } from "../utils/queries/internalApi.queries";
 import { ModalVariation } from "../types/enums/ModalVariation.enum";
 import UpgradeRequired from "../components/OtherViews/UpgradeRequired";
+import Disconnected from "../components/OtherViews/Disconnected";
+import Background from "../components/Background/Background";
 
 export default function Page() {
   const wallet = useWallet();
@@ -99,8 +101,10 @@ export default function Page() {
   
   return (
     <main className={styles.container}>
-      <Nav
-        isAccountInitialized={isInitialized}
+      {/* <Background /> */}
+
+      <Nav 
+        isAccountInitialized={isInitialized} 
         isAccountStatusLoading={isAccountStatusLoading}
       />
 
@@ -112,20 +116,23 @@ export default function Page() {
         {!config.NEXT_PUBLIC_UNAVAILABLE_TIME && (
           () => {
             switch (accountStatus) {
+              case AccountStatus.INITIALIZED:
+                return <Dashboard />;
+
               case AccountStatus.CLOSED:
                 return <ClosedAccount />;
 
               case AccountStatus.NO_BETA_KEY:
                 return <NoBetaKey />;
 
-            case AccountStatus.NOT_INITIALIZED:
-              return <Onboarding />;
+              case AccountStatus.NOT_INITIALIZED:
+                return <Onboarding />;
 
-            case AccountStatus.UPGRADE_REQUIRED:
-              return <UpgradeRequired />;
+              case AccountStatus.UPGRADE_REQUIRED:
+                return <UpgradeRequired />;
 
-            default:
-              return <Dashboard />;
+              default:
+                return <Disconnected />;
             }
           })()
         }

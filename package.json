@@ -11,7 +11,11 @@
   "dependencies": {
     "@jup-ag/api": "6.0.30",
     "@mrgnlabs/marginfi-client-v2": "4.0.4",
+<<<<<<< HEAD
     "@quartz-labs/sdk": "0.9.0",
+=======
+    "@quartz-labs/sdk": "0.9.1",
+>>>>>>> main
     "@solana/spl-token": "^0.4.9",
     "@solana/wallet-adapter-base": "^0.9.23",
     "@solana/wallet-adapter-base-ui": "^0.1.2",

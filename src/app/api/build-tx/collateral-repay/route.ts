@@ -2,16 +2,26 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { AddressLookupTableAccount, Connection, PublicKey, TransactionInstruction, VersionedTransaction } from '@solana/web3.js';
+import { AddressLookupTableAccount, Connection, Keypair, PublicKey, TransactionInstruction, VersionedTransaction } from '@solana/web3.js';
 import { baseUnitToDecimal, MarketIndex, QuartzClient, TOKENS, DummyWallet, QuartzUser, getTokenProgram, makeCreateAtaIxIfNeeded } from '@quartz-labs/sdk';
 import { fetchAndParse, getComputeUnitPriceIx } from '@/src/utils/helpers';
 import { JUPITER_SLIPPAGE_BPS } from '@/src/config/constants';
 import { getConfig as getMarginfiConfig, MarginfiClient } from '@mrgnlabs/marginfi-client-v2';
 import { SwapMode, type QuoteResponse } from '@jup-ag/api';
 import { createCloseAccountInstruction, getAssociatedTokenAddress } from '@solana/spl-token';
+import bs58 from 'bs58';
 
 const envSchema = z.object({
     RPC_URL: z.string().url(),
+    FLASH_LOAN_CALLER: z.string().transform(
+        (value) => {
+            try {
+                return Keypair.fromSecretKey(bs58.decode(value));
+            } catch {
+                throw new Error("FLASH_LOAN_CALLER must be a valid secret key");
+            }
+        }
+    ),
 });
 
 const paramsSchema = z.object({
@@ -47,6 +57,7 @@ export async function GET(request: Request) {
     try {
         env = envSchema.parse({
             RPC_URL: process.env.RPC_URL,
+            FLASH_LOAN_CALLER: process.env.FLASH_LOAN_CALLER,
         });
     } catch (error) {
         console.error("Error validating environment variables: ", error);
@@ -97,7 +108,7 @@ export async function GET(request: Request) {
             flashLoanAmountBaseUnits
         } = await makeCollateralRepayIxs(
             connection,
-            address,
+            env.FLASH_LOAN_CALLER.publicKey,
             amountSwapBaseUnits,
             marketIndexLoan,
             marketIndexCollateral,
@@ -107,7 +118,7 @@ export async function GET(request: Request) {
 
         const transaction = await buildFlashLoanTransaction(
             connection,
-            address,
+            env.FLASH_LOAN_CALLER,
             flashLoanAmountBaseUnits,
             marketIndexCollateral,
             ixs,
@@ -127,7 +138,7 @@ export async function GET(request: Request) {
 
 async function makeCollateralRepayIxs(
     connection: Connection,
-    address: PublicKey,
+    caller: PublicKey,
     amountSwapBaseUnits: number,
     marketIndexLoan: MarketIndex,
     marketIndexCollateral: MarketIndex,
@@ -149,13 +160,13 @@ async function makeCollateralRepayIxs(
     const {
         ix: jupiterIx,
         lookupTables: jupiterLookupTables
-    } = await makeJupiterIx(connection, jupiterQuote, address);
+    } = await makeJupiterIx(connection, jupiterQuote, caller);
 
     const { 
         ixs, 
         lookupTables: quartzLookupTables 
     } = await user.makeCollateralRepayIxs(
-        address,
+        caller,
         marketIndexLoan,
         marketIndexCollateral,
         jupiterIx
@@ -246,7 +257,7 @@ async function makeJupiterIx(
 
 async function buildFlashLoanTransaction(
     connection: Connection,
-    address: PublicKey,
+    caller: Keypair,
     flashLoanAmountBaseUnits: number,
     flashLoanMarketIndex: MarketIndex,
     instructions: TransactionInstruction[], 
@@ -255,11 +266,11 @@ async function buildFlashLoanTransaction(
     const amountLoanDecimal = baseUnitToDecimal(flashLoanAmountBaseUnits, flashLoanMarketIndex);
 
     // Get Marginfi account & bank
-    const wallet = new DummyWallet(address);
+    const wallet = new DummyWallet(caller.publicKey);
     const marginfiClient = await MarginfiClient.fetch(getMarginfiConfig(), wallet, connection);
-    const [ marginfiAccount ] = await marginfiClient.getMarginfiAccountsForAuthority(address);
+    const [ marginfiAccount ] = await marginfiClient.getMarginfiAccountsForAuthority(caller.publicKey);
     if (marginfiAccount === undefined) throw new Error("Could not find Flash Loan MarginFi account");
-    if (marginfiAccount.isDisabled) throw new Error("Flash Loan MarginFi account is disabled"); // TODO: Handle disabled MarginFi accounts
+    if (marginfiAccount.isDisabled) throw new Error("Flash Loan MarginFi account is disabled");
 
     const loanBank = marginfiClient.getBankByMint(TOKENS[flashLoanMarketIndex].mint);
     if (loanBank === null) throw new Error("Could not find Flash Loan MarginFi bank");
@@ -270,16 +281,16 @@ async function buildFlashLoanTransaction(
     // Make ATA instructions (closing ATA at the end if wSol is used)
     const mintLoan = TOKENS[flashLoanMarketIndex].mint;
     const mintLoanTokenProgram = await getTokenProgram(connection, mintLoan);
-    const walletAtaLoan = await getAssociatedTokenAddress(mintLoan, address, false, mintLoanTokenProgram);
-    const oix_createAtaLoan = await makeCreateAtaIxIfNeeded(connection, walletAtaLoan, address, mintLoan, mintLoanTokenProgram);
+    const walletAtaLoan = await getAssociatedTokenAddress(mintLoan, caller.publicKey, false, mintLoanTokenProgram);
+    const oix_createAtaLoan = await makeCreateAtaIxIfNeeded(connection, walletAtaLoan, caller.publicKey, mintLoan, mintLoanTokenProgram);
 
     const oix_closeWSolAta: TransactionInstruction[] = [];
     if (TOKENS[flashLoanMarketIndex].name === "SOL") {
         oix_closeWSolAta.push(
             createCloseAccountInstruction(
                 walletAtaLoan,
-                address,
-                address,
+                caller.publicKey,
+                caller.publicKey,
                 [],
                 mintLoanTokenProgram
             )
@@ -306,6 +317,8 @@ async function buildFlashLoanTransaction(
         ],
         addressLookupTableAccounts: lookupTables
     });
+
+    flashloanTx.sign([caller]);
 
     return flashloanTx;
 }
