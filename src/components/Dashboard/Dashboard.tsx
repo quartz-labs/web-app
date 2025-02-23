@@ -8,7 +8,7 @@ import Modal from "../Modal/Modal";
 
 export default function Dashboard() {
   const { isInitialized } = useStore();
-
+  
   return (
     <>
       <Modal />
@@ -16,8 +16,9 @@ export default function Dashboard() {
       <div className={`glass panel ${styles.mainPanel}`}>
         <div className={styles.mainPanelContent}>
           <h1 className={styles.title}>Available Credit</h1>
+
           <Balances />
-        
+
           {isInitialized && (
             <>
               <Health />
@@ -26,7 +27,7 @@ export default function Dashboard() {
           )}
 
           {!isInitialized && (
-            <p className={styles.notInitialized}>No wallet connected</p>
+            <p>Connecting...</p>
           )}
         </div>
       </div>
