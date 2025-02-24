@@ -102,8 +102,9 @@ export default function RepayWithCollateral({
             setAwaitingSign(false);
             if (signature) setModalVariation(ModalVariation.DISABLED);
         } catch (error) {
-            if (error instanceof WalletSignTransactionError) showTxStatus({ status: TxStatus.SIGN_REJECTED });
-            else {
+            if (error instanceof WalletSignTransactionError) {
+                showTxStatus({ status: TxStatus.SIGN_REJECTED });
+            } else {
                 showTxStatus({ status: TxStatus.NONE });
                 captureError(showError, "Failed to repay loan", "/RepayLoanModal.tsx", error, wallet.publicKey);
             }

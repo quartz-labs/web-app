@@ -68,29 +68,32 @@ export default function Page() {
           <Unavailable />
         )}
         
-        {!config.NEXT_PUBLIC_UNAVAILABLE_TIME && (
-          () => {
-            switch (accountStatus) {
-              case AccountStatus.INITIALIZED:
-                return <Dashboard />;
+        {!config.NEXT_PUBLIC_UNAVAILABLE_TIME && (<>
+          {wallet && (
+            () => {
+              switch (accountStatus) {
+                case AccountStatus.CLOSED:
+                  return <ClosedAccount />;
+  
+                case AccountStatus.NO_BETA_KEY:
+                  return <NoBetaKey />;
+  
+                case AccountStatus.NOT_INITIALIZED:
+                  return <Onboarding />;
+  
+                case AccountStatus.UPGRADE_REQUIRED:
+                  return <UpgradeRequired />;
+  
+                default:
+                  return <Dashboard />;
+              }
+            })()
+          }
 
-              case AccountStatus.CLOSED:
-                return <ClosedAccount />;
-
-              case AccountStatus.NO_BETA_KEY:
-                return <NoBetaKey />;
-
-              case AccountStatus.NOT_INITIALIZED:
-                return <Onboarding />;
-
-              case AccountStatus.UPGRADE_REQUIRED:
-                return <UpgradeRequired />;
-
-              default:
-                return <Disconnected />;
-            }
-          })()
-        }
+          {!wallet && (
+            <Disconnected />
+          )}
+        </>)}
       </div>
     </main>
   );

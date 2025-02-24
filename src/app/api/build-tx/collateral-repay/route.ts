@@ -118,6 +118,7 @@ export async function GET(request: Request) {
 
         const transaction = await buildFlashLoanTransaction(
             connection,
+            address,
             env.FLASH_LOAN_CALLER,
             flashLoanAmountBaseUnits,
             marketIndexCollateral,
@@ -169,7 +170,8 @@ async function makeCollateralRepayIxs(
         caller,
         marketIndexLoan,
         marketIndexCollateral,
-        jupiterIx
+        jupiterIx,
+        true
     );
 
     return {
@@ -233,16 +235,16 @@ async function makeJupiterIx(
         );
     
         return addressLookupTableAccountInfos.reduce((acc, accountInfo, index) => {
-        const addressLookupTableAddress = keys[index];
-        if (accountInfo && addressLookupTableAddress) {
-            const addressLookupTableAccount = new AddressLookupTableAccount({
-            key: new PublicKey(addressLookupTableAddress),
-            state: AddressLookupTableAccount.deserialize(accountInfo.data),
-            });
-            acc.push(addressLookupTableAccount);
-        }
-    
-        return acc;
+            const addressLookupTableAddress = keys[index];
+            if (accountInfo && addressLookupTableAddress) {
+                const addressLookupTableAccount = new AddressLookupTableAccount({
+                key: new PublicKey(addressLookupTableAddress),
+                state: AddressLookupTableAccount.deserialize(accountInfo.data),
+                });
+                acc.push(addressLookupTableAccount);
+            }
+        
+            return acc;
         }, new Array<AddressLookupTableAccount>());
     };
     
@@ -257,6 +259,7 @@ async function makeJupiterIx(
 
 async function buildFlashLoanTransaction(
     connection: Connection,
+    owner: PublicKey,
     caller: Keypair,
     flashLoanAmountBaseUnits: number,
     flashLoanMarketIndex: MarketIndex,
