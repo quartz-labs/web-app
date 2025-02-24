@@ -15,6 +15,7 @@ import config from "@/src/config/config";
 import Unavailable from "@/src/components/OtherViews/Unavailable";
 import UpgradeRequired from "../components/OtherViews/UpgradeRequired";
 import Disconnected from "../components/OtherViews/Disconnected";
+import Background from "../components/Background/Background";
 
 export default function Page() {
   const wallet = useWallet();
@@ -56,7 +57,7 @@ export default function Page() {
 
   return (
     <main className={styles.container}>
-      {/* <Background /> */}
+      <Background />
 
       <Nav 
         isAccountInitialized={isInitialized} 
@@ -69,7 +70,7 @@ export default function Page() {
         )}
         
         {!config.NEXT_PUBLIC_UNAVAILABLE_TIME && (<>
-          {wallet && (
+          {wallet.publicKey && (
             () => {
               switch (accountStatus) {
                 case AccountStatus.CLOSED:
@@ -90,7 +91,7 @@ export default function Page() {
             })()
           }
 
-          {!wallet && (
+          {!wallet.publicKey && (
             <Disconnected />
           )}
         </>)}

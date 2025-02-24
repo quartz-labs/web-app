@@ -110,13 +110,18 @@ a:hover {
   -moz-box-shadow: -10px 10px 24px 0px rgba(41,135,200,0.08);
   box-shadow: -10px 10px 24px 0px rgba(41,135,200,0.08);
 
-  /* Background */
-  background-image: var(--glass-background);
-  background-size: 17% auto, auto, auto, auto;
-  backdrop-filter: blur(22px);
-
   /* Border */
   border: var(--glass-border);
+
+  /* Background */
+  background-size: 17% auto, auto, auto, auto;
+  @supports (backdrop-filter: blur(14px)) {
+    background-image: var(--glass-background);
+    backdrop-filter: blur(14px);
+  }
+  @supports not (backdrop-filter: blur(14px)) {
+    background-image: var(--glass-background-solid);
+  }
 }
 
 .panel {
@@ -177,9 +182,12 @@ a:hover {
   --glass-background: 
     url("/noise.png"),
     radial-gradient(circle at 80% 20%, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%),
-    /* linear-gradient(#0B111DC0, #0B111DC0); */
-    linear-gradient(#0B111D99, #0B111D99), /* TODO - Remove this and get background blur or fallback working on mobile */
-    linear-gradient(#060910, #060910); /* This too */
+    linear-gradient(#0b111d6c, #0b111d6c);
+  --glass-background-solid: 
+    url("/noise.png"),
+    radial-gradient(circle at 80% 20%, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%),
+    linear-gradient(#0B111D99, #0B111D99),
+    linear-gradient(#060910, #060910);
 
   --background-linear-gradient: linear-gradient(var(--color-background), var(--color-background));
 
