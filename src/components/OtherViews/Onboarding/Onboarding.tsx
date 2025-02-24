@@ -7,7 +7,7 @@ import IdPhoto from "./IdPhoto.onboarding";
 import AccountPermissions from "./AccountPermissions.onboarding";
 import { DEFAULT_KYC_DATA, DEFAULT_TERMS, type KYCData, type Terms } from "@/src/types/interfaces/KYCData.interface";
 import type { Address } from "@/src/types/interfaces/Address.interface";
-import { useStore } from "@/src/utils/store";
+import styles from "./Onboarding.module.css";
 
 export enum OnboardingPage {
     ACCOUNT_CREATION = 0,
@@ -62,7 +62,7 @@ export default function Onboarding() {
     };
 
     return (
-        <>
+        <div className={styles.onboardingContainer}>
             <Progress page={page} />
 
             <div className={"glass panel"}>
@@ -125,6 +125,6 @@ export default function Onboarding() {
                     }
                 })()}
             </div>
-        </>
+        </div>
     );
 }
