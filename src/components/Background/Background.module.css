@@ -6,13 +6,6 @@
     height: 100%;
 }
 
-.gem {
-    position: absolute;
-    bottom: 0;
-    height: 30VH;
-    width: auto;
-}
-
 .imageLeft {
     left: 0;
     transform: translate(-50%, 0);
@@ -21,4 +14,11 @@
 .imageRight {
     right: 0;
     transform: translate(50%, 0);
+}
+
+.gem {
+    position: absolute;
+    bottom: 0;
+    height: var(--bg-gem-height);
+    width: auto;
 }

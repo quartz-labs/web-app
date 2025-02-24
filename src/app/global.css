@@ -242,6 +242,7 @@ a:hover {
   --notifications-button-padding: 9px;
   --nav-items-gap: 15px;
   --input-field-wrapper-gap: 10px;
+  --bg-gem-height: 30vh;
 }
 
 @media only screen and (max-width: 1300px) {
@@ -303,6 +304,7 @@ a:hover {
     --buttons-row-gap: 10px;
     --notifications-button-padding: 5px;
     --nav-items-gap: 10px;
+    --bg-gem-height: 20vh;
   }
 }
 
