@@ -28,7 +28,7 @@ export default function Dashboard() {
           )}
 
           {!isInitialized && (
-            <p>Connecting...</p>
+            <p className={styles.notInitialized}>Connecting wallet...</p>
           )}
 
           <Assets />

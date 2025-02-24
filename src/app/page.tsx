@@ -20,6 +20,7 @@ import { useProviderCardUserQuery, useQuartzCardUserQuery, useCardDetailsQuery }
 import { ModalVariation } from "../types/enums/ModalVariation.enum";
 import UpgradeRequired from "../components/OtherViews/UpgradeRequired";
 import Disconnected from "../components/OtherViews/Disconnected";
+import Background from "../components/Background/Background";
 
 export default function Page() {
   const wallet = useWallet();
@@ -100,7 +101,7 @@ export default function Page() {
   
   return (
     <main className={styles.container}>
-      {/* <Background /> */}
+      <Background />
 
       <Nav 
         isAccountInitialized={isInitialized} 
@@ -111,30 +112,33 @@ export default function Page() {
         {config.NEXT_PUBLIC_UNAVAILABLE_TIME && (
           <Unavailable />
         )}
+        
+        {!config.NEXT_PUBLIC_UNAVAILABLE_TIME && (<>
+          {wallet.publicKey && (
+            () => {
+              switch (accountStatus) {
+                case AccountStatus.CLOSED:
+                  return <ClosedAccount />;
+  
+                case AccountStatus.NO_BETA_KEY:
+                  return <NoBetaKey />;
+  
+                case AccountStatus.NOT_INITIALIZED:
+                  return <Onboarding />;
+  
+                case AccountStatus.UPGRADE_REQUIRED:
+                  return <UpgradeRequired />;
+  
+                default:
+                  return <Dashboard />;
+              }
+            })()
+          }
 
-        {!config.NEXT_PUBLIC_UNAVAILABLE_TIME && (
-          () => {
-            switch (accountStatus) {
-              case AccountStatus.INITIALIZED:
-                return <Dashboard />;
-
-              case AccountStatus.CLOSED:
-                return <ClosedAccount />;
-
-              case AccountStatus.NO_BETA_KEY:
-                return <NoBetaKey />;
-
-              case AccountStatus.NOT_INITIALIZED:
-                return <Onboarding />;
-
-              case AccountStatus.UPGRADE_REQUIRED:
-                return <UpgradeRequired />;
-
-              default:
-                return <Disconnected />;
-            }
-          })()
-        }
+          {!wallet.publicKey && (
+            <Disconnected />
+          )}
+        </>)}
       </div>
     </main>
   );

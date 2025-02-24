@@ -10,17 +10,17 @@ export default function Background() {
         priority 
         className={`${styles.gem} ${styles.imageLeft}`} 
         // Initial size values below are changed by css class
-        width={100}
-        height={100}
+        width={434}
+        height={564}
       />
       <Image 
-        src="/gemRight.png" 
+        src="/gem-right.webp" 
         alt="" 
         priority 
         className={`${styles.gem} ${styles.imageRight}`} 
         // Initial size values below are changed by css class
-        width={100}
-        height={100}
+        width={646}
+        height={564}
       />
     </div>
   );
