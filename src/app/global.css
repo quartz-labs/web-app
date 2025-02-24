@@ -185,10 +185,12 @@ a:hover {
   --glass-background: 
     url("/noise.png"),
     radial-gradient(circle at 80% 20%, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%),
+    linear-gradient(#ffffff19, #ffffff19),
     linear-gradient(#0b111d6c, #0b111d6c);
   --glass-background-solid: 
     url("/noise.png"),
     radial-gradient(circle at 80% 20%, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%),
+    linear-gradient(#ffffff19, #ffffff19),
     linear-gradient(#0B111D99, #0B111D99),
     linear-gradient(#060910, #060910);
 
@@ -213,6 +215,7 @@ a:hover {
   --font-size-large-base: 20.16px;
   --font-size-card-base: 18.5px;
   --font-size-p-base: 16.8px;
+  --font-size-medium-base: 15.5px;
   --font-size-small-base: 14px;
   --font-size-tiny-base: 12px;
   --font-size-balance-detail-base: 35px;
@@ -225,18 +228,19 @@ a:hover {
   --font-size-h4: var(--font-size-h4-base);
   --font-size-large: var(--font-size-large-base);
   --font-size-card: var(--font-size-card-base);
+  --font-size-medium: var(--font-size-medium-base);
   --font-size-p: var(--font-size-p-base);
   --font-size-small: var(--font-size-small-base);
   --font-size-tiny: var(--font-size-tiny-base);
   --font-size-balance-detail: var(--font-size-balance-detail-base);
   --font-size-asset-amount: var(--font-size-asset-amount-base);
 
-  --panel-padding: 9px;
+  --panel-padding: 14px;
   --nav-height: 50px;
   --asset-card-height: 73px;
   --modal-width: 780px;
   --modal-content-width: 75%;
-  --signup-field-height: 47.19px;
+  --signup-field-height: 50px;
   --input-field-height: 80px;
   --address-copy-button-height: 57px;
   --popup-position-bottom: 50px;
@@ -275,6 +279,7 @@ a:hover {
     --font-size-h4: calc(0.9 * var(--font-size-h4-base));
     --font-size-large: calc(0.9 * var(--font-size-large-base));
     --font-size-card: calc(0.9 * var(--font-size-card-base));
+    --font-size-medium: calc(0.9 * var(--font-size-medium-base));
     --font-size-p: calc(0.9 * var(--font-size-p-base));
     --font-size-small: calc(0.9 * var(--font-size-small-base));
     --font-size-tiny: calc(0.9 * var(--font-size-tiny-base));
@@ -298,6 +303,7 @@ a:hover {
     --font-size-h4: calc(0.8 * var(--font-size-h4-base));
     --font-size-large: calc(0.8 * var(--font-size-large-base));
     --font-size-card: calc(0.8 * var(--font-size-card-base));
+    --font-size-medium: calc(0.8 * var(--font-size-medium-base));
     --font-size-p: calc(0.8 * var(--font-size-p-base));
     --font-size-small: calc(0.8 * var(--font-size-small-base));
     --font-size-tiny: calc(0.8 * var(--font-size-tiny-base));

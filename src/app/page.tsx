@@ -2,7 +2,7 @@
 
 import Dashboard from "@/src/components/Dashboard/Dashboard";
 import Nav from "@/src/components/Nav/Nav";
-import Onboarding from "@/src/components/OtherViews/Onboarding";
+import Onboarding from "@/src/components/OtherViews/Onboarding/Onboarding";
 import ClosedAccount from "@/src/components/OtherViews/ClosedAccount";
 import NoBetaKey from "@/src/components/OtherViews/NoBetaKey";
 import { useWallet } from "@solana/wallet-adapter-react";

@@ -5,23 +5,18 @@ export interface KYCData {
     id: string;
     firstName: string;
     lastName: string;
-    birthDate: string; // YYYY-MM-DD
-    nationalId: string;
-    countryOfIssue: string; // ISO 3166-1 alpha-2
     email: string;
-    phoneCountryCode: string;
-    phoneNumber: string;
+    birthDate: string; // YYYY-MM-DD
     address: Address;
-    walletAddress: string;
-    chainId: string;
-    contractAddress: string;
-    ipAddress: string;
+    countryOfIssue: string; // ISO 3166-1 alpha-2
+    nationalId: string;
     occupation: string;
-    annualSalary: string;
     accountPurpose: string;
+    annualSalary: string;
     expectedMonthlyVolume: string;
+    walletAddress: string;
+    ipAddress: string;
     isTermsOfServiceAccepted: boolean;
-    hasExistingDocuments?: string;
 }
 
 const DEFAULT_COUNTRY = "US";
@@ -29,12 +24,8 @@ export const DEFAULT_KYC_DATA: KYCData = {
     id: "",
     firstName: "",
     lastName: "",
-    birthDate: "",
-    nationalId: "",
-    countryOfIssue: DEFAULT_COUNTRY,
     email: "",
-    phoneCountryCode: "",
-    phoneNumber: "",
+    birthDate: "",
     address: {
         line1: "",
         line2: "",
@@ -44,16 +35,15 @@ export const DEFAULT_KYC_DATA: KYCData = {
         countryCode: DEFAULT_COUNTRY,
         country: getCountry(DEFAULT_COUNTRY) ?? "",
     },
-    walletAddress: "",
-    chainId: "",
-    contractAddress: "",
-    ipAddress: "",
+    countryOfIssue: DEFAULT_COUNTRY,
+    nationalId: "",
     occupation: "",
-    annualSalary: "",
     accountPurpose: "",
+    annualSalary: "",
     expectedMonthlyVolume: "",
+    walletAddress: "",
+    ipAddress: "",
     isTermsOfServiceAccepted: false,
-    hasExistingDocuments: "",
 }
 
 
