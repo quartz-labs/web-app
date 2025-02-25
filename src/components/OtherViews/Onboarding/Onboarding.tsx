@@ -83,7 +83,8 @@ export default function Onboarding({ onCompleteOnboarding }: OnboardingProps) {
             setPage(OnboardingPage.ID_PHOTO);
         } else if (quartzCardUser?.auth_level === AuthLevel.CARD) {
             if (!cardDetails) {
-                captureError(showError, "Could not create card", "/Onboarding.tsx", "Could not create card", wallet?.publicKey ?? null);
+                // Fix this error
+                captureError(showError, "Could not create card", "/Onboarding.tsx", "Could not create card", wallet?.publicKey ?? null, true);
             }
 
             setPage(OnboardingPage.ACCOUNT_PERMISSIONS);

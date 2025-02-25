@@ -27,7 +27,7 @@ export default function Page() {
   const { setIsInitialized, jwtToken, setModalVariation, setSpendLimitRefreshing } = useStore();
   const refetchCardUser = useRefetchCardUser();
 
-  const [completedOnboarding, setCompletedOnboarding] = useState(true);
+  const [limitsSet, setLimitsSet] = useState(true);
 
   // Quartz account status
   const { data: accountStatus, isLoading: isAccountStatusLoading } = useAccountStatusQuery(wallet.publicKey);
@@ -52,8 +52,8 @@ export default function Page() {
   
 
   // Card data
-  const { data: quartzCardUser } = useQuartzCardUserQuery(isInitialized ? wallet.publicKey : null);
-  const { data: providerCardUser } = useProviderCardUserQuery(
+  const { data: quartzCardUser, isLoading: isQuartzCardUserLoading } = useQuartzCardUserQuery(isInitialized ? wallet.publicKey : null);
+  const { data: providerCardUser, isLoading: isProviderCardUserLoading } = useProviderCardUserQuery(
     quartzCardUser?.card_api_user_id ?? null,
     isInitialized && (quartzCardUser?.auth_level === AuthLevel.BASE || quartzCardUser?.auth_level === AuthLevel.KYC_PENDING)
   );
@@ -61,13 +61,14 @@ export default function Page() {
     quartzCardUser?.card_api_user_id ?? null,
     isInitialized && quartzCardUser?.auth_level === AuthLevel.CARD
   );
-  const requireOnboarding = (accountStatus === AccountStatus.NOT_INITIALIZED || quartzCardUser?.auth_level !== AuthLevel.CARD);
-  useEffect(() => {
-    if (requireOnboarding && completedOnboarding) {
-      setCompletedOnboarding(false);
-    }
-  }, [requireOnboarding, completedOnboarding]);
 
+  const doneLoading = !isAccountStatusLoading && !isQuartzCardUserLoading && !isProviderCardUserLoading;
+  const requireOnboarding = (doneLoading && (accountStatus !== undefined && accountStatus === AccountStatus.NOT_INITIALIZED) || (quartzCardUser?.auth_level !== AuthLevel.CARD && quartzCardUser?.auth_level !== undefined));
+  useEffect(() => {
+    if (requireOnboarding && limitsSet && doneLoading) {
+      setLimitsSet(false);
+    }
+  }, [requireOnboarding, limitsSet, doneLoading]);
 
   // Update QuartzCardUser status if ProviderCardUser status differs
   useEffect(() => {
@@ -138,7 +139,7 @@ export default function Page() {
     );
   }
 
-  if (requireOnboarding || !completedOnboarding) {
+  if (requireOnboarding || !limitsSet) {
     return (
       <main className={styles.container}>
         <Background />
@@ -150,7 +151,7 @@ export default function Page() {
 
         <div className={styles.content}>
           <Onboarding
-            onCompleteOnboarding={() => setCompletedOnboarding(true)}
+            onCompleteOnboarding={() => setLimitsSet(true)}
           />
         </div>
       </main>
