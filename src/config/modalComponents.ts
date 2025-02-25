@@ -5,9 +5,7 @@ import NotificationsModal from "@/src/components/Modal/Variations/Notifications.
 import RepayLoanModal from "@/src/components/Modal/Variations/Balance/RepayLoan.Modal";
 import WithdrawModal from "@/src/components/Modal/Variations/Balance/Withdraw.Modal";
 import BorrowModal from "../components/Modal/Variations/Balance/Borrow.Modal";
-import CardSignupModal from "../components/Modal/Variations/CardSignup.Modal";
 import AcceptTandcsModal from "../components/Modal/Variations/AcceptTandcs.Modal";
-import CardKycModal from "../components/Modal/Variations/CardKyc.Modal";
 import SpendLimitsModal from "../components/Modal/Variations/SpendLimits.Modal";
 
 export const ModalComponents = {
@@ -18,8 +16,6 @@ export const ModalComponents = {
     [ModalVariation.REPAY]: RepayLoanModal,
     [ModalVariation.REPAY_LOAN]: RepayLoanModal,
     [ModalVariation.CLOSE_ACCOUNT]: CloseAccountModal,
-    [ModalVariation.CARD_SIGNUP]: CardSignupModal,
-    [ModalVariation.CARD_KYC]: CardKycModal,
     [ModalVariation.ACCEPT_TANDCS]: AcceptTandcsModal,
     [ModalVariation.SPEND_LIMITS]: SpendLimitsModal
 };

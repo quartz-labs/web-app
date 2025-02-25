@@ -5,7 +5,6 @@ import base58 from "bs58";
 import config from "../config/config";
 import { fetchAndParse } from "./helpers";
 import { useStore } from "./store";
-import { ModalVariation } from "../types/enums/ModalVariation.enum";
 import { WalletSignMessageError } from "@solana/wallet-adapter-base";
 import { TandCsNeeded } from "../types/enums/AuthLevel.enum";
 
@@ -115,13 +114,12 @@ export function useRefetchCardUser() {
 }
 
 export function useOpenKycLink() {
-    const { setKycLink, setModalVariation } = useStore();
+    const { setKycLink } = useStore();
     
     return useCallback((link: string) => {
         setKycLink(link);
-        setModalVariation(ModalVariation.CARD_KYC);
         window.open(link, "_blank", "noopener noreferrer");
-    }, [setKycLink, setModalVariation]);
+    }, [setKycLink]);
 }
 
 export function useLoginCardUser() {

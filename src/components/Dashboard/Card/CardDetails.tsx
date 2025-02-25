@@ -55,29 +55,6 @@ export default function CardDetails() {
 
     const loginCardUser = useLoginCardUser();
 
-    if (
-        quartzCardUser?.auth_level === undefined 
-        || (quartzCardUser?.auth_level === AuthLevel.CARD && !cardDetails)
-    ) {
-        return (
-            <div className={styles.cardWrapper}>
-                <div className={styles.cardContainer}>
-                    <Card
-                        cvc={cardCvc}
-                        pan={cardPan}
-                    />  
-
-                    <button
-                        className={`glass-button ${styles.cardButton}`}
-                        onClick={() => setModalVariation(ModalVariation.CARD_SIGNUP)}
-                    >
-                        Get Quartz Card
-                    </button>
-                </div>
-            </div>
-        )
-    }
-
     if (!jwtToken) {
         return (
             <div className={styles.cardWrapper}>
