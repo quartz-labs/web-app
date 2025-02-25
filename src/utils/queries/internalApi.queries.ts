@@ -70,7 +70,7 @@ export const useTxHistoryQuery = (cardUserId: string | null, enabled: boolean) =
             userId: cardUserId,
         } : undefined,
         errorMessage: "Could not fetch tx history",
-        refetchInterval: 60_000,
+        refetchInterval: 180_000,
         enabled: cardUserId != null && enabled,
         onSuccess: (data) => setTxHistory(data)
     });
