@@ -38,7 +38,7 @@ export const getPhoneCode = (countryCode: string) => {
 
     try {
         return getCountryCallingCode(countryCode as CountryCode);
-    } catch (error) {
+    } catch {
         throw new Error(`No phone code found for country: ${countryCode}`);
     }
 };

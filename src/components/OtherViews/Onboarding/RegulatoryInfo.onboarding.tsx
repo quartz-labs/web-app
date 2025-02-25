@@ -37,7 +37,7 @@ export default function RegulatoryInfo({
     useEffect(() => {
         handleFormDataChange("accountPurpose", DEFAULT_PURPOSE);
         handleFormDataChange("expectedMonthlyVolume", DEFAULT_VOLUME);
-    }, []);
+    }, [handleFormDataChange]);
 
     const handleSubmit = () => {
         const missingValuesData = {

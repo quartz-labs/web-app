@@ -9,18 +9,20 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { AccountStatus } from "@/src/types/enums/AccountStatus.enum";
 import styles from "./page.module.css";
 import { useStore } from "@/src/utils/store";
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import config from "@/src/config/config";
 import Unavailable from "@/src/components/OtherViews/Unavailable";
 import { useLoginCardUser, useRefetchCardUser } from "../utils/hooks";
 import { AuthLevel, TandCsNeeded } from "../types/enums/AuthLevel.enum";
 import { fetchAndParse } from "../utils/helpers";
 import { useAccountStatusQuery, useWithdrawLimitsQuery, useBalancesQuery, useRatesQuery, usePricesQuery, useHealthQuery, useBorrowLimitsQuery, useSpendLimitQuery, useDepositLimitsQuery } from "../utils/queries/protocol.queries";
-import { useProviderCardUserQuery, useQuartzCardUserQuery, useCardDetailsQuery, useTxHistoryQuery, useApplicationStatusQuery } from "../utils/queries/internalApi.queries";
+import { useProviderCardUserQuery, useQuartzCardUserQuery, useCardDetailsQuery, useTxHistoryQuery } from "../utils/queries/internalApi.queries";
 import { ModalVariation } from "../types/enums/ModalVariation.enum";
 import UpgradeRequired from "../components/OtherViews/UpgradeRequired";
 import Disconnected from "../components/OtherViews/Disconnected";
 import Background from "../components/Background/Background";
+import { captureError } from "../utils/errors";
+import { useError } from "../context/error-provider";
 
 export default function Page() {
   const wallet = useWallet();
@@ -34,6 +36,8 @@ export default function Page() {
     setDoneLoading
   } = useStore();
   const refetchCardUser = useRefetchCardUser();
+  const loginCardUser = useLoginCardUser();
+  const { showError } = useError();
 
 
   // Quartz account status
@@ -122,21 +126,25 @@ export default function Page() {
     setDoneLoading(doneLoading);
   }, [doneLoading, setDoneLoading]);
 
-  const [onboardingComplete, setOnboardingComplete] = useState(true);
-  useEffect(() => {
-    if (requireOnboarding && onboardingComplete) {
-      setOnboardingComplete(false);
-    }
-  }, [requireOnboarding, onboardingComplete]);
-
-  const loginCardUser = useLoginCardUser();
-  const completeOnboarding = () => {
+  const completeOnboarding = async () => {
     setIsSigningLoginMessage(true);
     loginCardUser.mutate(TandCsNeeded.ACCEPTED);
-    refetchCardUser();
     setModalVariation(ModalVariation.DISABLED);
-    setOnboardingComplete(true);
+    
+    try {
+      await fetchAndParse(`${config.NEXT_PUBLIC_INTERNAL_API_URL}/user/initial-spend-limit`, {
+        method: 'PATCH',
+        headers: {
+        'Content-Type': 'application/json'
+      },
+        body: JSON.stringify({ id: quartzCardUser?.card_api_user_id })
+      });
+      refetchCardUser();
+    } catch (error) {
+      captureError(showError, "Could not update user in database", "app/page.tsx", error, wallet.publicKey);
+    }
   }
+
 
   if (config.NEXT_PUBLIC_UNAVAILABLE_TIME) {
     return (
@@ -171,7 +179,7 @@ export default function Page() {
     );
   }
 
-  if (requireOnboarding || !onboardingComplete) {
+  if (requireOnboarding || !quartzCardUser?.set_initial_spend_limit) {
     return (
       <main className={styles.container}>
         <Background />
