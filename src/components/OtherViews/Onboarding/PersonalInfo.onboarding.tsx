@@ -3,6 +3,7 @@ import styles from "./Onboarding.module.css";
 import type { OnboardingPageProps } from "./Onboarding";
 import { formatPhoneCode, getCountries, getCountryCodes } from "@/src/utils/countries";
 import { getCode } from "@/src/utils/countries";
+import { UNSUPPORTED_STATES } from "@/src/config/constants";
 
 export default function PersonalInfo({
     formData,
@@ -22,6 +23,8 @@ export default function PersonalInfo({
         phoneNumber: false,
     });
     const [isMissingValue, setIsMissingValue] = useState(false);
+    const [isUnsupportedState, setIsUnsupportedState] = useState(false);
+    const [isUnderAge, setIsUnderAge] = useState(false);
 
     const handleSubmit = () => {
         const missingValuesData = {
@@ -38,6 +41,25 @@ export default function PersonalInfo({
         setMissingValues(missingValuesData);
         for (const [, value] of Object.entries(missingValuesData)) {
             if (value) return setIsMissingValue(true);
+        }
+
+        if (UNSUPPORTED_STATES.includes(formData.address.region.toUpperCase())) {
+            return setIsUnsupportedState(true);
+        }
+        setIsUnsupportedState(false);
+
+        // Ensure over 18
+        const today = new Date();
+        const birthDate = new Date(formData.birthDate);
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            age--; // If birthday hasn't occurred yet this year, subtract one from age
+        }
+
+        if (age < 18) {
+            return setIsUnderAge(true);
         }
 
         incrementPage();
@@ -205,6 +227,12 @@ export default function PersonalInfo({
 
                 {isMissingValue && 
                     <p className={`error-text`}>Required fields are missing.</p>
+                }
+                {!isMissingValue && isUnsupportedState && 
+                    <p className={`error-text`}>We can&apos;t support users from your state yet.</p>
+                }
+                {!isMissingValue && !isUnsupportedState && isUnderAge && 
+                    <p className={`error-text`}>You must be at least 18 years old to apply for a card.</p>
                 }
             </div>
         </div>

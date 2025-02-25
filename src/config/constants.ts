@@ -14,3 +14,26 @@ export const DEFAULT_CARD_TIMEFRAME = new BN(SECONDS_PER_DAY);
 export const DEFAULT_CARD_TIMEFRAME_RESET = new BN(0);
 
 export const DUST_BUFFER_BASE_UNITS = 100;
+
+export const UNSUPPORTED_STATES = [
+    "NEVADA",
+    "NEW MEXICO",
+    "NORTH DAKOTA",
+    "SOUTH DAKOTA",
+    "WISCONSIN",
+    "VERMONT",
+    "DELAWARE",
+    "GEORGIA",
+    "IDAHO",
+    "LOUISIANA",
+    "MARYLAND",
+    "MISSOURI",
+    "MONTANA",
+    "UTAH",
+    "WASHINGTON",
+    "WYOMING",
+    "OHIO",
+    "OREGON",
+    "RHODE ISLAND",
+    "ARIZONA",
+]

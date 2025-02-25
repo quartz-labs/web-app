@@ -31,6 +31,8 @@ export default function RegulatoryInfo({
     });
     const [isMissingTerms, setIsMissingTerms] = useState(false);
 
+    const [isInvalidSSN, setIsInvalidSSN] = useState(false);
+
     const DEFAULT_PURPOSE = "Daily Spending";
     const DEFAULT_VOLUME = "500";
     const DEFAULT_VOLUME_DISPLAY = "$0-499";
@@ -70,6 +72,9 @@ export default function RegulatoryInfo({
         setIsMissingTerms(false);
 
         if (formData.countryOfIssue !== "US") {
+            if (formData.nationalId.length !== 9) {
+                return setIsInvalidSSN(true);
+            }
             handleTermsChange("openingDisclosure", undefined);
         }
 
@@ -84,7 +89,7 @@ export default function RegulatoryInfo({
                 <div className={styles.inputSection}>
                     <div className={styles.inputContainer}>
                         <p className={styles.inputLabel}>Where is your ID from?</p>
-                        <p className={styles.inputLabel}>What&apos;s your ID number?</p>
+                        <p className={styles.inputLabel}>What&apos;s your {formData.countryOfIssue === "US" ? "Social Security Number" : "ID number"}?</p>
                     </div>
                     <div className={styles.inputContainer}>
                         <select
@@ -252,6 +257,10 @@ export default function RegulatoryInfo({
 
                 {(!isMissingValue && isMissingTerms) &&
                     <p className={`error-text`}>You must agree to all terms.</p>
+                }
+
+                {(!isMissingValue && !isMissingTerms && isInvalidSSN) &&
+                    <p className={`error-text`}>Social Security Number is invalid.</p>
                 }
             </div>
         </div>
