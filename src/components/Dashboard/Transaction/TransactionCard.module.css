@@ -23,7 +23,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0px;
+    gap: 20px;
 
     padding: 25px 20px;
     width: 100%;
@@ -58,14 +58,10 @@
 }
 
 .currencies {
-    flex-grow: 1;
-
-    display: grid;
-    grid-template-columns: 4.5fr 1fr 4.5fr;
-    grid-column-gap: 0px;
-    grid-row-gap: 0px;
-    justify-content: space-between;
+    width: 15%;
+    display: flex;
     align-items: center;
+    justify-content: flex-start;
 }
 
 .arrow {
@@ -78,7 +74,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    width: 24%;
+    width: 80%;
+    padding-right: 20px;
 }
 
 .card-details {
@@ -152,37 +149,44 @@
 
 @media only screen and (max-width: 570px) {
     .card-base {
-        padding: 25px 10px;
+        padding: 25px 15px;
+    }
+
+    .currencies {
+        width: 20%;
+    }
+
+    .basic-info {
+        width: 75%;
+        padding-right: 10px;
     }
 
     .arrow {
         height: 15.2px;
         width: 21.12px;
     }
-
-    .basic-info {
-        flex-direction: column;
-        gap: 3px;
-        width: auto;
-    }
 }
 
 @media only screen and (max-width: 470px) {
     .card-base {
-        flex-direction: column-reverse;
+        flex-direction: column;
         gap: 15px;
         padding: 23px;
+    }
+
+    .currencies {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .basic-info {
+        width: 100%;
+        padding-right: 0;
     }
 
     .arrow {
         height: 13.68px;
         width: 19px;
-    }
-
-    .basic-info {
-        flex-direction: row;
-        justify-content: space-between;
-        width: 100%;
     }
 
     .currencies {

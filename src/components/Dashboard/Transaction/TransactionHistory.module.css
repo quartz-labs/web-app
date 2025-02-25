@@ -32,6 +32,10 @@
     }
 }
 
+.title {
+    font-size: var(--font-size-h4);
+}
+
 .nav-links {
     display: flex;
     align-items: center;
@@ -64,11 +68,10 @@
 }
 
 .transactions {
-    margin-top: 92VH;
+    margin-top: 20px;
     padding-top: 25px;
     padding-bottom: 250px;
     width: 100%;
-    border-width: 1.5px 0px 0px 0px;
 
     display: flex;
     flex-direction: column;
@@ -80,7 +83,7 @@
 
 @media only screen and (max-width: 1030px) {
     .transactions {
-        margin-top: 95VH;
+        margin-top: 20px;
         padding-top: 20px;
     }
 }

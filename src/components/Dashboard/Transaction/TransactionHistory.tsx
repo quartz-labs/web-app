@@ -9,8 +9,8 @@ interface TransactionsProps {
 export default function TransactionHistory({transactions} : TransactionsProps) {
     let lastDate: Date | null = null;
     return (
-        <div className={`glass ${styles["transactions"]}`}>
-            <h2 className={styles["heading"]}>Transactions</h2>
+        <div className={`${styles["transactions"]}`}>
+            <h2 className={styles.title}>Card Transactions</h2>
             <ul className={styles["transactions-content"]}>
                 {transactions.map((transaction, index) => {
                     const isFirstOfDay = !lastDate || lastDate.setHours(0,0,0,0) !== new Date(transaction.spend.authorizedAt).setHours(0,0,0,0);

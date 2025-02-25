@@ -1,7 +1,6 @@
 import Image from "next/image";
 import styles from "./TransactionCard.module.css"
 //import CurrencyInfo from "./CurrencyInfo";
-import TransactionStatus from "./TransactionStatus";
 import { useEffect, useRef, useState } from "react";
 import type { ProviderCardHistory } from "@/src/types/interfaces/ProviderCardHistory.interface";
 
@@ -13,8 +12,6 @@ interface TransactionCardProps {
 export default function TransactionCard({ transaction, dateLabelled }: TransactionCardProps) {
     const [isOpen, setIsOpen] = useState(false);
     const detailsRef = useRef<HTMLDivElement>(null);
-
-    const transactionTypeText = transaction.type;
 
     // Formatted date/time strings
     const timeObj = new Date(transaction.spend.authorizedAt);
@@ -83,18 +80,17 @@ export default function TransactionCard({ transaction, dateLabelled }: Transacti
                         )}
                     </div>
                     <div className={styles["basic-info"]}>
-                        <p className="light">{transaction.type.toUpperCase()}</p> <p>${transaction.spend.amount / 100}</p>
-                        <TransactionStatus status={transaction.spend.status} />
+                        {/* <p className="light">{transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}</p> <p>${transaction.spend.amount / 100}</p> */}
+                        <p className="light">{transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}</p> <p>${transaction.spend.amount / 100}</p>
+                        {/* <TransactionStatus status={transaction.spend.status} /> */}
                         <p>{formattedTime}</p>
                     </div>
                 </button>
 
                 <div ref={detailsRef} className={`${styles["card-details"]} ${isOpen && styles["open"]}`}>
-                    <p className="light">Type</p> <p>{transactionTypeText}</p>
                     <p className="light">Spent</p> <p>${transaction.spend.amount / 100}</p>
                     <p className="light">At</p> <p>{transaction.spend.enrichedMerchantName}</p>
                     <p className="light">Created on</p> <p>{formattedDateTime}</p>
-
                 </div>
             </div>
         </li>
