@@ -37,7 +37,7 @@ export default function AccountCreation({
         if (isInitialized) {
             incrementPage();
         }
-    }, [isInitialized]);
+    }, [isInitialized, incrementPage]);
 
     const handleCheckboxChange = (index: number): void => {
         const newCheckboxes = [...checkboxes]; 

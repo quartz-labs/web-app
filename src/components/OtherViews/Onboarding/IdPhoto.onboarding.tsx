@@ -1,16 +1,4 @@
-import { useError } from "@/src/context/error-provider";
-import { TxStatus, useTxStatus } from "@/src/context/tx-status-provider";
-import { captureError } from "@/src/utils/errors";
-import { signAndSendTransaction } from "@/src/utils/helpers";
-import { deserializeTransaction } from "@/src/utils/helpers";
-import { fetchAndParse } from "@/src/utils/helpers";
-import { buildEndpointURL } from "@/src/utils/helpers";
-import { useRefetchAccountStatus } from "@/src/utils/hooks";
-import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
-import { useAnchorWallet } from "@solana/wallet-adapter-react";
-import { useState } from "react";
 import styles from "./Onboarding.module.css";
-import { PuffLoader } from "react-spinners";
 import type { OnboardingPageProps } from "./Onboarding";
 import { TailSpin } from "react-loader-spinner";
 
@@ -21,7 +9,6 @@ export interface IdPhotoProps extends OnboardingPageProps {
 }
 
 export default function IdPhoto({
-    incrementPage, 
     decrementPage,
     awaitingApproval,
     rejectedReason,

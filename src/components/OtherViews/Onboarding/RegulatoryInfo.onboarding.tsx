@@ -49,7 +49,7 @@ export default function RegulatoryInfo({
             expectedMonthlyVolume: !formData.expectedMonthlyVolume,
         };
         setMissingValues(missingValuesData);
-        for (const [_, value] of Object.entries(missingValuesData)) {
+        for (const [, value] of Object.entries(missingValuesData)) {
             if (value) return setIsMissingValue(true);
         }
         setIsMissingValue(false);
@@ -84,7 +84,7 @@ export default function RegulatoryInfo({
                 <div className={styles.inputSection}>
                     <div className={styles.inputContainer}>
                         <p className={styles.inputLabel}>Where is your ID from?</p>
-                        <p className={styles.inputLabel}>What's your ID number?</p>
+                        <p className={styles.inputLabel}>What&apos;s your ID number?</p>
                     </div>
                     <div className={styles.inputContainer}>
                         <select
@@ -113,7 +113,7 @@ export default function RegulatoryInfo({
                 </div>
                 <div className={styles.inputSection}>
                     <div className={styles.inputContainer}>
-                        <p className={styles.inputLabel}>What's your occupation?</p>
+                        <p className={styles.inputLabel}>What&apos;s your occupation?</p>
                         <p className={styles.inputLabel}>What will you be using Quartz for?</p>
                     </div>
                     <div className={styles.inputContainer}>
@@ -139,8 +139,8 @@ export default function RegulatoryInfo({
                 </div>
                 <div className={styles.inputSection}>
                     <div className={styles.inputContainer}>
-                        <p className={styles.inputLabel}>What's your annual income?</p>
-                        <p className={styles.inputLabel}>What's your expected monthly spend on Quartz?</p>
+                        <p className={styles.inputLabel}>What&apos;s your annual income?</p>
+                        <p className={styles.inputLabel}>What&apos;s your expected monthly spend on Quartz?</p>
                     </div>
                     <div className={styles.inputContainer}>
                         <input 

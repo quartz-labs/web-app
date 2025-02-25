@@ -10,10 +10,6 @@ export default function PersonalInfo({
     handleAddressChange,
     incrementPage,
 }: OnboardingPageProps) {
-    const handleCompleteLater = () => {
-        throw new Error("Not implemented");
-    };
-
     const [missingValues, setMissingValues] = useState({
         firstName: false,
         lastName: false,
@@ -38,7 +34,7 @@ export default function PersonalInfo({
             postalCode: !formData.address.postalCode,
         };
         setMissingValues(missingValuesData);
-        for (const [_, value] of Object.entries(missingValuesData)) {
+        for (const [, value] of Object.entries(missingValuesData)) {
             if (value) return setIsMissingValue(true);
         }
 
@@ -51,7 +47,7 @@ export default function PersonalInfo({
 
             <div className={styles.formWrapper}>
                 <div className={styles.inputSection}>
-                    <p className={styles.inputLabel}>What's your full legal name? This must exactly match your ID.</p>
+                    <p className={styles.inputLabel}>What&apos;s your full legal name? This must exactly match your ID.</p>
                     <div className={styles.inputContainer}>
                         <input 
                             type="text" 
@@ -71,7 +67,7 @@ export default function PersonalInfo({
                 </div>
 
                 <div className={styles.inputSection}>
-                    <p className={styles.inputLabel}>What's your email?</p>
+                    <p className={styles.inputLabel}>What&apos;s your email?</p>
                     <div className={styles.inputContainer}>
                         <input 
                             type="text" 
@@ -84,7 +80,7 @@ export default function PersonalInfo({
                 </div>
 
                 <div className={styles.inputSection}>
-                    <p className={styles.inputLabel}>What's your date of birth?</p>
+                    <p className={styles.inputLabel}>What&apos;s your date of birth?</p>
                     <div className={styles.inputContainer}>
                         <input
                             className={`${styles.inputField} ${(missingValues.birthDate && !formData.birthDate) ? styles.missing : ""}`}
@@ -97,7 +93,7 @@ export default function PersonalInfo({
                 </div>
 
                 <div className={styles.inputSection}>
-                    <p className={styles.inputLabel}>What's your address?</p>
+                    <p className={styles.inputLabel}>What&apos;s your address?</p>
                     <div className={styles.inputContainer}>
                         <input 
                             type="text" 

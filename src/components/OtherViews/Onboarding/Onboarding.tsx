@@ -91,7 +91,7 @@ export default function Onboarding({ onCompleteOnboarding }: OnboardingProps) {
             setAwaitingApproval(false);
             setRejectedReason(undefined);
         }
-    }, [quartzCardUser?.auth_level, providerCardUser, cardDetails]);
+    }, [quartzCardUser?.auth_level, providerCardUser, cardDetails, showError, wallet?.publicKey]);
 
     const handleSubmit = async () => {
         if (!wallet?.publicKey) {

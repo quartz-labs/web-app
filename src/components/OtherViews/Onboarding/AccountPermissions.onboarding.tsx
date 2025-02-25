@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import SpendLimitsModal from "../../Modal/Variations/SpendLimits.Modal";
 import type { OnboardingPageProps } from "./Onboarding";
 import styles from "./Onboarding.module.css";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
@@ -27,8 +26,7 @@ export default function AccountPermissions({ onCompleteOnboarding }: AccountPerm
     const { 
         spendLimitTimeframeBaseUnits,
         spendLimitTimeframeLength,
-        spendLimitRefreshing,
-        spendLimitTimeframeRemainingBaseUnits
+        spendLimitRefreshing
     } = useStore();
     const refetchSpendLimits = useRefetchSpendLimits();
 
@@ -58,9 +56,6 @@ export default function AccountPermissions({ onCompleteOnboarding }: AccountPerm
         existingSpendLimitTimeframe = SpendLimitTimeframe.DAY;
     }
     const [newLimitTimeframeLength, setNewLimitTimeframeLength] = useState<SpendLimitTimeframe>(existingSpendLimitTimeframe);
-
-    let remainingSpendLimitDollars = baseUnitToDecimal(spendLimitTimeframeRemainingBaseUnits ?? 0, MARKET_INDEX_USDC);
-    if (spendLimitTimeframeLength === 0) remainingSpendLimitDollars = 0;
 
 
     useEffect(() => {
@@ -190,7 +185,7 @@ export default function AccountPermissions({ onCompleteOnboarding }: AccountPerm
                     className={`glass-button ${styles.mainButton}`}
                     onClick={handleConfirm}
                 >
-                    Done
+                    {awaitingSign ? "..." : "Done"}
                 </button>
             </div>
         </div>
