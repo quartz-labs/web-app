@@ -9,7 +9,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { AccountStatus } from "@/src/types/enums/AccountStatus.enum";
 import styles from "./page.module.css";
 import { useStore } from "@/src/utils/store";
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import config from "@/src/config/config";
 import Unavailable from "@/src/components/OtherViews/Unavailable";
 import { useRefetchCardUser } from "../utils/hooks";
@@ -27,6 +27,7 @@ export default function Page() {
   const { setIsInitialized, jwtToken, setModalVariation, setSpendLimitRefreshing } = useStore();
   const refetchCardUser = useRefetchCardUser();
 
+  const [completedOnboarding, setCompletedOnboarding] = useState(true);
 
   // Quartz account status
   const { data: accountStatus, isLoading: isAccountStatusLoading } = useAccountStatusQuery(wallet.publicKey);
@@ -61,6 +62,11 @@ export default function Page() {
     isInitialized && quartzCardUser?.auth_level === AuthLevel.CARD
   );
   const requireOnboarding = (accountStatus === AccountStatus.NOT_INITIALIZED || quartzCardUser?.auth_level !== AuthLevel.CARD);
+  useEffect(() => {
+    if (requireOnboarding && completedOnboarding) {
+      setCompletedOnboarding(false);
+    }
+  }, [requireOnboarding, completedOnboarding]);
 
 
   // Update QuartzCardUser status if ProviderCardUser status differs
@@ -132,7 +138,7 @@ export default function Page() {
     );
   }
 
-  if (requireOnboarding) {
+  if (requireOnboarding || !completedOnboarding) {
     return (
       <main className={styles.container}>
         <Background />
@@ -143,7 +149,9 @@ export default function Page() {
         />
 
         <div className={styles.content}>
-          <Onboarding />
+          <Onboarding
+            onCompleteOnboarding={() => setCompletedOnboarding(true)}
+          />
         </div>
       </main>
     );

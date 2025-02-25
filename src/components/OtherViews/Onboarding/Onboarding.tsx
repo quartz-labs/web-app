@@ -37,7 +37,11 @@ export interface OnboardingPageProps {
     terms: Terms;
 }
 
-export default function Onboarding() {
+export interface OnboardingProps {
+    onCompleteOnboarding: () => void;
+}
+
+export default function Onboarding({ onCompleteOnboarding }: OnboardingProps) {
     const wallet = useAnchorWallet();
     const { showError } = useError();
     const openKycLink = useOpenKycLink();
@@ -67,6 +71,7 @@ export default function Onboarding() {
                 acceptQuartzCardTerms: true,
                 privacyPolicy: true
             }));
+            setPage(OnboardingPage.PERSONAL_INFO);
         }
     }, [isInitialized]);
 
@@ -85,7 +90,7 @@ export default function Onboarding() {
             setAwaitingApproval(false);
             setRejectedReason(undefined);
         }
-    }, [quartzCardUser, providerCardUser, cardDetails]);
+    }, [quartzCardUser?.auth_level, providerCardUser, cardDetails]);
 
     const handleSubmit = async () => {
         if (!wallet?.publicKey) {
@@ -98,6 +103,7 @@ export default function Onboarding() {
 
         if (kycLink) {
             openKycLink(kycLink);
+            refetchCardUser();
             return;
         }
 
@@ -217,6 +223,7 @@ export default function Onboarding() {
                                 handleTermsChange={handleTermsChange}
                                 formData={formData}
                                 terms={terms}
+                                onCompleteOnboarding={onCompleteOnboarding}
                             />;
                     }
                 })()}

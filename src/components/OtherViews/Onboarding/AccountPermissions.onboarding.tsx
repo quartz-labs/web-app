@@ -15,16 +15,16 @@ import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
 import { captureError } from "@/src/utils/errors";
 import { TailSpin } from "react-loader-spinner";
 
-export default function AccountPermissions({
-    incrementPage, 
-    decrementPage 
-}: OnboardingPageProps) {
+export interface AccountPermissionsProps extends OnboardingPageProps {
+    onCompleteOnboarding: () => void;
+}
+
+export default function AccountPermissions({ onCompleteOnboarding }: AccountPermissionsProps) {
     const wallet = useAnchorWallet();
     const { showError } = useError();
     const { showTxStatus } = useTxStatus();
 
     const { 
-        setModalVariation,
         spendLimitTimeframeBaseUnits,
         spendLimitTimeframeLength,
         spendLimitRefreshing,
@@ -93,7 +93,7 @@ export default function AccountPermissions({
             setAwaitingSign(false);
             if (signature) {
                 refetchSpendLimits();
-                // TODO: Process completion
+                onCompleteOnboarding();
             }
         } catch (error) {
             if (error instanceof WalletSignTransactionError) showTxStatus({ status: TxStatus.SIGN_REJECTED });
