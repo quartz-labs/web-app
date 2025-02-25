@@ -5,6 +5,7 @@ import { createQuery } from "./createQuery";
 import config from "@/src/config/config";
 import type { CardsForUserResponse } from "@/src/types/interfaces/CardsForUserResponse.interface";
 import type { ProviderCardUser } from "@/src/types/interfaces/ProviderCardUser.interface";
+import type { ProviderCardHistory } from "@/src/types/interfaces/ProviderCardHistory.interface";
 
 export const useQuartzCardUserQuery = (publicKey: PublicKey | null) => {
     const { setQuartzCardUser } = useStore();
@@ -55,6 +56,23 @@ export const useCardDetailsQuery = (cardUserId: string | null, enabled: boolean)
         enabled: cardUserId != null && enabled,
         staleTime: Infinity,
         onSuccess: (data) => setCardDetails(data)
+    });
+    return query();
+};
+
+export const useTxHistoryQuery = (cardUserId: string | null, enabled: boolean) => {
+    const { setTxHistory } = useStore();
+
+    const query = createQuery<ProviderCardHistory[]>({
+        queryKey: ["user", "txHistory"],
+        url: `${config.NEXT_PUBLIC_INTERNAL_API_URL}/card/transaction/user`,
+        params: cardUserId ? { 
+            userId: cardUserId,
+        } : undefined,
+        errorMessage: "Could not fetch tx history",
+        refetchInterval: 60_000,
+        enabled: cardUserId != null && enabled,
+        onSuccess: (data) => setTxHistory(data)
     });
     return query();
 };

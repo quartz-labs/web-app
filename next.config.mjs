@@ -25,7 +25,10 @@ const nextConfig = {
         destination: "https://eu.i.posthog.com/decide",
       },
     ];
-  }
+  },
+  images: {
+    domains: ['storage.googleapis.com'],
+  },
 };
 
 export default nextConfig;

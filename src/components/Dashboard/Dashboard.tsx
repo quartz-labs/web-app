@@ -6,9 +6,10 @@ import ButtonRow from "./ButtonRow/ButtonRow";
 import Assets from "./Assets/Assets";
 import Modal from "../Modal/Modal";
 import CardDetails from "./Card/CardDetails";
+import TransactionHistory from "./Transaction/TransactionHistory";
 
 export default function Dashboard() {
-  const { isInitialized } = useStore();
+  const { isInitialized, txHistory } = useStore();
   
   return (
     <>
@@ -38,7 +39,10 @@ export default function Dashboard() {
       <div className={`glass panel ${styles.assetsPanel}`}>
         <div className={styles.assetsPanelContent}>
           {isInitialized && (
-            <CardDetails />
+            <>
+              <CardDetails />
+              <TransactionHistory transactions={txHistory ?? []}/>
+            </>
           )}
         </div>
       </div>

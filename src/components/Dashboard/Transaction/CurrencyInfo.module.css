@@ -1,0 +1,37 @@
+.currency-info {
+    display: flex;
+    align-items: center;
+}
+
+.currency-icon {
+    border-radius: 100%;
+}
+
+.currency-amount {
+    margin-left: 14px;
+    margin-right: 6px;
+}
+
+@media only screen and (max-width: 570px) {
+    .currency-amount {
+        margin-left: 10px;
+        margin-right: 4.3px;
+    }
+
+    .currency-icon {
+        height: 32px;
+        width: 32px;
+    }
+}
+
+@media only screen and (max-width: 570px) {
+    .currency-icon {
+        height: 24px;
+        width: 24px;
+    }
+    
+    .currency-amount {
+        margin-left: 4px;
+        margin-right: 4px;
+    }
+}
