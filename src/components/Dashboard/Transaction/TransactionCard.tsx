@@ -28,6 +28,7 @@ export default function TransactionCard({ transaction, dateLabelled }: Transacti
 
 
     const merchantImage = transaction.spend.enrichedMerchantIcon;
+    const defaultMerchantIcon = "/dollar.svg";
 
     // Formatted date label
     const today = new Date();
@@ -69,15 +70,13 @@ export default function TransactionCard({ transaction, dateLabelled }: Transacti
                     className={`glass ${styles["card-base"]} ${isOpen && styles["selected"]}`}
                 >
                     <div className={styles["currencies"]}>
-                        {merchantImage && (
-                            <Image
-                                src={merchantImage}
-                                alt="Merchant Icon"
-                                height={19}
-                                width={19}
-                                className={styles["merchant-icon"]}
-                            />
-                        )}
+                        <Image
+                            src={merchantImage || defaultMerchantIcon}
+                            alt="Merchant Icon"
+                            height={19}
+                            width={19}
+                            className={styles["merchant-icon"]}
+                        />
                     </div>
                     <div className={styles["basic-info"]}>
                         {/* <p className="light">{transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}</p> <p>${transaction.spend.amount / 100}</p> */}
