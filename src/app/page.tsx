@@ -16,7 +16,7 @@ import { useRefetchCardUser } from "../utils/hooks";
 import { AuthLevel } from "../types/enums/AuthLevel.enum";
 import { fetchAndParse } from "../utils/helpers";
 import { useAccountStatusQuery, useWithdrawLimitsQuery, useBalancesQuery, useRatesQuery, usePricesQuery, useHealthQuery, useBorrowLimitsQuery, useSpendLimitQuery, useDepositLimitsQuery } from "../utils/queries/protocol.queries";
-import { useProviderCardUserQuery, useQuartzCardUserQuery, useCardDetailsQuery } from "../utils/queries/internalApi.queries";
+import { useProviderCardUserQuery, useQuartzCardUserQuery, useCardDetailsQuery, useTxHistoryQuery } from "../utils/queries/internalApi.queries";
 import { ModalVariation } from "../types/enums/ModalVariation.enum";
 import UpgradeRequired from "../components/OtherViews/UpgradeRequired";
 import Disconnected from "../components/OtherViews/Disconnected";
@@ -61,6 +61,7 @@ export default function Page() {
     quartzCardUser?.card_api_user_id ?? null,
     isInitialized && quartzCardUser?.auth_level === AuthLevel.CARD
   );
+  useTxHistoryQuery(quartzCardUser?.card_api_user_id ?? null, isInitialized && quartzCardUser?.auth_level === AuthLevel.CARD);
 
   const doneLoading = !isAccountStatusLoading && !isQuartzCardUserLoading && !isProviderCardUserLoading;
   const requireOnboarding = (doneLoading && (accountStatus !== undefined && accountStatus === AccountStatus.NOT_INITIALIZED) || (quartzCardUser?.auth_level !== AuthLevel.CARD && quartzCardUser?.auth_level !== undefined));

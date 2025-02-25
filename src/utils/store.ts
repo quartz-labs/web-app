@@ -6,6 +6,7 @@ import type { CardsForUserResponse } from "../types/interfaces/CardsForUserRespo
 import type { ProviderCardUser } from "../types/interfaces/ProviderCardUser.interface";
 import type { QuartzCardUser } from "../types/interfaces/QuartzCardUser.interface";
 import type { JwtToken } from "../types/JwtToken.type";
+import type { ProviderCardHistory } from "../types/interfaces/ProviderCardHistory.interface";
 
 type State = {
   isInitialized: boolean;
@@ -28,6 +29,7 @@ type State = {
   spendLimitTimeframeRemainingBaseUnits?: number;
   spendLimitTimeframeLength?: number;
   spendLimitRefreshing?: boolean;
+  txHistory?: ProviderCardHistory[];
 };
 
 type Action = {
@@ -51,6 +53,7 @@ type Action = {
   setSpendLimitTimeframeRemainingBaseUnits: (spendLimitTimeframeRemaining?: number) => void;
   setSpendLimitTimeframeLength: (timeframe?: number) => void;
   setSpendLimitRefreshing: (refreshing?: boolean) => void;
+  setTxHistory: (txHistory?: ProviderCardHistory[]) => void;
 }
 
 export const useStore = create<State & Action>((set) => ({
@@ -74,7 +77,7 @@ export const useStore = create<State & Action>((set) => ({
   spendLimitTimeframeRemainingBaseUnits: undefined,
   spendLimitTimeframeLength: undefined,
   spendLimitRefreshing: false,
-  
+  txHistory: undefined,
   setIsInitialized: (isInitialized: boolean) => set({ isInitialized }),
   setPrices: (prices?: Record<MarketIndex, number>) => set({ prices }),
   setRates: (rates?: Record<MarketIndex, Rate>) => set({ rates }),
@@ -95,4 +98,5 @@ export const useStore = create<State & Action>((set) => ({
   setSpendLimitTimeframeRemainingBaseUnits: (spendLimitTimeframeRemaining?: number) => set({ spendLimitTimeframeRemainingBaseUnits: spendLimitTimeframeRemaining }),
   setSpendLimitTimeframeLength: (timeframe?: number) => set({ spendLimitTimeframeLength: timeframe }),
   setSpendLimitRefreshing: (refreshing?: boolean) => set({ spendLimitRefreshing: refreshing }),
+  setTxHistory: (txHistory?: ProviderCardHistory[]) => set({ txHistory }),
 }));

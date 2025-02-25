@@ -1,0 +1,214 @@
+.transaction-card-wrapper {
+    border-radius: var(--transaction-card-border-radius);
+    width: 100%;
+}
+
+.date-label {
+    margin: 5px 0px 14px 0px;
+}
+
+.transaction-card {
+    width: 100%;
+    padding: 0px;
+
+    flex-direction: column;
+    overflow: hidden;
+    border-width: 1.5px;
+    border-radius: var(--transaction-card-border-radius);
+
+    backdrop-filter: blur(30px);
+}
+
+.card-base {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+
+    padding: 25px 20px;
+    width: 100%;
+    border: 0px;
+    outline: 1.5px solid var(--placeholder-glass-stroke);
+}
+
+.card-base:hover {
+    --overlay-color: rgba(255, 255, 255, 0.03);
+    background-image: 
+        url("/noise.png"),
+        radial-gradient(circle at 80% 20%, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%),
+        linear-gradient(#ffffff0a, #ffffff0a),
+        linear-gradient(#0B111D80, #0B111D80);
+}
+
+.selected {
+    background-image: 
+        url("/noise.png"),
+        radial-gradient(circle at 80% 20%, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%),
+        linear-gradient(#343946, #343946);
+    background-size: 17% auto, auto, auto;
+}
+
+.selected:hover {
+    background-image: 
+        url("/noise.png"),
+        radial-gradient(circle at 80% 20%, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%),
+        linear-gradient(#ffffff05, #ffffff05),
+        linear-gradient(#343946, #343946);
+    background-size: 17% auto, auto, auto, auto;
+}
+
+.currencies {
+    width: 15%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.arrow {
+    height: 19px;
+    width: 26.4px;
+    margin: auto;
+}
+
+.basic-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 80%;
+    padding-right: 20px;
+}
+
+.card-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-column-gap: 100px;
+    grid-row-gap: 10px;
+    justify-content: left;
+
+    overflow: hidden;
+    transition: max-height 0.15s ease-in, padding 0.15s ease-in;
+}
+
+.card-details.open {
+    transition: max-height 0.15s ease-out, padding 0.15s ease-out;
+}
+
+.transaction-hash {
+    display: flex;
+    gap: 4px;
+    justify-content: left;
+    align-items: center;
+}
+
+.hash-display {
+    margin-right: 8px;
+}
+
+.hash-button {
+    background: transparent;
+    border: 0px;
+    min-width: 31px;
+    height: 31px;
+    padding: 0px;
+
+    margin-top: -3px;
+    margin-bottom: -3px;
+
+    position: relative;
+    transition-duration: 0.4s;
+    -webkit-transition-duration: 0.4s;    
+}
+
+.hash-button:after {
+    content: "";
+    display: block;
+    position: absolute;
+    border-radius: 4em;
+    left: 0;
+    top:0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: all 0.5s;
+    box-shadow: 0 0 12px 12px white;
+}
+
+.hash-button:active:after {
+    box-shadow: 0 0 0 0 white;
+    position: absolute;
+    border-radius: 4em;
+    left: 0;
+    top:0;
+    opacity: 1;
+    transition: 0s;
+}
+
+.hash-button:active {
+    top: 1px;
+}
+
+@media only screen and (max-width: 570px) {
+    .card-base {
+        padding: 25px 15px;
+    }
+
+    .currencies {
+        width: 20%;
+    }
+
+    .basic-info {
+        width: 75%;
+        padding-right: 10px;
+    }
+
+    .arrow {
+        height: 15.2px;
+        width: 21.12px;
+    }
+}
+
+@media only screen and (max-width: 470px) {
+    .card-base {
+        flex-direction: column;
+        gap: 15px;
+        padding: 23px;
+    }
+
+    .currencies {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .basic-info {
+        width: 100%;
+        padding-right: 0;
+    }
+
+    .arrow {
+        height: 13.68px;
+        width: 19px;
+    }
+
+    .currencies {
+        justify-items: stretch;
+        width: 100%;
+        grid-template-columns: 5fr 1fr 5fr;
+    }
+
+    .currencies > :nth-child(1) {
+        justify-self: start;
+    }
+
+    .currencies > :nth-child(2) {
+        justify-self: center;
+    }
+
+    .currencies > :nth-child(3) {
+        justify-self: end;
+    }
+
+    .card-details {
+        grid-column-gap: 15px;
+    }
+}
+
