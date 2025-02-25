@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Progress from "./Progress.onboarding";
 import AccountCreation from "./AccountCreation.onboarding";
 import PersonalInfo from "./PersonalInfo.onboarding";
@@ -8,6 +8,16 @@ import AccountPermissions from "./AccountPermissions.onboarding";
 import { DEFAULT_KYC_DATA, DEFAULT_TERMS, type KYCData, type Terms } from "@/src/types/interfaces/KYCData.interface";
 import type { Address } from "@/src/types/interfaces/Address.interface";
 import styles from "./Onboarding.module.css";
+import { useAnchorWallet } from "@solana/wallet-adapter-react";
+import { captureError } from "@/src/utils/errors";
+import { useError } from "@/src/context/error-provider";
+import type { ApplicationCompletionLink } from "@/src/types/ApplicationCompleteLink.type";
+import config from "@/src/config/config";
+import type { QuartzCardUser } from "@/src/types/interfaces/QuartzCardUser.interface";
+import { fetchAndParse } from "@/src/utils/helpers";
+import { useOpenKycLink, useRefetchCardUser } from "@/src/utils/hooks";
+import { useStore } from "@/src/utils/store";
+import { AuthLevel } from "@/src/types/enums/AuthLevel.enum";
 
 export enum OnboardingPage {
     ACCOUNT_CREATION = 0,
@@ -28,14 +38,97 @@ export interface OnboardingPageProps {
 }
 
 export default function Onboarding() {
-    const [page, setPage] = useState(OnboardingPage.REGULATORY_INFO);
+    const wallet = useAnchorWallet();
+    const { showError } = useError();
+    const openKycLink = useOpenKycLink();
+    const refetchCardUser = useRefetchCardUser();
+    const { 
+        isInitialized, 
+        quartzCardUser, 
+        providerCardUser, 
+        cardDetails 
+    } = useStore();
+    
+    const [page, setPage] = useState(OnboardingPage.ACCOUNT_PERMISSIONS);
     const incrementPage = () => setPage(page + 1);
     const decrementPage = () => setPage(page - 1);
 
     const [formData, setFormData] = useState<KYCData>(DEFAULT_KYC_DATA);
     const [terms, setTerms] = useState<Terms>(DEFAULT_TERMS);
 
-    // If account initialized, set t&c and privacy policy terms to true
+    const [kycLink, setKycLink] = useState<string | undefined>(undefined);
+    const [awaitingApproval, setAwaitingApproval] = useState(false);
+    const [rejectedReason, setRejectedReason] = useState<string | undefined>(undefined);
+
+    useEffect(() => {
+        if (isInitialized) {
+            setTerms(prev => ({
+                ...prev,
+                acceptQuartzCardTerms: true,
+                privacyPolicy: true
+            }));
+        }
+    }, [isInitialized]);
+
+    useEffect(() => {
+        if (quartzCardUser?.auth_level === AuthLevel.BASE) {
+            setKycLink(providerCardUser?.applicationCompletionLink ? (
+                `${providerCardUser.applicationCompletionLink.url}?userId=${providerCardUser.applicationCompletionLink.params.userId}`
+            ) : undefined);
+            setPage(OnboardingPage.ID_PHOTO);
+        } else if (quartzCardUser?.auth_level === AuthLevel.CARD) {
+            if (!cardDetails) {
+                captureError(showError, "Could not create card", "/Onboarding.tsx", "Could not create card", wallet?.publicKey ?? null);
+            }
+
+            setPage(OnboardingPage.ACCOUNT_PERMISSIONS);
+            setAwaitingApproval(false);
+            setRejectedReason(undefined);
+        }
+    }, [quartzCardUser, providerCardUser, cardDetails]);
+
+    const handleSubmit = async () => {
+        if (!wallet?.publicKey) {
+            captureError(showError, "Wallet not connected", "/Onboarding.tsx", "Wallet not connected", null);
+            return;
+        }
+
+        setAwaitingApproval(true);
+        setRejectedReason(undefined);
+
+        if (kycLink) {
+            openKycLink(kycLink);
+            return;
+        }
+
+        try {
+            const submitData = {
+                ...formData,
+                walletAddress: wallet.publicKey.toBase58(),
+                ...terms
+            }
+
+            const response: {
+                quartzCardUser: QuartzCardUser;
+                applicationCompletionLink: ApplicationCompletionLink;
+            } = await fetchAndParse(
+                `${config.NEXT_PUBLIC_INTERNAL_API_URL}/card/application/create`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(submitData),
+                }
+            );
+
+            openKycLink(`${response.applicationCompletionLink.url}?userId=${response.applicationCompletionLink.params.userId}`);
+            refetchCardUser();
+        } catch (error) {
+            captureError(showError, "Failed to submit form", "/CardSignupModal.tsx", error, wallet.publicKey);
+            setAwaitingApproval(false);
+        }
+    }
 
     const handleFormDataChange = <K extends keyof KYCData>(field: K, value: KYCData[K]) => {
         setFormData(prev => ({
@@ -109,7 +202,10 @@ export default function Onboarding() {
                                 handleAddressChange={handleAddressChange}
                                 handleTermsChange={handleTermsChange}
                                 formData={formData}
-                                terms={terms}
+                                terms={terms}   
+                                awaitingApproval={awaitingApproval}
+                                rejectedReason={rejectedReason}
+                                handleSubmit={handleSubmit}
                             />;
 
                         case OnboardingPage.ACCOUNT_PERMISSIONS:

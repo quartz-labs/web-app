@@ -237,3 +237,9 @@
     width: 100%;
     height: var(--signup-field-height);
 }
+
+.applicationRejected {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}

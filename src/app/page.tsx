@@ -36,7 +36,7 @@ export default function Page() {
   }, [setIsInitialized, isInitialized]);
   
 
-  // Quartz account data
+  // Quartz protocol account data
   usePricesQuery();
   useRatesQuery();
   useBalancesQuery(isInitialized ? wallet.publicKey : null);

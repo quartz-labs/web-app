@@ -69,6 +69,10 @@ export default function RegulatoryInfo({
         }
         setIsMissingTerms(false);
 
+        if (formData.countryOfIssue !== "US") {
+            handleTermsChange("openingDisclosure", undefined);
+        }
+
         incrementPage();
     }
 
