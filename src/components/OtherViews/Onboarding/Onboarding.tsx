@@ -49,7 +49,7 @@ export default function Onboarding() {
         cardDetails 
     } = useStore();
     
-    const [page, setPage] = useState(OnboardingPage.ACCOUNT_PERMISSIONS);
+    const [page, setPage] = useState(OnboardingPage.ACCOUNT_CREATION);
     const incrementPage = () => setPage(page + 1);
     const decrementPage = () => setPage(page - 1);
 

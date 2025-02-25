@@ -70,6 +70,12 @@ export default function CloseAccountModal() {
 
             <div className={styles.buttons}>
                 <button 
+                    className={`glass-button ${styles.mainButton}`}
+                    onClick={() => setModalVariation(ModalVariation.DISABLED)}
+                >
+                    Cancel
+                </button>
+                <button 
                     className={`glass-button ghost error ${styles.mainButton}`}
                     onClick={handleCloseAccount}
                 >
@@ -85,13 +91,6 @@ export default function CloseAccountModal() {
                     {!awaitingSign &&
                         <p>Close Account</p>
                     }
-                </button>
-
-                <button 
-                    className={`glass-button ${styles.mainButton}`}
-                    onClick={() => setModalVariation(ModalVariation.DISABLED)}
-                >
-                    Cancel
                 </button>
             </div>
         </div>

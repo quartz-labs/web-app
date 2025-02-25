@@ -60,6 +60,7 @@ export default function Page() {
     quartzCardUser?.card_api_user_id ?? null,
     isInitialized && quartzCardUser?.auth_level === AuthLevel.CARD
   );
+  const requireOnboarding = (accountStatus === AccountStatus.NOT_INITIALIZED || quartzCardUser?.auth_level !== AuthLevel.CARD);
 
 
   // Update QuartzCardUser status if ProviderCardUser status differs
@@ -97,7 +98,56 @@ export default function Page() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps	
   }, [isInitialized, quartzCardUser?.auth_level, jwtToken]);
-  
+
+  if (config.NEXT_PUBLIC_UNAVAILABLE_TIME) {
+    return (
+      <main className={styles.container}>
+        <Background />
+
+        <Nav 
+          isAccountInitialized={isInitialized} 
+          isAccountStatusLoading={isAccountStatusLoading}
+        />
+        <div className={styles.content}>
+          <Unavailable />
+        </div>
+      </main>
+    );
+  }
+
+  if (!wallet.publicKey) {
+    return (
+      <main className={styles.container}>
+        <Background />
+        
+        <Nav 
+          isAccountInitialized={isInitialized} 
+          isAccountStatusLoading={isAccountStatusLoading}
+        />
+
+        <div className={styles.content}>
+          <Disconnected />
+        </div>
+      </main>
+    );
+  }
+
+  if (requireOnboarding) {
+    return (
+      <main className={styles.container}>
+        <Background />
+        
+        <Nav 
+          isAccountInitialized={isInitialized} 
+          isAccountStatusLoading={isAccountStatusLoading}
+        />
+
+        <div className={styles.content}>
+          <Onboarding />
+        </div>
+      </main>
+    );
+  }
   
   return (
     <main className={styles.container}>
@@ -109,36 +159,22 @@ export default function Page() {
       />
 
       <div className={styles.content}>
-        {config.NEXT_PUBLIC_UNAVAILABLE_TIME && (
-          <Unavailable />
-        )}
-        
-        {!config.NEXT_PUBLIC_UNAVAILABLE_TIME && (<>
-          {wallet.publicKey && (
-            () => {
-              switch (accountStatus) {
-                case AccountStatus.CLOSED:
+          {(() => {
+                switch (accountStatus) {
+                  case AccountStatus.CLOSED:
                   return <ClosedAccount />;
-  
+
                 case AccountStatus.NO_BETA_KEY:
                   return <NoBetaKey />;
-  
-                case AccountStatus.NOT_INITIALIZED:
-                  return <Onboarding />;
-  
+
                 case AccountStatus.UPGRADE_REQUIRED:
                   return <UpgradeRequired />;
-  
+
                 default:
                   return <Dashboard />;
-              }
+                }
             })()
           }
-
-          {!wallet.publicKey && (
-            <Disconnected />
-          )}
-        </>)}
       </div>
     </main>
   );

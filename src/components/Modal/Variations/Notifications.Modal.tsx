@@ -100,17 +100,16 @@ export default function NotificationsModal() {
 
             <div className={styles.buttons}>
                 <button 
-                    className={`glass-button ${styles.mainButton}`}
-                    onClick={() => {window.open(`https://telegram.me/QuartzLTVBot`, '_blank');}}
-                >
-                    Open Telegram
-                </button>
-
-                <button 
                     className={`glass-button ghost ${styles.mainButton}`}
                     onClick={() => setModalVariation(ModalVariation.DISABLED)}
                 >
                     Done
+                </button>
+                <button 
+                    className={`glass-button ${styles.mainButton}`}
+                    onClick={() => {window.open(`https://telegram.me/QuartzLTVBot`, '_blank');}}
+                >
+                    Open Telegram
                 </button>
             </div>
         </div>

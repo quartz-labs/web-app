@@ -94,7 +94,7 @@
 }
 
 .textContent {
-    width: 72%;
+    width: 80%;
     gap: 65px;
 }
 
@@ -242,4 +242,17 @@
     display: flex;
     flex-direction: column;
     gap: 24px;
+}
+
+.spendLimitsContainer {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+}
+
+.loadingSpinner {
+    height: 100%;
+    width: auto;
+    aspect-ratio: 1;
 }

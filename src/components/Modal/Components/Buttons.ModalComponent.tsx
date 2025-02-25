@@ -19,6 +19,12 @@ export default function Buttons({
     return (
         <div className={styles.buttons}>
             <button 
+                className={`glass-button ghost ${styles.mainButton}`}
+                onClick={() => onCancel()}
+            >
+                Cancel
+            </button>
+            <button 
                 className={`glass-button ${styles.mainButton} ${disabled ? "disabled" : ""}`}
                 onClick={() => {
                     if (!disabled) onConfirm();
@@ -36,12 +42,6 @@ export default function Buttons({
                 {!awaitingSign &&
                     <p>{label}</p>
                 }
-            </button>
-            <button 
-                className={`glass-button ghost ${styles.mainButton}`}
-                onClick={() => onCancel()}
-            >
-                Cancel
             </button>
         </div>        
     )

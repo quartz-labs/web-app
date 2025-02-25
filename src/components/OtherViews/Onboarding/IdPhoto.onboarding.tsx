@@ -33,7 +33,7 @@ export default function IdPhoto({
                 <h1 className={styles.title}>Time to take a photo of your ID</h1>
                 <div className={styles.textBody}>
                     <p className={styles.subtitle}>
-                        Clicking the button below will redirect you to Sumsub to complete KYC. Make sure your ID hasn&apos;t expired, and is clear and fully visible <span className={"no-wrap"}>in the photo</span>.
+                        Clicking the button below will redirect you to Sumsub to complete KYC. Make sure your ID hasn&apos;t expired, and is clear and fully visible <span className={"no-wrap"}>in the photo.</span>
                     </p>
                     <p className={styles.subtitle}>
                         Return to this page after submitting your document to finish creating your account.

@@ -160,12 +160,13 @@ export default function PersonalInfo({
             </div>
 
             <div className={styles.buttonContainer}>
-                <button 
+                {/* TODO: Add ability to skip KYC and complete later */}
+                {/* <button 
                     className={`glass-button ghost ${styles.mainButton}`}
                     onClick={handleCompleteLater}
                 >
                     Complete Later
-                </button>
+                </button> */} 
 
                 <button 
                     className={`glass-button ${styles.mainButton}`}
