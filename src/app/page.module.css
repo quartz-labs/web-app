@@ -11,6 +11,9 @@
     flex-direction: row;
     padding: var(--panel-padding);
     gap: var(--panel-padding);
+    
+    position: relative;
+    z-index: 1;
 }
 
 @media only screen and (max-width: 800px) {

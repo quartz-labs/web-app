@@ -6,6 +6,9 @@
     margin: var(--panel-padding);
     margin-bottom: 0px;
     padding: 0px var(--panel-padding);
+
+    position: relative;
+    z-index: 1;
 }
 
 .logoContainer {

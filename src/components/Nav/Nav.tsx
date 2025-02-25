@@ -46,7 +46,10 @@ export default function Nav({
         {wallet.publicKey && isAccountInitialized &&
           <button 
             className={styles.notificationsButton}
-            onClick={() => setModalVariation(ModalVariation.NOTIFICATIONS)}
+            onClick={() => {
+              console.log("clicked");
+              setModalVariation(ModalVariation.NOTIFICATIONS)}
+          }
           >
             <Image 
                 className={"image-fill"}
