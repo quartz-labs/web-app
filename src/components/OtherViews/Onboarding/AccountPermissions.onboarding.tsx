@@ -13,6 +13,7 @@ import { DEFAULT_CARD_TRANSACTION_LIMIT } from "@/src/config/constants";
 import { WalletSignTransactionError } from "@solana/wallet-adapter-base";
 import { captureError } from "@/src/utils/errors";
 import { TailSpin } from "react-loader-spinner";
+import { PuffLoader } from "react-spinners";
 
 export interface AccountPermissionsProps extends OnboardingPageProps {
     onCompleteOnboarding: () => void;
@@ -185,7 +186,18 @@ export default function AccountPermissions({ onCompleteOnboarding }: AccountPerm
                     className={`glass-button ${styles.mainButton}`}
                     onClick={handleConfirm}
                 >
-                    {awaitingSign ? "..." : "Done"}
+                    {awaitingSign &&
+                        <PuffLoader
+                            color={"#ffffff"}
+                            size={30}
+                            aria-label="Loading"
+                            data-testid="loader"
+                        />
+                    }
+
+                    {!awaitingSign &&
+                        <p>Done</p>
+                    }
                 </button>
             </div>
         </div>

@@ -1,3 +1,5 @@
+import { getCountryCallingCode, type CountryCode, getCountries as getPhoneCountries } from "libphonenumber-js";
+
 export const getCountry = (code: string) => {
     const codes = Object.keys(COUNTRIES);
     if (!codes.includes(code)) {
@@ -17,6 +19,33 @@ export const getCode = (country: string) => {
 
 export const getCountries = () => {
     return Object.values(COUNTRIES);
+};
+
+export const getCountryCodes = () => {
+    return Object.keys(COUNTRIES);
+};
+
+export const getPhoneCode = (countryCode: string) => {
+    const codes = Object.keys(COUNTRIES);
+    if (!codes.includes(countryCode)) {
+        throw new Error(`Invalid country code: ${countryCode}`);
+    }
+
+    const supportedCountryCodes = getPhoneCountries();
+    if (!supportedCountryCodes.includes(countryCode as CountryCode)) {
+        return "1";
+    }
+
+    try {
+        return getCountryCallingCode(countryCode as CountryCode);
+    } catch (error) {
+        throw new Error(`No phone code found for country: ${countryCode}`);
+    }
+};
+
+export const formatPhoneCode = (countryCode: string) => {
+    const code = getPhoneCode(countryCode);
+    return `+${code} (${getCountry(countryCode)})`;
 };
 
 const COUNTRIES = {

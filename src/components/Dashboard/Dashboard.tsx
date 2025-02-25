@@ -9,8 +9,8 @@ import CardDetails from "./Card/CardDetails";
 import TransactionHistory from "./Transaction/TransactionHistory";
 
 export default function Dashboard() {
-  const { isInitialized, txHistory } = useStore();
-  
+  const { isInitialized, txHistory, doneLoading } = useStore();
+
   return (
     <>
       <Modal />
@@ -21,14 +21,14 @@ export default function Dashboard() {
 
           <Balances />
 
-          {isInitialized && (
+          {isInitialized && doneLoading && (
             <>
               <RepayWarning />
               <ButtonRow />
             </>
           )}
 
-          {!isInitialized && (
+          {(!isInitialized || !doneLoading) && (
             <p className={styles.notInitialized}>Connecting wallet...</p>
           )}
 
@@ -38,7 +38,7 @@ export default function Dashboard() {
 
       <div className={`glass panel ${styles.assetsPanel}`}>
         <div className={styles.assetsPanelContent}>
-          {isInitialized && (
+          {(isInitialized && doneLoading) && (
             <>
               <CardDetails />
               <TransactionHistory transactions={txHistory ?? []}/>

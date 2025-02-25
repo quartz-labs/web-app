@@ -12,11 +12,11 @@ import { useStore } from "@/src/utils/store";
 import { useEffect, useState } from 'react';
 import config from "@/src/config/config";
 import Unavailable from "@/src/components/OtherViews/Unavailable";
-import { useRefetchCardUser } from "../utils/hooks";
-import { AuthLevel } from "../types/enums/AuthLevel.enum";
+import { useLoginCardUser, useRefetchCardUser } from "../utils/hooks";
+import { AuthLevel, TandCsNeeded } from "../types/enums/AuthLevel.enum";
 import { fetchAndParse } from "../utils/helpers";
 import { useAccountStatusQuery, useWithdrawLimitsQuery, useBalancesQuery, useRatesQuery, usePricesQuery, useHealthQuery, useBorrowLimitsQuery, useSpendLimitQuery, useDepositLimitsQuery } from "../utils/queries/protocol.queries";
-import { useProviderCardUserQuery, useQuartzCardUserQuery, useCardDetailsQuery, useTxHistoryQuery } from "../utils/queries/internalApi.queries";
+import { useProviderCardUserQuery, useQuartzCardUserQuery, useCardDetailsQuery, useTxHistoryQuery, useApplicationStatusQuery } from "../utils/queries/internalApi.queries";
 import { ModalVariation } from "../types/enums/ModalVariation.enum";
 import UpgradeRequired from "../components/OtherViews/UpgradeRequired";
 import Disconnected from "../components/OtherViews/Disconnected";
@@ -24,10 +24,17 @@ import Background from "../components/Background/Background";
 
 export default function Page() {
   const wallet = useWallet();
-  const { setIsInitialized, jwtToken, setModalVariation, setSpendLimitRefreshing } = useStore();
+  const { 
+    setIsInitialized, 
+    jwtToken, 
+    setModalVariation, 
+    setSpendLimitRefreshing, 
+    isSigningLoginMessage,
+    setIsSigningLoginMessage,
+    setDoneLoading
+  } = useStore();
   const refetchCardUser = useRefetchCardUser();
 
-  const [limitsSet, setLimitsSet] = useState(true);
 
   // Quartz account status
   const { data: accountStatus, isLoading: isAccountStatusLoading } = useAccountStatusQuery(wallet.publicKey);
@@ -53,9 +60,10 @@ export default function Page() {
 
   // Card data
   const { data: quartzCardUser, isLoading: isQuartzCardUserLoading } = useQuartzCardUserQuery(isInitialized ? wallet.publicKey : null);
+  const refreshForKyc = isInitialized && (quartzCardUser?.auth_level === AuthLevel.BASE || quartzCardUser?.auth_level === AuthLevel.KYC_PENDING);
   const { data: providerCardUser, isLoading: isProviderCardUserLoading } = useProviderCardUserQuery(
     quartzCardUser?.card_api_user_id ?? null,
-    isInitialized && (quartzCardUser?.auth_level === AuthLevel.BASE || quartzCardUser?.auth_level === AuthLevel.KYC_PENDING)
+    refreshForKyc
   );
   useCardDetailsQuery(
     quartzCardUser?.card_api_user_id ?? null,
@@ -63,13 +71,6 @@ export default function Page() {
   );
   useTxHistoryQuery(quartzCardUser?.card_api_user_id ?? null, isInitialized && quartzCardUser?.auth_level === AuthLevel.CARD);
 
-  const doneLoading = !isAccountStatusLoading && !isQuartzCardUserLoading && !isProviderCardUserLoading;
-  const requireOnboarding = (doneLoading && (accountStatus !== undefined && accountStatus === AccountStatus.NOT_INITIALIZED) || (quartzCardUser?.auth_level !== AuthLevel.CARD && quartzCardUser?.auth_level !== undefined));
-  useEffect(() => {
-    if (requireOnboarding && limitsSet && doneLoading) {
-      setLimitsSet(false);
-    }
-  }, [requireOnboarding, limitsSet, doneLoading]);
 
   // Update QuartzCardUser status if ProviderCardUser status differs
   useEffect(() => {
@@ -101,11 +102,41 @@ export default function Page() {
 
   // Log in card user
   useEffect(() => {
-    if (isInitialized && quartzCardUser?.auth_level === AuthLevel.CARD && jwtToken === undefined) {
+    if (
+      isInitialized 
+      && quartzCardUser?.auth_level === AuthLevel.CARD 
+      && jwtToken === undefined 
+      && !isSigningLoginMessage
+    ) {
       setModalVariation(ModalVariation.ACCEPT_TANDCS)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps	
-  }, [isInitialized, quartzCardUser?.auth_level, jwtToken]);
+  }, [isInitialized, quartzCardUser?.auth_level, jwtToken, isSigningLoginMessage]);
+
+
+  const passedKyc = quartzCardUser?.auth_level === AuthLevel.CARD;
+  const doneLoading = accountStatus !== undefined && !isAccountStatusLoading && !isQuartzCardUserLoading && !isProviderCardUserLoading;
+  const requireOnboarding = doneLoading && (!isInitialized || !passedKyc);
+
+  useEffect(() => {
+    setDoneLoading(doneLoading);
+  }, [doneLoading, setDoneLoading]);
+
+  const [onboardingComplete, setOnboardingComplete] = useState(true);
+  useEffect(() => {
+    if (requireOnboarding && onboardingComplete) {
+      setOnboardingComplete(false);
+    }
+  }, [requireOnboarding, onboardingComplete]);
+
+  const loginCardUser = useLoginCardUser();
+  const completeOnboarding = () => {
+    setIsSigningLoginMessage(true);
+    loginCardUser.mutate(TandCsNeeded.ACCEPTED);
+    refetchCardUser();
+    setModalVariation(ModalVariation.DISABLED);
+    setOnboardingComplete(true);
+  }
 
   if (config.NEXT_PUBLIC_UNAVAILABLE_TIME) {
     return (
@@ -140,7 +171,7 @@ export default function Page() {
     );
   }
 
-  if (requireOnboarding || !limitsSet) {
+  if (requireOnboarding || !onboardingComplete) {
     return (
       <main className={styles.container}>
         <Background />
@@ -152,7 +183,7 @@ export default function Page() {
 
         <div className={styles.content}>
           <Onboarding
-            onCompleteOnboarding={() => setLimitsSet(true)}
+            onCompleteOnboarding={completeOnboarding}
           />
         </div>
       </main>

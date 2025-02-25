@@ -30,6 +30,7 @@ type State = {
   spendLimitTimeframeLength?: number;
   spendLimitRefreshing?: boolean;
   txHistory?: ProviderCardHistory[];
+  doneLoading?: boolean;
 };
 
 type Action = {
@@ -54,6 +55,7 @@ type Action = {
   setSpendLimitTimeframeLength: (timeframe?: number) => void;
   setSpendLimitRefreshing: (refreshing?: boolean) => void;
   setTxHistory: (txHistory?: ProviderCardHistory[]) => void;
+  setDoneLoading: (doneLoading?: boolean) => void;
 }
 
 export const useStore = create<State & Action>((set) => ({
@@ -78,6 +80,8 @@ export const useStore = create<State & Action>((set) => ({
   spendLimitTimeframeLength: undefined,
   spendLimitRefreshing: false,
   txHistory: undefined,
+  doneLoading: undefined,
+
   setIsInitialized: (isInitialized: boolean) => set({ isInitialized }),
   setPrices: (prices?: Record<MarketIndex, number>) => set({ prices }),
   setRates: (rates?: Record<MarketIndex, Rate>) => set({ rates }),
@@ -99,4 +103,5 @@ export const useStore = create<State & Action>((set) => ({
   setSpendLimitTimeframeLength: (timeframe?: number) => set({ spendLimitTimeframeLength: timeframe }),
   setSpendLimitRefreshing: (refreshing?: boolean) => set({ spendLimitRefreshing: refreshing }),
   setTxHistory: (txHistory?: ProviderCardHistory[]) => set({ txHistory }),
+  setDoneLoading: (doneLoading?: boolean) => set({ doneLoading }),
 }));

@@ -11,7 +11,7 @@ export default function AcceptTandcsModal() {
 
     const loginCardUser = useLoginCardUser();
 
-    const tandcsLink = "https://www.google.com";
+    const TERMS_AND_CONDITIONS_LINK = "https://docs.quartzpay.io/terms-and-conditions";
 
     useEffect(() => {
         return () => {
@@ -25,7 +25,7 @@ export default function AcceptTandcsModal() {
             <h2 className={styles.heading}>Sign into your Quartz Card account</h2>
 
             <p style={{ marginBottom: "55px", marginTop: "10px" }}>
-                Do you accept the Quartz Spend Card <a href={tandcsLink} target="_blank" rel="noopener noreferrer" className={styles.kycLink}>terms and conditions</a>?
+                Do you accept the Quartz Spend Card <a href={TERMS_AND_CONDITIONS_LINK} target="_blank" rel="noopener noreferrer" className={styles.kycLink}>terms and conditions</a>?
             </p>
 
             <button

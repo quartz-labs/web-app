@@ -9,7 +9,7 @@ import { DEFAULT_REFETCH_INTERVAL } from "@/src/config/constants";
 
 export const useAccountStatusQuery = (address: PublicKey | null) => {
     const query = createQuery<AccountStatus>({
-        queryKey: ["account-status"],
+        queryKey: ["account-status", address?.toBase58() ?? ""],
         url: "/api/account-status",
         params: address ? {
             wallet: address.toBase58()
@@ -60,7 +60,7 @@ export const useBalancesQuery = (address: PublicKey | null) => {
     const { setBalances } = useStore();
 
     const query = createQuery<Record<MarketIndex, number>>({
-        queryKey: ["user", "balances"],
+        queryKey: ["user", "balances", address?.toBase58() ?? ""],
         url: `${config.NEXT_PUBLIC_API_URL}/user/balance`,
         params: address ? { 
             address: address.toBase58(),
@@ -78,7 +78,7 @@ export const useWithdrawLimitsQuery = (address: PublicKey | null) => {
     const { setWithdrawLimits } = useStore();
 
     const query = createQuery<Record<MarketIndex, number>>({
-        queryKey: ["user", "withdraw-limits"],
+        queryKey: ["user", "withdraw-limits", address?.toBase58() ?? ""],
         url: `${config.NEXT_PUBLIC_API_URL}/user/withdraw-limit`,
         params: address ? { 
             address: address.toBase58(),
@@ -96,7 +96,7 @@ export const useBorrowLimitsQuery = (address: PublicKey | null) => {
     const { setBorrowLimits } = useStore();
 
     const query = createQuery<Record<MarketIndex, number>>({
-        queryKey: ["user", "borrow-limits"],
+        queryKey: ["user", "borrow-limits", address?.toBase58() ?? ""],
         url: `${config.NEXT_PUBLIC_API_URL}/user/borrow-limit`,
         params: address ? { 
             address: address.toBase58(),
@@ -139,7 +139,7 @@ export const useSpendLimitQuery = (address: PublicKey | null) => {
         spendLimitTimeframeRemainingBaseUnits: number;
         timeframe: number;
     }>({
-        queryKey: ["user", "spend-limits"],
+        queryKey: ["user", "spend-limits", address?.toBase58() ?? ""],
         url: "/api/get-spend-limits",
         params: address ? { 
             address: address.toBase58(),

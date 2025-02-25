@@ -17,6 +17,8 @@ export interface KYCData {
     walletAddress: string;
     ipAddress: string;
     isTermsOfServiceAccepted: boolean;
+    phoneCountryCode: string;
+    phoneNumber: string;
 }
 
 const DEFAULT_COUNTRY = "US";
@@ -44,6 +46,8 @@ export const DEFAULT_KYC_DATA: KYCData = {
     walletAddress: "",
     ipAddress: "",
     isTermsOfServiceAccepted: false,
+    phoneCountryCode: DEFAULT_COUNTRY,
+    phoneNumber: "",
 }
 
 

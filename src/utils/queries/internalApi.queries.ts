@@ -43,6 +43,21 @@ export const useProviderCardUserQuery = (cardUserId: string | null, refetch: boo
     return query();
 };
 
+export const useApplicationStatusQuery = (cardUserId: string | null, refetch: boolean) => {
+    const query = createQuery<any>({
+        queryKey: ["card-user", "provider-card-user", "user"],
+        url: `${config.NEXT_PUBLIC_INTERNAL_API_URL}/application/status`,
+        params: cardUserId ? {
+            id: cardUserId
+        } : undefined,
+        errorMessage: "Could not fetch Provider Card User",
+        enabled: cardUserId != null,
+        staleTime: refetch ? 3_000 : Infinity,
+        refetchInterval: refetch ? 3_000 : undefined,
+    });
+    return query();
+};
+
 export const useCardDetailsQuery = (cardUserId: string | null, enabled: boolean) => {
     const { setCardDetails } = useStore();
 

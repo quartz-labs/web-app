@@ -1,7 +1,7 @@
 import { useState } from "react";
 import styles from "./Onboarding.module.css";
 import type { OnboardingPageProps } from "./Onboarding";
-import { getCountries } from "@/src/utils/countries";
+import { formatPhoneCode, getCountries, getCountryCodes } from "@/src/utils/countries";
 import { getCode } from "@/src/utils/countries";
 
 export default function PersonalInfo({
@@ -19,6 +19,7 @@ export default function PersonalInfo({
         city: false,
         region: false,
         postalCode: false,
+        phoneNumber: false,
     });
     const [isMissingValue, setIsMissingValue] = useState(false);
 
@@ -32,6 +33,7 @@ export default function PersonalInfo({
             city: !formData.address.city,
             region: !formData.address.region,
             postalCode: !formData.address.postalCode,
+            phoneNumber: !formData.phoneNumber,
         };
         setMissingValues(missingValuesData);
         for (const [, value] of Object.entries(missingValuesData)) {
@@ -67,7 +69,43 @@ export default function PersonalInfo({
                 </div>
 
                 <div className={styles.inputSection}>
-                    <p className={styles.inputLabel}>What&apos;s your email?</p>
+                    <p className={styles.inputLabel}>What&apos;s your phone number?</p>
+                    <div className={styles.inputContainer}>
+                        <select
+                            className={`${styles.inputField} ${styles.inputSelect}`}
+                            value={formatPhoneCode(formData.phoneCountryCode)}
+                            onChange={(e) => {
+                                const country = e.target.value.split(" (")[1]?.split(")")[0];
+                                const countryCode = getCode(country ?? "");
+                                if (!countryCode) throw new Error("Invalid country");
+
+                                handleFormDataChange("phoneCountryCode", countryCode);
+                            }}
+                        >
+                            {getCountryCodes().map((code) => (
+                                <option key={code} value={formatPhoneCode(code)}>
+                                    {formatPhoneCode(code)}
+                                </option>
+                            ))}
+                        </select>
+                        <input 
+                            type="text" 
+                            className={`${styles.inputField} ${missingValues.phoneNumber ? styles.missing : ""}`} 
+                            placeholder="000 000 0000"
+                            value={formData.phoneNumber}
+                            onChange={(e) => {
+                                const value = e.target.value.replace(/\D/g, '');
+                                handleFormDataChange("phoneNumber", value);
+                            }}
+                        />
+                    </div>
+                </div>
+
+                <div className={styles.inputSection}>
+                    <div className={styles.inputContainer}>
+                        <p className={styles.inputLabel}>What&apos;s your email?</p>
+                        <p className={styles.inputLabel}>What&apos;s your date of birth?</p>
+                    </div>
                     <div className={styles.inputContainer}>
                         <input 
                             type="text" 
@@ -76,12 +114,6 @@ export default function PersonalInfo({
                             value={formData.email}
                             onChange={(e) => handleFormDataChange("email", e.target.value)}
                         />
-                    </div>
-                </div>
-
-                <div className={styles.inputSection}>
-                    <p className={styles.inputLabel}>What&apos;s your date of birth?</p>
-                    <div className={styles.inputContainer}>
                         <input
                             className={`${styles.inputField} ${(missingValues.birthDate && !formData.birthDate) ? styles.missing : ""}`}
                             type="date"

@@ -18,6 +18,8 @@ import { fetchAndParse } from "@/src/utils/helpers";
 import { useOpenKycLink, useRefetchCardUser } from "@/src/utils/hooks";
 import { useStore } from "@/src/utils/store";
 import { AuthLevel } from "@/src/types/enums/AuthLevel.enum";
+import { getPhoneCode } from "@/src/utils/countries";
+import { useApplicationStatusQuery } from "@/src/utils/queries/internalApi.queries";
 
 export enum OnboardingPage {
     ACCOUNT_CREATION = 0,
@@ -50,7 +52,7 @@ export default function Onboarding({ onCompleteOnboarding }: OnboardingProps) {
         isInitialized, 
         quartzCardUser, 
         providerCardUser, 
-        cardDetails 
+        cardDetails
     } = useStore();
     
     const [page, setPage] = useState(OnboardingPage.ACCOUNT_CREATION);
@@ -62,15 +64,41 @@ export default function Onboarding({ onCompleteOnboarding }: OnboardingProps) {
 
     const [kycLink, setKycLink] = useState<string | undefined>(undefined);
     const [awaitingApproval, setAwaitingApproval] = useState(false);
-    const [rejectedReason, setRejectedReason] = useState<string | undefined>(undefined);
+
+    const {data: applicationStatus} = useApplicationStatusQuery(
+        quartzCardUser?.card_api_user_id ?? null,
+        awaitingApproval
+    );
+
+    const handleFormDataChange = <K extends keyof KYCData>(field: K, value: KYCData[K]) => {
+        setFormData(prev => ({
+            ...prev,
+            [field]: value
+        }));
+    };
+
+    const handleAddressChange = <K extends keyof Address>(field: K, value: Address[K]) => {
+        setFormData(prev => ({
+            ...prev,
+            address: {
+                ...prev.address,
+                [field]: value
+            }
+        }));
+    };
+
+    const handleTermsChange = <K extends keyof Terms>(field: K, value: Terms[K]) => {
+        setTerms(prev => ({
+            ...prev,
+            [field]: value
+        }));
+    };
 
     useEffect(() => {
         if (isInitialized) {
-            setTerms(prev => ({
-                ...prev,
-                acceptQuartzCardTerms: true,
-                privacyPolicy: true
-            }));
+            handleTermsChange("acceptQuartzCardTerms", true);
+            handleTermsChange("privacyPolicy", true);
+            handleFormDataChange("isTermsOfServiceAccepted", true);
             setPage(OnboardingPage.PERSONAL_INFO);
         }
     }, [isInitialized]);
@@ -81,17 +109,15 @@ export default function Onboarding({ onCompleteOnboarding }: OnboardingProps) {
                 `${providerCardUser.applicationCompletionLink.url}?userId=${providerCardUser.applicationCompletionLink.params.userId}`
             ) : undefined);
             setPage(OnboardingPage.ID_PHOTO);
-        } else if (quartzCardUser?.auth_level === AuthLevel.CARD) {
+        } else if (applicationStatus?.applicationStatus === "approved" && quartzCardUser?.auth_level === AuthLevel.CARD) {
             if (!cardDetails) {
-                // Fix this error
                 captureError(showError, "Could not create card", "/Onboarding.tsx", "Could not create card", wallet?.publicKey ?? null, true);
             }
 
             setPage(OnboardingPage.ACCOUNT_PERMISSIONS);
             setAwaitingApproval(false);
-            setRejectedReason(undefined);
         }
-    }, [quartzCardUser?.auth_level, providerCardUser, cardDetails, showError, wallet?.publicKey]);
+    }, [quartzCardUser?.auth_level, providerCardUser, cardDetails, showError, wallet?.publicKey, applicationStatus]);
 
     const handleSubmit = async () => {
         if (!wallet?.publicKey) {
@@ -100,7 +126,6 @@ export default function Onboarding({ onCompleteOnboarding }: OnboardingProps) {
         }
 
         setAwaitingApproval(true);
-        setRejectedReason(undefined);
 
         if (kycLink) {
             openKycLink(kycLink);
@@ -109,8 +134,13 @@ export default function Onboarding({ onCompleteOnboarding }: OnboardingProps) {
         }
 
         try {
-            const submitData = {
+            const formattedData = {
                 ...formData,
+                phoneCountryCode: getPhoneCode(formData.phoneCountryCode),
+            }
+
+            const submitData = {
+                ...formattedData,
                 walletAddress: wallet.publicKey.toBase58(),
                 ...terms
             }
@@ -136,30 +166,6 @@ export default function Onboarding({ onCompleteOnboarding }: OnboardingProps) {
             setAwaitingApproval(false);
         }
     }
-
-    const handleFormDataChange = <K extends keyof KYCData>(field: K, value: KYCData[K]) => {
-        setFormData(prev => ({
-            ...prev,
-            [field]: value
-        }));
-    };
-
-    const handleAddressChange = <K extends keyof Address>(field: K, value: Address[K]) => {
-        setFormData(prev => ({
-            ...prev,
-            address: {
-                ...prev.address,
-                [field]: value
-            }
-        }));
-    };
-
-    const handleTermsChange = <K extends keyof Terms>(field: K, value: Terms[K]) => {
-        setTerms(prev => ({
-            ...prev,
-            [field]: value
-        }));
-    };
 
     return (
         <div className={styles.onboardingContainer}>
@@ -211,7 +217,7 @@ export default function Onboarding({ onCompleteOnboarding }: OnboardingProps) {
                                 formData={formData}
                                 terms={terms}   
                                 awaitingApproval={awaitingApproval}
-                                rejectedReason={rejectedReason}
+                                rejectedReason={applicationStatus?.applicationReason ?? ""}
                                 handleSubmit={handleSubmit}
                             />;
 
