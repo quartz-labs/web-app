@@ -22,6 +22,10 @@ export interface KYCData {
 }
 
 const DEFAULT_COUNTRY = "US";
+export const DEFAULT_PURPOSE = "Daily Spending";
+export const DEFAULT_VOLUME = "500";
+export const DEFAULT_VOLUME_DISPLAY = "$0-499";
+
 export const DEFAULT_KYC_DATA: KYCData = {
     id: "",
     firstName: "",
@@ -40,9 +44,9 @@ export const DEFAULT_KYC_DATA: KYCData = {
     countryOfIssue: DEFAULT_COUNTRY,
     nationalId: "",
     occupation: "",
-    accountPurpose: "",
+    accountPurpose: DEFAULT_PURPOSE,
     annualSalary: "",
-    expectedMonthlyVolume: "",
+    expectedMonthlyVolume: DEFAULT_VOLUME,
     walletAddress: "",
     ipAddress: "",
     isTermsOfServiceAccepted: false,

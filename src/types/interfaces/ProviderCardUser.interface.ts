@@ -15,5 +15,5 @@ export interface ProviderCardUser {
     phoneNumber: string;
     applicationStatus: ApplicationStatus;
     applicationCompletionLink: ApplicationCompletionLink;
-    applicationReason: string | undefined;
+    applicationReason: string;
 }

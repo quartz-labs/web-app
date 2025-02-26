@@ -1,11 +1,10 @@
 import { useStore } from "@/src/utils/store";
 import styles from "./Card.module.css";
-import { AuthLevel, TandCsNeeded } from "@/src/types/enums/AuthLevel.enum";
+import { QuartzCardAccountStatus, TandCsNeeded } from "@/src/types/enums/QuartzCardAccountStatus.enum";
 import { useState } from "react";
 import { fetchAndParse } from "@/src/utils/helpers";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
-import { TailSpin } from "react-loader-spinner";
-import { useLoginCardUser, useOpenKycLink } from "@/src/utils/hooks";
+import { useLoginCardUser } from "@/src/utils/hooks";
 import { PuffLoader } from "react-spinners";
 import Card from "./Card";
 
@@ -15,10 +14,8 @@ export default function CardDetails() {
         quartzCardUser,
         jwtToken,
         cardDetails,
-        providerCardUser,
         isSigningLoginMessage
     } = useStore();
-    const openKycLink = useOpenKycLink();
 
     const [loadingDetails, setLoadingDetails] = useState(false);
     const [cardPan, setCardPan] = useState<string | null>(null);
@@ -67,7 +64,7 @@ export default function CardDetails() {
                     <button
                         className={`glass-button ${styles.cardButton}`}
                         onClick={() => {
-                            if (quartzCardUser?.auth_level === AuthLevel.CARD) {
+                            if (quartzCardUser?.account_status === QuartzCardAccountStatus.CARD) {
                                 setModalVariation(ModalVariation.ACCEPT_TANDCS);
                             } else {
                                 loginCardUser.mutate(TandCsNeeded.NOT_NEEDED)
@@ -87,74 +84,6 @@ export default function CardDetails() {
                             <p>Authorize Wallet</p>
                         )}
                     </button>
-                </div>
-            </div>
-        )
-    }
-
-    if (quartzCardUser?.auth_level === AuthLevel.BASE) {
-        const link = providerCardUser?.applicationCompletionLink ? (
-            `${providerCardUser.applicationCompletionLink.url}?userId=${providerCardUser.applicationCompletionLink.params.userId}`
-        ) : undefined;
-        return (
-            <div className={styles.cardWrapper}>
-                <div className={styles.cardContainer}>
-                    <Card
-                        cvc={cardCvc}
-                        pan={cardPan}
-                    />
-
-                    {link && (
-                        <button
-                            className={`glass-button ${styles.cardButton}`}
-                            onClick={() => openKycLink(link)}
-                        >
-                            Complete KYC
-                        </button>
-                    )}
-
-                    {!link && (
-                        <div className={styles.kycPending}>
-                            <p>Loading KYC link...</p>
-
-                            <TailSpin
-                                height="18.5"
-                                width="18.5"
-                                color="#ffffffA5"
-                                ariaLabel="loading-spinner"
-                                wrapperStyle={{
-                                    width: "25px"
-                                }}
-                            />
-                        </div>
-                    )}
-                </div>
-            </div>
-        )
-    }
-
-    if (quartzCardUser?.auth_level === AuthLevel.KYC_PENDING) {
-        return (
-            <div className={styles.cardWrapper}>
-                <div className={styles.cardContainer}>
-                    <Card
-                        cvc={cardCvc}
-                        pan={cardPan}
-                    />
-
-                    <div className={styles.kycPending}>
-                        <p>KYC verification pending...</p>
-
-                        <TailSpin
-                            height="18.5"
-                            width="18.5"
-                            color="#ffffffA5"
-                            ariaLabel="loading-spinner"
-                            wrapperStyle={{
-                                width: "25px"
-                            }}
-                        />
-                    </div>
                 </div>
             </div>
         )

@@ -1,8 +1,9 @@
 import styles from "./Onboarding.module.css";
 import type { OnboardingPageProps } from "./Onboarding";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { getCountries, getCountry } from "@/src/utils/countries";
 import { getCode } from "@/src/utils/countries";
+import { DEFAULT_PURPOSE, DEFAULT_VOLUME, DEFAULT_VOLUME_DISPLAY } from "@/src/types/interfaces/KYCData.interface";
 
 export default function RegulatoryInfo({
     incrementPage, 
@@ -32,14 +33,6 @@ export default function RegulatoryInfo({
     const [isMissingTerms, setIsMissingTerms] = useState(false);
 
     const [isInvalidSSN, setIsInvalidSSN] = useState(false);
-
-    const DEFAULT_PURPOSE = "Daily Spending";
-    const DEFAULT_VOLUME = "500";
-    const DEFAULT_VOLUME_DISPLAY = "$0-499";
-    useEffect(() => {
-        handleFormDataChange("accountPurpose", DEFAULT_PURPOSE);
-        handleFormDataChange("expectedMonthlyVolume", DEFAULT_VOLUME);
-    }, [handleFormDataChange]);
 
     const handleSubmit = () => {
         const missingValuesData = {
@@ -88,7 +81,7 @@ export default function RegulatoryInfo({
                 <div className={styles.inputSection}>
                     <div className={styles.inputContainer}>
                         <div>
-                            <p className={styles.inputLabel}>Where is your ID from?</p>
+                            <p className={styles.inputLabel}>Where is your ID from?<sup>*</sup></p>
                             <select
                                 className={`${styles.inputField} ${styles.inputSelect}`}
                                 value={getCountry(formData.countryOfIssue) ?? ""}
@@ -106,7 +99,7 @@ export default function RegulatoryInfo({
                             </select>
                         </div>
                         <div>
-                            <p className={styles.inputLabel}>What&apos;s your {formData.countryOfIssue === "US" ? "Social Security Number" : "ID number"}?</p>
+                            <p className={styles.inputLabel}>What&apos;s your {formData.countryOfIssue === "US" ? "Social Security Number" : "ID number"}?<sup>*</sup></p>
                             <input 
                                 type="text" 
                                 className={`${styles.inputField} ${missingValues.nationalId ? styles.missing : ""}`} 
@@ -120,7 +113,7 @@ export default function RegulatoryInfo({
                 <div className={styles.inputSection}>
                     <div className={styles.inputContainer}>
                         <div>
-                            <p className={styles.inputLabel}>What&apos;s your occupation?</p>
+                            <p className={styles.inputLabel}>What&apos;s your occupation?<sup>*</sup></p>
                             <input 
                                 type="text" 
                                 className={`${styles.inputField} ${missingValues.occupation ? styles.missing : ""}`} 
@@ -130,7 +123,7 @@ export default function RegulatoryInfo({
                             />
                         </div>
                         <div>
-                            <p className={styles.inputLabel}>What will you be using Quartz for?</p>
+                            <p className={styles.inputLabel}>What will you be using Quartz for?<sup>*</sup></p>
                             <select
                                 className={`${styles.inputField} ${styles.inputSelect}`}
                                 value={formData.accountPurpose}
@@ -148,7 +141,7 @@ export default function RegulatoryInfo({
                 <div className={styles.inputSection}>
                     <div className={styles.inputContainer}>
                         <div>
-                            <p className={styles.inputLabel}>What&apos;s your annual income?</p>
+                            <p className={styles.inputLabel}>What&apos;s your annual income?<sup>*</sup></p>
                             <input 
                                 type="text" 
                                 className={`${styles.inputField} ${missingValues.annualSalary ? styles.missing : ""}`} 
@@ -167,7 +160,7 @@ export default function RegulatoryInfo({
                             />
                         </div>
                         <div>
-                            <p className={styles.inputLabel}>What&apos;s your expected monthly spend on Quartz?</p>
+                            <p className={styles.inputLabel}>What&apos;s your expected monthly spend on Quartz?<sup>*</sup></p>
                             <select
                                 className={`${styles.inputField} ${styles.inputSelect}`}
                                 value={formData.expectedMonthlyVolume}

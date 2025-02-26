@@ -2,7 +2,6 @@
 
 import Dashboard from "@/src/components/Dashboard/Dashboard";
 import Nav from "@/src/components/Nav/Nav";
-import Onboarding from "@/src/components/OtherViews/Onboarding/Onboarding";
 import ClosedAccount from "@/src/components/OtherViews/ClosedAccount";
 import NoBetaKey from "@/src/components/OtherViews/NoBetaKey";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -12,17 +11,14 @@ import { useStore } from "@/src/utils/store";
 import { useEffect } from 'react';
 import config from "@/src/config/config";
 import Unavailable from "@/src/components/OtherViews/Unavailable";
-import { useLoginCardUser, useRefetchCardUser } from "../utils/hooks";
-import { AuthLevel, TandCsNeeded } from "../types/enums/AuthLevel.enum";
-import { fetchAndParse } from "../utils/helpers";
+import { QuartzCardAccountStatus } from "../types/enums/QuartzCardAccountStatus.enum";
 import { useAccountStatusQuery, useWithdrawLimitsQuery, useBalancesQuery, useRatesQuery, usePricesQuery, useHealthQuery, useBorrowLimitsQuery, useSpendLimitQuery, useDepositLimitsQuery } from "../utils/queries/protocol.queries";
 import { useProviderCardUserQuery, useQuartzCardUserQuery, useCardDetailsQuery, useTxHistoryQuery } from "../utils/queries/internalApi.queries";
 import { ModalVariation } from "../types/enums/ModalVariation.enum";
 import UpgradeRequired from "../components/OtherViews/UpgradeRequired";
 import Disconnected from "../components/OtherViews/Disconnected";
 import Background from "../components/Background/Background";
-import { captureError } from "../utils/errors";
-import { useError } from "../context/error-provider";
+import Onboarding from "../components/OtherViews/Onboarding/Onboarding";
 
 export default function Page() {
   const wallet = useWallet();
@@ -30,14 +26,9 @@ export default function Page() {
     setIsInitialized, 
     jwtToken, 
     setModalVariation, 
-    setSpendLimitRefreshing, 
-    isSigningLoginMessage,
-    setIsSigningLoginMessage,
-    setDoneLoading
+    setSpendLimitRefreshing,
+    isSigningLoginMessage
   } = useStore();
-  const refetchCardUser = useRefetchCardUser();
-  const loginCardUser = useLoginCardUser();
-  const { showError } = useError();
 
 
   // Quartz account status
@@ -63,87 +54,31 @@ export default function Page() {
   
 
   // Card data
-  const { data: quartzCardUser, isLoading: isQuartzCardUserLoading } = useQuartzCardUserQuery(isInitialized ? wallet.publicKey : null);
-  const refreshForKyc = isInitialized && (quartzCardUser?.auth_level === AuthLevel.BASE || quartzCardUser?.auth_level === AuthLevel.KYC_PENDING);
-  const { data: providerCardUser, isLoading: isProviderCardUserLoading } = useProviderCardUserQuery(
-    quartzCardUser?.card_api_user_id ?? null,
-    refreshForKyc
-  );
+  const { data: quartzCardUser } = useQuartzCardUserQuery(isInitialized ? wallet.publicKey : null);
+  useProviderCardUserQuery(quartzCardUser?.card_api_user_id ?? null);
   useCardDetailsQuery(
     quartzCardUser?.card_api_user_id ?? null,
-    isInitialized && quartzCardUser?.auth_level === AuthLevel.CARD
+    isInitialized && quartzCardUser?.account_status === QuartzCardAccountStatus.CARD
   );
-  useTxHistoryQuery(quartzCardUser?.card_api_user_id ?? null, isInitialized && quartzCardUser?.auth_level === AuthLevel.CARD);
-
-
-  // Update QuartzCardUser status if ProviderCardUser status differs
-  useEffect(() => {
-    if (!providerCardUser || !quartzCardUser || !wallet.publicKey) return;
-
-    let providerCardUserStatus: AuthLevel;
-    if (providerCardUser?.applicationStatus === "approved") {
-      providerCardUserStatus = AuthLevel.CARD;
-    } else if (providerCardUser?.applicationStatus === "pending") {
-      providerCardUserStatus = AuthLevel.KYC_PENDING;
-    } else {
-      providerCardUserStatus = AuthLevel.BASE;
-    }
-
-    if (quartzCardUser?.auth_level !== providerCardUserStatus) {
-      fetchAndParse(`${config.NEXT_PUBLIC_INTERNAL_API_URL}/auth/auth-level?publicKey=${wallet.publicKey}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          authLevel: providerCardUserStatus
-        })
-      });
-      refetchCardUser();
-    }
-  }, [quartzCardUser, providerCardUser, wallet.publicKey, refetchCardUser]);
+  useTxHistoryQuery(
+    quartzCardUser?.card_api_user_id ?? null, 
+    isInitialized && quartzCardUser?.account_status === QuartzCardAccountStatus.CARD
+  );
 
 
   // Log in card user
   useEffect(() => {
     if (
       isInitialized 
-      && quartzCardUser?.auth_level === AuthLevel.CARD 
-      && jwtToken === undefined 
+      && quartzCardUser?.account_status === QuartzCardAccountStatus.CARD 
+      && jwtToken === undefined
       && !isSigningLoginMessage
     ) {
       setModalVariation(ModalVariation.ACCEPT_TANDCS)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps	
-  }, [isInitialized, quartzCardUser?.auth_level, jwtToken, isSigningLoginMessage]);
-
-
-  const passedKyc = quartzCardUser?.auth_level === AuthLevel.CARD;
-  const doneLoading = accountStatus !== undefined && !isAccountStatusLoading && !isQuartzCardUserLoading && !isProviderCardUserLoading;
-  const requireOnboarding = doneLoading && (!isInitialized || !passedKyc);
-
-  useEffect(() => {
-    setDoneLoading(doneLoading);
-  }, [doneLoading, setDoneLoading]);
-
-  const completeOnboarding = async () => {
-    setIsSigningLoginMessage(true);
-    loginCardUser.mutate(TandCsNeeded.ACCEPTED);
-    setModalVariation(ModalVariation.DISABLED);
-    
-    try {
-      await fetchAndParse(`${config.NEXT_PUBLIC_INTERNAL_API_URL}/user/initial-spend-limit`, {
-        method: 'PATCH',
-        headers: {
-        'Content-Type': 'application/json'
-      },
-        body: JSON.stringify({ id: quartzCardUser?.card_api_user_id })
-      });
-      refetchCardUser();
-    } catch (error) {
-      captureError(showError, "Could not update user in database", "app/page.tsx", error, wallet.publicKey);
-    }
-  }
+  }, [isInitialized, quartzCardUser?.account_status, jwtToken, isSigningLoginMessage]);
+  
 
 
   if (config.NEXT_PUBLIC_UNAVAILABLE_TIME) {
@@ -179,51 +114,49 @@ export default function Page() {
     );
   }
 
-  if (requireOnboarding || (doneLoading && !quartzCardUser?.set_initial_spend_limit)) {
+  if (quartzCardUser === undefined || quartzCardUser?.account_status === QuartzCardAccountStatus.CARD) {
     return (
       <main className={styles.container}>
         <Background />
-        
+  
         <Nav 
           isAccountInitialized={isInitialized} 
           isAccountStatusLoading={isAccountStatusLoading}
         />
-
+  
         <div className={styles.content}>
-          <Onboarding
-            onCompleteOnboarding={completeOnboarding}
-          />
+            {(() => {
+                  switch (accountStatus) {
+                    case AccountStatus.CLOSED:
+                    return <ClosedAccount />;
+  
+                  case AccountStatus.NO_BETA_KEY:
+                    return <NoBetaKey />;
+  
+                  case AccountStatus.UPGRADE_REQUIRED:
+                    return <UpgradeRequired />;
+  
+                  default:
+                    return <Dashboard />;
+                  }
+              })()
+            }
         </div>
       </main>
     );
   }
-  
+
   return (
     <main className={styles.container}>
       <Background />
-
+      
       <Nav 
         isAccountInitialized={isInitialized} 
         isAccountStatusLoading={isAccountStatusLoading}
       />
 
       <div className={styles.content}>
-          {(() => {
-                switch (accountStatus) {
-                  case AccountStatus.CLOSED:
-                  return <ClosedAccount />;
-
-                case AccountStatus.NO_BETA_KEY:
-                  return <NoBetaKey />;
-
-                case AccountStatus.UPGRADE_REQUIRED:
-                  return <UpgradeRequired />;
-
-                default:
-                  return <Dashboard />;
-                }
-            })()
-          }
+        <Onboarding />
       </div>
     </main>
   );

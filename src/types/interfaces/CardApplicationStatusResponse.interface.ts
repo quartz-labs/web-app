@@ -1,6 +1,6 @@
 import type { ApplicationStatus } from "../ApplicationStatus.type";
 
-export interface CardApplicationStatusResponse {
+export type CardApplicationStatusResponse = {
     id: string;
     applicationStatus: ApplicationStatus;
     applicationCompletionLink: {
@@ -8,6 +8,6 @@ export interface CardApplicationStatusResponse {
         params: {
             userId: string;
         };
-    };
+    } | undefined;
     applicationReason: string;
 };

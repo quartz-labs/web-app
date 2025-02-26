@@ -3,7 +3,7 @@ import styles from "../Modal.module.css";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
 import { useLoginCardUser, useRefetchCardUser } from "@/src/utils/hooks";
 import { useEffect } from "react";
-import { TandCsNeeded } from "@/src/types/enums/AuthLevel.enum";
+import { TandCsNeeded } from "@/src/types/enums/QuartzCardAccountStatus.enum";
 
 export default function AcceptTandcsModal() {
     const { setModalVariation } = useStore();

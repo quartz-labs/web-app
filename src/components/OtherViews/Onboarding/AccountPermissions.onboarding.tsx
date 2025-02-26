@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import type { OnboardingPageProps } from "./Onboarding";
 import styles from "./Onboarding.module.css";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useError } from "@/src/context/error-provider";
@@ -15,11 +14,11 @@ import { captureError } from "@/src/utils/errors";
 import { TailSpin } from "react-loader-spinner";
 import { PuffLoader } from "react-spinners";
 
-export interface AccountPermissionsProps extends OnboardingPageProps {
-    onCompleteOnboarding: () => void;
+export interface AccountPermissionsProps {
+    onSetSpendLimit: () => void;
 }
 
-export default function AccountPermissions({ onCompleteOnboarding }: AccountPermissionsProps) {
+export default function AccountPermissions({ onSetSpendLimit }: AccountPermissionsProps) {
     const wallet = useAnchorWallet();
     const { showError } = useError();
     const { showTxStatus } = useTxStatus();
@@ -37,12 +36,19 @@ export default function AccountPermissions({ onCompleteOnboarding }: AccountPerm
     
     let existingSpendLimitDollars = spendLimitTimeframeBaseUnits 
         ? baseUnitToDecimal(spendLimitTimeframeBaseUnits, MARKET_INDEX_USDC) 
-        : 0;
+        : undefined;
     if (spendLimitTimeframeLength === 0) existingSpendLimitDollars = 0; // If timeframe is 0, limit is 0
 
-    const [newLimitTimeframeDollarsStr, setNewLimitTimeframeDollarsStr] = useState<string>(
-        existingSpendLimitDollars.toFixed(2)
+    const [newLimitTimeframeDollarsStr, setNewLimitTimeframeDollarsStr] = useState<string|undefined>(
+        existingSpendLimitDollars ? existingSpendLimitDollars.toFixed(2) : undefined
     );
+
+    // Replace default undefined value once loaded
+    useEffect(() => {
+        if (newLimitTimeframeDollarsStr === undefined && existingSpendLimitDollars !== undefined) {
+            setNewLimitTimeframeDollarsStr(existingSpendLimitDollars.toFixed(2));
+        }
+    }, [newLimitTimeframeDollarsStr, existingSpendLimitDollars]);
 
     let existingSpendLimitTimeframe = spendLimitTimeframeLength;
     const isValidSpendLimitTimeframe = (existingSpendLimitTimeframe === undefined)
@@ -89,7 +95,7 @@ export default function AccountPermissions({ onCompleteOnboarding }: AccountPerm
             setAwaitingSign(false);
             if (signature) {
                 refetchSpendLimits();
-                onCompleteOnboarding();
+                onSetSpendLimit();
             }
         } catch (error) {
             if (error instanceof WalletSignTransactionError) showTxStatus({ status: TxStatus.SIGN_REJECTED });
@@ -128,7 +134,7 @@ export default function AccountPermissions({ onCompleteOnboarding }: AccountPerm
                                 type="text" 
                                 placeholder={"0.0"} 
                                 value={
-                                    newLimitTimeframeDollarsStr.startsWith("$")
+                                    newLimitTimeframeDollarsStr?.startsWith("$")
                                     ? newLimitTimeframeDollarsStr
                                     : `$${newLimitTimeframeDollarsStr}`
                                 } 

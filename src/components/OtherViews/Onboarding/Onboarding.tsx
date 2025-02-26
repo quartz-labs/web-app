@@ -15,11 +15,12 @@ import type { ApplicationCompletionLink } from "@/src/types/ApplicationCompleteL
 import config from "@/src/config/config";
 import type { QuartzCardUser } from "@/src/types/interfaces/QuartzCardUser.interface";
 import { fetchAndParse } from "@/src/utils/helpers";
-import { useOpenKycLink, useRefetchCardUser } from "@/src/utils/hooks";
+import { useLoginCardUser, useOpenKycLink, useRefetchCardUser } from "@/src/utils/hooks";
 import { useStore } from "@/src/utils/store";
-import { AuthLevel } from "@/src/types/enums/AuthLevel.enum";
+import { QuartzCardAccountStatus, TandCsNeeded } from "@/src/types/enums/QuartzCardAccountStatus.enum";
 import { getPhoneCode } from "@/src/utils/countries";
 import { useApplicationStatusQuery } from "@/src/utils/queries/internalApi.queries";
+import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
 
 export enum OnboardingPage {
     ACCOUNT_CREATION = 0,
@@ -39,36 +40,64 @@ export interface OnboardingPageProps {
     terms: Terms;
 }
 
-export interface OnboardingProps {
-    onCompleteOnboarding: () => void;
-}
-
-export default function Onboarding({ onCompleteOnboarding }: OnboardingProps) {
+export default function Onboarding() {
     const wallet = useAnchorWallet();
     const { showError } = useError();
     const openKycLink = useOpenKycLink();
     const refetchCardUser = useRefetchCardUser();
     const { 
         isInitialized, 
-        quartzCardUser, 
-        providerCardUser, 
-        cardDetails
+        quartzCardUser,
+        providerCardUser,
+        setModalVariation,
+        setIsSigningLoginMessage
     } = useStore();
     
-    const [page, setPage] = useState(OnboardingPage.ACCOUNT_CREATION);
+
+    let startingPage;
+    if (!isInitialized) {
+        // If not initialized, go to PDA account creation
+        startingPage = OnboardingPage.ACCOUNT_CREATION;
+    } else if (
+        isInitialized
+        && quartzCardUser?.account_status === undefined
+    ) {
+        // If PDA created but no KYC, go to personal info
+        startingPage = OnboardingPage.PERSONAL_INFO;
+    } 
+    else if (
+        quartzCardUser?.account_status === QuartzCardAccountStatus.KYC_PENDING
+        || quartzCardUser?.account_status === QuartzCardAccountStatus.KYC_REJECTED
+    ) {
+        // If KYC pending or rejected, go to ID photo
+        startingPage = OnboardingPage.ID_PHOTO;
+    } 
+    else {
+        // If KYC complete, go to account permissions
+        startingPage = OnboardingPage.ACCOUNT_PERMISSIONS;
+    }
+
+
+    const [page, setPage] = useState<OnboardingPage>(startingPage);
     const incrementPage = () => setPage(page + 1);
     const decrementPage = () => setPage(page - 1);
+
 
     const [formData, setFormData] = useState<KYCData>(DEFAULT_KYC_DATA);
     const [terms, setTerms] = useState<Terms>(DEFAULT_TERMS);
 
-    const [kycLink, setKycLink] = useState<string | undefined>(undefined);
-    const [awaitingApproval, setAwaitingApproval] = useState(false);
 
     const {data: applicationStatus} = useApplicationStatusQuery(
         quartzCardUser?.card_api_user_id ?? null,
-        awaitingApproval
+        quartzCardUser?.account_status === QuartzCardAccountStatus.KYC_PENDING
     );
+    useEffect(() => {
+        if (applicationStatus?.applicationStatus === "approved") {
+            refetchCardUser();
+            setPage(OnboardingPage.ACCOUNT_PERMISSIONS);
+        }
+    }, [applicationStatus?.applicationStatus, refetchCardUser]);
+    
 
     const handleFormDataChange = <K extends keyof KYCData>(field: K, value: KYCData[K]) => {
         setFormData(prev => ({
@@ -95,79 +124,42 @@ export default function Onboarding({ onCompleteOnboarding }: OnboardingProps) {
     };
 
     const [hasInitialized, setHasInitialized] = useState(false);
-
     useEffect(() => {
         if (!isInitialized || hasInitialized) return;
 
         if (!formData.isTermsOfServiceAccepted) {
             handleTermsChange("acceptQuartzCardTerms", true);
         }
-
         if (!terms.privacyPolicy) {
             handleTermsChange("privacyPolicy", true);
         }
-
         if (!formData.isTermsOfServiceAccepted) {
             handleFormDataChange("isTermsOfServiceAccepted", true);
         }
 
         setHasInitialized(true);
-
-        if (quartzCardUser?.auth_level === undefined) {
-            // Created on-chain account, but not submitted KYC
-            return setPage(OnboardingPage.PERSONAL_INFO);
-        } 
-        
-        if (quartzCardUser?.auth_level === AuthLevel.BASE) {
-            // Created on-chain account and submitted KYC, but not been approved
-            setKycLink(providerCardUser?.applicationCompletionLink ? (
-                `${providerCardUser.applicationCompletionLink.url}?userId=${providerCardUser.applicationCompletionLink.params.userId}`
-            ) : undefined);
-            return setPage(OnboardingPage.ID_PHOTO);
-        } 
-        
-        if (applicationStatus?.applicationStatus === "approved" && quartzCardUser?.auth_level === AuthLevel.CARD) {
-            // Created on-chain account and submitted KYC, been approved, but not yet set spend limits
-            if (!cardDetails) {
-                captureError(showError, "Could not create card", "/Onboarding.tsx", "Could not create card", wallet?.publicKey ?? null, true);
-            }
-
-            setPage(OnboardingPage.ACCOUNT_PERMISSIONS);
-            setAwaitingApproval(false);
-        }
     }, [ 
         isInitialized, 
-        quartzCardUser?.auth_level, 
-        providerCardUser, 
-        cardDetails, 
-        showError, 
-        wallet?.publicKey, 
-        applicationStatus,
-        hasInitialized,
+        hasInitialized, 
         formData.isTermsOfServiceAccepted,
         terms.privacyPolicy,
         terms.acceptQuartzCardTerms
     ]);
 
+    const [pendingKyc, setPendingKyc] = useState(providerCardUser?.applicationStatus === "pending");
     const handleSubmit = async () => {
         if (!wallet?.publicKey) {
             captureError(showError, "Wallet not connected", "/Onboarding.tsx", "Wallet not connected", null);
             return;
         }
 
-        setAwaitingApproval(true);
-
-        if (kycLink) {
-            openKycLink(kycLink);
-            refetchCardUser();
-            return;
-        }
-
-        if (providerCardUser?.applicationCompletionLink) {
+        if (providerCardUser) {
             openKycLink(`${providerCardUser.applicationCompletionLink.url}?userId=${providerCardUser.applicationCompletionLink.params.userId}`);
             refetchCardUser();
             return;
         }
+
+        setPendingKyc(true);
 
         try {
             const formattedData = {
@@ -199,8 +191,28 @@ export default function Onboarding({ onCompleteOnboarding }: OnboardingProps) {
             refetchCardUser();
         } catch (error) {
             captureError(showError, "Failed to submit form", "/CardSignupModal.tsx", error, wallet.publicKey);
-            setAwaitingApproval(false);
+            setPendingKyc(false);
         }
+    }
+
+    const loginCardUser = useLoginCardUser();
+    const handleSetSpendLimit = async () => {
+        await fetchAndParse(
+            `${config.NEXT_PUBLIC_INTERNAL_API_URL}/card/application/set-limits`,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    id: quartzCardUser?.card_api_user_id,
+                }),
+            }
+        );
+        setIsSigningLoginMessage(true);
+        loginCardUser.mutate(TandCsNeeded.ACCEPTED);
+        setModalVariation(ModalVariation.DISABLED);
+        refetchCardUser();
     }
 
     return (
@@ -252,21 +264,14 @@ export default function Onboarding({ onCompleteOnboarding }: OnboardingProps) {
                                 handleTermsChange={handleTermsChange}
                                 formData={formData}
                                 terms={terms}   
-                                awaitingApproval={awaitingApproval}
+                                awaitingApproval={pendingKyc}
                                 rejectedReason={applicationStatus?.applicationReason ?? ""}
                                 handleSubmit={handleSubmit}
                             />;
 
                         case OnboardingPage.ACCOUNT_PERMISSIONS:
                             return <AccountPermissions 
-                                incrementPage={incrementPage}
-                                decrementPage={decrementPage}
-                                handleFormDataChange={handleFormDataChange}
-                                handleAddressChange={handleAddressChange}
-                                handleTermsChange={handleTermsChange}
-                                formData={formData}
-                                terms={terms}
-                                onCompleteOnboarding={onCompleteOnboarding}
+                                onSetSpendLimit={handleSetSpendLimit}
                             />;
                     }
                 })()}

@@ -1,10 +1,10 @@
 import Image from "next/image";
 import styles from "./Nav.module.css";
 import { WalletButton } from "@/src/context/solana/solana-provider";
-import { useWallet } from "@solana/wallet-adapter-react";
 import { TailSpin } from "react-loader-spinner";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
 import { useStore } from "@/src/utils/store";
+import { QuartzCardAccountStatus } from "@/src/types/enums/QuartzCardAccountStatus.enum";
 
 export interface NavProps {
   isAccountInitialized: boolean;
@@ -15,8 +15,7 @@ export default function Nav({
   isAccountInitialized,
   isAccountStatusLoading
 }: NavProps) {
-  const wallet = useWallet();
-  const { setModalVariation } = useStore();
+  const { setModalVariation, quartzCardUser } = useStore();
 
   return (
     <div className={styles["nav"]}>
@@ -43,13 +42,10 @@ export default function Nav({
           />
         }
 
-        {wallet.publicKey && isAccountInitialized &&
+        {isAccountInitialized && quartzCardUser?.account_status === QuartzCardAccountStatus.CARD &&
           <button 
             className={styles.notificationsButton}
-            onClick={() => {
-              console.log("clicked");
-              setModalVariation(ModalVariation.NOTIFICATIONS)}
-          }
+            onClick={() => setModalVariation(ModalVariation.NOTIFICATIONS)}
           >
             <Image 
                 className={"image-fill"}

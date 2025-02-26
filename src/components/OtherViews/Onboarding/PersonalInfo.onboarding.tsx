@@ -71,7 +71,7 @@ export default function PersonalInfo({
 
             <div className={styles.formWrapper}>
                 <div className={styles.inputSection}>
-                    <p className={styles.inputLabel}>What&apos;s your full legal name? This must exactly match your ID.</p>
+                    <p className={styles.inputLabel}>What&apos;s your full legal name? This must exactly match your ID.<sup>*</sup></p>
                     <div className={styles.inputContainer}>
                         <input 
                             type="text" 
@@ -91,7 +91,7 @@ export default function PersonalInfo({
                 </div>
 
                 <div className={styles.inputSection}>
-                    <p className={styles.inputLabel}>What&apos;s your phone number?</p>
+                    <p className={styles.inputLabel}>What&apos;s your phone number?<sup>*</sup></p>
                     <div className={styles.inputContainer}>
                         <select
                             className={`${styles.inputField} ${styles.inputSelect}`}
@@ -126,7 +126,7 @@ export default function PersonalInfo({
                 <div className={styles.inputSection}>
                     <div className={styles.inputContainer}>
                         <div>
-                            <p className={styles.inputLabel}>What&apos;s your email?</p>
+                            <p className={styles.inputLabel}>What&apos;s your email?<sup>*</sup></p>
                             <input 
                                 type="text" 
                                 className={`${styles.inputField} ${missingValues.email ? styles.missing : ""}`} 
@@ -136,7 +136,7 @@ export default function PersonalInfo({
                             />
                         </div>
                         <div>
-                            <p className={styles.inputLabel}>What&apos;s your date of birth?</p>
+                            <p className={styles.inputLabel}>What&apos;s your date of birth?<sup>*</sup></p>
                             <input
                                 className={`${styles.inputField} ${(missingValues.birthDate && !formData.birthDate) ? styles.missing : ""}`}
                                 type="date"
@@ -149,7 +149,7 @@ export default function PersonalInfo({
                 </div>
 
                 <div className={styles.inputSection}>
-                    <p className={styles.inputLabel}>What&apos;s your address?</p>
+                    <p className={styles.inputLabel}>What&apos;s your address?<sup>*</sup></p>
                     <div className={styles.inputContainer}>
                         <input 
                             type="text" 
@@ -161,7 +161,7 @@ export default function PersonalInfo({
                         <input 
                             type="text" 
                             className={`${styles.inputField}`} 
-                            placeholder="Apt./Suite"
+                            placeholder="Apt./Suite (optional)"
                             value={formData.address.line2}
                             onChange={(e) => handleAddressChange("line2", e.target.value)}
                         />

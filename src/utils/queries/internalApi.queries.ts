@@ -6,6 +6,7 @@ import config from "@/src/config/config";
 import type { CardsForUserResponse } from "@/src/types/interfaces/CardsForUserResponse.interface";
 import type { ProviderCardUser } from "@/src/types/interfaces/ProviderCardUser.interface";
 import type { ProviderCardHistory } from "@/src/types/interfaces/ProviderCardHistory.interface";
+import type { CardApplicationStatusResponse } from "@/src/types/interfaces/CardApplicationStatusResponse.interface";
 
 export const useQuartzCardUserQuery = (publicKey: PublicKey | null) => {
     const { setQuartzCardUser } = useStore();
@@ -25,7 +26,7 @@ export const useQuartzCardUserQuery = (publicKey: PublicKey | null) => {
     return query();
 };
 
-export const useProviderCardUserQuery = (cardUserId: string | null, refetch: boolean) => {
+export const useProviderCardUserQuery = (cardUserId: string | null, refetch: boolean = false) => {
     const { setProviderCardUser } = useStore();
 
     const query = createQuery<ProviderCardUser>({
@@ -44,9 +45,9 @@ export const useProviderCardUserQuery = (cardUserId: string | null, refetch: boo
 };
 
 export const useApplicationStatusQuery = (cardUserId: string | null, refetch: boolean) => {
-    const query = createQuery<any>({
-        queryKey: ["card-user", "provider-card-user", "user"],
-        url: `${config.NEXT_PUBLIC_INTERNAL_API_URL}/application/status`,
+    const query = createQuery<CardApplicationStatusResponse>({
+        queryKey: ["card-user", "provider-card-user", "application-status"],
+        url: `${config.NEXT_PUBLIC_INTERNAL_API_URL}/card/application/status`,
         params: cardUserId ? {
             id: cardUserId
         } : undefined,

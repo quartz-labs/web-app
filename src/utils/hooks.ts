@@ -6,7 +6,7 @@ import config from "../config/config";
 import { fetchAndParse } from "./helpers";
 import { useStore } from "./store";
 import { WalletSignMessageError } from "@solana/wallet-adapter-base";
-import { TandCsNeeded } from "../types/enums/AuthLevel.enum";
+import { TandCsNeeded } from "../types/enums/QuartzCardAccountStatus.enum";
 
 export function useRefetchAccountData() {
     const queryClient = useQueryClient();
