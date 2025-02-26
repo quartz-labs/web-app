@@ -151,7 +151,6 @@
 
 .inputFieldSpendLimits {
     font-size: var(--font-size-large);
-    height: calc(var(--input-field-height) * 0.85);
     display: flex;
     align-items: center;
     justify-content: flex-start;
@@ -307,7 +306,6 @@
 
     .inputFieldWrapper {
         flex-direction: column;
-        height: calc((var(--input-field-height) * 2) + var(--input-field-wrapper-gap));
     }
 }
 
@@ -410,5 +408,4 @@
     height: 75%;
     width: auto;
     aspect-ratio: 1;
-    padding-left: 5px;
 }

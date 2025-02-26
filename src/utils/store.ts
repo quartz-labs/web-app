@@ -21,7 +21,7 @@ type State = {
   jwtToken?: JwtToken;
   isSigningLoginMessage: boolean;
   kycLink?: string;
-  quartzCardUser?: QuartzCardUser;
+  quartzCardUser?: QuartzCardUser | null;
   providerCardUser?: ProviderCardUser;
   cardDetails?: CardsForUserResponse;
   spendLimitTransactionBaseUnits?: number;
@@ -45,7 +45,7 @@ type Action = {
   setJwtToken: (jwtToken?: JwtToken) => void;
   setIsSigningLoginMessage: (isSigningLoginMessage: boolean) => void;
   setKycLink: (kycLink?: string) => void;
-  setQuartzCardUser: (quartzCardUser?: QuartzCardUser) => void;
+  setQuartzCardUser: (quartzCardUser?: QuartzCardUser | null) => void;
   setProviderCardUser: (providerCardUser?: ProviderCardUser) => void;
   setCardDetails: (cardDetails?: CardsForUserResponse) => void;
   setSpendLimitTransactionBaseUnits: (spendLimitTransaction?: number) => void;
@@ -91,7 +91,7 @@ export const useStore = create<State & Action>((set) => ({
   setJwtToken: (jwtToken?: JwtToken) => set({ jwtToken }),
   setIsSigningLoginMessage: (isSigningLoginMessage: boolean) => set({ isSigningLoginMessage }),
   setKycLink: (kycLink?: string) => set({ kycLink }),
-  setQuartzCardUser: (quartzCardUser?: QuartzCardUser) => set({ quartzCardUser }),
+  setQuartzCardUser: (quartzCardUser?: QuartzCardUser | null) => set({ quartzCardUser }),
   setProviderCardUser: (providerCardUser?: ProviderCardUser) => set({ providerCardUser }),
   setCardDetails: (cardDetails?: CardsForUserResponse) => set({ cardDetails }),
   setSpendLimitTransactionBaseUnits: (spendLimitTransaction?: number) => set({ spendLimitTransactionBaseUnits: spendLimitTransaction }),

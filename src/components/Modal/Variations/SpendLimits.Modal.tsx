@@ -125,7 +125,7 @@ export default function SpendLimitsModal() {
                 <div className={styles.inputFieldWrapper}>
                     {!showLoading &&
                         <input 
-                            className={`${styles.inputField} ${styles.inputFieldAmount} ${styles.inputFieldSpendLimits}`}
+                            className={`${styles.inputField} ${styles.inputFieldSpendLimits}`}
                             type="text" 
                             placeholder={"0.0"} 
                             value={
@@ -141,7 +141,7 @@ export default function SpendLimitsModal() {
                         />
                     }
                     {showLoading &&
-                        <div className={`${styles.inputField} ${styles.inputFieldAmount} ${styles.inputFieldSpendLimits}`}>
+                        <div className={`${styles.inputField} ${styles.inputFieldSpendLimits}`}>
                             <TailSpin
                                 height="100%"
                                 width="100%"

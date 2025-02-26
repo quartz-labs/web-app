@@ -11,7 +11,7 @@ import type { CardApplicationStatusResponse } from "@/src/types/interfaces/CardA
 export const useQuartzCardUserQuery = (publicKey: PublicKey | null) => {
     const { setQuartzCardUser } = useStore();
 
-    const query = createQuery<QuartzCardUser>({
+    const query = createQuery<QuartzCardUser | null>({
         queryKey: ["card-user", "quartz-card-user"],
         url: `${config.NEXT_PUBLIC_INTERNAL_API_URL}/auth/user-info`,
         params: publicKey ? {
