@@ -254,6 +254,7 @@ a:hover {
   --nav-items-gap: 15px;
   --input-field-wrapper-gap: 10px;
   --bg-gem-height: 30vh;
+  --onboarding-content-padding: 100px;
 }
 
 @media only screen and (max-width: 1300px) {
@@ -268,6 +269,7 @@ a:hover {
 @media only screen and (max-width: 1040px) {
   :root {
     --buttons-row-gap: 12px;
+    --onboarding-content-padding: 60px;
   }
 }
 

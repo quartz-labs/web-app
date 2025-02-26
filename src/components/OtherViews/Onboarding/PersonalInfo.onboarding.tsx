@@ -124,7 +124,7 @@ export default function PersonalInfo({
                 </div>
 
                 <div className={styles.inputSection}>
-                    <div className={styles.inputContainer}>
+                    <div className={`${styles.inputContainer} ${styles.splitContent}`}>
                         <div>
                             <p className={styles.inputLabel}>What&apos;s your email?<sup>*</sup></p>
                             <input 
