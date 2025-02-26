@@ -11,7 +11,7 @@ export default function CopyText({ text }: CopyTextProps) {
 
     const copy = () => {
         setIsCopied(true);
-        navigator.clipboard.writeText(text);
+        navigator.clipboard.writeText(text.replace(/\s/g, ''));
         setTimeout(() => {
             setIsCopied(false);
         }, 650);
