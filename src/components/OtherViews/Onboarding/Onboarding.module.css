@@ -6,6 +6,45 @@
     gap: var(--panel-padding);
 }
 
+.contentWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    justify-content: center;
+
+    padding-left: 100px;
+    padding-right: 100px;
+    height: 100%;
+    width: 100%;
+
+    box-sizing: border-box;
+}
+
+.progressPanel {
+    padding: 45px 0px;
+    flex-grow: 0;
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+@media only screen and (max-width: 800px) {
+    .onboardingContainer {
+        grid-template-columns: 1fr;
+        /* grid-template-rows: 1fr 9fr; */
+    }
+
+    .contentWrapper {
+        padding: 20px 5px;
+    }
+
+    .progressPanel {
+        display: none;
+    }
+}
+
 .checkboxes {
     padding: 0;
     margin: 0;
@@ -82,17 +121,6 @@
     font-weight: 300;
 }
 
-.contentWrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: start;
-    justify-content: center;
-
-    padding: 0px 100px;
-    height: 100%;
-    width: 100%;
-}
-
 .textContent {
     width: 80%;
     gap: 65px;
@@ -108,16 +136,6 @@
 .buttonContainer button {
     width: 175px;
     height: 54px;
-}
-
-.progressPanel {
-    padding: 45px 0px;
-    flex-grow: 0;
-    width: 100%;
-
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
 }
 
 .titleCard {
@@ -172,6 +190,19 @@
     width: 100%;
 }
 
+.inputContainer > div {
+    flex: 1 1 0;
+    min-width: 0;
+    width: 100%;
+}
+
+@media only screen and (max-width: 800px) {
+    .inputContainer {
+        flex-direction: column;
+        gap: 8px;
+    }
+}
+
 .inputField {
     font-size: var(--font-size-p);
     padding: 15px 18px;
@@ -185,7 +216,7 @@
     color: var(--color-text);
     flex: 1 1 0;
     min-width: 0;
-    width: auto;
+    width: 100%;
 }
 
 .inputField::placeholder {
@@ -206,6 +237,8 @@
 
 .inputSelect {
     padding: 0px 18px;
+    line-height: var(--signup-field-height);
+    height: var(--signup-field-height);
 
     appearance: none;
     -webkit-appearance: none;

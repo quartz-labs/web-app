@@ -94,8 +94,10 @@ export default function Onboarding({ onCompleteOnboarding }: OnboardingProps) {
         }));
     };
 
+    const [hasInitialized, setHasInitialized] = useState(false);
+
     useEffect(() => {
-        if (!isInitialized) return;
+        if (!isInitialized || hasInitialized) return;
 
         if (!formData.isTermsOfServiceAccepted) {
             handleTermsChange("acceptQuartzCardTerms", true);
@@ -108,6 +110,8 @@ export default function Onboarding({ onCompleteOnboarding }: OnboardingProps) {
         if (!formData.isTermsOfServiceAccepted) {
             handleFormDataChange("isTermsOfServiceAccepted", true);
         }
+
+        setHasInitialized(true);
 
         if (quartzCardUser?.auth_level === undefined) {
             // Created on-chain account, but not submitted KYC
@@ -131,7 +135,7 @@ export default function Onboarding({ onCompleteOnboarding }: OnboardingProps) {
             setPage(OnboardingPage.ACCOUNT_PERMISSIONS);
             setAwaitingApproval(false);
         }
-    }, [
+    }, [ 
         isInitialized, 
         quartzCardUser?.auth_level, 
         providerCardUser, 
@@ -139,6 +143,7 @@ export default function Onboarding({ onCompleteOnboarding }: OnboardingProps) {
         showError, 
         wallet?.publicKey, 
         applicationStatus,
+        hasInitialized,
         formData.isTermsOfServiceAccepted,
         terms.privacyPolicy,
         terms.acceptQuartzCardTerms

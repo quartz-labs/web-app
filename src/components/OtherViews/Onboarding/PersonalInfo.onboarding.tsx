@@ -125,24 +125,26 @@ export default function PersonalInfo({
 
                 <div className={styles.inputSection}>
                     <div className={styles.inputContainer}>
-                        <p className={styles.inputLabel}>What&apos;s your email?</p>
-                        <p className={styles.inputLabel}>What&apos;s your date of birth?</p>
-                    </div>
-                    <div className={styles.inputContainer}>
-                        <input 
-                            type="text" 
-                            className={`${styles.inputField} ${missingValues.email ? styles.missing : ""}`} 
-                            placeholder="name@example.com"
-                            value={formData.email}
-                            onChange={(e) => handleFormDataChange("email", e.target.value)}
-                        />
-                        <input
-                            className={`${styles.inputField} ${(missingValues.birthDate && !formData.birthDate) ? styles.missing : ""}`}
-                            type="date"
-                            value={formData.birthDate}
-                            onChange={(e) => handleFormDataChange("birthDate", e.target.value)}
-                            max={new Date().toISOString().split('T')[0]} // Prevents future dates
-                        />
+                        <div>
+                            <p className={styles.inputLabel}>What&apos;s your email?</p>
+                            <input 
+                                type="text" 
+                                className={`${styles.inputField} ${missingValues.email ? styles.missing : ""}`} 
+                                placeholder="name@example.com"
+                                value={formData.email}
+                                onChange={(e) => handleFormDataChange("email", e.target.value)}
+                            />
+                        </div>
+                        <div>
+                            <p className={styles.inputLabel}>What&apos;s your date of birth?</p>
+                            <input
+                                className={`${styles.inputField} ${(missingValues.birthDate && !formData.birthDate) ? styles.missing : ""}`}
+                                type="date"
+                                value={formData.birthDate}
+                                onChange={(e) => handleFormDataChange("birthDate", e.target.value)}
+                                max={new Date().toISOString().split('T')[0]} // Prevents future dates
+                            />
+                        </div>
                     </div>
                 </div>
 

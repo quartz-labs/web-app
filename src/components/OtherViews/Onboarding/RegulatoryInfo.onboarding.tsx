@@ -72,10 +72,9 @@ export default function RegulatoryInfo({
         setIsMissingTerms(false);
 
         if (formData.countryOfIssue !== "US") {
-            if (formData.nationalId.length !== 9) {
-                return setIsInvalidSSN(true);
-            }
             handleTermsChange("openingDisclosure", undefined);
+        } else if (formData.nationalId.length !== 9) { // US must be valid SSN
+            return setIsInvalidSSN(true);
         }
 
         incrementPage();
@@ -88,94 +87,100 @@ export default function RegulatoryInfo({
             <div className={`${styles.formWrapper} ${styles.shortMargin}`}>
                 <div className={styles.inputSection}>
                     <div className={styles.inputContainer}>
-                        <p className={styles.inputLabel}>Where is your ID from?</p>
-                        <p className={styles.inputLabel}>What&apos;s your {formData.countryOfIssue === "US" ? "Social Security Number" : "ID number"}?</p>
-                    </div>
-                    <div className={styles.inputContainer}>
-                        <select
-                            className={`${styles.inputField} ${styles.inputSelect}`}
-                            value={getCountry(formData.countryOfIssue) ?? ""}
-                            onChange={(e) => {
-                                const countryCode = getCode(e.target.value);
-                                if (!countryCode) throw new Error("Invalid country");
-                                handleFormDataChange("countryOfIssue", countryCode);
-                            }}
-                        >
-                            {getCountries().map((country) => (
-                                <option key={country} value={country}>
-                                    {country}
-                                </option>
-                            ))}
-                        </select>
-                        <input 
-                            type="text" 
-                            className={`${styles.inputField} ${missingValues.nationalId ? styles.missing : ""}`} 
-                            placeholder="000 00 0000"
-                            value={formData.nationalId}
-                            onChange={(e) => handleFormDataChange("nationalId", e.target.value)}
-                        />
-                    </div>
-                </div>
-                <div className={styles.inputSection}>
-                    <div className={styles.inputContainer}>
-                        <p className={styles.inputLabel}>What&apos;s your occupation?</p>
-                        <p className={styles.inputLabel}>What will you be using Quartz for?</p>
-                    </div>
-                    <div className={styles.inputContainer}>
-                        <input 
-                            type="text" 
-                            className={`${styles.inputField} ${missingValues.occupation ? styles.missing : ""}`} 
-                            placeholder="Occupation"
-                            value={formData.occupation}
-                            onChange={(e) => handleFormDataChange("occupation", e.target.value)}
-                        />
-                        <select
-                            className={`${styles.inputField} ${styles.inputSelect}`}
-                            value={formData.accountPurpose}
-                            onChange={(e) => handleFormDataChange("accountPurpose", e.target.value)}
-                        >
-                            <option value={DEFAULT_PURPOSE}>{DEFAULT_PURPOSE}</option>
-                            <option value="Receiving Salary">Receiving Salary</option>
-                            <option value="Managing Investments">Managing Investments</option>
-                            <option value="Subscriptions">Subscriptions</option>
-                            <option value="Large Purchases">Large Purchases</option>
-                        </select>
+                        <div>
+                            <p className={styles.inputLabel}>Where is your ID from?</p>
+                            <select
+                                className={`${styles.inputField} ${styles.inputSelect}`}
+                                value={getCountry(formData.countryOfIssue) ?? ""}
+                                onChange={(e) => {
+                                    const countryCode = getCode(e.target.value);
+                                    if (!countryCode) throw new Error("Invalid country");
+                                    handleFormDataChange("countryOfIssue", countryCode);
+                                }}
+                            >
+                                {getCountries().map((country) => (
+                                    <option key={country} value={country}>
+                                        {country}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div>
+                            <p className={styles.inputLabel}>What&apos;s your {formData.countryOfIssue === "US" ? "Social Security Number" : "ID number"}?</p>
+                            <input 
+                                type="text" 
+                                className={`${styles.inputField} ${missingValues.nationalId ? styles.missing : ""}`} 
+                                placeholder="000 00 0000"
+                                value={formData.nationalId}
+                                onChange={(e) => handleFormDataChange("nationalId", e.target.value)}
+                            />
+                        </div>
                     </div>
                 </div>
                 <div className={styles.inputSection}>
                     <div className={styles.inputContainer}>
-                        <p className={styles.inputLabel}>What&apos;s your annual income?</p>
-                        <p className={styles.inputLabel}>What&apos;s your expected monthly spend on Quartz?</p>
+                        <div>
+                            <p className={styles.inputLabel}>What&apos;s your occupation?</p>
+                            <input 
+                                type="text" 
+                                className={`${styles.inputField} ${missingValues.occupation ? styles.missing : ""}`} 
+                                placeholder="Occupation"
+                                value={formData.occupation}
+                                onChange={(e) => handleFormDataChange("occupation", e.target.value)}
+                            />
+                        </div>
+                        <div>
+                            <p className={styles.inputLabel}>What will you be using Quartz for?</p>
+                            <select
+                                className={`${styles.inputField} ${styles.inputSelect}`}
+                                value={formData.accountPurpose}
+                                onChange={(e) => handleFormDataChange("accountPurpose", e.target.value)}
+                            >
+                                <option value={DEFAULT_PURPOSE}>{DEFAULT_PURPOSE}</option>
+                                <option value="Receiving Salary">Receiving Salary</option>
+                                <option value="Managing Investments">Managing Investments</option>
+                                <option value="Subscriptions">Subscriptions</option>
+                                <option value="Large Purchases">Large Purchases</option>
+                            </select>
+                        </div>
                     </div>
+                </div>
+                <div className={styles.inputSection}>
                     <div className={styles.inputContainer}>
-                        <input 
-                            type="text" 
-                            className={`${styles.inputField} ${missingValues.annualSalary ? styles.missing : ""}`} 
-                            placeholder="$"
-                            value={
-                                !formData.annualSalary 
-                                    ? ""
-                                    : formData.annualSalary.startsWith('$') 
-                                        ? formData.annualSalary 
-                                        : `$${formData.annualSalary}`
-                            }
-                            onChange={(e) => handleFormDataChange(
-                                "annualSalary", 
-                                e.target.value.replace("$", "").replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1')
-                            )}
-                        />
-                        <select
-                            className={`${styles.inputField} ${styles.inputSelect}`}
-                            value={formData.expectedMonthlyVolume}
-                            onChange={(e) => handleFormDataChange("expectedMonthlyVolume", e.target.value)}
-                        >
-                            <option value={DEFAULT_VOLUME}>{DEFAULT_VOLUME_DISPLAY}</option>
-                            <option value="1000">$500-999</option>
-                            <option value="2000">$1,000-1,999</option>
-                            <option value="5000">$2,000-4,999</option>
-                            <option value="10000">$5,000-9,999</option>
-                            <option value="15000">$10,000+</option>
-                        </select>
+                        <div>
+                            <p className={styles.inputLabel}>What&apos;s your annual income?</p>
+                            <input 
+                                type="text" 
+                                className={`${styles.inputField} ${missingValues.annualSalary ? styles.missing : ""}`} 
+                                placeholder="$"
+                                value={
+                                    !formData.annualSalary 
+                                        ? ""
+                                        : formData.annualSalary.startsWith('$') 
+                                            ? formData.annualSalary 
+                                            : `$${formData.annualSalary}`
+                                }
+                                onChange={(e) => handleFormDataChange(
+                                    "annualSalary", 
+                                    e.target.value.replace("$", "").replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1')
+                                )}
+                            />
+                        </div>
+                        <div>
+                            <p className={styles.inputLabel}>What&apos;s your expected monthly spend on Quartz?</p>
+                            <select
+                                className={`${styles.inputField} ${styles.inputSelect}`}
+                                value={formData.expectedMonthlyVolume}
+                                onChange={(e) => handleFormDataChange("expectedMonthlyVolume", e.target.value)}
+                            >
+                                <option value={DEFAULT_VOLUME}>{DEFAULT_VOLUME_DISPLAY}</option>
+                                <option value="1000">$500-999</option>
+                                <option value="2000">$1,000-1,999</option>
+                                <option value="5000">$2,000-4,999</option>
+                                <option value="10000">$5,000-9,999</option>
+                                <option value="15000">$10,000+</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div>
