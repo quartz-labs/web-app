@@ -163,6 +163,12 @@ export default function Onboarding({ onCompleteOnboarding }: OnboardingProps) {
             return;
         }
 
+        if (providerCardUser?.applicationCompletionLink) {
+            openKycLink(`${providerCardUser.applicationCompletionLink.url}?userId=${providerCardUser.applicationCompletionLink.params.userId}`);
+            refetchCardUser();
+            return;
+        }
+
         try {
             const formattedData = {
                 ...formData,
