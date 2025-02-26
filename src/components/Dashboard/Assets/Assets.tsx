@@ -33,7 +33,7 @@ export default function Assets({ isLoading }: { isLoading: boolean }) {
         setBorrowedValue(
             formatDollarValue(loanBalance, 2).join(".")
         );
-    }, [prices, balances, rates, isInitialized]);
+    }, [prices, balances, rates, isInitialized, isLoading]);
 
     return (
         <div className={styles.assetsWrapper}>

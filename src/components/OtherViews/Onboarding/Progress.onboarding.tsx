@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useState } from "react";
 import type { OnboardingPage } from "./Onboarding";
 import styles from "./Onboarding.module.css";
 
@@ -24,16 +26,36 @@ export interface TitleCardProps {
 }  
 
 export function TitleCard({ title, position, selected }: TitleCardProps) {
-    let className = undefined;
+    const [windowWidth, setWindowWidth] = useState<number | null>(null);
+
+    useEffect(() => {
+        setWindowWidth(window.innerWidth);
+
+        const handleResize = () => {
+            setWindowWidth(window.innerWidth);
+        }
+
+        window.addEventListener("resize", handleResize);
+
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
+
+    const MOBILE_WIDTH = 800;
+    let titleText = title;
+    if (windowWidth !== null && windowWidth < MOBILE_WIDTH && selected !== position) {
+        titleText = position.toString();
+    }
+
+    let className = styles.unselected;
     if (selected === position) {
         className = styles.selected;
     } else if (selected < position) {
-        className = styles.notReached;
+        className = `${styles.notReached} ${styles.unselected}`;
     }
 
     return (
         <div className={`${styles.titleCard} ${className ?? ""}`}>
-            <h1>{title}</h1>
+            <h1>{titleText}</h1>
         </div>
     );
 }

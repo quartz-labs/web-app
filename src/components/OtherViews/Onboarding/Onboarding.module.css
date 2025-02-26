@@ -286,8 +286,8 @@
     }
 
     .onboardingContainer {
-        grid-template-columns: 1fr;
-        /* grid-template-rows: 1fr 9fr; */
+        display: flex;
+        flex-direction: column;
     }
 
     .contentWrapper {
@@ -295,7 +295,23 @@
     }
 
     .progressPanel {
-        display: none;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 15px;
+    }
+
+    .titleCard {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 0px;
+        width: auto;
+    }
+
+    .titleCard.selected {
+        width: auto;
+        padding: 10px;
     }
 
     .textContent {
