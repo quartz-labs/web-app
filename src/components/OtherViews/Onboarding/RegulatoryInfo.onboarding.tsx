@@ -79,7 +79,7 @@ export default function RegulatoryInfo({
 
             <div className={`${styles.formWrapper} ${styles.shortMargin}`}>
                 <div className={styles.inputSection}>
-                    <div className={styles.inputContainer}>
+                    <div className={`${styles.inputContainer} ${styles.splitContent}`}>
                         <div>
                             <p className={styles.inputLabel}>Where is your ID from?<sup>*</sup></p>
                             <select
@@ -111,7 +111,7 @@ export default function RegulatoryInfo({
                     </div>
                 </div>
                 <div className={styles.inputSection}>
-                    <div className={styles.inputContainer}>
+                    <div className={`${styles.inputContainer} ${styles.splitContent}`}>
                         <div>
                             <p className={styles.inputLabel}>What&apos;s your occupation?<sup>*</sup></p>
                             <input 
@@ -139,7 +139,7 @@ export default function RegulatoryInfo({
                     </div>
                 </div>
                 <div className={styles.inputSection}>
-                    <div className={styles.inputContainer}>
+                    <div className={`${styles.inputContainer} ${styles.splitContent}`}>
                         <div>
                             <p className={styles.inputLabel}>What&apos;s your annual income?<sup>*</sup></p>
                             <input 

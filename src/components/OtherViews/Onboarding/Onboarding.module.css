@@ -16,8 +16,8 @@
     padding-right: var(--onboarding-content-padding);
     height: 100%;
     width: 100%;
+
     box-sizing: border-box;
-    min-width: 100%;
 }
 
 .progressPanel {
@@ -276,13 +276,13 @@
 }
 
 @media only screen and (max-width: 800px) {
-    .splitContent {
-        gap: 26px;
-    }
-
     .inputContainer {
         flex-direction: column;
         gap: 8px;
+    }
+
+    .splitContent {
+        gap: 26px;
     }
 
     .onboardingContainer {
@@ -296,6 +296,17 @@
 
     .progressPanel {
         display: none;
+    }
+
+    .textContent {
+        width: 100%;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .heading {
+        text-align: center;
+        align-items: center;
     }
 }
 

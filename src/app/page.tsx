@@ -54,7 +54,7 @@ export default function Page() {
   
 
   // Card data
-  const { data: quartzCardUser } = useQuartzCardUserQuery(isInitialized ? wallet.publicKey : null);
+  const { data: quartzCardUser, status: quartzCardUserStatus } = useQuartzCardUserQuery(isInitialized ? wallet.publicKey : null);
   useProviderCardUserQuery(quartzCardUser?.card_api_user_id ?? null);
   useCardDetailsQuery(
     quartzCardUser?.card_api_user_id ?? null,
@@ -114,7 +114,24 @@ export default function Page() {
     );
   }
 
-  if (quartzCardUser === undefined || quartzCardUser?.account_status === QuartzCardAccountStatus.CARD) {
+  if (quartzCardUserStatus === 'pending') {
+    return (
+      <main className={styles.container}>
+        <Background />
+  
+        <Nav 
+          isAccountInitialized={false} 
+          isAccountStatusLoading={true}
+        />
+  
+        <div className={styles.content}>
+            <Dashboard isLoading={true} />
+        </div>
+      </main>
+    );
+  }
+
+  if (quartzCardUser?.account_status === QuartzCardAccountStatus.CARD) {
     return (
       <main className={styles.container}>
         <Background />

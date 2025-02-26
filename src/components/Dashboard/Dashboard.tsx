@@ -8,7 +8,13 @@ import Modal from "../Modal/Modal";
 import CardDetails from "./Card/CardDetails";
 import TransactionHistory from "./Transaction/TransactionHistory";
 
-export default function Dashboard() {
+export interface DashboardProps {
+  isLoading?: boolean;
+}
+
+export default function Dashboard({ 
+  isLoading = false 
+}: DashboardProps) {
   const { isInitialized, txHistory } = useStore();
 
   return (
@@ -21,24 +27,24 @@ export default function Dashboard() {
 
           <Balances />
 
-          {isInitialized && (
+          {isInitialized && !isLoading && (
             <>
               <RepayWarning />
               <ButtonRow />
             </>
           )}
 
-          {(!isInitialized) && (
+          {(!isInitialized || isLoading) && (
             <p className={styles.notInitialized}>Connecting wallet...</p>
           )}
 
-          <Assets />
+          <Assets isLoading={isLoading} />
         </div>
       </div>
 
       <div className={`glass panel ${styles.assetsPanel}`}>
         <div className={styles.assetsPanelContent}>
-          {isInitialized && (
+          {isInitialized && !isLoading && (
             <>
               <CardDetails />
               <TransactionHistory transactions={txHistory ?? []}/>
