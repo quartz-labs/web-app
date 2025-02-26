@@ -179,7 +179,7 @@ export default function Page() {
     );
   }
 
-  if (requireOnboarding || !quartzCardUser?.set_initial_spend_limit) {
+  if (requireOnboarding || (doneLoading && !quartzCardUser?.set_initial_spend_limit)) {
     return (
       <main className={styles.container}>
         <Background />

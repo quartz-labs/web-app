@@ -95,39 +95,35 @@ export default function Onboarding({ onCompleteOnboarding }: OnboardingProps) {
     };
 
     useEffect(() => {
-        if (isInitialized) {
+        if (!isInitialized) return;
+
+        if (!formData.isTermsOfServiceAccepted) {
             handleTermsChange("acceptQuartzCardTerms", true);
-            handleTermsChange("privacyPolicy", true);
-            handleFormDataChange("isTermsOfServiceAccepted", true);
-
-            if (quartzCardUser?.auth_level === undefined) {
-                // Created on-chain account, but not submitted KYC
-                setPage(OnboardingPage.PERSONAL_INFO);
-            } else if (quartzCardUser?.auth_level === AuthLevel.BASE) {
-                // Created on-chain account and submitted KYC, but not been approved
-                setKycLink(providerCardUser?.applicationCompletionLink ? (
-                    `${providerCardUser.applicationCompletionLink.url}?userId=${providerCardUser.applicationCompletionLink.params.userId}`
-                ) : undefined);
-                setPage(OnboardingPage.ID_PHOTO);
-            } else if (applicationStatus?.applicationStatus === "approved" && quartzCardUser?.auth_level === AuthLevel.CARD) {
-                // Created on-chain account and submitted KYC, been approved, but not yet set spend limits
-                if (!cardDetails) {
-                    captureError(showError, "Could not create card", "/Onboarding.tsx", "Could not create card", wallet?.publicKey ?? null, true);
-                }
-    
-                setPage(OnboardingPage.ACCOUNT_PERMISSIONS);
-                setAwaitingApproval(false);
-            }
         }
-    }, [isInitialized, quartzCardUser?.auth_level, providerCardUser, cardDetails, showError, wallet?.publicKey, applicationStatus]);
 
-    useEffect(() => {
+        if (!terms.privacyPolicy) {
+            handleTermsChange("privacyPolicy", true);
+        }
+
+        if (!formData.isTermsOfServiceAccepted) {
+            handleFormDataChange("isTermsOfServiceAccepted", true);
+        }
+
+        if (quartzCardUser?.auth_level === undefined) {
+            // Created on-chain account, but not submitted KYC
+            return setPage(OnboardingPage.PERSONAL_INFO);
+        } 
+        
         if (quartzCardUser?.auth_level === AuthLevel.BASE) {
+            // Created on-chain account and submitted KYC, but not been approved
             setKycLink(providerCardUser?.applicationCompletionLink ? (
                 `${providerCardUser.applicationCompletionLink.url}?userId=${providerCardUser.applicationCompletionLink.params.userId}`
             ) : undefined);
-            setPage(OnboardingPage.ID_PHOTO);
-        } else if (applicationStatus?.applicationStatus === "approved" && quartzCardUser?.auth_level === AuthLevel.CARD) {
+            return setPage(OnboardingPage.ID_PHOTO);
+        } 
+        
+        if (applicationStatus?.applicationStatus === "approved" && quartzCardUser?.auth_level === AuthLevel.CARD) {
+            // Created on-chain account and submitted KYC, been approved, but not yet set spend limits
             if (!cardDetails) {
                 captureError(showError, "Could not create card", "/Onboarding.tsx", "Could not create card", wallet?.publicKey ?? null, true);
             }
@@ -135,7 +131,18 @@ export default function Onboarding({ onCompleteOnboarding }: OnboardingProps) {
             setPage(OnboardingPage.ACCOUNT_PERMISSIONS);
             setAwaitingApproval(false);
         }
-    }, [quartzCardUser?.auth_level, providerCardUser, cardDetails, showError, wallet?.publicKey, applicationStatus]);
+    }, [
+        isInitialized, 
+        quartzCardUser?.auth_level, 
+        providerCardUser, 
+        cardDetails, 
+        showError, 
+        wallet?.publicKey, 
+        applicationStatus,
+        formData.isTermsOfServiceAccepted,
+        terms.privacyPolicy,
+        terms.acceptQuartzCardTerms
+    ]);
 
     const handleSubmit = async () => {
         if (!wallet?.publicKey) {
