@@ -89,11 +89,11 @@ export default function Onboarding() {
         quartzCardUser?.card_api_user_id ?? null,
         quartzCardUser?.account_status === QuartzCardAccountStatus.KYC_PENDING
     );
+    
     useEffect(() => {
-        if (applicationStatus?.applicationStatus === "approved") {
-            refetchCardUser();
-        }
-    }, [applicationStatus?.applicationStatus, refetchCardUser]);
+        refetchCardUser();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
     
 
     const handleFormDataChange = <K extends keyof KYCData>(field: K, value: KYCData[K]) => {
@@ -150,6 +150,11 @@ export default function Onboarding() {
             return;
         }
 
+        if (quartzCardUser?.account_status === QuartzCardAccountStatus.KYC_APPROVED) {
+            setPage(OnboardingPage.ACCOUNT_PERMISSIONS);
+            return;
+        }
+
         setPendingKyc(true);
 
         if (providerCardUser) {
@@ -165,6 +170,19 @@ export default function Onboarding() {
     const handleSubmit = async () => {
         if (!wallet?.publicKey) {
             captureError(showError, "Wallet not connected", "/Onboarding.tsx", "Wallet not connected", null);
+            return;
+        }
+
+        if (
+            quartzCardUser?.account_status === QuartzCardAccountStatus.KYC_PENDING
+            || quartzCardUser?.account_status === QuartzCardAccountStatus.KYC_REJECTED
+        ) {
+            setPage(OnboardingPage.ID_PHOTO);
+            return;
+        }
+
+        if (quartzCardUser?.account_status === QuartzCardAccountStatus.KYC_APPROVED) {
+            setPage(OnboardingPage.ACCOUNT_PERMISSIONS);
             return;
         }
 
