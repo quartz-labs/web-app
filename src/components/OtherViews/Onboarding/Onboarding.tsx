@@ -11,9 +11,7 @@ import styles from "./Onboarding.module.css";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { captureError } from "@/src/utils/errors";
 import { useError } from "@/src/context/error-provider";
-import type { ApplicationCompletionLink } from "@/src/types/ApplicationCompleteLink.type";
 import config from "@/src/config/config";
-import type { QuartzCardUser } from "@/src/types/interfaces/QuartzCardUser.interface";
 import { fetchAndParse } from "@/src/utils/helpers";
 import { useLoginCardUser, useOpenKycLink, useRefetchCardUser } from "@/src/utils/hooks";
 import { useStore } from "@/src/utils/store";
@@ -146,11 +144,13 @@ export default function Onboarding() {
     ]);
 
     const [pendingKyc, setPendingKyc] = useState(providerCardUser?.applicationStatus === "pending");
-    const handleSubmit = async () => {
+    const handleOpenKycLink = async () => {
         if (!wallet?.publicKey) {
             captureError(showError, "Wallet not connected", "/Onboarding.tsx", "Wallet not connected", null);
             return;
         }
+
+        setPendingKyc(true);
 
         if (providerCardUser) {
             openKycLink(`${providerCardUser.applicationCompletionLink.url}?userId=${providerCardUser.applicationCompletionLink.params.userId}`);
@@ -158,7 +158,17 @@ export default function Onboarding() {
             return;
         }
 
-        setPendingKyc(true);
+        setPendingKyc(false);
+    }
+
+    const [awaitingSubmit, setAwaitingSubmit] = useState(false);
+    const handleSubmit = async () => {
+        if (!wallet?.publicKey) {
+            captureError(showError, "Wallet not connected", "/Onboarding.tsx", "Wallet not connected", null);
+            return;
+        }
+
+        setAwaitingSubmit(true);
 
         try {
             const formattedData = {
@@ -172,10 +182,7 @@ export default function Onboarding() {
                 ...terms
             }
 
-            const response: {
-                quartzCardUser: QuartzCardUser;
-                applicationCompletionLink: ApplicationCompletionLink;
-            } = await fetchAndParse(
+            await fetchAndParse(
                 `${config.NEXT_PUBLIC_INTERNAL_API_URL}/card/application/create`,
                 {
                     method: 'POST',
@@ -186,11 +193,12 @@ export default function Onboarding() {
                 }
             );
 
-            openKycLink(`${response.applicationCompletionLink.url}?userId=${response.applicationCompletionLink.params.userId}`);
             refetchCardUser();
+            setPage(OnboardingPage.ID_PHOTO);
         } catch (error) {
             captureError(showError, "Failed to submit form", "/CardSignupModal.tsx", error, wallet.publicKey);
-            setPendingKyc(false);
+        } finally {
+            setAwaitingSubmit(false);
         }
     }
 
@@ -252,6 +260,8 @@ export default function Onboarding() {
                                 handleTermsChange={handleTermsChange}
                                 formData={formData}
                                 terms={terms}
+                                submitCardData={handleSubmit}
+                                awaitingSubmit={awaitingSubmit}
                             />;
 
                         case OnboardingPage.ID_PHOTO:
@@ -265,7 +275,7 @@ export default function Onboarding() {
                                 terms={terms}   
                                 awaitingApproval={pendingKyc}
                                 rejectedReason={applicationStatus?.applicationReason ?? ""}
-                                handleSubmit={handleSubmit}
+                                handleSubmit={handleOpenKycLink}
                             />;
 
                         case OnboardingPage.ACCOUNT_PERMISSIONS:

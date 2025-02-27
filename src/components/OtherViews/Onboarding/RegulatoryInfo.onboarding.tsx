@@ -4,15 +4,22 @@ import { useState } from "react";
 import { getCountries, getCountry } from "@/src/utils/countries";
 import { getCode } from "@/src/utils/countries";
 import { DEFAULT_PURPOSE, DEFAULT_VOLUME, DEFAULT_VOLUME_DISPLAY } from "@/src/types/interfaces/KYCData.interface";
+import { PuffLoader } from "react-spinners";
+
+export interface RegulatoryInfoProps extends OnboardingPageProps {
+    submitCardData: () => void;
+    awaitingSubmit: boolean;
+}
 
 export default function RegulatoryInfo({
-    incrementPage, 
     decrementPage,
     formData,
     terms,
     handleFormDataChange,
-    handleTermsChange
-}: OnboardingPageProps) {
+    handleTermsChange,
+    submitCardData,
+    awaitingSubmit
+}: RegulatoryInfoProps) {
 
     const [missingValues, setMissingValues] = useState({
         countryOfIssue: false,
@@ -70,7 +77,7 @@ export default function RegulatoryInfo({
             return setIsInvalidSSN(true);
         }
 
-        incrementPage();
+        submitCardData();
     }
 
     return (
@@ -246,7 +253,18 @@ export default function RegulatoryInfo({
                     className={`glass-button ${styles.mainButton}`}
                     onClick={handleSubmit}
                 >
-                    Next
+                    {awaitingSubmit &&
+                        <PuffLoader
+                            color={"#ffffff"}
+                            size={30}
+                            aria-label="Loading"
+                            data-testid="loader"
+                        />
+                    }
+
+                    {!awaitingSubmit &&
+                        <p>Next</p>
+                    }
                 </button>
 
                 {isMissingValue && 

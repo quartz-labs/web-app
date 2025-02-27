@@ -54,7 +54,7 @@ export default function Page() {
   
 
   // Card data
-  const { data: quartzCardUser, status: quartzCardUserStatus } = useQuartzCardUserQuery(wallet.publicKey);
+  const { data: quartzCardUser } = useQuartzCardUserQuery(wallet.publicKey);
   useProviderCardUserQuery(quartzCardUser?.card_api_user_id ?? null);
   useCardDetailsQuery(
     quartzCardUser?.card_api_user_id ?? null,
@@ -114,7 +114,7 @@ export default function Page() {
     );
   }
 
-  if (quartzCardUserStatus === 'pending' || isAccountStatusLoading) {
+  if (quartzCardUser === undefined || isAccountStatusLoading) {
     return (
       <main className={styles.container}>
         <Background />
