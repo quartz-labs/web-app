@@ -85,10 +85,21 @@ export default function Onboarding() {
     const [terms, setTerms] = useState<Terms>(DEFAULT_TERMS);
 
 
+    const [pendingKyc, setPendingKyc] = useState(providerCardUser?.applicationStatus === "pending");
+    const refreshKYC = quartzCardUser?.account_status === QuartzCardAccountStatus.KYC_PENDING
+        || page === OnboardingPage.ID_PHOTO
+        || pendingKyc;
     const {data: applicationStatus} = useApplicationStatusQuery(
         quartzCardUser?.card_api_user_id ?? null,
-        quartzCardUser?.account_status === QuartzCardAccountStatus.KYC_PENDING
+        refreshKYC
     );
+
+    // Redirect to account permissions if KYC is approved
+    useEffect(() => {
+        if (quartzCardUser?.account_status === QuartzCardAccountStatus.KYC_APPROVED) {
+            setPage(OnboardingPage.ACCOUNT_PERMISSIONS);
+        }
+    }, [quartzCardUser?.account_status]);
     
     useEffect(() => {
         refetchCardUser();
@@ -143,7 +154,6 @@ export default function Onboarding() {
         terms.acceptQuartzCardTerms
     ]);
 
-    const [pendingKyc, setPendingKyc] = useState(providerCardUser?.applicationStatus === "pending");
     const handleOpenKycLink = async () => {
         if (!wallet?.publicKey) {
             captureError(showError, "Wallet not connected", "/Onboarding.tsx", "Wallet not connected", null);
