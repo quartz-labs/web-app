@@ -33,21 +33,20 @@ export default function AccountPermissions({ onSetSpendLimit }: AccountPermissio
     const [awaitingSign, setAwaitingSign] = useState(false);
     const [errorText, setErrorText] = useState("");
 
-
-    // Spend limit amount
-    let existingSpendLimitDollars = spendLimitTimeframeBaseUnits 
-        ? baseUnitToDecimal(spendLimitTimeframeBaseUnits, MARKET_INDEX_USDC) 
-        : undefined;
-    if (spendLimitTimeframeLength === 0) existingSpendLimitDollars = 0; // If timeframe is 0, limit is 0
-
     const [newLimitTimeframeDollarsStr, setNewLimitTimeframeDollarsStr] = useState<string | undefined>(undefined);
 
     // Replace default undefined value once loaded
     useEffect(() => {
-        if (existingSpendLimitDollars !== undefined) {
-            setNewLimitTimeframeDollarsStr(existingSpendLimitDollars.toFixed(2));
+        if (spendLimitTimeframeLength === 0) {
+            setNewLimitTimeframeDollarsStr("0");
+            return;
         }
-    }, [existingSpendLimitDollars]);
+
+        if (spendLimitTimeframeBaseUnits !== undefined) {
+            const decimal = baseUnitToDecimal(spendLimitTimeframeBaseUnits, MARKET_INDEX_USDC);
+            setNewLimitTimeframeDollarsStr(decimal.toFixed(2));
+        }
+    }, [spendLimitTimeframeBaseUnits, spendLimitTimeframeLength]);
 
 
     // Spend limit timeframe
