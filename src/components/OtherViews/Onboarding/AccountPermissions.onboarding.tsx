@@ -33,23 +33,24 @@ export default function AccountPermissions({ onSetSpendLimit }: AccountPermissio
     const [awaitingSign, setAwaitingSign] = useState(false);
     const [errorText, setErrorText] = useState("");
 
-    
+
+    // Spend limit amount
     let existingSpendLimitDollars = spendLimitTimeframeBaseUnits 
         ? baseUnitToDecimal(spendLimitTimeframeBaseUnits, MARKET_INDEX_USDC) 
         : undefined;
     if (spendLimitTimeframeLength === 0) existingSpendLimitDollars = 0; // If timeframe is 0, limit is 0
 
-    const [newLimitTimeframeDollarsStr, setNewLimitTimeframeDollarsStr] = useState<string|undefined>(
-        existingSpendLimitDollars ? existingSpendLimitDollars.toFixed(2) : undefined
-    );
+    const [newLimitTimeframeDollarsStr, setNewLimitTimeframeDollarsStr] = useState<string | undefined>(undefined);
 
     // Replace default undefined value once loaded
     useEffect(() => {
-        if (newLimitTimeframeDollarsStr === undefined && existingSpendLimitDollars !== undefined) {
+        if (existingSpendLimitDollars !== undefined) {
             setNewLimitTimeframeDollarsStr(existingSpendLimitDollars.toFixed(2));
         }
-    }, [newLimitTimeframeDollarsStr, existingSpendLimitDollars]);
+    }, [existingSpendLimitDollars]);
 
+
+    // Spend limit timeframe
     let existingSpendLimitTimeframe = spendLimitTimeframeLength;
     const isValidSpendLimitTimeframe = (existingSpendLimitTimeframe === undefined)
         ? false
@@ -108,7 +109,7 @@ export default function AccountPermissions({ onSetSpendLimit }: AccountPermissio
         }
     }
 
-    const showLoading = (spendLimitTimeframeBaseUnits === undefined) || spendLimitRefreshing;
+    const showLoading = (newLimitTimeframeDollarsStr === undefined) || spendLimitRefreshing;
 
     return (
         <div className={`${styles.contentWrapper} ${styles.textContent}`}>

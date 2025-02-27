@@ -103,7 +103,7 @@ export default function RegulatoryInfo({
                             <input 
                                 type="text" 
                                 className={`${styles.inputField} ${missingValues.nationalId ? styles.missing : ""}`} 
-                                placeholder="000 00 0000"
+                                placeholder={formData.countryOfIssue === "US" ? "000 00 0000" : "ID / Passport / Driver's License"}
                                 value={formData.nationalId}
                                 onChange={(e) => handleFormDataChange("nationalId", e.target.value)}
                             />

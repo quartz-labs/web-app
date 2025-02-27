@@ -54,14 +54,12 @@ export default function Onboarding() {
     } = useStore();
     
 
-    let startingPage;
+    let startingPage: OnboardingPage;
     if (!isInitialized) {
         // If not initialized, go to PDA account creation
         startingPage = OnboardingPage.ACCOUNT_CREATION;
-    } else if (
-        isInitialized
-        && quartzCardUser?.account_status === undefined
-    ) {
+    } 
+    else if (quartzCardUser === null) {
         // If PDA created but no KYC, go to personal info
         startingPage = OnboardingPage.PERSONAL_INFO;
     } 
@@ -71,16 +69,18 @@ export default function Onboarding() {
     ) {
         // If KYC pending or rejected, go to ID photo
         startingPage = OnboardingPage.ID_PHOTO;
-    } 
-    else {
+    } else {
         // If KYC complete, go to account permissions
         startingPage = OnboardingPage.ACCOUNT_PERMISSIONS;
     }
 
-
     const [page, setPage] = useState<OnboardingPage>(startingPage);
     const incrementPage = () => setPage(page + 1);
     const decrementPage = () => setPage(page - 1);
+
+    useEffect(() => {
+        setPage(startingPage);
+    }, [startingPage]);
 
 
     const [formData, setFormData] = useState<KYCData>(DEFAULT_KYC_DATA);
@@ -94,7 +94,6 @@ export default function Onboarding() {
     useEffect(() => {
         if (applicationStatus?.applicationStatus === "approved") {
             refetchCardUser();
-            setPage(OnboardingPage.ACCOUNT_PERMISSIONS);
         }
     }, [applicationStatus?.applicationStatus, refetchCardUser]);
     

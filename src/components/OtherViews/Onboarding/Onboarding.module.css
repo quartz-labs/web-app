@@ -328,7 +328,7 @@
 
 @media only screen and (max-width: 580px) {
     .buttonContainer {
-        flex-direction: column;
+        flex-direction: column-reverse;
         width: 100%;
     }
 
