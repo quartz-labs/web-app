@@ -6,7 +6,7 @@ import ButtonRow from "./ButtonRow/ButtonRow";
 import Assets from "./Assets/Assets";
 import Modal from "../Modal/Modal";
 import CardDetails from "./Card/CardDetails";
-import TransactionHistory from "./Transaction/TransactionHistory";
+import TransactionHistory from "./Transactions/TransactionHistory";
 
 export default function Dashboard() {
   const { isInitialized, txHistory } = useStore();

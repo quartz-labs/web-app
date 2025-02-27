@@ -6,7 +6,7 @@ import type { CardsForUserResponse } from "../types/interfaces/CardsForUserRespo
 import type { ProviderCardUser } from "../types/interfaces/ProviderCardUser.interface";
 import type { QuartzCardUser } from "../types/interfaces/QuartzCardUser.interface";
 import type { JwtToken } from "../types/JwtToken.type";
-import type { ProviderCardHistory } from "../types/interfaces/ProviderCardHistory.interface";
+import type { CardTransactionData } from "../types/interfaces/CardTransactionData.interface";
 
 type State = {
   isInitialized: boolean;
@@ -29,7 +29,7 @@ type State = {
   spendLimitTimeframeRemainingBaseUnits?: number;
   spendLimitTimeframeLength?: number;
   spendLimitRefreshing?: boolean;
-  txHistory?: ProviderCardHistory[];
+  txHistory?: CardTransactionData[];
 };
 
 type Action = {
@@ -53,7 +53,7 @@ type Action = {
   setSpendLimitTimeframeRemainingBaseUnits: (spendLimitTimeframeRemaining?: number) => void;
   setSpendLimitTimeframeLength: (timeframe?: number) => void;
   setSpendLimitRefreshing: (refreshing?: boolean) => void;
-  setTxHistory: (txHistory?: ProviderCardHistory[]) => void;
+  setTxHistory: (txHistory?: CardTransactionData[]) => void;
 }
 
 export const useStore = create<State & Action>((set) => ({
@@ -98,5 +98,5 @@ export const useStore = create<State & Action>((set) => ({
   setSpendLimitTimeframeRemainingBaseUnits: (spendLimitTimeframeRemaining?: number) => set({ spendLimitTimeframeRemainingBaseUnits: spendLimitTimeframeRemaining }),
   setSpendLimitTimeframeLength: (timeframe?: number) => set({ spendLimitTimeframeLength: timeframe }),
   setSpendLimitRefreshing: (refreshing?: boolean) => set({ spendLimitRefreshing: refreshing }),
-  setTxHistory: (txHistory?: ProviderCardHistory[]) => set({ txHistory }),
+  setTxHistory: (txHistory?: CardTransactionData[]) => set({ txHistory }),
 }));

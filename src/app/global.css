@@ -177,10 +177,12 @@ a:hover {
   --placeholder-glass-stroke: #2B3A4A;
   --placeholder-glass-stroke-accent: #5A355A;
   --placeholder-glass-stroke-error: #83484E;
+  --placeholder-glass-stroke-declined: #83484e97;
   --placeholder-glass-icon-error: #695563;
 
   --glass-border: 1.8px solid var(--placeholder-glass-stroke); /* TODO: Make gradient */
   --glass-border-error: 1.5px solid var(--placeholder-glass-stroke-error);
+  --glass-border-declined: 1.5px solid var(--placeholder-glass-stroke-declined);
   --glass-border-popup: 1.5px solid var(--placeholder-glass-stroke);
   --glass-background: 
     url("/noise.png"),

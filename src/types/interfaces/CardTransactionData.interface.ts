@@ -1,4 +1,10 @@
-export interface ProviderCardHistory {
+export interface CardTransactionData {
+  transactionHash: string | null;
+  declinedReason: string | null;
+  data: ProviderTransactionData;
+}
+
+export interface ProviderTransactionData {
   id: string;
   type: string;
   spend: {
