@@ -114,7 +114,7 @@ export default function Page() {
     );
   }
 
-  if (quartzCardUserStatus === 'pending') {
+  if (quartzCardUserStatus === 'pending' || isAccountStatusLoading) {
     return (
       <main className={styles.container}>
         <Background />
