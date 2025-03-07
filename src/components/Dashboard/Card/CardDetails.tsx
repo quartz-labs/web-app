@@ -1,18 +1,18 @@
 import { useStore } from "@/src/utils/store";
 import styles from "./Card.module.css";
-import { QuartzCardAccountStatus, TandCsNeeded } from "@/src/types/enums/QuartzCardAccountStatus.enum";
 import { useState } from "react";
 import { fetchAndParse } from "@/src/utils/helpers";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
 import { useLoginCardUser } from "@/src/utils/hooks";
 import { PuffLoader } from "react-spinners";
 import Card from "./Card";
+import { TermsNeeded } from "@/src/types/enums/TermsNeeded.enum";
 
 export default function CardDetails() {
     const {
         setModalVariation,
-        quartzCardUser,
         jwtToken,
+        cardUser,
         cardDetails,
         isSigningLoginMessage
     } = useStore();
@@ -24,7 +24,7 @@ export default function CardDetails() {
 
     const getCardDetails = async (cardId: string) => {
         setLoadingDetails(true);
-        const response = await fetchAndParse(`/api/card-details?id=${cardId}`, {
+        const response = await fetchAndParse(`/api/card-details?cardId=${cardId}`, {
             method: 'POST',
             headers: {
                 "Authorization": `Bearer ${jwtToken}`,
@@ -46,7 +46,7 @@ export default function CardDetails() {
             setCardPan(null);
             setCardCvc(null);
         } else {
-            getCardDetails(cardDetails.id);
+            getCardDetails(cardDetails.id.toString());
         }
     }
 
@@ -64,10 +64,10 @@ export default function CardDetails() {
                     <button
                         className={`glass-button ${styles.cardButton}`}
                         onClick={() => {
-                            if (quartzCardUser?.account_status === QuartzCardAccountStatus.CARD) {
+                            if (cardUser?.account_status === "card") {
                                 setModalVariation(ModalVariation.ACCEPT_TANDCS);
                             } else {
-                                loginCardUser.mutate(TandCsNeeded.NOT_NEEDED)
+                                loginCardUser.mutate(TermsNeeded.NOT_NEEDED)
                             }
                         }}
                     >

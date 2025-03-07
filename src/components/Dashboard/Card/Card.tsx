@@ -47,8 +47,8 @@ export default function Card({ cvc, pan }: CardDetails) {
         );
     }
 
-    const expiryYear = cardDetails.expirationYear.toString().slice(-2);
-    const expiryMonth = cardDetails.expirationMonth.toString().padStart(2, '0');
+    const expiryYear = cardDetails.expiration_year.toString().slice(-2);
+    const expiryMonth = cardDetails.expiration_month.toString().padStart(2, '0');
     return (
         <div className={styles.card}>
             <Image 

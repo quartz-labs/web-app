@@ -4,7 +4,6 @@ import { WalletButton } from "@/src/context/solana/solana-provider";
 import { TailSpin } from "react-loader-spinner";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
 import { useStore } from "@/src/utils/store";
-import { QuartzCardAccountStatus } from "@/src/types/enums/QuartzCardAccountStatus.enum";
 
 export interface NavProps {
   isAccountInitialized: boolean;
@@ -15,7 +14,7 @@ export default function Nav({
   isAccountInitialized,
   isAccountStatusLoading
 }: NavProps) {
-  const { setModalVariation, quartzCardUser } = useStore();
+  const { setModalVariation, cardUser } = useStore();
 
   return (
     <div className={styles["nav"]}>
@@ -42,7 +41,7 @@ export default function Nav({
           />
         }
 
-        {isAccountInitialized && quartzCardUser?.account_status === QuartzCardAccountStatus.CARD &&
+        {isAccountInitialized && cardUser?.account_status === "card" && // TODO: This should only be hidden if the user is in the onboarding flow, and should be visible if they skip it even without creating a card
           <button 
             className={styles.notificationsButton}
             onClick={() => setModalVariation(ModalVariation.NOTIFICATIONS)}

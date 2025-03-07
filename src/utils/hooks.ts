@@ -6,7 +6,7 @@ import config from "../config/config";
 import { fetchAndParse } from "./helpers";
 import { useStore } from "./store";
 import { WalletSignMessageError } from "@solana/wallet-adapter-base";
-import { TandCsNeeded } from "../types/enums/QuartzCardAccountStatus.enum";
+import { TermsNeeded } from "../types/enums/TermsNeeded.enum";
 
 export function useRefetchAccountData() {
     const queryClient = useQueryClient();
@@ -123,7 +123,7 @@ export function useOpenKycLink() {
 }
 
 export function useLoginCardUser() {
-    const { setJwtToken, setIsSigningLoginMessage, quartzCardUser } = useStore();
+    const { setJwtToken, setIsSigningLoginMessage } = useStore();
     const wallet = useWallet();
 
     const signMessage = async (wallet: WalletContextState, message: string) => {
@@ -136,7 +136,7 @@ export function useLoginCardUser() {
   
     return useMutation({
       mutationKey: ['login-card-user', wallet?.publicKey?.toBase58()],
-      mutationFn: async (acceptTandcsParam?: TandCsNeeded) => {
+      mutationFn: async (acceptTermsParam?: TermsNeeded) => {
         if (!wallet) throw new Error("Wallet not found");
 
         const message = [
@@ -158,9 +158,8 @@ export function useLoginCardUser() {
                 throw error;
             }
         }
-        const acceptTandcs = acceptTandcsParam === TandCsNeeded.ACCEPTED;
 
-        const cardToken = await fetchAndParse(`${config.NEXT_PUBLIC_INTERNAL_API_URL}/auth/user`, {
+        const cardToken = await fetchAndParse(`${config.NEXT_PUBLIC_CARD_API_URL}/auth/user`, {
             method: 'POST',
             headers: {
               "Content-Type": "application/json",
@@ -170,9 +169,7 @@ export function useLoginCardUser() {
               publicKey: wallet.publicKey,
               signature,
               message,
-              id: quartzCardUser?.id,
-              //change tbis so that 
-              ...(acceptTandcsParam && { acceptQuartzCardTerms: acceptTandcs }),
+              acceptTerms: acceptTermsParam === TermsNeeded.ACCEPTED
             })
         });
         

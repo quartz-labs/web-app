@@ -2,11 +2,10 @@ import type { Rate } from "@/src/types/interfaces/Rate.interface";
 import { create } from "zustand";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
 import type { MarketIndex } from "@quartz-labs/sdk/browser";
-import type { CardsForUserResponse } from "../types/interfaces/CardsForUserResponse.interface";
-import type { ProviderCardUser } from "../types/interfaces/ProviderCardUser.interface";
-import type { QuartzCardUser } from "../types/interfaces/QuartzCardUser.interface";
 import type { JwtToken } from "../types/JwtToken.type";
-import type { ProviderCardHistory } from "../types/interfaces/ProviderCardHistory.interface";
+import type { CardUser } from "../types/CardUser.interface";
+import type { Card } from "../types/Card.interface";
+import type { CardTransaction } from "../types/CardTransaction.interface";
 
 type State = {
   isInitialized: boolean;
@@ -21,15 +20,14 @@ type State = {
   jwtToken?: JwtToken;
   isSigningLoginMessage: boolean;
   kycLink?: string;
-  quartzCardUser?: QuartzCardUser | null;
-  providerCardUser?: ProviderCardUser;
-  cardDetails?: CardsForUserResponse;
+  cardUser?: CardUser | null;
+  cardDetails?: Card;
   spendLimitTransactionBaseUnits?: number;
   spendLimitTimeframeBaseUnits?: number;
   spendLimitTimeframeRemainingBaseUnits?: number;
   spendLimitTimeframeLength?: number;
   spendLimitRefreshing?: boolean;
-  txHistory?: ProviderCardHistory[];
+  txHistory?: CardTransaction[];
 };
 
 type Action = {
@@ -45,15 +43,14 @@ type Action = {
   setJwtToken: (jwtToken?: JwtToken) => void;
   setIsSigningLoginMessage: (isSigningLoginMessage: boolean) => void;
   setKycLink: (kycLink?: string) => void;
-  setQuartzCardUser: (quartzCardUser?: QuartzCardUser | null) => void;
-  setProviderCardUser: (providerCardUser?: ProviderCardUser) => void;
-  setCardDetails: (cardDetails?: CardsForUserResponse) => void;
+  setCardUser: (cardUser?: CardUser | null) => void;
+  setCardDetails: (cardDetails?: Card) => void;
   setSpendLimitTransactionBaseUnits: (spendLimitTransaction?: number) => void;
   setSpendLimitTimeframeBaseUnits: (spendLimitTimeframe?: number) => void;
   setSpendLimitTimeframeRemainingBaseUnits: (spendLimitTimeframeRemaining?: number) => void;
   setSpendLimitTimeframeLength: (timeframe?: number) => void;
   setSpendLimitRefreshing: (refreshing?: boolean) => void;
-  setTxHistory: (txHistory?: ProviderCardHistory[]) => void;
+  setTxHistory: (txHistory?: CardTransaction[]) => void;
 }
 
 export const useStore = create<State & Action>((set) => ({
@@ -69,8 +66,7 @@ export const useStore = create<State & Action>((set) => ({
   jwtToken: undefined,
   isSigningLoginMessage: false,
   kycLink: undefined,
-  quartzCardUser: undefined,
-  providerCardUser: undefined,
+  cardUser: undefined,
   cardDetails: undefined,
   spendLimitTransactionBaseUnits: undefined,
   spendLimitTimeframeBaseUnits: undefined,
@@ -91,13 +87,12 @@ export const useStore = create<State & Action>((set) => ({
   setJwtToken: (jwtToken?: JwtToken) => set({ jwtToken }),
   setIsSigningLoginMessage: (isSigningLoginMessage: boolean) => set({ isSigningLoginMessage }),
   setKycLink: (kycLink?: string) => set({ kycLink }),
-  setQuartzCardUser: (quartzCardUser?: QuartzCardUser | null) => set({ quartzCardUser }),
-  setProviderCardUser: (providerCardUser?: ProviderCardUser) => set({ providerCardUser }),
-  setCardDetails: (cardDetails?: CardsForUserResponse) => set({ cardDetails }),
+  setCardUser: (cardUser?: CardUser | null) => set({ cardUser }),
+  setCardDetails: (cardDetails?: Card) => set({ cardDetails }),
   setSpendLimitTransactionBaseUnits: (spendLimitTransaction?: number) => set({ spendLimitTransactionBaseUnits: spendLimitTransaction }),
   setSpendLimitTimeframeBaseUnits: (spendLimitTimeframe?: number) => set({ spendLimitTimeframeBaseUnits: spendLimitTimeframe }),
   setSpendLimitTimeframeRemainingBaseUnits: (spendLimitTimeframeRemaining?: number) => set({ spendLimitTimeframeRemainingBaseUnits: spendLimitTimeframeRemaining }),
   setSpendLimitTimeframeLength: (timeframe?: number) => set({ spendLimitTimeframeLength: timeframe }),
   setSpendLimitRefreshing: (refreshing?: boolean) => set({ spendLimitRefreshing: refreshing }),
-  setTxHistory: (txHistory?: ProviderCardHistory[]) => set({ txHistory }),
+  setTxHistory: (txHistory?: CardTransaction[]) => set({ txHistory }),
 }));

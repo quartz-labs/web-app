@@ -16,8 +16,8 @@ const envSchema = z.object({
         },
         { message: "Beta key collection is not a valid public key" }
     ),
-    NEXT_PUBLIC_API_URL: z.string().url().transform((url) => url.endsWith('/') ? url.slice(0, -1) : url),
-    NEXT_PUBLIC_INTERNAL_API_URL: z.string().url().transform((url) => url.endsWith('/') ? url.slice(0, -1) : url),
+    NEXT_PUBLIC_PROTOCOL_API_URL: z.string().url().transform((url) => url.endsWith('/') ? url.slice(0, -1) : url),
+    NEXT_PUBLIC_CARD_API_URL: z.string().url().transform((url) => url.endsWith('/') ? url.slice(0, -1) : url),
     NEXT_PUBLIC_UNAVAILABLE_TIME: z.string(),
     NEXT_PUBLIC_CARD_PEM: z.string()
 });
@@ -28,8 +28,8 @@ const config: Config = envSchema.parse({
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
     NEXT_PUBLIC_REQUIRE_BETA_KEY: process.env.NEXT_PUBLIC_REQUIRE_BETA_KEY,
     NEXT_PUBLIC_BETA_KEY_COLLECTION: process.env.NEXT_PUBLIC_BETA_KEY_COLLECTION,
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
-    NEXT_PUBLIC_INTERNAL_API_URL: process.env.NEXT_PUBLIC_INTERNAL_API_URL,
+    NEXT_PUBLIC_PROTOCOL_API_URL: process.env.NEXT_PUBLIC_PROTOCOL_API_URL,
+    NEXT_PUBLIC_CARD_API_URL: process.env.NEXT_PUBLIC_CARD_API_URL,
     NEXT_PUBLIC_UNAVAILABLE_TIME: process.env.NEXT_PUBLIC_UNAVAILABLE_TIME,
     NEXT_PUBLIC_CARD_PEM: process.env.NEXT_PUBLIC_CARD_PEM
 });

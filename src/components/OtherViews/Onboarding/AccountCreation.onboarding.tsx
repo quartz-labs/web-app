@@ -67,7 +67,7 @@ export default function AccountCreation({
             
             setAwaitingSign(false);
             if (signature) {
-                handleTermsChange("acceptQuartzCardTerms", true);
+                handleTermsChange("isTermsOfServiceAccepted", true);
                 handleTermsChange("privacyPolicy", true);
                 refetchAccountStatus(signature);
             }

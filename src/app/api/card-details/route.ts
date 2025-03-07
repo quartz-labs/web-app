@@ -7,7 +7,7 @@ import QueryString from 'qs';
 import { decryptSecret, fetchAndParse } from '@/src/utils/helpers';
 
 const envSchema = z.object({
-    NEXT_PUBLIC_INTERNAL_API_URL: z.string().url(),
+    NEXT_PUBLIC_CARD_API_URL: z.string().url(),
     NEXT_PUBLIC_CARD_PEM: z.string()
 });
 
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     let env;
     try {
         env = envSchema.parse({
-            NEXT_PUBLIC_INTERNAL_API_URL: process.env.NEXT_PUBLIC_INTERNAL_API_URL,
+            NEXT_PUBLIC_CARD_API_URL: process.env.NEXT_PUBLIC_CARD_API_URL,
             NEXT_PUBLIC_CARD_PEM: process.env.NEXT_PUBLIC_CARD_PEM
         });
     } catch (error) {
@@ -29,8 +29,8 @@ export async function POST(request: Request) {
     }
 
     const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
-    if (!id) return NextResponse.json({ error: "Card ID is required" }, { status: 400 });
+    const cardId = searchParams.get('cardId');
+    if (!cardId) return NextResponse.json({ error: "cardId is required" }, { status: 400 });
 
 
     const bodyJson = await request.json();
@@ -42,22 +42,25 @@ export async function POST(request: Request) {
         return NextResponse.json({ error }, { status: 400 });
     }
 
-
+    
+    const sessionId = await generateSessionId(env.NEXT_PUBLIC_CARD_PEM);
     const queryString = QueryString.stringify({
-        id: id
+        cardId: cardId,
+        sessionId: sessionId
     });
-    const sessionId = await generateSessionId(env.NEXT_PUBLIC_CARD_PEM!);
 
-    const options = {
-        method: 'POST',
-        headers: {
-            "Content-Type": "application/json",
-            accept: 'application/json',
-            "Authorization": `Bearer ${body.jwtToken}`
-        },
-        body: JSON.stringify({ sessionId: sessionId.sessionId })
-    };
-    const response = await fetchAndParse(`${env.NEXT_PUBLIC_INTERNAL_API_URL}card/issuing/secrets?${queryString}`, options);
+    const response = await fetchAndParse(
+        `${env.NEXT_PUBLIC_CARD_API_URL}card/secrets?${queryString}`,
+         {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json",
+                accept: 'application/json',
+                "Authorization": `Bearer ${body.jwtToken}`
+            },
+         }
+    );
+
     try {
         const decryptedPan = (await decryptSecret(response.encryptedPan.data, response.encryptedPan.iv, sessionId.secretKey))
             .replace(/[^\d]/g, '').slice(0, 16);

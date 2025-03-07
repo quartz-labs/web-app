@@ -2,7 +2,6 @@ import { getCountry } from "@/src/utils/countries";
 import type { Address } from "./Address.interface";
 
 export interface KYCData {
-    id: string;
     firstName: string;
     lastName: string;
     email: string;
@@ -15,7 +14,6 @@ export interface KYCData {
     annualSalary: string;
     expectedMonthlyVolume: string;
     walletAddress: string;
-    ipAddress: string;
     isTermsOfServiceAccepted: boolean;
     phoneCountryCode: string;
     phoneNumber: string;
@@ -27,7 +25,6 @@ export const DEFAULT_VOLUME = "500";
 export const DEFAULT_VOLUME_DISPLAY = "$0-499";
 
 export const DEFAULT_KYC_DATA: KYCData = {
-    id: "",
     firstName: "",
     lastName: "",
     email: "",
@@ -48,7 +45,6 @@ export const DEFAULT_KYC_DATA: KYCData = {
     annualSalary: "",
     expectedMonthlyVolume: DEFAULT_VOLUME,
     walletAddress: "",
-    ipAddress: "",
     isTermsOfServiceAccepted: false,
     phoneCountryCode: DEFAULT_COUNTRY,
     phoneNumber: "",
@@ -58,7 +54,7 @@ export const DEFAULT_KYC_DATA: KYCData = {
 export interface Terms {
     acceptEsignConsent: boolean;
     openingDisclosure: boolean | undefined;
-    acceptQuartzCardTerms: boolean;
+    isTermsOfServiceAccepted: boolean;
     privacyPolicy: boolean;
     informationIsAccurate: boolean;
     applyingForCardNotSolicitation: boolean;
@@ -67,7 +63,7 @@ export interface Terms {
 export const DEFAULT_TERMS: Terms = {
     acceptEsignConsent: false,
     openingDisclosure: undefined,
-    acceptQuartzCardTerms: false,
+    isTermsOfServiceAccepted: false,
     privacyPolicy: false,
     informationIsAccurate: false,
     applyingForCardNotSolicitation: false,

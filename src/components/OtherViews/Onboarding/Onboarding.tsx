@@ -15,10 +15,9 @@ import config from "@/src/config/config";
 import { fetchAndParse } from "@/src/utils/helpers";
 import { useLoginCardUser, useOpenKycLink, useRefetchCardUser } from "@/src/utils/hooks";
 import { useStore } from "@/src/utils/store";
-import { QuartzCardAccountStatus, TandCsNeeded } from "@/src/types/enums/QuartzCardAccountStatus.enum";
 import { getPhoneCode } from "@/src/utils/countries";
-import { useApplicationStatusQuery } from "@/src/utils/queries/internalApi.queries";
 import { ModalVariation } from "@/src/types/enums/ModalVariation.enum";
+import { TermsNeeded } from "@/src/types/enums/TermsNeeded.enum";
 
 export enum OnboardingPage {
     ACCOUNT_CREATION = 0,
@@ -45,8 +44,7 @@ export default function Onboarding() {
     const refetchCardUser = useRefetchCardUser();
     const { 
         isInitialized, 
-        quartzCardUser,
-        providerCardUser,
+        cardUser,
         setModalVariation,
         setIsSigningLoginMessage
     } = useStore();
@@ -57,19 +55,19 @@ export default function Onboarding() {
         // If not initialized, go to PDA account creation
         startingPage = OnboardingPage.ACCOUNT_CREATION;
     } 
-    else if (quartzCardUser === null) {
+    else if (cardUser === null) {
         // If PDA created but no KYC, go to personal info
         startingPage = OnboardingPage.PERSONAL_INFO;
     } 
     else if (
-        quartzCardUser?.account_status === QuartzCardAccountStatus.KYC_PENDING
-        || quartzCardUser?.account_status === QuartzCardAccountStatus.KYC_REJECTED
+        cardUser?.account_status === "card" 
+        ||cardUser?.account_status === "kyc_approved"
     ) {
-        // If KYC pending or rejected, go to ID photo
-        startingPage = OnboardingPage.ID_PHOTO;
-    } else {
         // If KYC complete, go to account permissions
         startingPage = OnboardingPage.ACCOUNT_PERMISSIONS;
+    } else {
+        // If KYC pending or denied, go to ID photo
+        startingPage = OnboardingPage.ID_PHOTO;
     }
 
     const [page, setPage] = useState<OnboardingPage>(startingPage);
@@ -85,21 +83,13 @@ export default function Onboarding() {
     const [terms, setTerms] = useState<Terms>(DEFAULT_TERMS);
 
 
-    const [pendingKyc, setPendingKyc] = useState(providerCardUser?.applicationStatus === "pending");
-    const refreshKYC = quartzCardUser?.account_status === QuartzCardAccountStatus.KYC_PENDING
-        || page === OnboardingPage.ID_PHOTO
-        || pendingKyc;
-    const {data: applicationStatus} = useApplicationStatusQuery(
-        quartzCardUser?.card_api_user_id ?? null,
-        refreshKYC
-    );
-
     // Redirect to account permissions if KYC is approved
     useEffect(() => {
-        if (quartzCardUser?.account_status === QuartzCardAccountStatus.KYC_APPROVED) {
+        if (cardUser?.account_status === "kyc_approved") {
             setPage(OnboardingPage.ACCOUNT_PERMISSIONS);
         }
-    }, [quartzCardUser?.account_status]);
+    }, [cardUser?.account_status]);
+
     
     useEffect(() => {
         refetchCardUser();
@@ -136,7 +126,7 @@ export default function Onboarding() {
         if (!isInitialized || hasInitialized) return;
 
         if (!formData.isTermsOfServiceAccepted) {
-            handleTermsChange("acceptQuartzCardTerms", true);
+            handleTermsChange("isTermsOfServiceAccepted", true);
         }
         if (!terms.privacyPolicy) {
             handleTermsChange("privacyPolicy", true);
@@ -151,7 +141,7 @@ export default function Onboarding() {
         hasInitialized, 
         formData.isTermsOfServiceAccepted,
         terms.privacyPolicy,
-        terms.acceptQuartzCardTerms
+        terms.isTermsOfServiceAccepted
     ]);
 
     const handleOpenKycLink = async () => {
@@ -160,20 +150,17 @@ export default function Onboarding() {
             return;
         }
 
-        if (quartzCardUser?.account_status === QuartzCardAccountStatus.KYC_APPROVED) {
+        refetchCardUser();
+
+        if (cardUser?.account_status === "kyc_approved") {
             setPage(OnboardingPage.ACCOUNT_PERMISSIONS);
             return;
         }
 
-        setPendingKyc(true);
-
-        if (providerCardUser) {
-            openKycLink(`${providerCardUser.applicationCompletionLink.url}?userId=${providerCardUser.applicationCompletionLink.params.userId}`);
-            refetchCardUser();
+        if (cardUser) {
+            openKycLink(cardUser.application_completion_link);
             return;
         }
-
-        setPendingKyc(false);
     }
 
     const [awaitingSubmit, setAwaitingSubmit] = useState(false);
@@ -183,20 +170,15 @@ export default function Onboarding() {
             return;
         }
 
-        if (
-            quartzCardUser?.account_status === QuartzCardAccountStatus.KYC_PENDING
-            || quartzCardUser?.account_status === QuartzCardAccountStatus.KYC_REJECTED
-        ) {
-            setPage(OnboardingPage.ID_PHOTO);
-            return;
-        }
+        setAwaitingSubmit(true);
 
-        if (quartzCardUser?.account_status === QuartzCardAccountStatus.KYC_APPROVED) {
+        if (
+            cardUser?.account_status === "kyc_approved"
+            || cardUser?.account_status === "card"
+        ) {
             setPage(OnboardingPage.ACCOUNT_PERMISSIONS);
             return;
         }
-
-        setAwaitingSubmit(true);
 
         try {
             const formattedData = {
@@ -206,12 +188,12 @@ export default function Onboarding() {
 
             const submitData = {
                 ...formattedData,
-                walletAddress: wallet.publicKey.toBase58(),
+                publicKey: wallet.publicKey.toBase58(),
                 ...terms
             }
 
             await fetchAndParse(
-                `${config.NEXT_PUBLIC_INTERNAL_API_URL}/card/application/create`,
+                `${config.NEXT_PUBLIC_CARD_API_URL}/user`,
                 {
                     method: 'POST',
                     headers: {
@@ -232,20 +214,26 @@ export default function Onboarding() {
 
     const loginCardUser = useLoginCardUser();
     const handleSetSpendLimit = async () => {
+        if (!wallet?.publicKey) {
+            captureError(showError, "Wallet not connected", "/Onboarding.tsx", "Wallet not connected", null);
+            return;
+        }
+
         await fetchAndParse(
-            `${config.NEXT_PUBLIC_INTERNAL_API_URL}/card/application/set-limits`,
+            `${config.NEXT_PUBLIC_CARD_API_URL}/user/onboarding`,
             {
-                method: 'POST',
+                method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    id: quartzCardUser?.card_api_user_id,
+                    publicKey: wallet.publicKey.toBase58(),
                 }),
             }
         );
+
         setIsSigningLoginMessage(true);
-        loginCardUser.mutate(TandCsNeeded.ACCEPTED);
+        loginCardUser.mutate(TermsNeeded.ACCEPTED);
         setModalVariation(ModalVariation.DISABLED);
         refetchCardUser();
     }
@@ -300,9 +288,8 @@ export default function Onboarding() {
                                 handleAddressChange={handleAddressChange}
                                 handleTermsChange={handleTermsChange}
                                 formData={formData}
-                                terms={terms}   
-                                awaitingApproval={pendingKyc}
-                                rejectedReason={applicationStatus?.applicationReason ?? ""}
+                                terms={terms}
+                                rejectedReason={cardUser?.application_denied_reason ?? ""}
                                 handleSubmit={handleOpenKycLink}
                             />;
 

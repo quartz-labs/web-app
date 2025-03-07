@@ -2,10 +2,10 @@ import Image from "next/image";
 import styles from "./TransactionCard.module.css"
 //import CurrencyInfo from "./CurrencyInfo";
 import { useEffect, useRef, useState } from "react";
-import type { ProviderCardHistory } from "@/src/types/interfaces/ProviderCardHistory.interface";
+import type { CardTransaction } from "@/src/types/CardTransaction.interface";
 
 interface TransactionCardProps {
-    transaction: ProviderCardHistory;
+    transaction: CardTransaction;
     dateLabelled: boolean;
 }
 
@@ -14,7 +14,7 @@ export default function TransactionCard({ transaction, dateLabelled }: Transacti
     const detailsRef = useRef<HTMLDivElement>(null);
 
     // Formatted date/time strings
-    const timeObj = new Date(transaction.spend.authorizedAt);
+    const timeObj = new Date(transaction.authorized_at);
     const formattedDate = timeObj.toLocaleDateString("en-IE", {
         month: "long",
         day: "numeric"
@@ -27,7 +27,7 @@ export default function TransactionCard({ transaction, dateLabelled }: Transacti
     const formattedDateTime = `${formattedDate}, ${formattedTime}`;
 
 
-    const merchantImage = transaction.spend.enrichedMerchantIcon;
+    const merchantImage = transaction.enriched_merchant_icon;
     const defaultMerchantIcon = "/dollar.svg";
 
     // Formatted date label
@@ -80,15 +80,15 @@ export default function TransactionCard({ transaction, dateLabelled }: Transacti
                     </div>
                     <div className={styles["basic-info"]}>
                         {/* <p className="light">{transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}</p> <p>${transaction.spend.amount / 100}</p> */}
-                        <p className="light">{transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}</p> <p>${transaction.spend.amount / 100}</p>
+                        <p>${transaction.amount / 100}</p>
                         {/* <TransactionStatus status={transaction.spend.status} /> */}
                         <p>{formattedTime}</p>
                     </div>
                 </button>
 
                 <div ref={detailsRef} className={`${styles["card-details"]} ${isOpen && styles["open"]}`}>
-                    <p className="light">Spent</p> <p>${transaction.spend.amount / 100}</p>
-                    <p className="light">At</p> <p>{transaction.spend.enrichedMerchantName}</p>
+                    <p className="light">Spent</p> <p>${transaction.amount / 100}</p>
+                    <p className="light">At</p> <p>{transaction.enriched_merchant_name}</p>
                     <p className="light">Created on</p> <p>{formattedDateTime}</p>
                 </div>
             </div>

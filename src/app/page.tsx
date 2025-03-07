@@ -8,12 +8,11 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { AccountStatus } from "@/src/types/enums/AccountStatus.enum";
 import styles from "./page.module.css";
 import { useStore } from "@/src/utils/store";
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import config from "@/src/config/config";
 import Unavailable from "@/src/components/OtherViews/Unavailable";
-import { QuartzCardAccountStatus } from "../types/enums/QuartzCardAccountStatus.enum";
-import { useAccountStatusQuery, useWithdrawLimitsQuery, useBalancesQuery, useRatesQuery, usePricesQuery, useHealthQuery, useBorrowLimitsQuery, useSpendLimitQuery, useDepositLimitsQuery } from "../utils/queries/protocol.queries";
-import { useProviderCardUserQuery, useQuartzCardUserQuery, useCardDetailsQuery, useTxHistoryQuery } from "../utils/queries/internalApi.queries";
+import { useAccountStatusQuery, useWithdrawLimitsQuery, useBalancesQuery, useRatesQuery, usePricesQuery, useHealthQuery, useBorrowLimitsQuery, useSpendLimitQuery, useDepositLimitsQuery } from "../utils/queries/protocolApi.queries";
+import { useCardDetailsQuery, useCardTransactionsQuery, useCardUserQuery } from "../utils/queries/cardApi.queries";
 import { ModalVariation } from "../types/enums/ModalVariation.enum";
 import UpgradeRequired from "../components/OtherViews/UpgradeRequired";
 import Disconnected from "../components/OtherViews/Disconnected";
@@ -54,15 +53,26 @@ export default function Page() {
   
 
   // Card data
-  const { data: quartzCardUser } = useQuartzCardUserQuery(wallet.publicKey);
-  useProviderCardUserQuery(quartzCardUser?.card_api_user_id ?? null);
-  useCardDetailsQuery(
-    quartzCardUser?.card_api_user_id ?? null,
-    isInitialized && quartzCardUser?.account_status === QuartzCardAccountStatus.CARD
+  const [refetchCardUser, setRefetchCardUser] = useState(true);
+  const { data: cardUser } = useCardUserQuery(
+    wallet.publicKey,
+    refetchCardUser
   );
-  useTxHistoryQuery(
-    quartzCardUser?.card_api_user_id ?? null, 
-    isInitialized && quartzCardUser?.account_status === QuartzCardAccountStatus.CARD
+  useEffect(() => {
+    if (cardUser?.account_status !== "kyc_approved" && cardUser?.account_status !== "card") {
+      setRefetchCardUser(true);
+    } else {
+      setRefetchCardUser(false);
+    }
+  }, [cardUser?.account_status])
+
+  useCardDetailsQuery(
+    wallet.publicKey,
+    isInitialized && cardUser?.account_status === "card"
+  );
+  useCardTransactionsQuery(
+    wallet.publicKey,
+    isInitialized && cardUser?.account_status === "card"
   );
 
 
@@ -70,14 +80,14 @@ export default function Page() {
   useEffect(() => {
     if (
       isInitialized 
-      && quartzCardUser?.account_status === QuartzCardAccountStatus.CARD 
+      && cardUser?.account_status === "card"
       && jwtToken === undefined
       && !isSigningLoginMessage
     ) {
       setModalVariation(ModalVariation.ACCEPT_TANDCS)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps	
-  }, [isInitialized, quartzCardUser?.account_status, jwtToken, isSigningLoginMessage]);
+  }, [isInitialized, cardUser?.account_status, jwtToken, isSigningLoginMessage]);
   
 
 
@@ -114,7 +124,7 @@ export default function Page() {
     );
   }
 
-  if (quartzCardUser === undefined || isAccountStatusLoading) {
+  if (cardUser === undefined || isAccountStatusLoading) {
     return (
       <main className={styles.container}>
         <Background />
@@ -131,7 +141,7 @@ export default function Page() {
     );
   }
 
-  if (quartzCardUser?.account_status === QuartzCardAccountStatus.CARD) {
+  if (cardUser?.account_status === "card") {
     return (
       <main className={styles.container}>
         <Background />

@@ -1,19 +1,21 @@
 import styles from "./Onboarding.module.css";
 import type { OnboardingPageProps } from "./Onboarding";
 import { TailSpin } from "react-loader-spinner";
+import { useStore } from "@/src/utils/store";
 
 export interface IdPhotoProps extends OnboardingPageProps {
-    awaitingApproval: boolean;
     rejectedReason: string | undefined;
     handleSubmit: () => void;
 }
 
 export default function IdPhoto({
     decrementPage,
-    awaitingApproval,
     rejectedReason,
     handleSubmit
 }: IdPhotoProps) {
+    const { cardUser } = useStore();
+    const awaitingApproval = (cardUser?.account_status !== "kyc_approved" && cardUser?.account_status !== "card");
+
     const formatRejection = (rejection: string): string[] => {
         const reasons: string[] = [];
 
